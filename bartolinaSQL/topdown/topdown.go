@@ -44,23 +44,74 @@ const (
 	CausetActionAddIndex			CausetActionType = 7
 	CausetActionDropIndex			CausetActionType = 8
 	CausetActionCreateBlock			CausetActionType = 9
-	CausetActionDropBlock			
-
-	synset0 = iota
-	synsetBinaryBranching
-	synsetSingletonBranching
-	synsetSwarmBranching
-	FlagConstant       uint64 = 0
-	FlagHasParamMarker uint64 = 1 << iota
-	FlagHasFunc
-	FlagHasReference
-	FlagHasAggregateFunc
-	FlagHasSubquery
-	FlagHasVariable
-	FlagHasDefault
-	FlagPreEvaluated
-	FlagHasWindowFunc
+	CausetActionDropForeignKey      CausetActionType = 10
+	CausetActionTruncateBlock       CausetActionType = 11
+	CausetActionModifyColumn        CausetActionType = 12
+	CausetActionRebaseAutoID        CausetActionType = 13
+	CausetActionRenameBlock         CausetActionType = 14
+	CausetActionSetDefaultValue     CausetActionType = 15
+	CausetActionShardRowID          CausetActionType = 16
+	CausetActionModifyTableComment  CausetActionType = 17
+	CausetActionRenameIndex         CausetActionType = 18
+	CausetActionAddTablePartition   CausetActionType = 19
+	CausetActionDropTablePartition  CausetActionType = 20
+	CausetActionCreateView                   CausetActionType = 21
+	CausetActionModifyTableCharsetAndCollate CausetActionType = 22
+	CausetActionTruncateBlockPartition       CausetActionType = 23
+	CausetActionDropView                     CausetActionType = 24
+	CausetActionRecoverBlock                 CausetActionType = 25
 )
+
+// AddIndexStr is a string related to the operation of "add index".
+const AddIndexStr = "add index"
+
+var causetActionMap = map[CausetActionType]string{
+	ActionCreateSchema:                 "create schema",
+	ActionDropSchema:                   "drop schema",
+	ActionCreateTable:                  "create table",
+	ActionDropTable:                    "drop table",
+	ActionAddColumn:                    "add column",
+	ActionDropColumn:                   "drop column",
+	ActionAddIndex:                     AddIndexStr,
+	ActionDropIndex:                    "drop index",
+	ActionAddForeignKey:                "add foreign key",
+	ActionDropForeignKey:               "drop foreign key",
+	ActionTruncateTable:                "truncate table",
+	ActionModifyColumn:                 "modify column",
+	ActionRebaseAutoID:                 "rebase auto_increment ID",
+	CausetActionRenameBlock:                  "rename table",
+	ActionSetDefaultValue:              "set default value",
+	ActionShardRowID:                   "shard row ID",
+	ActionModifyTableComment:           "modify table comment",
+	ActionRenameIndex:                  "rename index",
+	ActionAddTablePartition:            "add partition",
+	ActionDropTablePartition:           "drop partition",
+	ActionCreateView:                   "create view",
+	ActionModifyTableCharsetAndCollate: "modify table charset and collate",
+	ActionTruncateTablePartition:       "truncate partition",
+	ActionDropView:                     "drop view",
+	ActionRecoverTable:                 "recover table",
+}
+
+// String return current ddl action in string
+func (action CausetActionType) String() string {
+	if v, ok := actionMap[action]; ok {
+		return v
+	}
+	return "none"
+}
+
+// HistoryInfo is used for binlog.
+type HistoryInfo struct {
+	SchemaVersion int64
+	DBInfo        *DBInfo
+	TableInfo     *TableInfo
+	FinishedTS    uint64
+}
+		
+
+
+
 
 //Root of Semantic tree
 
