@@ -138,7 +138,7 @@ type flatFormatter tokenizedIndentFormatter
 //  FlatFormatter(os.Stdout, " ").Format("abc%d%%e%i\nx\ny\n%uz\n", 3)
 // output in the form of a Go quoted string literal:
 //  "abc3%%e x y z\n"
-func FlatFormatter(w io.Writer) Formatter {
+func FlatFormatter(w io.Writer) StringFormatter {
 	return (*flatFormatter)(TokenizedIndentFormatter(w, "").(*indentFormatter))
 }
 
