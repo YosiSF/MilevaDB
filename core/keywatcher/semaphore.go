@@ -26,7 +26,7 @@ import (
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/clientv3/concurrency"
 	"github.com/coreos/etcd/etcdserver/api/v3rpc/rpctypes"
-	"github.com/coreos/etcd/mvcc/mvccpb"
+	"github.com/coreos/etcd/mvcc/mvcc"
 	"github/com/YosiSF/MilevaDB/curvature"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"

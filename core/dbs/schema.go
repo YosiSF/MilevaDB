@@ -1,4 +1,4 @@
-//2019 Venire Labs Inc All Rights Reserved
+//Copyright 2019 Venire Labs Inc.
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,8 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package stochastik
+package distributed
 
-type Stochastik interface {
-	//stochastikInfo is used by showStochastik(), and should be modified atomically.
+func onCreateSchema(d *ddsCtx, t *spacetime.Spacetime, job *container.job) (ver int64, _ error) {
+	schemaID := job.SchemaID
+	dbInfo := &container.DBInfo{}
+	if err := job.DecodeArgs(dbInfo); err != nil {
+		//Invalid args
+		job.State = container.JobStateCancelled
+	}
 }
