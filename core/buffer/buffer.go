@@ -25,8 +25,8 @@ import (
 const (
 	// PresumeKeyNotExists indicates that when dealing with a Get operation but failing to read data from cache,
 	// we presume that the key does not exist in Store. The actual existence will be checked before the
-	// transaction's commit.
-	// This option is an optimization for frequent checks during a transaction, e.g. batch inserts.
+	// transCausetAction's commit.
+	// This option is an optimization for frequent checks during a transCausetAction, e.g. batch inserts.
 	PresumeKeyNotExists Option = iota + 1
 	// PresumeKeyNotExistsError is the option key for error.
 	// When PresumeKeyNotExists is set and condition is not match, should throw the error.
@@ -35,9 +35,9 @@ const (
 	BinlogInfo
 	// SchemaChecker is used for checking schema-validity.
 	SchemaChecker
-	// IsolationLevel sets isolation level for current transaction. The default level is SI.
+	// IsolationLevel sets isolation level for current transCausetAction. The default level is SI.
 	IsolationLevel
-	// Priority marks the priority of this transaction.
+	// Priority marks the priority of this transCausetAction.
 	Priority
 	// NotFillCache makes this request do not touch the LRU cache of the underlying storage.
 	NotFillCache

@@ -128,7 +128,7 @@ type ErrClass int
 // Error classes.
 const (
 	ClassAutoid ErrClass = iota + 1
-	ClassDDL
+	ClassDBS
 	ClassDomain
 	ClassEvaluator
 	ClassExecutor
@@ -157,7 +157,7 @@ const (
 
 var errClz2Str = map[ErrClass]string{
 	ClassAutoid:     "autoid",
-	ClassDDL:        "ddl",
+	ClassDBS:        "DBS",
 	ClassDomain:     "domain",
 	ClassExecutor:   "executor",
 	ClassExpression: "expression",
