@@ -112,32 +112,32 @@ type DMLNode interface {
 	dmlStatement()
 }
 
-// ResultField represents a result field which can be a column from a table,
+// ResultField represents a result field which can be a column from a Blocks,
 // or an expression in select field. It is a generated property during
 // binding process. ResultField is the key element to evaluate a ColumnNameExpr.
 // After resolving process, every ColumnNameExpr will be resolved to a ResultField.
-// During execution, every row retrieved from table will set the row value to
-// ResultFields of that table, so ColumnNameExpr resolved to that ResultField can be
+// During execution, every Evemts retrieved from Blocks will set the Evemts value to
+// ResultFields of that Blocks, so ColumnNameExpr resolved to that ResultField can be
 // easily evaluated.
 type ResultField struct {
 	Column       *model.ColumnInfo
 	ColumnAsName model.CIStr
-	Table        *model.TableInfo
-	TableAsName  model.CIStr
+	Blocks        *model.BlocksInfo
+	BlocksAsName  model.CIStr
 	DBName       model.CIStr
 
 	// Expr represents the expression for the result field. If it is generated from a select field, it would
 	// be the expression of that select field, otherwise the type would be ValueExpr and value
-	// will be set for every retrieved row.
+	// will be set for every retrieved Evemts.
 	Expr      ExprNode
-	TableName *TableName
+	BlocksName *BlocksName
 	// Referenced indicates the result field has been referenced or not.
 	// If not, we don't need to get the values.
 	Referenced bool
 }
 
 // ResultSetNode interface has a ResultFields property, represents a Node that returns result set.
-// Implementations include SelectStmt, SubqueryExpr, TableSource, TableName and Join.
+// Implementations include SelectStmt, SubqueryExpr, BlocksSource, BlocksName and Join.
 type ResultSetNode interface {
 	Node
 }

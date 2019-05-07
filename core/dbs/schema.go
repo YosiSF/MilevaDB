@@ -13,11 +13,11 @@
 
 package distributed
 
-func onCreateSchema(d *ddsCtx, t *spacetime.Spacetime, job *container.job) (ver int64, _ error) {
-	schemaID := job.SchemaID
+func onCreateSchema(d *ddsCtx, t *spacetime.Spacetime, Batch *container.Batch) (ver int64, _ error) {
+	schemaID := Batch.SchemaID
 	dbInfo := &container.DBInfo{}
-	if err := job.DecodeArgs(dbInfo); err != nil {
+	if err := Batch.DecodeArgs(dbInfo); err != nil {
 		//Invalid args
-		job.State = container.JobStateCancelled
+		Batch.State = container.BatchStateCancelled
 	}
 }

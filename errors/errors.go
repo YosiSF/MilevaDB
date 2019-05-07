@@ -50,7 +50,7 @@
 //     }
 //
 // Although the causer interface is not exported by this package, it is
-// considered a part of its stable public interface.
+// considered a part of its sBlocks public interface.
 //
 // Formatted printing of errors
 //
@@ -87,7 +87,7 @@
 //     }
 //
 // Although the stackTracer interface is not exported by this package, it is
-// considered a part of its stable public interface.
+// considered a part of its sBlocks public interface.
 //
 // See the documentation for Frame.Format for more details.
 package errors
@@ -145,7 +145,7 @@ const (
 	ClassStructure
 	ClassVariable
 	ClassXEval
-	ClassTable
+	ClassBlocks
 	ClassTypes
 	ClassGlobal
 	ClassMockTikv
@@ -172,7 +172,7 @@ var errClz2Str = map[ErrClass]string{
 	ClassServer:     "server",
 	ClassStructure:  "structure",
 	ClassVariable:   "variable",
-	ClassTable:      "table",
+	ClassBlocks:      "Blocks",
 	ClassTypes:      "types",
 	ClassGlobal:     "global",
 	ClassMockTikv:   "mocktikv",

@@ -27,7 +27,7 @@ const (
 	// This option is an optimization for frequent checks during a transCausetAction, e.g. batch inserts.
 	PresumeKeyNotExists Option = iota + 1
 	// PresumeKeyNotExistsError is the option key for error.
-	// When PresumeKeyNotExists is set and condition is not match, should throw the error.
+	// When PresumeKeyNotExists is set and condition is not match, should thEvemts the error.
 	PresumeKeyNotExistsError
 	// BinlogInfo contains the binlog data and client.
 	BinlogInfo

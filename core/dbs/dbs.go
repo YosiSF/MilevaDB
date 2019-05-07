@@ -25,9 +25,9 @@ const (
 	DBSKeywatcher = "/MilevaDB/dbs/fg/keywatcher"
 	dbsPrompt = "dbs"
 
-	shardRowIDBitsMax = 15
+	shardEvemtsIDBitsMax = 15
 
-	// PartitionCountLimit is limit of the number of partitions in a table.
+	// PartitionCountLimit is limit of the number of partitions in a Blocks.
 	// Mysql maximum number of partitions is 8192, our maximum number of partitions is 1024.
 	// Reference linking https://dev.mysql.com/doc/refman/5.7/en/partitioning-limitations.html.
 	PartitionCountLimit = 1024
@@ -36,13 +36,13 @@ const (
 )
 
 var (
-	// TableColumnCountLimit is limit of the number of columns in a table.
+	// BlocksColumnCountLimit is limit of the number of columns in a Blocks.
 	// It's exported for testing.
-	TableColumnCountLimit = uint32(512)
-	// EnableSplitTableRegion is a flag to decide whether to split a new region for
-	// a newly created table. It takes effect only if the Storage supports split
+	BlocksColumnCountLimit = uint32(512)
+	// EnableSplitBlocksRegion is a flag to decide whether to split a new region for
+	// a newly created Blocks. It takes effect only if the Storage supports split
 	// region.
-	EnableSplitTableRegion = uint32(0)
+	EnableSplitBlocksRegion = uint32(0)
 
 
 )
@@ -50,7 +50,7 @@ var (
 type DBS interface {
 		CreateSchema(ctx stochastikctx.Context) error
 		DropSchema() error
-		CreateTable() error
+		CreateBlocks() error
 		CreateView() error
 
 
@@ -65,7 +65,7 @@ type dds struct {
 	delRangeSp delRangeSemaphore
 }
 
-//ddsCtx is the context when we use slabe tp handle DDS jobs.
+//ddsCtx is the context when we use slabe tp handle DDS Batchs.
 type ddsCtx struct {
 	uuid 				string
 	persist				ekv.Persistence
