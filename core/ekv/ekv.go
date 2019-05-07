@@ -17,9 +17,7 @@ package buffer
 
 import (
 	"context"
-	"github.com/MilevaDB/persist/einsteindb/parliament"
-	"github.com/MilevaDB/util/provisions"
-	"github.com/MilevaDB/util/mem"
+	""
 )
 
 const (

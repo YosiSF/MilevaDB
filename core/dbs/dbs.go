@@ -8,9 +8,9 @@ import (
 
 	"github.com/coreos/etcd/clientv3"
 	"github.com/ngaut/pools"
-	"github.com/YosiSF/MilevaDB/keywatcher"
-	"github.com/YosiSF/MilevaDB/BartolinaSQL/container"
-	"github.com/YosiSF/MilevaDB/BartolinaSQL/query"
+	"github.com/YosiSF/MilevaDB/core/keywatcher"
+	"github.com/YosiSF/MilevaDB/BerolinaSQL/container"
+	"github.com/YosiSF/MilevaDB/BerolinaSQL/query"
 
 	"github.com/twinj/uuid"
 	"go.uber.org/zap"
@@ -70,5 +70,5 @@ type ddsCtx struct {
 	uuid 				string
 	persist				ekv.Persistence
 	keywatcherSemaphore keywatcher.keywatcherSemaphore
-	
+
 }
