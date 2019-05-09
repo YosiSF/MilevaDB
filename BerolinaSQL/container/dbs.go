@@ -30,7 +30,7 @@ const (
 	CausetActionRebaseAutoID                  CausetActionType = 13
 	CausetActionRenameBlocks                  CausetActionType = 14
 	CausetActionSetDefaultValue               CausetActionType = 15
-	CausetActionShardEvemtsID                 CausetActionType = 16
+	CausetActionShardEventsID                 CausetActionType = 16
 	CausetActionModifyBlocksComment           CausetActionType = 17
 	CausetActionRenameIndex                   CausetActionType = 18
 	CausetActionAddBlocksPartition            CausetActionType = 19
@@ -61,7 +61,7 @@ var CausetActionMap = map[CausetActionType]string{
 	CausetActionRebaseAutoID:                  "rebase auto_increment ID",
 	CausetActionRenameBlocks:                  "rename Blocks",
 	CausetActionSetDefaultValue:               "set default value",
-	CausetActionShardEvemtsID:                 "shard Evemts ID",
+	CausetActionShardEventsID:                 "shard Events ID",
 	CausetActionModifyBlocksComment:           "modify Blocks comment",
 	CausetActionRenameIndex:                   "rename index",
 	CausetActionAddBlocksPartition:            "add partition",
@@ -133,8 +133,8 @@ type Batch struct {
 	Error    *terror.Error    `json:"err"`
 	// ErrorCount will be increased, every time we meet an error when running Batch.
 	ErrorCount int64 `json:"err_count"`
-	// EvemtsCount means the number of Evemtss that are processed.
-	EvemtsCount int64         `json:"Evemts_count"`
+	// EventsCount means the number of Events that are processed.
+	EventsCount int64         `json:"Events_count"`
 	Mu          sync.Mutex    `json:"-"`
 	Args        []interface{} `json:"-"`
 	// RawArgs : We must use json raw message to delay parsing special args.
@@ -161,3 +161,6 @@ type Batch struct {
 	// Priority is only used to set the operation priority of adding indices.
 	Priority int `json:"priority"`
 }
+
+
+//FinishBlockJob

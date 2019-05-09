@@ -1,5 +1,5 @@
-//Copyright 2019 Venire Labs Inc.
-
+//Venire Labs 2019 All Rights Reservedd.
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,13 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package distributed
-
-func onCreateSchema(d *dbsCtx, t *spacetime.Spacetime, Batch *container.Batch) (ver int64, _ error) {
-	schemaID := Batch.SchemaID
-	dbInfo := &container.DBInfo{}
-	if err := Batch.DecodeArgs(dbInfo); err != nil {
-		//Invalid args
-		Batch.State = container.BatchStateCancelled
-	}
-}
+package binlog

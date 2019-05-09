@@ -1,29 +1,17 @@
 package dbs
 
 import (
-	"context"
-	"fmt"
 	"sync"
-	"time"
-
-	"github.com/coreos/etcd/clientv3"
-	"github.com/ngaut/pools"
-	"github.com/YosiSF/MilevaDB/core/keywatcher"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/container"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/query"
-
-	"github.com/twinj/uuid"
-	"go.uber.org/zap"
 )
 
-//dbs 
+//dbs
 
 const (
 	currentVersion = 1
 
 	//DBSKeywatcherKey is the dbs keywatcher path saved to etcd.
 	DBSKeywatcher = "/MilevaDB/dbs/fg/keywatcher"
-	dbsPrompt = "dbs"
+	dbsPrompt     = "dbs"
 
 	shardEvemtsIDBitsMax = 15
 
@@ -31,8 +19,6 @@ const (
 	// Mysql maximum number of partitions is 8192, our maximum number of partitions is 1024.
 	// Reference linking https://dev.mysql.com/doc/refman/5.7/en/partitioning-limitations.html.
 	PartitionCountLimit = 1024
-
-
 )
 
 var (
@@ -43,32 +29,34 @@ var (
 	// a newly created Blocks. It takes effect only if the Storage supports split
 	// region.
 	EnableSplitBlocksRegion = uint32(0)
-
-
 )
+
 //Promise handler
 type DBS interface {
-		CreateSchema(ctx stochastikctx.Context) error
-		DropSchema() error
-		CreateBlocks() error
-		CreateView() error
-
-
+	CreateSchema(ctx stochastikctx.Context) error
+	DropSchema() error
+	CreateBlocks() error
+	CreateView() error
+}
+ 
+type dbs struct {
+	m      			 sync.RWMutex
+	quitCh 			 chan struct{}
+	*dbsCtx
+	slaves        	 map[slaveType]*slaveType
+	stochastikPool 	 *stochastikPool
+	delRangeSp     	 delRangeSemaphore
 }
 
-type dds struct {
-	m  sync.RWMutex
-	quitCh chan struct{}
-	*ddsCtx
-	slaves map[slaveType]*slaveType
-	stochastikPool *stochastikPool
-	delRangeSp delRangeSemaphore
-}
-
-//ddsCtx is the context when we use slabe tp handle DDS Batchs.
-type ddsCtx struct {
-	uuid 				string
-	persist				ekv.Persistence
-	keywatcherSemaphore keywatcher.keywatcherSemaphore
-
+//ddsCtx is the context when we use slave to handle DBS Batchs.
+type dbsCtx struct {
+	uuid                   string
+	persist                ekv.Persistence
+	keywatcherSemaphore    keywatcher.keywatcherSemaphore
+	schemaReplicantSync	   SchemaReplicantSync
+	dbsBatchDoneCh 		   chan struct{}
+	dbsEventCh			   chan<- *util.Event
+	lease				   time.Duration
+	binlogCli    		   *pumpcli.PumpsClient // binlogCli is used for Binlog.
+	infoHandle			   *schemaReplicant.Handle
 }
