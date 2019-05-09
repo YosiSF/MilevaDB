@@ -25,6 +25,13 @@ import (
 	"time"
 
 	"github.com/YosiSF/MilevaDB/errors"
+	"github.com/YosiSF/MilevaDB/core/schemareplicant"
+	"github.com/YosiSF/MilevaDB/core/curvature"
+	"github.com/YosiSF/MilevaDB/core/soliton"
+
+	"github.com/twinj/uuid"
+	"go.uber.org/zap"
+
 )
 
 // Node is the basic element of the AST.

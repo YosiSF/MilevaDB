@@ -38,7 +38,7 @@ type DBS interface {
 	CreateBlocks() error
 	CreateView() error
 }
- 
+
 type dbs struct {
 	m      			 sync.RWMutex
 	quitCh 			 chan struct{}
