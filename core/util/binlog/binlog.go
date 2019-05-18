@@ -60,8 +60,9 @@ type FreeLogConfig struct {
   freelog.FreeLogConfig
 }
 
+//Timestamp switch; New a freelog, default to disabled; slow query.
 func NewFreeLogConfig(level, format, slowQueryFile string, fileCfg FileFreeLogConfig, disableTimestamp bool) *FreeLogConfig {
-	return &LogConfig{
+	return &FreeLogConfig{
 		Config: freelog.Config{
 			Level:            level,
 			Format:           format,
