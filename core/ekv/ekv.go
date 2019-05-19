@@ -75,6 +75,35 @@ const (
 	RC
 )
 
+//Primary tinyint byte key
+type Key []byte
+
+//return the next byte key
+func (k Key) Next() Key {
+	buf := make([]byte, len([]byte(k))+1)
+	copy(buf, []byte(k))
+	return buf
+}
+
+func (k Key) PrefixNext() Key {
+	buf := make([]byte, len([]byte(k)))
+	copy(buf, []byte(k))
+	var i int
+	for i = len(k) -1; i >= 0 ; i-- {
+		buf[i]++
+		if buf[i] != 0 {
+			break
+		}
+	}
+
+	if i == -1 {
+		copy(buf, k)
+		buf = append(buf, 0 )
+	}
+
+	return buf
+}
+
 type IsoLevel int
 
 
@@ -112,6 +141,8 @@ type PullbackInverter interface {
 	 Pullback
 	 Inverter
 }
+
+
 
 //In-memory tuple collection for buffer writing operations
 type InMemCausetBuffer{
@@ -185,6 +216,9 @@ type GraphRequest struct {
 	Streaming bool
 
 }
+
+
+
 
 
 }
