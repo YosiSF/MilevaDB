@@ -196,6 +196,7 @@ type GraphRequest struct {
 	StartTimestamp		uint64
 	ByteCollection		[]byte
 	KeyRanges			[]KeyRange
+
 	KeepOrder bool
 	// Desc is true, if the request is sent in descending order.
 	Desc bool
@@ -219,7 +220,72 @@ type GraphRequest struct {
 
 
 
-
-
+// ResultSubset represents a result subset from a single storage unit.
+// TODO: Find a better interface for ResultSubset that can reuse bytes.
+type ResultSubset interface {
+	// GetData gets the data.
+	GetData() []byte
+	// GetStartKey gets the start key.
+	GetStartKey() Key
+	// GetExecDetails gets the detail information.
+	GetExecDetails() *execdetails.ExecDetails
+	// MemSize returns how many bytes of memory this result use for tracing memory usage.
+	MemSize() int64
 }
+
+// Response represents the response returned from KV layer.
+type GraphResponse interface {
+	// Next returns a resultSubset from a single storage unit.
+	// When full result set is returned, nil is returned.
+	Next(ctx context.Context) (resultSubset ResultSubset, err error)
+	// Close response.
+	Close() error
+}
+
+// Snapshot defines the interface for the snapshot fetched from KV store.
+type Snapshot interface {
+	PullbackInverter
+	// BatchGet gets a batch of values from snapshot.
+	BatchGet(keys []Key) (map[string][]byte, error)
+	// SetPriority snapshot set the priority
+	SetPriority(priority int)
+}
+
+/ Driver is the interface that must be implemented by a KV storage.
+type Driver interface {
+	// Open returns a new Storage.
+	// The path is the string for storage specific format.
+	Open(path string) (Storage, error)
+}
+
+// Storage defines the interface for storage.
+// Isolation should be at least SI(SNAPSHOT ISOLATION)
+type Storage interface {
+	// Begin transaction
+	Begin() (Transaction, error)
+	// BeginWithStartTS begins transaction with startTS.
+	BeginWithStartTS(startTS uint64) (Transaction, error)
+	// GetSnapshot gets a snapshot that is able to read any data which data is <= ver.
+	// if ver is MaxVersion or > current max committed version, we will use current version for this snapshot.
+	GetSnapshot(ver Version) (Snapshot, error)
+	// GetClient gets a client instance.
+	GetClient() Client
+	// Close store
+	Close() error
+	// UUID return a unique ID which represents a Storage.
+	UUID() string
+	// CurrentVersion returns current max committed version.
+	CurrentVersion() (Version, error)
+	// GetOracle gets a timestamp oracle client.
+	GetOracle() oracle.Oracle
+	// SupportDeleteRange gets the storage support delete range or not.
+	SupportDeleteRange() (supported bool)
+	// Name gets the name of the storage engine
+	Name() string
+	// Describe returns of brief introduction of the storage
+	Describe() string
+	// ShowStatus returns the specified status of the storage
+	ShowStatus(ctx context.Context, key string) (interface{}, error)
+}
+
 

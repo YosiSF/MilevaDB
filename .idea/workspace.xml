@@ -2,10 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c7b4911b-a773-427b-986a-8dea14609c51" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/core/merkle/hash.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/core/merkle/merkle.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/core/stochastik/stochastikscope.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/block/block.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/block/block.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/ekv/ekv.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/ekv/ekv.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/stochastik/stochastik.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/stochastik/stochastik.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/spacetime/spacetime.go" beforeDir="false" afterPath="$PROJECT_DIR$/core/spacetime/spacetime.go" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -19,7 +21,7 @@
         <entry file="file://$PROJECT_DIR$/core/block/block.go">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="243">
-              <caret line="33" column="29" lean-forward="true" selection-start-line="33" selection-start-column="29" selection-end-line="33" selection-end-column="29" />
+              <caret line="33" column="29" selection-start-line="33" selection-start-column="29" selection-end-line="33" selection-end-column="29" />
               <folding>
                 <element signature="e#15#56#0" expanded="true" />
               </folding>
@@ -27,7 +29,7 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/BerolinaSQL/query/query.go">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="9330">
@@ -37,12 +39,45 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/core/stochastik/stochastikscope.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="30">
+              <caret line="2" selection-start-line="2" selection-end-line="2" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/core/spacetime/spacetime.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="225">
-              <caret line="15" column="7" lean-forward="true" selection-start-line="15" selection-start-column="7" selection-end-line="15" selection-end-column="7" />
+            <state relative-caret-position="851">
+              <caret line="106" selection-start-line="106" selection-end-line="106" />
               <folding>
-                <element signature="e#544#584#0" expanded="true" />
+                <element signature="e#544#1081#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/core/merkle/hash.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="720">
+              <caret line="40" column="17" selection-start-line="40" selection-start-column="17" selection-end-line="40" selection-end-column="17" />
+              <folding>
+                <element signature="e#531#584#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/core/merkle/merkle.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="575">
+              <caret line="25" column="42" selection-start-line="25" selection-start-column="42" selection-end-line="25" selection-end-column="42" />
+              <folding>
+                <element signature="e#535#547#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -57,11 +92,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/core/ekv/ekv.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1558">
-              <caret line="104" column="1" lean-forward="true" selection-start-line="104" selection-start-column="1" selection-end-line="104" selection-end-column="1" />
+            <state relative-caret-position="792">
+              <caret line="246" column="20" selection-start-line="246" selection-start-column="20" selection-end-line="246" selection-end-column="20" />
               <folding>
                 <element signature="e#533#616#0" expanded="true" />
               </folding>
@@ -71,6 +106,13 @@
       </file>
     </leaf>
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Go File" />
+      </list>
+    </option>
+  </component>
   <component name="GOROOT" path="/usr/local/Cellar/go/1.10.3/libexec" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -79,9 +121,13 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/BerolinaSQL/query/query.go" />
-        <option value="$PROJECT_DIR$/core/ekv/ekv.go" />
         <option value="$PROJECT_DIR$/core/block/block.go" />
         <option value="$PROJECT_DIR$/core/stochastik/stochastik.go" />
+        <option value="$PROJECT_DIR$/core/stochastik/stochastikscope.go" />
+        <option value="$PROJECT_DIR$/core/spacetime/spacetime.go" />
+        <option value="$PROJECT_DIR$/core/merkle/hash.go" />
+        <option value="$PROJECT_DIR$/core/merkle/merkle.go" />
+        <option value="$PROJECT_DIR$/core/ekv/ekv.go" />
       </list>
     </option>
   </component>
@@ -147,13 +193,31 @@
               <item name="MilevaDB" type="b2602c69:ProjectViewProjectNode" />
               <item name="MilevaDB" type="462c0819:PsiDirectoryNode" />
               <item name="core" type="462c0819:PsiDirectoryNode" />
+              <item name="merkle" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="MilevaDB" type="b2602c69:ProjectViewProjectNode" />
+              <item name="MilevaDB" type="462c0819:PsiDirectoryNode" />
+              <item name="core" type="462c0819:PsiDirectoryNode" />
               <item name="schemareplicant" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="MilevaDB" type="b2602c69:ProjectViewProjectNode" />
               <item name="MilevaDB" type="462c0819:PsiDirectoryNode" />
               <item name="core" type="462c0819:PsiDirectoryNode" />
+              <item name="spacetime" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="MilevaDB" type="b2602c69:ProjectViewProjectNode" />
+              <item name="MilevaDB" type="462c0819:PsiDirectoryNode" />
+              <item name="core" type="462c0819:PsiDirectoryNode" />
               <item name="stochastik" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="MilevaDB" type="b2602c69:ProjectViewProjectNode" />
+              <item name="MilevaDB" type="462c0819:PsiDirectoryNode" />
+              <item name="core" type="462c0819:PsiDirectoryNode" />
+              <item name="util" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -163,6 +227,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="DefaultGoTemplateProperty" value="Go File" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="go.gopath.indexing.explicitly.defined" value="true" />
@@ -171,6 +236,7 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors.General" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -189,7 +255,7 @@
     <editor active="true" />
     <layout>
       <window_info id="Favorites" side_tool="true" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.24563591" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.26433915" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Docker" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" />
@@ -225,33 +291,27 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/core/spacetime/spacetime.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="225">
-          <caret line="15" column="7" lean-forward="true" selection-start-line="15" selection-start-column="7" selection-end-line="15" selection-end-column="7" />
-          <folding>
-            <element signature="e#544#584#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/core/ekv/ekv.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1558">
-          <caret line="104" column="1" lean-forward="true" selection-start-line="104" selection-start-column="1" selection-end-line="104" selection-end-column="1" />
-          <folding>
-            <element signature="e#533#616#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/core/block/block.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="243">
-          <caret line="33" column="29" lean-forward="true" selection-start-line="33" selection-start-column="29" selection-end-line="33" selection-end-column="29" />
+          <caret line="33" column="29" selection-start-line="33" selection-start-column="29" selection-end-line="33" selection-end-column="29" />
           <folding>
             <element signature="e#15#56#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BerolinaSQL/query/query.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="9330">
+          <caret line="622" column="1" selection-start-line="622" selection-start-column="1" selection-end-line="622" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/core/stochastik/stochastikscope.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="30">
+          <caret line="2" selection-start-line="2" selection-end-line="2" />
         </state>
       </provider>
     </entry>
@@ -262,10 +322,43 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/BerolinaSQL/query/query.go">
+    <entry file="file://$PROJECT_DIR$/core/spacetime/spacetime.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="9330">
-          <caret line="622" column="1" selection-start-line="622" selection-start-column="1" selection-end-line="622" selection-end-column="1" />
+        <state relative-caret-position="851">
+          <caret line="106" selection-start-line="106" selection-end-line="106" />
+          <folding>
+            <element signature="e#544#1081#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/core/merkle/hash.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="720">
+          <caret line="40" column="17" selection-start-line="40" selection-start-column="17" selection-end-line="40" selection-end-column="17" />
+          <folding>
+            <element signature="e#531#584#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/core/merkle/merkle.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="575">
+          <caret line="25" column="42" selection-start-line="25" selection-start-column="42" selection-end-line="25" selection-end-column="42" />
+          <folding>
+            <element signature="e#535#547#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/core/ekv/ekv.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="792">
+          <caret line="246" column="20" selection-start-line="246" selection-start-column="20" selection-end-line="246" selection-end-column="20" />
+          <folding>
+            <element signature="e#533#616#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
