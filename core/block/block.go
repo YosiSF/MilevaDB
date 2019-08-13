@@ -14,14 +14,14 @@ import (
 
 )
 
-//type of block
+//type of block, gives us storage options
 type Type int16
 
 const (
 
 	//NormalBlock, store data in EinsteinDB, mockEinsteinDB, and so on.
 	NormalBlock Type = iota
-	//memory data struct
+	//memory data struct, stores no data, extract data from the memory struct
 	VirtualBlock
 	//MemoryBlock
 	MemoryBlock
@@ -46,6 +46,12 @@ type AddRecordOpt struct {
 	IsUpdate bool
 }
 
+//Add record method of the block interface
+type AddRecorOption interface {
+	ApplyOn(*AddRecordOpt)
+}
+
+//Row modifier using dp-table via interface call back without threading.
 type Block interface {
 
 	//Record iterator
@@ -65,6 +71,9 @@ type Block interface {
 
 	// DeletableIndices returns delete-only, write-only and public indices of the table.
 	DeletableIndices() []Index
+
+
+
 
 
 
