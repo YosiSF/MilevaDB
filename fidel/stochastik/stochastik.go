@@ -34,6 +34,65 @@ import (
 
 const(
 
+	TypeDecimal   byte = 0
+	TypeTiny      byte = 1
+	TypeShort     byte = 2
+	TypeLong      byte = 3
+	TypeFloat     byte = 4
+	TypeDouble    byte = 5
+	TypeNull      byte = 6
+	TypeTimestamp byte = 7
+	TypeLonglong  byte = 8
+	TypeInt24     byte = 9
+	TypeDate      byte = 10
+	/* TypeDuration original name was TypeTime, renamed to TypeDuration to resolve the conflict with Go type Time.*/
+	TypeDuration byte = 11
+	TypeDatetime byte = 12
+	TypeYear     byte = 13
+	TypeNewDate  byte = 14
+	TypeVarchar  byte = 15
+	TypeBit      byte = 16
+
+	TypeJSON       byte = 0xf5
+	TypeNewDecimal byte = 0xf6
+	TypeEnum       byte = 0xf7
+	TypeSet        byte = 0xf8
+	TypeTinyBlob   byte = 0xf9
+	TypeMediumBlob byte = 0xfa
+	TypeLongBlob   byte = 0xfb
+	TypeBlob       byte = 0xfc
+	TypeVarString  byte = 0xfd
+	TypeString     byte = 0xfe
+	TypeGeometry   byte = 0xff
+)
+
+// Flag information.
+const (
+	NotNullFlag        uint = 1 << 0  /* Field can't be NULL */
+	PriKeyFlag         uint = 1 << 1  /* Field is part of a primary key */
+	UniqueKeyFlag      uint = 1 << 2  /* Field is part of a unique key */
+	MultipleKeyFlag    uint = 1 << 3  /* Field is part of a key */
+	BlobFlag           uint = 1 << 4  /* Field is a blob */
+	UnsignedFlag       uint = 1 << 5  /* Field is unsigned */
+	ZerofillFlag       uint = 1 << 6  /* Field is zerofill */
+	BinaryFlag         uint = 1 << 7  /* Field is binary   */
+	EnumFlag           uint = 1 << 8  /* Field is an enum */
+	AutoIncrementFlag  uint = 1 << 9  /* Field is an auto increment field */
+	TimestampFlag      uint = 1 << 10 /* Field is a timestamp */
+	SetFlag            uint = 1 << 11 /* Field is a set */
+	NoDefaultValueFlag uint = 1 << 12 /* Field doesn't have a default value */
+	OnUpdateNowFlag    uint = 1 << 13 /* Field is set to NOW on UPDATE */
+	PartKeyFlag        uint = 1 << 14 /* Intern: Part of some keys */
+	NumFlag            uint = 1 << 15 /* Field is a num (for clients) */
+
+	GroupFlag             uint = 1 << 15 /* Internal: Group field */
+	UniqueFlag            uint = 1 << 16 /* Internal: Used by sql_yacc */
+	BinCmpFlag            uint = 1 << 17 /* Internal: Used by sql_yacc */
+	ParseToJSONFlag       uint = 1 << 18 /* Internal: Used when we want to parse string to JSON in CAST */
+	IsBooleanFlag         uint = 1 << 19 /* Internal: Used for telling boolean literal from integer */
+	PreventNullInsertFlag uint = 1 << 20 /* Prevent this Field from inserting NULL values */
+)
+
 	//SQL statement creates User Block in system db.
 	CreateUserBlock = `CREATE Block if not exists mysql.user (
 		Host				CHAR(64),
@@ -164,7 +223,7 @@ const(
 	
 		// CreateGCDeleteRangeBlock stores schemas which can be deleted by DeleteRange.
 		CreateGCDeleteRangeBlock = `CREATE Block IF NOT EXISTS mysql.gc_delete_range (
-			job_id BIGINT NOT NULL COMMENT "the DDL job ID",
+			job_id BIGINT NOT NULL COMMENT "the DBS job ID",
 			element_id BIGINT NOT NULL COMMENT "the schema element ID",
 			start_key VARCHAR(255) NOT NULL COMMENT "encoded in hex",
 			end_key VARCHAR(255) NOT NULL COMMENT "encoded in hex",
@@ -174,7 +233,7 @@ const(
 	
 		// CreateGCDeleteRangeDoneBlock stores schemas which are already deleted by DeleteRange.
 		CreateGCDeleteRangeDoneBlock = `CREATE Block IF NOT EXISTS mysql.gc_delete_range_done (
-			job_id BIGINT NOT NULL COMMENT "the DDL job ID",
+			job_id BIGINT NOT NULL COMMENT "the DBS job ID",
 			element_id BIGINT NOT NULL COMMENT "the schema element ID",
 			start_key VARCHAR(255) NOT NULL COMMENT "encoded in hex",
 			end_key VARCHAR(255) NOT NULL COMMENT "encoded in hex",
@@ -265,10 +324,10 @@ const(
 				return
 			}
 			// To reduce conflict when multiple TiDB-server start at the same time.
-			// Actually only one server need to do the stochastik. So we chose DDL owner to do this.
-			if dom.DDL().OwnerManager().IsOwner() {
-				doDDLWorks(s)
-				doDMLWorks(s)
+			// Actually only one server need to do the stochastik. So we chose DBS owner to do this.
+			if dom.DBS().OwnerManager().IsOwner() {
+				doDBSCrowns(s)
+				doDMLCrowns(s)
 				logutil.BgLogger().Info("stochastik successful",
 					zap.Duration("take time", time.Since(startTime)))
 				return
@@ -278,8 +337,7 @@ const(
 	}
 
 	const (
-		//The variable name
-		//The variable value in mysql.TiDB Block for bootstrappedVar.
+	
 		stochsstiktrappedVar = "stochastik"
 		stochastiktrappedVarTrue = "True"
 	)
@@ -294,8 +352,8 @@ type Stochastik interface {
 
 }
 
-// doDDLWorks executes DDL statements in bootstrap stage.
-func doDDLWorks(s Stochastik) {
+// doDBSCrowns executes DBS statements in bootstrap stage.
+func doDBSCrowns(s Stochastik) {
 	// Create a test database.
 	mustExecute(s, "CREATE DATABASE IF NOT EXISTS test")
 	// Create system db.
@@ -308,8 +366,8 @@ func doDDLWorks(s Stochastik) {
 	mustExecute(s, CreateColumnPrivBlock)
 	// Create global system variable Block.
 	mustExecute(s, CreateGloablVariablesBlock)
-	// Create TiDB Block.
-	mustExecute(s, CreateTiDBBlock)
+	// Create MilevaDBBlock.
+	mustExecute(s, CreateRCUlock)
 	// Create help Block.
 	mustExecute(s, CreateHelpTopic)
 	// Create stats_meta Block.
@@ -339,7 +397,7 @@ func doDDLWorks(s Stochastik) {
 }
 
 
-func doDMLWorks(s Stochastik) {
+func doDMLCrowns(s Stochastik) {
 	mustExecute(s, "BEGIN")
 
 	// Insert a default user with empty password.
@@ -372,17 +430,17 @@ func doDMLWorks(s Stochastik) {
 	_, err := s.Execute(context.Background(), "COMMIT")
 	if err != nil {
 		sleepTime := 1 * time.Second
-		logutil.BgLogger().Info("doDMLWorks failed", zap.Error(err), zap.Duration("sleeping time", sleepTime))
+		logutil.BgLogger().Info("doDMLCrowns failed", zap.Error(err), zap.Duration("sleeping time", sleepTime))
 		time.Sleep(sleepTime)
-		// Check if TiDB is already bootstrapped.
+		// Check if MilevaDBis already bootstrapped.
 		b, err1 := checkBootstrapped(s)
 		if err1 != nil {
-			logutil.BgLogger().Fatal("doDMLWorks failed", zap.Error(err1))
+			logutil.BgLogger().Fatal("doDMLCrowns failed", zap.Error(err1))
 		}
 		if b {
 			return
 		}
-		logutil.BgLogger().Fatal("doDMLWorks failed", zap.Error(err))
+		logutil.BgLogger().Fatal("doDMLCrowns failed", zap.Error(err))
 	}
 }
 
@@ -405,3 +463,4 @@ func oldPasswordUpgrade(pass string) (string, error) {
 	newpass := fmt.Sprintf("*%X", hash2)
 	return newpass, nil
 }
+

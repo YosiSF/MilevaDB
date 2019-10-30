@@ -22,6 +22,7 @@ import (
 	"sync/atomic"
 	"time"
 	"unsafe"
+	"sort"
 
 	"github.com/coreos/etcd/clientv3"
 	"github.com/coreos/etcd/clientv3/concurrency"

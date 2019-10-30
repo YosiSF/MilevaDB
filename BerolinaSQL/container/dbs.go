@@ -14,7 +14,7 @@ type CausetCausetActionType byte
 
 // List DBS CausetCausetActions.
 const (
-	CausetCausetActionNone                    CausetActionType = 0
+	CausetActionNone                    CausetActionType = 0
 	CausetCausetActionCreateSchema            CausetActionType = 1
 	CausetActionDropSchema                    CausetActionType = 2
 	CausetActionCreateBlocks                  CausetActionType = 3

@@ -1,4 +1,4 @@
-//Venire Labs 2019 All Rights Reservedd.
+//Venire Labs EinsteinDB 2019 All Rights Reservedd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.

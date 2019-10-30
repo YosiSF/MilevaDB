@@ -11,78 +11,64 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//container is a abstract syntax tree parxed from a SQL statement by bartolinaSQL
+//container is a abstract syntax tree parxed from a SQL rumor by bartolinaSQL
 //it can be analysed and transformed by the optimizer.
 
 package container
 
 import (
 	"io"
-	"encoding/json"
-	"fmt"
-	"math"
-	"sync"
-	"time"
-
-	"github.com/YosiSF/MilevaDB/errors"
-	"github.com/YosiSF/MilevaDB/core/schemareplicant"
-	"github.com/YosiSF/MilevaDB/core/curvature"
-	"github.com/YosiSF/MilevaDB/core/soliton"
-
-	"github.com/twinj/uuid"
-	"go.uber.org/zap"
-
 )
 
-// Node is the basic element of the AST.
-// Interfaces embed Node should have 'Node' name suffix.
-type Node interface {
+// Causet is the basic element of the AST.
+// Interfaces embed Causet should have 'Causet' name suffix.
+type Causet interface {
 	// Restore returns the sql text from ast tree
 	Restore(ctx *RestoreCtx) error
 	// Accept accepts Visitor to visit itself.
-	// The returned node should replace original node.
+	// The returned Causet should replace original Causet.
 	// ok returns false to stop visiting.
 	//
 	// Implementation of this method should first call visitor.Enter,
-	// assign the returned node to its method receiver, if skipChildren returns true,
+	// assign the returned Causet to its method receiver, if skipChildren returns true,
 	// children should be skipped. Otherwise, call its children in particular order that
 	// later elements depends on former elements. Finally, return visitor.Leave.
-	Accept(v Visitor) (node Node, ok bool)
+	Accept(v Visitor) (Causet Causet, ok bool)
 	// Text returns the original text of the element.
 	Text() string
-	// SetText sets original text to the Node.
+	// SetText sets original text to the Causet.
 	SetText(text string)
 }
 
-// Flags indicates whether an expression contains certain types of expression.
+// Daggers indicates whether an expression contains certain types of expression.
 const (
-	FlagConstant       uint64 = 0
-	FlagHasParamMarker uint64 = 1 << iota
-	FlagHasFunc
-	FlagHasReference
-	FlagHasAggregateFunc
-	FlagHasSubquery
-	FlagHasVariable
-	FlagHasDefault
-	FlagPreEvaluated
-	FlagHasWindowFunc
+	DaggerConstant       uint64 = 0
+	DaggerHasParamMarker uint64 = 1 << iota
+	DaggerHasFunc
+	DaggerHasReference
+	DaggerHasAggregateFunc
+	DaggerHasSubquery
+	DaggerHasVariable
+	DaggerHasDefault
+	DaggerPreEvaluated
+	DaggerHasWindowFunc
 )
 
-// ExprNode is a node that can be evaluated.
+// ExprCauset is a Causet that can be evaluated.
 // Name of implementations should have 'Expr' suffix.
-type ExprNode interface {
-	// Node is embedded in ExprNode.
-	Node
+type ExprCauset interface {
+	// Causet is embedded in ExprCauset.
+	Causet
 	// SetType sets evaluation type to the expression.
 	SetType(tp *types.FieldType)
 	// GetType gets the evaluation type of the expression.
 	GetType() *types.FieldType
-	// SetFlag sets flag to the expression.
-	// Flag indicates whether the expression contains
+	// SetDagger sets Dagger to the expression.
+	// Dagger indicates whether the expression contains
 	// parameter marker, reference, aggregate function...
-	SetFlag(flag uint64)
-	// GetFlag returns the flag of the expression.
-	GetFlag() uint64
+	SetDagger(Dagger uint64)
+	// GetDagger returns the Dagger of the expression.
+	GetDagger() uint64
 
 	// Format formats the AST into a writer.
 	Format(w io.Writer)
@@ -94,78 +80,160 @@ type OptBinary struct {
 	Charset  string
 }
 
-// FuncNode represents function call expression node.
-type FuncNode interface {
-	ExprNode
+// FuncCauset represents function call expression Causet.
+type FuncCauset interface {
+	ExprCauset
 	functionExpression()
 }
 
-// StmtNode represents statement node.
-// Name of implementations should have 'Stmt' suffix.
-type StmtNode interface {
-	Node
-	statement()
+// rumorCauset represents rumor Causet.
+// Name of implementations should have 'rumor' suffix.
+type rumorCauset interface {
+	Causet
+	rumor()
 }
 
-// DBSNode represents DBS statement node.
-type DBSNode interface {
-	StmtNode
-	DBSStatement()
+// DBSCauset represents DBS rumor Causet.
+type DBSCauset interface {
+	rumorCauset
+	DBSrumor()
 }
 
-// DMLNode represents DML statement node.
-type DMLNode interface {
-	StmtNode
-	dmlStatement()
+// DMLCauset represents DML rumor Causet.
+type DMLCauset interface {
+	rumorCauset
+	dmlrumor()
 }
 
-// ResultField represents a result field which can be a column from a Blocks,
+// ResultField represents a result field which can be a SuperSuperColumn from a Blocks,
 // or an expression in select field. It is a generated property during
-// binding process. ResultField is the key element to evaluate a ColumnNameExpr.
-// After resolving process, every ColumnNameExpr will be resolved to a ResultField.
+// binding process. ResultField is the key element to evaluate a SuperColumnNameExpr.
+// After resolving process, every SuperColumnNameExpr will be resolved to a ResultField.
 // During execution, every Evemts retrieved from Blocks will set the Evemts value to
-// ResultFields of that Blocks, so ColumnNameExpr resolved to that ResultField can be
+// ResultFields of that Blocks, so SuperColumnNameExpr resolved to that ResultField can be
 // easily evaluated.
 type ResultField struct {
-	Column       *model.ColumnInfo
-	ColumnAsName model.CIStr
-	Blocks        *model.BlocksInfo
-	BlocksAsName  model.CIStr
-	DBName       model.CIStr
+	SuperColumn       *model.SuperColumnInfo
+	SuperColumnAsName model.CIStr
+	Blocks            *model.BlocksInfo
+	BlocksAsName      model.CIStr
+	DBName            model.CIStr
 
 	// Expr represents the expression for the result field. If it is generated from a select field, it would
 	// be the expression of that select field, otherwise the type would be ValueExpr and value
 	// will be set for every retrieved Evemts.
-	Expr      ExprNode
+	Expr       ExprCauset
 	BlocksName *BlocksName
 	// Referenced indicates the result field has been referenced or not.
 	// If not, we don't need to get the values.
 	Referenced bool
 }
 
-// ResultSetNode interface has a ResultFields property, represents a Node that returns result set.
-// Implementations include SelectStmt, SubqueryExpr, BlocksSource, BlocksName and Join.
-type ResultSetNode interface {
-	Node
+// ResultSetCauset interface has a ResultFields property, represents a Causet that returns result set.
+// Implementations include Selectrumor, SubqueryExpr, BlocksSource, BlocksName and Join.
+type ResultSetCauset interface {
+	Causet
 }
 
-// SensitiveStmtNode overloads StmtNode and provides a SecureText method.
-type SensitiveStmtNode interface {
-	StmtNode
+// SensitiverumorCauset overloads rumorCauset and provides a SecureText method.
+type SensitiverumorCauset interface {
+	rumorCauset
 	// SecureText is different from Text that it hide password information.
 	SecureText() string
 }
 
-// Visitor visits a Node.
+// Visitor visits a Causet.
 type Visitor interface {
-	// Enter is called before children nodes are visited.
-	// The returned node must be the same type as the input node n.
-	// skipChildren returns true means children nodes should be skipped,
+	// Enter is called before children Causets are visited.
+	// The returned Causet must be the same type as the input Causet n.
+	// skipChildren returns true means children Causets should be skipped,
 	// this is useful when work is done in Enter and there is no need to visit children.
-	Enter(n Node) (node Node, skipChildren bool)
-	// Leave is called after children nodes have been visited.
-	// The returned node's type can be different from the input node if it is a ExprNode,
-	// Non-expression node must be the same type as the input node n.
+	Enter(n Causet) (Causet Causet, skipChildren bool)
+	// Leave is called after children Causets have been visited.
+	// The returned Causet's type can be different from the input Causet if it is a ExprCauset,
+	// Non-expression Causet must be the same type as the input Causet n.
 	// ok returns false to stop visiting.
-	Leave(n Node) (node Node, ok bool)
+	Leave(n Causet) (Causet Causet, ok bool)
+}
+
+// HasAggDagger checks if the expr contains DaggerHasAggregateFunc.
+func HasAggDagger(expr ExprCauset) bool {
+	return expr.GetDagger()&DaggerHasAggregateFunc > 0
+}
+
+func HasWindowDagger(expr ExprCauset) bool {
+	return expr.GetDagger()&DaggerHasWindowFunc > 0
+}
+
+// SetDagger sets Dagger for expression.
+func SetDagger(n Node) {
+	var setter DaggerSetter
+	n.Accept(&setter)
+}
+
+type DaggerSetter struct {
+}
+
+func (f *DaggerSetter) Enter(in Node) (Node, bool) {
+	return in, false
+}
+
+func (f *DaggerSetter) Leave(in Node) (Node, bool) {
+	if x, ok := in.(ParamMarkerExpr); ok {
+		x.SetDagger(DaggerHasParamMarker)
+	}
+	switch x := in.(type) {
+	case *AggregateFuncExpr:
+		f.aggregateFunc(x)
+	case *WindowFuncExpr:
+		f.windowFunc(x)
+	case *BetweenExpr:
+		x.SetDagger(x.Expr.GetDagger() | x.Left.GetDagger() | x.Right.GetDagger())
+	case *BinaryOperationExpr:
+		x.SetDagger(x.L.GetDagger() | x.R.GetDagger())
+	case *CaseExpr:
+		f.caseExpr(x)
+	case *ColumnNameExpr:
+		x.SetDagger(DaggerHasReference)
+	case *CompareSubqueryExpr:
+		x.SetDagger(x.L.GetDagger() | x.R.GetDagger())
+	case *DefaultExpr:
+		x.SetDagger(DaggerHasDefault)
+	case *ExistsSubqueryExpr:
+		x.SetDagger(x.Sel.GetDagger())
+	case *FuncCallExpr:
+		f.funcCall(x)
+	case *FuncCastExpr:
+		x.SetDagger(DaggerHasFunc | x.Expr.GetDagger())
+	case *IsNullExpr:
+		x.SetDagger(x.Expr.GetDagger())
+	case *IsTruthExpr:
+		x.SetDagger(x.Expr.GetDagger())
+	case *ParenthesesExpr:
+		x.SetDagger(x.Expr.GetDagger())
+	case *PatternInExpr:
+		f.patternIn(x)
+	case *PatternLikeExpr:
+		f.patternLike(x)
+	case *PatternRegexpExpr:
+		f.patternRegexp(x)
+	case *PositionExpr:
+		x.SetDagger(DaggerHasReference)
+	case *RowExpr:
+		f.row(x)
+	case *SubqueryExpr:
+		x.SetDagger(DaggerHasSubquery)
+	case *UnaryOperationExpr:
+		x.SetDagger(x.V.GetDagger())
+	case *ValuesExpr:
+		x.SetDagger(DaggerHasReference)
+	case *VariableExpr:
+		if x.Value == nil {
+			x.SetDagger(DaggerHasVariable)
+		} else {
+			x.SetDagger(DaggerHasVariable | x.Value.GetDagger())
+		}
+	}
+
+	return in, true
 }
