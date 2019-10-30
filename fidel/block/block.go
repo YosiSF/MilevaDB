@@ -1,17 +1,20 @@
+//Copyright 2019 All Rights Reserved Apache License-2.0.
+
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package block
 
 import (
-	"fmt"
-	"strconv"
-	"strings"
-	"go.uber.org/zap"
-	"github.com/YosiSF/MilevaDB/core/stochastik"
-	"github.com/YosiSF/MilevaDB/core/util/binlog"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/query"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/container"
-	"github.com/YosiSF/MilevaDB/core/ekv"
-
-
+	"github.com/YosiSF/MilevaDB/fidel/ekv"
 )
 
 //type of block, gives us storage options
@@ -25,17 +28,12 @@ const (
 	VirtualBlock
 	//MemoryBlock
 	MemoryBlock
-
-
 )
 
 const (
-
 	DirtyBlockAddEvent = iota
 	DirtyBlockDeleteEvent
 	DirtyBlockTruncate
-
-
 )
 
 //low level record iteration
@@ -58,7 +56,7 @@ type Block interface {
 	IterRecords(ctx stochastiktxn.Context, startKey ekv.Key, cols []*Batch, fn RecordIterFunc) error
 
 	//EventRowWithBatch return a row event that contains given batch
-	EventWithBatch(ctx stochastiktxn.Context, h int64, cols[]*Batch)([]types.Datum, error)
+	EventWithBatch(ctx stochastiktxn.Context, h int64, cols []*Batch) ([]types.Datum, error)
 
 	//Event returns a row for all batches == columns
 	Event(ctx stochastiktxn.Context, h int64) ([]types.Datum, error)
@@ -71,10 +69,4 @@ type Block interface {
 
 	// DeletableIndices returns delete-only, write-only and public indices of the table.
 	DeletableIndices() []Index
-
-
-
-
-
-
 }
