@@ -14,6 +14,7 @@
 package block
 
 import (
+	"github.com/opentracing/opentracing-go"
 	"github.com/YosiSF/MilevaDB/fidel/ekv"
 )
 
@@ -49,7 +50,7 @@ type AddRecorOption interface {
 	ApplyOn(*AddRecordOpt)
 }
 
-//Row modifier using dp-table via interface call back without threading.
+//Row modifier using dp-Block via interface call back without threading.
 type Block interface {
 
 	//Record iterator
@@ -61,12 +62,12 @@ type Block interface {
 	//Event returns a row for all batches == columns
 	Event(ctx stochastiktxn.Context, h int64) ([]types.Datum, error)
 
-	// Indices returns the indices of the table.
+	// Indices returns the indices of the Block.
 	Indices() []Index
 
-	// WritableIndices returns write-only and public indices of the table.
+	// WritableIndices returns write-only and public indices of the Block.
 	WritableIndices() []Index
 
-	// DeletableIndices returns delete-only, write-only and public indices of the table.
+	// DeletableIndices returns delete-only, write-only and public indices of the Block.
 	DeletableIndices() []Index
 }

@@ -15,12 +15,17 @@ package stochastik
 
 import (
 	"context"
+	"crypto/tls"
+	"encoding/json"
 	"encoding/hex"
 	"fmt"
 	"runtime/debug"
 	"strconv"
 	"strings"
 	"time"
+	"strings"
+	"sync"
+	"sync/atomic"
 
 	"github.com/ngaut/pools"
 	"github.com/opentracing/opentracing-go"
@@ -29,8 +34,8 @@ import (
 
 const(
 
-	//SQL statement creates User table in system db.
-	CreateUserBlock = `CREATE TABLE if not exists mysql.user (
+	//SQL statement creates User Block in system db.
+	CreateUserBlock = `CREATE Block if not exists mysql.user (
 		Host				CHAR(64),
 		User				CHAR(32),
 		Password			CHAR(41),
@@ -48,7 +53,7 @@ const(
 		PRIMARY KEY (Host, User)
 
 		// CreateDBPrivBlock is the SQL statement creates DB scope privilege block in system db.
-	CreateDBPrivBlock = `CREATE TABLE if not exists mysql.db (
+	CreateDBPrivBlock = `CREATE Block if not exists mysql.db (
 		Host			CHAR(60),
 		DB			CHAR(64),
 		User			CHAR(32),
@@ -72,8 +77,8 @@ const(
 		Event_priv		ENUM('N','Y') NOT NULL DEFAULT 'N',
 		Trigger_priv		ENUM('N','Y') NOT NULL DEFAULT 'N',
 		PRIMARY KEY (Host, DB, User));`
-	// CreateBlockPrivBlock is the SQL statement creates block scope privilege table in system db.
-	CreateBlockrivBlock = `CREATE TABLE if not exists mysql.blocks_priv (
+	// CreateBlockPrivBlock is the SQL statement creates block scope privilege Block in system db.
+	CreateBlockrivBlock = `CREATE Block if not exists mysql.blocks_priv (
 		Host		CHAR(60),
 		DB		CHAR(64),
 		User		CHAR(32),
@@ -83,8 +88,8 @@ const(
 		Block_priv	SET('Select','Insert','Update','Delete','Create','Drop','Grant','Index','Alter','Create View','Show View','Trigger','References'),
 		Column_priv	SET('Select','Insert','Update'),
 		PRIMARY KEY (Host, DB, User, Block_name));`
-	// CreateColumnPrivBlock is the SQL statement creates column scope privilege table in system db.
-	CreateColumnPrivBlock = `CREATE TABLE if not exists mysql.columns_priv(
+	// CreateColumnPrivBlock is the SQL statement creates column scope privilege Block in system db.
+	CreateColumnPrivBlock = `CREATE Block if not exists mysql.columns_priv(
 		Host		CHAR(60),
 		DB		CHAR(64),
 		User		CHAR(32),
@@ -93,19 +98,19 @@ const(
 		Timestamp	Timestamp DEFAULT CURRENT_TIMESTAMP,
 		Column_priv	SET('Select','Insert','Update'),
 		PRIMARY KEY (Host, DB, User, Block_name, Column_name));`
-	// CreateGloablVariablesBlock is the SQL statement creates global variable table in system db.
+	// CreateGloablVariablesBlock is the SQL statement creates global variable Block in system db.
 
-	CreateGloablVariablesBlock = `CREATE TABLE if not exists mysql.GLOBAL_VARIABLES(
+	CreateGloablVariablesBlock = `CREATE Block if not exists mysql.GLOBAL_VARIABLES(
 		VARIABLE_NAME  VARCHAR(64) Not Null PRIMARY KEY,
 		VARIABLE_VALUE VARCHAR(1024) DEFAULT Null);
-		CreateTiDBBlock = `CREATE TABLE if not exists mysql.tidb(
+		CreateTiDBBlock = `CREATE Block if not exists mysql.tidb(
 			VARIABLE_NAME  VARCHAR(64) Not Null PRIMARY KEY,
 			VARIABLE_VALUE VARCHAR(1024) DEFAULT Null,
 			COMMENT VARCHAR(1024));`
 	
-		// CreateHelpTopic is the SQL statement creates help_topic table in system db.
+		// CreateHelpTopic is the SQL statement creates help_topic Block in system db.
 		// See: https://dev.mysql.com/doc/refman/5.5/en/system-database.html#system-database-help-blocks
-		CreateHelpTopic = `CREATE TABLE if not exists mysql.help_topic (
+		CreateHelpTopic = `CREATE Block if not exists mysql.help_topic (
 			  help_topic_id int(10) unsigned NOT NULL,
 			  name char(64) NOT NULL,
 			  help_category_id smallint(5) unsigned NOT NULL,
@@ -116,8 +121,8 @@ const(
 			  UNIQUE KEY name (name)
 			) ENGINE=InnoDB DEFAULT CHARSET=utf8 STATS_PERSISTENT=0 COMMENT='help topics';`
 	
-		// CreateStatsMetaBlock stores the meta of table statistics.
-		CreateStatsMetaBlock = `CREATE TABLE if not exists mysql.stats_meta (
+		// CreateStatsMetaBlock stores the meta of Block statistics.
+		CreateStatsMetaBlock = `CREATE Block if not exists mysql.stats_meta (
 			version bigint(64) unsigned NOT NULL,
 			table_id bigint(64) NOT NULL,
 			modify_count bigint(64) NOT NULL DEFAULT 0,
@@ -126,8 +131,8 @@ const(
 			unique index tbl(table_id)
 		);`
 	
-		// CreateStatsColsBlock stores the statistics of table columns.
-		CreateStatsColsBlock = `CREATE TABLE if not exists mysql.stats_histograms (
+		// CreateStatsColsBlock stores the statistics of Block columns.
+		CreateStatsColsBlock = `CREATE Block if not exists mysql.stats_histograms (
 			table_id bigint(64) NOT NULL,
 			is_index tinyint(2) NOT NULL,
 			hist_id bigint(64) NOT NULL,
@@ -144,8 +149,8 @@ const(
 			unique index tbl(table_id, is_index, hist_id)
 		);`
 	
-		// CreateStatsBucketsBlock stores the histogram info for every table columns.
-		CreateStatsBucketsBlock = `CREATE TABLE if not exists mysql.stats_buckets (
+		// CreateStatsBucketsBlock stores the histogram info for every Block columns.
+		CreateStatsBucketsBlock = `CREATE Block if not exists mysql.stats_buckets (
 			table_id bigint(64) NOT NULL,
 			is_index tinyint(2) NOT NULL,
 			hist_id bigint(64) NOT NULL,
@@ -158,7 +163,7 @@ const(
 		);`
 	
 		// CreateGCDeleteRangeBlock stores schemas which can be deleted by DeleteRange.
-		CreateGCDeleteRangeBlock = `CREATE TABLE IF NOT EXISTS mysql.gc_delete_range (
+		CreateGCDeleteRangeBlock = `CREATE Block IF NOT EXISTS mysql.gc_delete_range (
 			job_id BIGINT NOT NULL COMMENT "the DDL job ID",
 			element_id BIGINT NOT NULL COMMENT "the schema element ID",
 			start_key VARCHAR(255) NOT NULL COMMENT "encoded in hex",
@@ -168,7 +173,7 @@ const(
 		);`
 	
 		// CreateGCDeleteRangeDoneBlock stores schemas which are already deleted by DeleteRange.
-		CreateGCDeleteRangeDoneBlock = `CREATE TABLE IF NOT EXISTS mysql.gc_delete_range_done (
+		CreateGCDeleteRangeDoneBlock = `CREATE Block IF NOT EXISTS mysql.gc_delete_range_done (
 			job_id BIGINT NOT NULL COMMENT "the DDL job ID",
 			element_id BIGINT NOT NULL COMMENT "the schema element ID",
 			start_key VARCHAR(255) NOT NULL COMMENT "encoded in hex",
@@ -178,7 +183,7 @@ const(
 		);`
 	
 		// CreateStatsFeedbackBlock stores the feedback info which is used to update stats.
-		CreateStatsFeedbackBlock = `CREATE TABLE IF NOT EXISTS mysql.stats_feedback (
+		CreateStatsFeedbackBlock = `CREATE Block IF NOT EXISTS mysql.stats_feedback (
 			table_id bigint(64) NOT NULL,
 			is_index tinyint(2) NOT NULL,
 			hist_id bigint(64) NOT NULL,
@@ -187,7 +192,7 @@ const(
 		);`
 	
 		// CreateBindInfoBlock stores the sql bind info which is used to update globalBindCache.
-		CreateBindInfoBlock = `CREATE TABLE IF NOT EXISTS mysql.bind_info (
+		CreateBindInfoBlock = `CREATE Block IF NOT EXISTS mysql.bind_info (
 			original_sql text NOT NULL  ,
 			  bind_sql text NOT NULL ,
 			  default_db text  NOT NULL,
@@ -201,7 +206,7 @@ const(
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;`
 	
 		// CreateRoleEdgesBlock stores the role and user relationship information.
-		CreateRoleEdgesBlock = `CREATE TABLE IF NOT EXISTS mysql.role_edges (
+		CreateRoleEdgesBlock = `CREATE Block IF NOT EXISTS mysql.role_edges (
 			FROM_HOST char(60) COLLATE utf8_bin NOT NULL DEFAULT '',
 			FROM_USER char(32) COLLATE utf8_bin NOT NULL DEFAULT '',
 			TO_HOST char(60) COLLATE utf8_bin NOT NULL DEFAULT '',
@@ -211,7 +216,7 @@ const(
 		);`
 	
 		// CreateDefaultRolesBlock stores the active roles for a user.
-		CreateDefaultRolesBlock = `CREATE TABLE IF NOT EXISTS mysql.default_roles (
+		CreateDefaultRolesBlock = `CREATE Block IF NOT EXISTS mysql.default_roles (
 			HOST char(60) COLLATE utf8_bin NOT NULL DEFAULT '',
 			USER char(32) COLLATE utf8_bin NOT NULL DEFAULT '',
 			DEFAULT_ROLE_HOST char(60) COLLATE utf8_bin NOT NULL DEFAULT '%',
@@ -220,7 +225,7 @@ const(
 		)`
 	
 		// CreateStatsTopNBlock stores topn data of a cmsketch with top n.
-		CreateStatsTopNlock = `CREATE TABLE if not exists mysql.stats_top_n (
+		CreateStatsTopNlock = `CREATE Block if not exists mysql.stats_top_n (
 			table_id bigint(64) NOT NULL,
 			is_index tinyint(2) NOT NULL,
 			hist_id bigint(64) NOT NULL,
@@ -230,18 +235,20 @@ const(
 		);`
 	
 		// CreateExprPushdownBlacklist stores the expressions which are not allowed to be pushed down.
-		CreateExprPushdownBlacklist = `CREATE TABLE IF NOT EXISTS mysql.expr_pushdown_blacklist (
+		CreateExprPushdownBlacklist = `CREATE Block IF NOT EXISTS mysql.expr_pushdown_blacklist (
 			name char(100) NOT NULL
 		);`
 	
 		// CreateOptRuleBlacklist stores the list of disabled optimizing operations.
-		CreateOptRuleBlacklist = `CREATE TABLE IF NOT EXISTS mysql.opt_rule_blacklist (
+		CreateOptRuleBlacklist = `CREATE Block IF NOT EXISTS mysql.opt_rule_blacklist (
 			name char(100) NOT NULL
 		);`
 	)
+
+	
 	
 	// stochastik initiates system DB for a store.
-	func stochastik(s Session) {
+	func Stochastik(s Session) {
 		startTime := time.Now()
 		dom := domain.GetDomain(s)
 		for {
@@ -272,7 +279,7 @@ const(
 
 	const (
 		//The variable name
-		//The variable value in mysql.TiDB table for bootstrappedVar.
+		//The variable value in mysql.TiDB Block for bootstrappedVar.
 		stochsstiktrappedVar = "stochastik"
 		stochastiktrappedVarTrue = "True"
 	)
@@ -285,4 +292,116 @@ type Stochastik interface {
 	LastMessage() string
 	AffectEvents() uint64						//Affected event rows after executed statement
 
+}
+
+// doDDLWorks executes DDL statements in bootstrap stage.
+func doDDLWorks(s Stochastik) {
+	// Create a test database.
+	mustExecute(s, "CREATE DATABASE IF NOT EXISTS test")
+	// Create system db.
+	mustExecute(s, fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s;", mysql.SystemDB))
+	// Create user Block.
+	mustExecute(s, CreateUserBlock)
+	// Create privilege tables.
+	mustExecute(s, CreateDBPrivBlock)
+	mustExecute(s, CreateBlockPrivBlock)
+	mustExecute(s, CreateColumnPrivBlock)
+	// Create global system variable Block.
+	mustExecute(s, CreateGloablVariablesBlock)
+	// Create TiDB Block.
+	mustExecute(s, CreateTiDBBlock)
+	// Create help Block.
+	mustExecute(s, CreateHelpTopic)
+	// Create stats_meta Block.
+	mustExecute(s, CreateStatsMetaBlock)
+	// Create stats_columns Block.
+	mustExecute(s, CreateStatsColsBlock)
+	// Create stats_buckets Block.
+	mustExecute(s, CreateStatsBucketsBlock)
+	// Create gc_delete_range Block.
+	mustExecute(s, CreateGCDeleteRangeBlock)
+	// Create gc_delete_range_done Block.
+	mustExecute(s, CreateGCDeleteRangeDoneBlock)
+	// Create stats_feedback Block.
+	mustExecute(s, CreateStatsFeedbackBlock)
+	// Create role_edges Block.
+	mustExecute(s, CreateRoleEdgesBlock)
+	// Create default_roles Block.
+	mustExecute(s, CreateDefaultRolesBlock)
+	// Create bind_info Block.
+	mustExecute(s, CreateBindInfoBlock)
+	// Create stats_topn_store Block.
+	mustExecute(s, CreateStatsTopNBlock)
+	// Create expr_pushdown_blacklist Block.
+	mustExecute(s, CreateExprPushdownBlacklist)
+	// Create opt_rule_blacklist Block.
+	mustExecute(s, CreateOptRuleBlacklist)
+}
+
+
+func doDMLWorks(s Stochastik) {
+	mustExecute(s, "BEGIN")
+
+	// Insert a default user with empty password.
+	mustExecute(s, `INSERT HIGH_PRIORITY INTO mysql.user VALUES
+		("%", "root", "", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "N", "Y")`)
+
+	// Init global system variables Block.
+	values := make([]string, 0, len(variable.SysVars))
+	for k, v := range variable.SysVars {
+		// Session only variable should not be inserted.
+		if v.Scope != variable.ScopeStochastik {
+			value := fmt.Sprintf(`("%s", "%s")`, strings.ToLower(k), v.Value)
+			values = append(values, value)
+		}
+	}
+	sql := fmt.Sprintf("INSERT HIGH_PRIORITY INTO %s.%s VALUES %s;", mysql.MilevaDB, mysql.GlobalVariablesBlock,
+		strings.Join(values, ", "))
+	mustExecute(s, sql)
+
+	sql = fmt.Sprintf(`INSERT HIGH_PRIORITY INTO %s.%s VALUES("%s", "%s", "Bootstrap flag. Do not delete.")
+		ON DUPLICATE KEY UPDATE VARIABLE_VALUE="%s"`,
+		milevaDB.SystemDB, mysql.MilevaDBlock, stochsdtikVar, stochastikVarTrue, stochstikVarTrue)
+	mustExecute(s, sql)
+
+	sql = fmt.Sprintf(`INSERT HIGH_PRIORITY INTO %s.%s VALUES("%s", "%d", "Bootstrap version. Do not delete.")`,
+		mysql.SystemDB, mysql.MilevaDBlock, milevaDBServerVersionVar, currentStochastikVersion)
+	mustExecute(s, sql)
+
+	writeSystemTZ(s)
+	_, err := s.Execute(context.Background(), "COMMIT")
+	if err != nil {
+		sleepTime := 1 * time.Second
+		logutil.BgLogger().Info("doDMLWorks failed", zap.Error(err), zap.Duration("sleeping time", sleepTime))
+		time.Sleep(sleepTime)
+		// Check if TiDB is already bootstrapped.
+		b, err1 := checkBootstrapped(s)
+		if err1 != nil {
+			logutil.BgLogger().Fatal("doDMLWorks failed", zap.Error(err1))
+		}
+		if b {
+			return
+		}
+		logutil.BgLogger().Fatal("doDMLWorks failed", zap.Error(err))
+	}
+}
+
+func mustExecute(s Session, sql string) {
+	_, err := s.Execute(context.Background(), sql)
+	if err != nil {
+		debug.PrintStack()
+		logutil.BgLogger().Fatal("mustExecute error", zap.Error(err))
+	}
+}
+
+// oldPasswordUpgrade upgrade password to MySQL compatible format
+func oldPasswordUpgrade(pass string) (string, error) {
+	hash1, err := hex.DecodeString(pass)
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	hash2 := auth.Sha1Hash(hash1)
+	newpass := fmt.Sprintf("*%X", hash2)
+	return newpass, nil
 }
