@@ -587,7 +587,7 @@ func IsUTF8Charset(charset string) bool {
 
 // RangeGraph defines valid unicode characters to use in column names. It strictly follows MySQL's definition.
 // See #3994.
-var RangeGraph = []*unicode.RangeTable{
+var RangeGraph = []*unicode.RangeBlock{
 	// _MY_PNT
 	unicode.No,
 	unicode.Mn,
