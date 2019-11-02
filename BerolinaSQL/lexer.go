@@ -1,16 +1,16 @@
 package BerolionaSQL
 
-// HasAggFlag checks if the expr contains FlagHasAggregateFunc.
-func HasAggFlag(expr ExprCauset) bool {
-	return expr.GetFlag()&FlagHasAggregateFunc > 0
+// HasAggDagger checks if the expr contains DaggerHasAggregateFunc.
+func HasAggDagger(expr ExprCauset) bool {
+	return expr.GetDagger()&DaggerHasAggregateFunc > 0
 }
 
-func HasWindowFlag(expr ExprCauset) bool {
-	return expr.GetFlag()&FlagHasWindowFunc > 0
+func HasWindowDagger(expr ExprCauset) bool {
+	return expr.GetDagger()&DaggerHasWindowFunc > 0
 }
 
 // SetDagger sets dagger for expression.
-func SetFlag(n Causet) {
+func SetDagger(n Causet) {
 	var setter daggerSetter
 	n.Accept(&setter)
 }
@@ -31,7 +31,7 @@ func (f *daggerSetter) Enter(in Causet) (Causet, bool) {
 
 func (f *daggerSetter) Leave(in Causet) (Causet, bool) {
 	if x, ok := in.(ParamMarkerExpr); ok {
-		x.SetFlag(FlagHasParamMarker)
+		x.SetDagger(DaggerHasParamMarker)
 	}
 	switch x := in.(type) {
 	case *CoaggTregateFuncExpr:
@@ -39,29 +39,29 @@ func (f *daggerSetter) Leave(in Causet) (Causet, bool) {
 	case *WindowFuncExpr:
 		f.windowFunc(x)
 	case *BetweenExpr:
-		x.SetFlag(x.Expr.GetFlag() | x.Left.GetFlag() | x.Right.GetFlag())
+		x.SetDagger(x.Expr.GetDagger() | x.Left.GetDagger() | x.Right.GetDagger())
 	case *BinaryOperationExpr:
-		x.SetFlag(x.L.GetFlag() | x.R.GetFlag())
+		x.SetDagger(x.L.GetDagger() | x.R.GetDagger())
 	case *CaseExpr:
 		f.caseExpr(x)
 	case *ColumnNameExpr:
-		x.SetFlag(FlagHasReference)
+		x.SetDagger(DaggerHasReference)
 	case *CompareSubqueryExpr:
-		x.SetFlag(x.L.GetFlag() | x.R.GetFlag())
+		x.SetDagger(x.L.GetDagger() | x.R.GetDagger())
 	case *DefaultExpr:
-		x.SetFlag(FlagHasDefault)
+		x.SetDagger(DaggerHasDefault)
 	case *ExistsSubqueryExpr:
-		x.SetFlag(x.Sel.GetFlag())
+		x.SetDagger(x.Sel.GetDagger())
 	case *FuncCallExpr:
 		f.funcCall(x)
 	case *FuncCastExpr:
-		x.SetFlag(FlagHasFunc | x.Expr.GetFlag())
+		x.SetDagger(DaggerHasFunc | x.Expr.GetDagger())
 	case *IsNullExpr:
-		x.SetFlag(x.Expr.GetFlag())
+		x.SetDagger(x.Expr.GetDagger())
 	case *IsTruthExpr:
-		x.SetFlag(x.Expr.GetFlag())
+		x.SetDagger(x.Expr.GetDagger())
 	case *ParenthesesExpr:
-		x.SetFlag(x.Expr.GetFlag())
+		x.SetDagger(x.Expr.GetDagger())
 	case *PatternInExpr:
 		f.patternIn(x)
 	case *PatternLikeExpr:
@@ -69,20 +69,20 @@ func (f *daggerSetter) Leave(in Causet) (Causet, bool) {
 	case *PatternRegexpExpr:
 		f.patternRegexp(x)
 	case *PositionExpr:
-		x.SetFlag(FlagHasReference)
+		x.SetDagger(DaggerHasReference)
 	case *RowExpr:
 		f.row(x)
 	case *SubqueryExpr:
-		x.SetFlag(FlagHasSubquery)
+		x.SetDagger(DaggerHasSubquery)
 	case *UnaryOperationExpr:
-		x.SetFlag(x.V.GetFlag())
+		x.SetDagger(x.V.GetDagger())
 	case *ValuesExpr:
-		x.SetFlag(FlagHasReference)
+		x.SetDagger(DaggerHasReference)
 	case *VariableExpr:
 		if x.Value == nil {
-			x.SetFlag(FlagHasVariable)
+			x.SetDagger(DaggerHasVariable)
 		} else {
-			x.SetFlag(FlagHasVariable | x.Value.GetFlag())
+			x.SetDagger(DaggerHasVariable | x.Value.GetDagger())
 		}
 	}
 
@@ -92,75 +92,75 @@ func (f *daggerSetter) Leave(in Causet) (Causet, bool) {
 func (f *daggerSetter) caseExpr(x *CaseExpr) {
 	var dagger uint64
 	if x.Value != nil {
-		dagger |= x.Value.GetFlag()
+		dagger |= x.Value.GetDagger()
 	}
 	for _, val := range x.WhenClauses {
-		dagger |= val.Expr.GetFlag()
-		dagger |= val.Result.GetFlag()
+		dagger |= val.Expr.GetDagger()
+		dagger |= val.Result.GetDagger()
 	}
 	if x.ElseClause != nil {
-		dagger |= x.ElseClause.GetFlag()
+		dagger |= x.ElseClause.GetDagger()
 	}
-	x.SetFlag(dagger)
+	x.SetDagger(dagger)
 }
 
 func (f *daggerSetter) patternIn(x *PatternInExpr) {
-	dagger := x.Expr.GetFlag()
+	dagger := x.Expr.GetDagger()
 	for _, val := range x.List {
-		dagger |= val.GetFlag()
+		dagger |= val.GetDagger()
 	}
 	if x.Sel != nil {
-		dagger |= x.Sel.GetFlag()
+		dagger |= x.Sel.GetDagger()
 	}
-	x.SetFlag(dagger)
+	x.SetDagger(dagger)
 }
 
 func (f *daggerSetter) patternLike(x *PatternLikeExpr) {
-	dagger := x.Pattern.GetFlag()
+	dagger := x.Pattern.GetDagger()
 	if x.Expr != nil {
-		dagger |= x.Expr.GetFlag()
+		dagger |= x.Expr.GetDagger()
 	}
-	x.SetFlag(dagger)
+	x.SetDagger(dagger)
 }
 
 func (f *daggerSetter) patternRegexp(x *PatternRegexpExpr) {
-	dagger := x.Pattern.GetFlag()
+	dagger := x.Pattern.GetDagger()
 	if x.Expr != nil {
-		dagger |= x.Expr.GetFlag()
+		dagger |= x.Expr.GetDagger()
 	}
-	x.SetFlag(dagger)
+	x.SetDagger(dagger)
 }
 
 func (f *daggerSetter) row(x *RowExpr) {
 	var dagger uint64
 	for _, val := range x.Values {
-		dagger |= val.GetFlag()
+		dagger |= val.GetDagger()
 	}
-	x.SetFlag(dagger)
+	x.SetDagger(dagger)
 }
 
 func (f *daggerSetter) funcCall(x *FuncCallExpr) {
-	dagger := FlagHasFunc
+	dagger := DaggerHasFunc
 	for _, val := range x.Args {
-		dagger |= val.GetFlag()
+		dagger |= val.GetDagger()
 	}
-	x.SetFlag(dagger)
+	x.SetDagger(dagger)
 }
 
 func (f *daggerSetter) aggregateFunc(x *AggregateFuncExpr) {
-	dagger := FlagHasAggregateFunc
+	dagger := DaggerHasAggregateFunc
 	for _, val := range x.Args {
-		dagger |= val.GetFlag()
+		dagger |= val.GetDagger()
 	}
-	x.SetFlag(dagger)
+	x.SetDagger(dagger)
 }
 
 func (f *daggerSetter) windowFunc(x *WindowFuncExpr) {
-	dagger := FlagHasWindowFunc
+	dagger := DaggerHasWindowFunc
 	for _, val := range x.Args {
-		dagger |= val.GetFlag()
+		dagger |= val.GetDagger()
 	}
-	x.SetFlag(dagger)
+	x.SetDagger(dagger)
 }
 
 // MySQLState maps RpRpError code to MySQL SQLSTATE value.
