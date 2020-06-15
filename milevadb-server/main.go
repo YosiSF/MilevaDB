@@ -63,7 +63,7 @@ const (
 	mdbRepairMode       = "repair-mode"
 	mdbRepairList       = "repair-list"
 
-	mdbProxyProtocolNetworks      = "proxy-protocol-networs"
+	mdbProxyProtocolNetworks      = "proxy-protocol-networks"
 	mdbProxyProtocolHeaderTimeout = "proxy-protocol-header-timeout"
 	mdbAffinityCPU				  = "affinity-cpus"
 

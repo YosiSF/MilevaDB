@@ -1,4 +1,4 @@
-//Copyright 2019 Venire Labs Inc All Rights Reserved.
+
 //EinsteinDB2020 All Rights Reserved
 
 // Licensed under the Apache License, Version 2.0 (the "License");
