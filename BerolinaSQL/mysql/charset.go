@@ -1,4 +1,4 @@
-//Copyright 2019 EinsteinDB Inc
+//Copyright 2020 WHTCORPS INC ALL RIGHTS RESERVED
 //
 //
 // Licensed under the Apache License, Version 2.0 (the "License");

@@ -20,12 +20,36 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c7b4911b-a773-427b-986a-8dea14609c51" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/mdb/dbs/column.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/interlock/builder.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rel-planner/core/cache.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/util/mem/mmap.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/util/mem/tracker.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/yosi/vmfs/file.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BerolinaSQL/container/container.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/container/container.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mdb/dbs/dbs.go" beforeDir="false" afterPath="$PROJECT_DIR$/mdb/dbs/dbs.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mdb/dbs/schema.go" beforeDir="false" afterPath="$PROJECT_DIR$/mdb/dbs/schema.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/milevadb-server/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/milevadb-server/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BerolinaSQL/mysql/charset.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/mysql/charset.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mdb/block/block.go" beforeDir="false" afterPath="$PROJECT_DIR$/block/block.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mdb/config/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/config/config.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mdb/dbs/column.go" beforeDir="false" afterPath="$PROJECT_DIR$/dbs/column.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mdb/dbs/dbs.go" beforeDir="false" afterPath="$PROJECT_DIR$/dbs/dbs.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mdb/dbs/schema.go" beforeDir="false" afterPath="$PROJECT_DIR$/dbs/schema.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mdb/ekv/causalimemdb/siman.go" beforeDir="false" afterPath="$PROJECT_DIR$/ekv/causalimemdb/siman.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mdb/ekv/ekv.go" beforeDir="false" afterPath="$PROJECT_DIR$/ekv/ekv.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mdb/keywatcher/mock.go" beforeDir="false" afterPath="$PROJECT_DIR$/keywatcher/mock.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mdb/keywatcher/semaphore.go" beforeDir="false" afterPath="$PROJECT_DIR$/keywatcher/semaphore.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mdb/merkle/hash.go" beforeDir="false" afterPath="$PROJECT_DIR$/merkle/hash.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mdb/merkle/merkle.go" beforeDir="false" afterPath="$PROJECT_DIR$/merkle/merkle.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mdb/persist/einsteindb/prover" beforeDir="false" afterPath="$PROJECT_DIR$/interlock/adapter.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mdb/persist/persist.go" beforeDir="false" afterPath="$PROJECT_DIR$/persist/persist.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mdb/schemareplicant/driver.go" beforeDir="false" afterPath="$PROJECT_DIR$/schemareplicant/driver.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mdb/spacetime/spacetime.go" beforeDir="false" afterPath="$PROJECT_DIR$/spacetime/spacetime.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mdb/stochastik/stochastik.go" beforeDir="false" afterPath="$PROJECT_DIR$/stochastik/stochastik.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mdb/stochastik/stochastikscope.go" beforeDir="false" afterPath="$PROJECT_DIR$/stochastik/stochastikscope.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mdb/util/binlog/binlog.go" beforeDir="false" afterPath="$PROJECT_DIR$/util/binlog/binlog.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mdb/util/format/format.go" beforeDir="false" afterPath="$PROJECT_DIR$/util/format/format.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mdb/util/mem/mmap.go" beforeDir="false" afterPath="$PROJECT_DIR$/interlock/admin.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mdb/yosi/vmfs/file.go" beforeDir="false" afterPath="$PROJECT_DIR$/interlock/bind.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mdb/yosi/vmfs/inode.go" beforeDir="false" afterPath="$PROJECT_DIR$/yosi/vmfs/inode.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mdb/yosi/yosi.go" beforeDir="false" afterPath="$PROJECT_DIR$/yosi/yosi.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -52,6 +76,7 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="DefaultGoTemplateProperty" value="Go File" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
@@ -59,6 +84,7 @@
     <property name="go.gopath.indexing.explicitly.defined" value="true" />
     <property name="go.import.settings.migrated" value="true" />
     <property name="go.sdk.automatically.set" value="true" />
+    <property name="go.tried.to.enable.integration.vgo.integrator" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
@@ -69,6 +95,11 @@
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors.General" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+    </key>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="2" />
@@ -83,16 +114,35 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+  </component>
+  <component name="VgoProject">
+    <integration-enabled>true</integration-enabled>
   </component>
   <component name="WindowStateProjectService">
     <state x="418" y="466" key="#GOROOT" timestamp="1592198603378">
       <screen x="0" y="23" width="1792" height="1013" />
     </state>
     <state x="418" y="466" key="#GOROOT/0.23.1792.1013@0.23.1792.1013" timestamp="1592198603378" />
-    <state x="0" y="168" key="SettingsEditor" timestamp="1592199076646">
+    <state x="264" y="370" key="#Go_Modules" timestamp="1592285982900">
       <screen x="0" y="23" width="1792" height="1013" />
     </state>
-    <state x="0" y="168" key="SettingsEditor/0.23.1792.1013@0.23.1792.1013" timestamp="1592199076646" />
+    <state x="264" y="370" key="#Go_Modules/0.23.1792.1013@0.23.1792.1013" timestamp="1592285982900" />
+    <state x="363" y="398" key="EnvironmentVariablesDialog" timestamp="1592285982193">
+      <screen x="0" y="23" width="1792" height="1013" />
+    </state>
+    <state x="363" y="398" key="EnvironmentVariablesDialog/0.23.1792.1013@0.23.1792.1013" timestamp="1592285982193" />
+    <state x="0" y="168" key="SettingsEditor" timestamp="1592286631683">
+      <screen x="0" y="23" width="1792" height="1013" />
+    </state>
+    <state x="0" y="168" key="SettingsEditor/0.23.1792.1013@0.23.1792.1013" timestamp="1592286631683" />
+    <state x="91" y="183" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1592286475656">
+      <screen x="0" y="23" width="1792" height="1013" />
+    </state>
+    <state x="91" y="183" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.23.1792.1013@0.23.1792.1013" timestamp="1592286475656" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

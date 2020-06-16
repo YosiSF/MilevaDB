@@ -14,8 +14,6 @@ package spacetime
 
 
 import (
-
-
 	"context"
 	"encoding/binary"
 	"encoding/json"

@@ -14,7 +14,7 @@
 package binlog
 
 import (
-  "bytes"
+	"bytes"
   "context"
   "fmt"
   "os"
