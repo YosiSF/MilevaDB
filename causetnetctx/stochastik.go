@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package stochastik
+package causetnetctx
 
 import (
 	"context"
@@ -306,29 +306,29 @@ const (
 
 	
 	
-	// stochastik initiates system DB for a store.
+	// causetnetctx initiates system DB for a store.
 	func Stochastik(s Session) {
 		startTime := time.Now()
 		dom := domain.GetDomain(s)
 		for {
 			b, err := checkBootstrapped(s)
 			if err != nil {
-				logutil.BgLogger().Fatal("check stochastik error",
+				logutil.BgLogger().Fatal("check causetnetctx error",
 					zap.Error(err))
 			}
 			// For rolling upgrade, we can't do upgrade only in the owner.
 			if b {
 				upgrade(s)
-				logutil.BgLogger().Info("upgrade successful in stochastik",
+				logutil.BgLogger().Info("upgrade successful in causetnetctx",
 					zap.Duration("take time", time.Since(startTime)))
 				return
 			}
 			// To reduce conflict when multiple TiDB-server start at the same time.
-			// Actually only one server need to do the stochastik. So we chose DBS owner to do this.
+			// Actually only one server need to do the causetnetctx. So we chose DBS owner to do this.
 			if dom.DBS().OwnerManager().IsOwner() {
 				doDBSCrowns(s)
 				doDMLCrowns(s)
-				logutil.BgLogger().Info("stochastik successful",
+				logutil.BgLogger().Info("causetnetctx successful",
 					zap.Duration("take time", time.Since(startTime)))
 				return
 			}
@@ -338,7 +338,7 @@ const (
 
 	const (
 	
-		stochsstiktrappedVar = "stochastik"
+		stochsstiktrappedVar = "causetnetctx"
 		stochastiktrappedVarTrue = "True"
 	)
 

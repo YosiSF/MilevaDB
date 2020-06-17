@@ -14,3 +14,55 @@
 
 package Interlock
 
+import(
+		"causet"
+		"math"
+
+	)
+
+
+// CheckIndexRangeExec outputs the index values which has handle between begin and end.
+type CheckIndexRangeExec struct {
+	baseInterlock
+
+	table    *serial.TableInfo
+	index    *serial.IndexInfo
+	is       schemaReplicant.SchemaReplicant
+	startKey []types.Datum
+
+	handleRanges []ast.HandleRange
+	srcSoliton     *soliton.Soliton
+
+	result distsql.SelectResult
+	cols   []*serial.ColumnInfo
+}
+
+// Next implements the Interlock Next interface.
+func (e *CheckIndexRangeExec) Next(ctx causet.Causetctx, req *soliton.Soliton) error {
+	req.Reset()
+	handleIdx := e.schema.Len() - 1
+	for {
+		err := e.result.Next(ctx, e.srcSoliton)
+		if err != nil {
+			return err
+		}
+		if e.srcSoliton.NumRows() == 0 {
+			return nil
+		}
+		iter := soliton.NewIterator4Soliton(e.srcSoliton)
+		for row := iter.Begin(); row != iter.End(); row = iter.Next() {
+			handle := row.GetInt64(handleIdx)
+			for _, hr := range e.handleRanges {
+				if handle >= hr.Begin && handle < hr.End {
+					req.AppendRow(row)
+					break
+				}
+			}
+		}
+		if req.NumRows() > 0 {
+			return nil
+		}
+	}
+}
+
+
