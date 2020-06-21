@@ -47,7 +47,7 @@ const (
 	mdbCors             = "cors"
 	mdbSocket           = "socket"
 	mdbEnableBinlog     = "enable-binlog"
-	mdbRunDDL           = "run-ddl"
+	mdbRunDBS           = "run-ddl"
 	mdbLogLevel         = "L"
 	mdbLogFile          = "log-file"
 	mdbLogSlowQuery     = "log-slow-query"

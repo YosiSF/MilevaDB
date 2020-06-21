@@ -20,27 +20,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c7b4911b-a773-427b-986a-8dea14609c51" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/BerolinaSQL/ast/ast.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/BerolinaSQL/ast/dbs.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/BerolinaSQL/ast/expressions.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/causetnet/bootstrap.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/causetnetctx/binloginfo/binloginfo.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/causetnetctx/causetnetctx.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dbs/table.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/interlock/hash_table.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rel-planner/core/common_plans.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/rel-planner/core/encode.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/util/codec/codec.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/util/math/math.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/util/soliton/column.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/util/soliton/row.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/util/soliton/soliton.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BerolinaSQL/ast/base.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BerolinaSQL/ast/dml.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BerolinaSQL/mysql/errcode.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BerolinaSQL/mysql/type.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BerolinaSQL/serial/dbs.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BerolinaSQL/serial/serial.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BerolinaSQL/query/query.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/query/query.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/interlock/admin.go" beforeDir="false" afterPath="$PROJECT_DIR$/interlock/admin.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/interlock/builder.go" beforeDir="false" afterPath="$PROJECT_DIR$/interlock/builder.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stochastik/stochastik.go" beforeDir="false" afterPath="$PROJECT_DIR$/causetnetctx/stochastik.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stochastik/stochastikscope.go" beforeDir="false" afterPath="$PROJECT_DIR$/causetnetctx/stochastikscope.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BerolinaSQL/ast/ast.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/ast/ast.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BerolinaSQL/ast/dbs.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/ast/dbs.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BerolinaSQL/ast/expressions.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/ast/expressions.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BerolinaSQL/container/container.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/container/container.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BerolinaSQL/container/dbs.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/container/dbs.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BerolinaSQL/mysql/charset.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/mysql/charset.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BerolinaSQL/mysql/const.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/mysql/const.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BerolinaSQL/mysql/state.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/mysql/state.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/milevadb-server/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/milevadb-server/main.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -89,6 +84,7 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/BerolinaSQL" />
       <recent name="$PROJECT_DIR$" />
     </key>
   </component>
@@ -134,6 +130,10 @@
       <screen x="0" y="23" width="1792" height="1013" />
     </state>
     <state x="91" y="183" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.23.1792.1013@0.23.1792.1013" timestamp="1592286475656" />
+    <state x="163" y="209" width="667" height="640" key="find.popup" timestamp="1592720923485">
+      <screen x="0" y="23" width="1792" height="1013" />
+    </state>
+    <state x="163" y="209" width="667" height="640" key="find.popup/0.23.1792.1013@0.23.1792.1013" timestamp="1592720923485" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

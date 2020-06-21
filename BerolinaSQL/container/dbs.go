@@ -151,7 +151,7 @@ type Batch struct {
 	Query      string       `json:"query"`
 	BinlogInfo *HistoryInfo `json:"binlog"`
 
-	// Version indicates the DDL Batch version. For old Batchs, it will be 0.
+	// Version indicates the DBS Batch version. For old Batchs, it will be 0.
 	Version int64 `json:"version"`
 
 	// ReorgMeta is meta info of ddl reorganization.

@@ -16,19 +16,19 @@ package ast
 import "errors"
 
 var (
-	_ DDLNode = &AlterTableStmt{}
-	_ DDLNode = &CreateDatabaseStmt{}
-	_ DDLNode = &CreateIndexStmt{}
-	_ DDLNode = &CreateTableStmt{}
-	_ DDLNode = &CreateViewStmt{}
-	_ DDLNode = &CreateSequenceStmt{}
-	_ DDLNode = &DropDatabaseStmt{}
-	_ DDLNode = &DropIndexStmt{}
-	_ DDLNode = &DropTableStmt{}
-	_ DDLNode = &DropSequenceStmt{}
-	_ DDLNode = &RenameTableStmt{}
-	_ DDLNode = &TruncateTableStmt{}
-	_ DDLNode = &RepairTableStmt{}
+	_ DBSNode = &AlterTableStmt{}
+	_ DBSNode = &CreateDatabaseStmt{}
+	_ DBSNode = &CreateIndexStmt{}
+	_ DBSNode = &CreateTableStmt{}
+	_ DBSNode = &CreateViewStmt{}
+	_ DBSNode = &CreateSequenceStmt{}
+	_ DBSNode = &DropDatabaseStmt{}
+	_ DBSNode = &DropIndexStmt{}
+	_ DBSNode = &DropTableStmt{}
+	_ DBSNode = &DropSequenceStmt{}
+	_ DBSNode = &RenameTableStmt{}
+	_ DBSNode = &TruncateTableStmt{}
+	_ DBSNode = &RepairTableStmt{}
 
 	_ Node = &AlterTableSpec{}
 	_ Node = &ColumnDef{}
@@ -2202,11 +2202,11 @@ const (
 	LockTypeExclusive
 )
 
-// AlgorithmType is the algorithm of the DDL operations.
+// AlgorithmType is the algorithm of the DBS operations.
 // See https://dev.mysql.com/doc/refman/8.0/en/alter-table.html#alter-table-performance.
 type AlgorithmType byte
 
-// DDL algorithms.
+// DBS algorithms.
 // For now, TiDB only supported inplace and instance algorithms. If the user specify `copy`,
 // will get an error.
 const (
@@ -2854,18 +2854,18 @@ func (n *TruncateTableStmt) Accept(v Visitor) (Node, bool) {
 }
 
 var (
-	ErrNoParts                              = terror.ClassDDL.NewStd(mysql.ErrNoParts)
-	ErrPartitionColumnList                  = terror.ClassDDL.NewStd(mysql.ErrPartitionColumnList)
-	ErrPartitionRequiresValues              = terror.ClassDDL.NewStd(mysql.ErrPartitionRequiresValues)
-	ErrPartitionsMustBeDefined              = terror.ClassDDL.NewStd(mysql.ErrPartitionsMustBeDefined)
-	ErrPartitionWrongNoPart                 = terror.ClassDDL.NewStd(mysql.ErrPartitionWrongNoPart)
-	ErrPartitionWrongNoSubpart              = terror.ClassDDL.NewStd(mysql.ErrPartitionWrongNoSubpart)
-	ErrPartitionWrongValues                 = terror.ClassDDL.NewStd(mysql.ErrPartitionWrongValues)
-	ErrRowSinglePartitionField              = terror.ClassDDL.NewStd(mysql.ErrRowSinglePartitionField)
-	ErrSubpartition                         = terror.ClassDDL.NewStd(mysql.ErrSubpartition)
-	ErrSystemVersioningWrongPartitions      = terror.ClassDDL.NewStd(mysql.ErrSystemVersioningWrongPartitions)
-	ErrTooManyValues                        = terror.ClassDDL.NewStd(mysql.ErrTooManyValues)
-	ErrWrongPartitionTypeExpectedSystemTime = terror.ClassDDL.NewStd(mysql.ErrWrongPartitionTypeExpectedSystemTime)
+	ErrNoParts                              = terror.ClassDBS.NewStd(mysql.ErrNoParts)
+	ErrPartitionColumnList                  = terror.ClassDBS.NewStd(mysql.ErrPartitionColumnList)
+	ErrPartitionRequiresValues              = terror.ClassDBS.NewStd(mysql.ErrPartitionRequiresValues)
+	ErrPartitionsMustBeDefined              = terror.ClassDBS.NewStd(mysql.ErrPartitionsMustBeDefined)
+	ErrPartitionWrongNoPart                 = terror.ClassDBS.NewStd(mysql.ErrPartitionWrongNoPart)
+	ErrPartitionWrongNoSubpart              = terror.ClassDBS.NewStd(mysql.ErrPartitionWrongNoSubpart)
+	ErrPartitionWrongValues                 = terror.ClassDBS.NewStd(mysql.ErrPartitionWrongValues)
+	ErrRowSinglePartitionField              = terror.ClassDBS.NewStd(mysql.ErrRowSinglePartitionField)
+	ErrSubpartition                         = terror.ClassDBS.NewStd(mysql.ErrSubpartition)
+	ErrSystemVersioningWrongPartitions      = terror.ClassDBS.NewStd(mysql.ErrSystemVersioningWrongPartitions)
+	ErrTooManyValues                        = terror.ClassDBS.NewStd(mysql.ErrTooManyValues)
+	ErrWrongPartitionTypeExpectedSystemTime = terror.ClassDBS.NewStd(mysql.ErrWrongPartitionTypeExpectedSystemTime)
 )
 
 type SubPartitionDefinition struct {

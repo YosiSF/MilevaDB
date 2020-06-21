@@ -18,7 +18,7 @@ import "unicode"
 
 // CharsetNameToID maps charset name to its default collation ID.
 func CharsetNameToID(charset string) uint8 {
-	// Use quick path for TiDB to avoid access CharsetIDs map
+
 	// "SHOW CHARACTER SET;" to see all the supported character sets.
 	if charset == "utf8mb4" {
 		return UTF8MB4DefaultCollationID

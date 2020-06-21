@@ -1,5 +1,4 @@
-
-//EinsteinDB2020 All Rights Reserved
+//WHTCORPS INC 2020 All Rights Reserved
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -242,7 +241,7 @@ const (
 	User           = "user"
 	Version        = "version"
 	TiDBVersion    = "tidb_version"
-	TiDBIsDDLOwner = "tidb_is_ddl_owner"
+	TiDBIsDBSOwner = "tidb_is_ddl_owner"
 	TiDBDecodePlan = "tidb_decode_plan"
 
 	// control functions
