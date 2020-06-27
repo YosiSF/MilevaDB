@@ -29,7 +29,7 @@ import (
 
 	"github.com/ngaut/pools"
 	"github.com/opentracing/opentracing-go"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/query"
+	"github.com/YosiSF/MilevaDB/BerolinaSQL/BerolinaSQL/query"
 )
 
 const(

@@ -149,7 +149,7 @@ type Execute struct {
 }
 
 // OptimizePreparedPlan optimizes the prepared statement.
-func (e *Execute) OptimizePreparedPlan(ctx causet.Causetctx, sctx causetnetctx.Causetctx, is schemaReplicant.SchemaReplicant) error {
+func (e *Execute) OptimizePreparedPlan(ctx context.contextctx, sctx causetnetctx.contextctx, is schemaReplicant.SchemaReplicant) error {
 	vars := sctx.GetSessionVars()
 	if e.Name != "" {
 		e.ExecID = vars.PreparedStmtNameToID[e.Name]

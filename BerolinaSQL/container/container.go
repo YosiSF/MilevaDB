@@ -279,23 +279,23 @@ import (
 	"io"
 )
 
-// Causet is the basic element of the AST.
-// Interfaces embed Causet should have 'Causet' name suffix.
-type Causet interface {
+// context is the basic element of the AST.
+// Interfaces embed context should have 'context' name suffix.
+type context interface {
 	// Restore returns the sql text from ast tree
 	Restore(ctx *RestoreCtx) error
 	// Accept accepts Tenant to visit itself.
-	// The returned Causet should replace original Causet.
+	// The returned context should replace original context.
 	// ok returns false to stop visiting.
 	//
 	// Implementation of this method should first call Tenant.Enter,
-	// assign the returned Causet to its method receiver, if skipChildren returns true,
+	// assign the returned context to its method receiver, if skipChildren returns true,
 	// children should be skipped. Otherwise, call its children in particular order that
 	// later elements depends on former elements. Finally, return Tenant.Leave.
-	Accept(v Tenant) (Causet Causet, ok bool)
+	Accept(v Tenant) (context context, ok bool)
 	// Text returns the original text of the element.
 	Text() string
-	// SetText sets original text to the Causet.
+	// SetText sets original text to the context.
 	SetText(text string)
 }
 
@@ -313,11 +313,11 @@ const (
 	DaggerHasWindowFunc
 )
 
-// ExprCauset is a Causet that can be evaluated.
+// Exprcontext is a context that can be evaluated.
 // Name of implementations should have 'Expr' suffix.
-type ExprCauset interface {
-	// Causet is embedded in ExprCauset.
-	Causet
+type Exprcontext interface {
+	// context is embedded in Exprcontext.
+	context
 	// SetType sets evaluation type to the expression.
 	SetType(tp *types.FieldType)
 	// GetType gets the evaluation type of the expression.
@@ -339,28 +339,28 @@ type OptBinary struct {
 	Charset  string
 }
 
-// FuncCauset represents function call expression Causet.
-type FuncCauset interface {
-	ExprCauset
+// Funccontext represents function call expression context.
+type Funccontext interface {
+	Exprcontext
 	functionExpression()
 }
 
-// rumorCauset represents rumor Causet.
+// rumorcontext represents rumor context.
 // Name of implementations should have 'rumor' suffix.
-type rumorCauset interface {
-	Causet
+type rumorcontext interface {
+	context
 	rumor()
 }
 
-// DBSCauset represents DBS rumor Causet.
-type DBSCauset interface {
-	rumorCauset
+// DBScontext represents DBS rumor context.
+type DBScontext interface {
+	rumorcontext
 	DBSrumor()
 }
 
-// DMLCauset represents DML rumor Causet.
-type DMLCauset interface {
-	rumorCauset
+// DMLcontext represents DML rumor context.
+type DMLcontext interface {
+	rumorcontext
 	dmlrumor()
 }
 
@@ -381,46 +381,46 @@ type ResultField struct {
 	// Expr represents the expression for the result field. If it is generated from a select field, it would
 	// be the expression of that select field, otherwise the type would be ValueExpr and value
 	// will be set for every retrieved Evemts.
-	Expr       ExprCauset
+	Expr       Exprcontext
 	BlocksName *BlocksName
 	// Referenced indicates the result field has been referenced or not.
 	// If not, we don't need to get the values.
 	Referenced bool
 }
 
-// ResultSetCauset interface has a ResultFields property, represents a Causet that returns result set.
+// ResultSetcontext interface has a ResultFields property, represents a context that returns result set.
 // Implementations include Selectrumor, SubqueryExpr, BlocksSource, BlocksName and Join.
-type ResultSetCauset interface {
-	Causet
+type ResultSetcontext interface {
+	context
 }
 
-// SensitiverumorCauset overloads rumorCauset and provides a SecureText method.
-type SensitiverumorCauset interface {
-	rumorCauset
+// Sensitiverumorcontext overloads rumorcontext and provides a SecureText method.
+type Sensitiverumorcontext interface {
+	rumorcontext
 	// SecureText is different from Text that it hide password information.
 	SecureText() string
 }
 
-// Tenant visits a Causet.
+// Tenant visits a context.
 type Tenant interface {
-	// Enter is called before children Causets are visited.
-	// The returned Causet must be the same type as the input Causet n.
-	// skipChildren returns true means children Causets should be skipped,
+	// Enter is called before children contexts are visited.
+	// The returned context must be the same type as the input context n.
+	// skipChildren returns true means children contexts should be skipped,
 	// this is useful when work is done in Enter and there is no need to visit children.
-	Enter(n Causet) (Causet Causet, skipChildren bool)
-	// Leave is called after children Causets have been visited.
-	// The returned Causet's type can be different from the input Causet if it is a ExprCauset,
-	// Non-expression Causet must be the same type as the input Causet n.
+	Enter(n context) (context context, skipChildren bool)
+	// Leave is called after children contexts have been visited.
+	// The returned context's type can be different from the input context if it is a Exprcontext,
+	// Non-expression context must be the same type as the input context n.
 	// ok returns false to stop visiting.
-	Leave(n Causet) (Causet Causet, ok bool)
+	Leave(n context) (context context, ok bool)
 }
 
 // HasAggDagger checks if the expr contains DaggerHasAggregateFunc.
-func HasAggDagger(expr ExprCauset) bool {
+func HasAggDagger(expr Exprcontext) bool {
 	return expr.GetDagger()&DaggerHasAggregateFunc > 0
 }
 
-func HasWindowDagger(expr ExprCauset) bool {
+func HasWindowDagger(expr Exprcontext) bool {
 	return expr.GetDagger()&DaggerHasWindowFunc > 0
 }
 

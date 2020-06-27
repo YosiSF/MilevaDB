@@ -18,8 +18,8 @@ import (
 	"encoding/binary"
 	"strconv"
 
-	"github.com/YosiSF/MilevaDB/errors/binlog"
-	"github.com/YosiSF/MilevaDB/core/ekv"
+	"github.com/YosiSF/MilevaDB/BerolinaSQL/errors/binlog"
+	"github.com/YosiSF/MilevaDB/BerolinaSQL/core/ekv"
 )
 
 //Hash pair for (field, value)

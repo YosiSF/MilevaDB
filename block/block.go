@@ -15,7 +15,7 @@ package block
 
 import (
 	"github.com/opentracing/opentracing-go"
-	"github.com/YosiSF/MilevaDB/fidel/ekv"
+	"github.com/YosiSF/MilevaDB/BerolinaSQL/fidel/ekv"
 )
 
 //type of block, gives us storage options

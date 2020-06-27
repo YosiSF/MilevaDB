@@ -41,8 +41,8 @@ const (
 	estCountDivisor = 8
 )
 
-// hashCausetctx keeps the needed hash causet of a db table in hash join.
-type hashCausetctx struct {
+// hashcontextctx keeps the needed hash context of a db table in hash join.
+type hashcontextctx struct {
 	allTypes  []*types.FieldType
 	keyColIdx []int
 	buf       []byte
@@ -50,7 +50,7 @@ type hashCausetctx struct {
 	hasNull   []bool
 }
 
-func (hc *hashCausetctx) initHash(rows int) {
+func (hc *hashcontextctx) initHash(rows int) {
 	if hc.buf == nil {
 		hc.buf = make([]byte, 1)
 	}

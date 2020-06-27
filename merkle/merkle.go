@@ -17,8 +17,8 @@
 package merkle
 
 import (
-	"github.com/YosiSF/MilevaDB/errors"
-	"github.com/YosiSF/MilevaDB/core/ekv"
+	"github.com/YosiSF/MilevaDB/BerolinaSQL/errors"
+	"github.com/YosiSF/MilevaDB/BerolinaSQL/core/ekv"
 )
 
 

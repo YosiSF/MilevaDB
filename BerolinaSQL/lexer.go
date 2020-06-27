@@ -1,16 +1,16 @@
 package BerolionaSQL
 
 // HasAggDagger checks if the expr contains DaggerHasAggregateFunc.
-func HasAggDagger(expr ExprCauset) bool {
+func HasAggDagger(expr Exprcontext) bool {
 	return expr.GetDagger()&DaggerHasAggregateFunc > 0
 }
 
-func HasWindowDagger(expr ExprCauset) bool {
+func HasWindowDagger(expr Exprcontext) bool {
 	return expr.GetDagger()&DaggerHasWindowFunc > 0
 }
 
 // SetDagger sets dagger for expression.
-func SetDagger(n Causet) {
+func SetDagger(n context) {
 	var setter daggerSetter
 	n.Accept(&setter)
 }
@@ -18,18 +18,18 @@ func SetDagger(n Causet) {
 type daggerSetter struct {
 }
 
-func (f *daggerSetter) Enter(in Causet) (Causet, bool) {
+func (f *daggerSetter) Enter(in context) (context, bool) {
 	return in, false
 }
 
 type daggerSetter struct {
 }
 
-func (f *daggerSetter) Enter(in Causet) (Causet, bool) {
+func (f *daggerSetter) Enter(in context) (context, bool) {
 	return in, false
 }
 
-func (f *daggerSetter) Leave(in Causet) (Causet, bool) {
+func (f *daggerSetter) Leave(in context) (context, bool) {
 	if x, ok := in.(ParamMarkerExpr); ok {
 		x.SetDagger(DaggerHasParamMarker)
 	}

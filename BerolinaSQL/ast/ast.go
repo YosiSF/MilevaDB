@@ -13,9 +13,9 @@
 
 import(
 	"io"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/format"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/serial"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/types"
+	"github.com/YosiSF/MilevaDB/BerolinaSQL/BerolinaSQL/format"
+	"github.com/YosiSF/MilevaDB/BerolinaSQL/BerolinaSQL/serial"
+	"github.com/YosiSF/MilevaDB/BerolinaSQL/BerolinaSQL/types"
 )
 
 package ast

@@ -8,74 +8,74 @@ import (
 	"sync"
 )
 
-//CausetActionType is the type for DBSƒ CausetCausetAction.
+//contextActionType is the type for DBSƒ contextcontextAction.
 
-type CausetCausetActionType byte
+type contextcontextActionType byte
 
-// List DBS CausetCausetActions.
+// List DBS contextcontextActions.
 const (
-	CausetActionNone                    CausetActionType = 0
-	CausetCausetActionCreateSchema            CausetActionType = 1
-	CausetActionDropSchema                    CausetActionType = 2
-	CausetActionCreateBlocks                  CausetActionType = 3
-	CausetActionDropBlocks                    CausetActionType = 4
-	CausetActionAddColumn                     CausetActionType = 5
-	CausetActionDropColumn                    CausetActionType = 6
-	CausetActionAddIndex                      CausetActionType = 7
-	CausetActionDropIndex                     CausetActionType = 8
-	CausetActionAddForeignKey                 CausetActionType = 9
-	CausetActionDropForeignKey                CausetActionType = 10
-	CausetActionTruncateBlocks                CausetActionType = 11
-	CausetActionModifyColumn                  CausetActionType = 12
-	CausetActionRebaseAutoID                  CausetActionType = 13
-	CausetActionRenameBlocks                  CausetActionType = 14
-	CausetActionSetDefaultValue               CausetActionType = 15
-	CausetActionShardEventsID                 CausetActionType = 16
-	CausetActionModifyBlocksComment           CausetActionType = 17
-	CausetActionRenameIndex                   CausetActionType = 18
-	CausetActionAddBlocksPartition            CausetActionType = 19
-	CausetActionDropBlocksPartition           CausetActionType = 20
-	CausetActionCreateView                    CausetActionType = 21
-	CausetActionModifyBlocksCharsetAndCollate CausetActionType = 22
-	CausetActionTruncateBlocksPartition       CausetActionType = 23
-	CausetActionDropView                      CausetActionType = 24
-	CausetActionRecoverBlocks                 CausetActionType = 25
+	contextActionNone                    contextActionType = 0
+	contextcontextActionCreateSchema            contextActionType = 1
+	contextActionDropSchema                    contextActionType = 2
+	contextActionCreateBlocks                  contextActionType = 3
+	contextActionDropBlocks                    contextActionType = 4
+	contextActionAddColumn                     contextActionType = 5
+	contextActionDropColumn                    contextActionType = 6
+	contextActionAddIndex                      contextActionType = 7
+	contextActionDropIndex                     contextActionType = 8
+	contextActionAddForeignKey                 contextActionType = 9
+	contextActionDropForeignKey                contextActionType = 10
+	contextActionTruncateBlocks                contextActionType = 11
+	contextActionModifyColumn                  contextActionType = 12
+	contextActionRebaseAutoID                  contextActionType = 13
+	contextActionRenameBlocks                  contextActionType = 14
+	contextActionSetDefaultValue               contextActionType = 15
+	contextActionShardEventsID                 contextActionType = 16
+	contextActionModifyBlocksComment           contextActionType = 17
+	contextActionRenameIndex                   contextActionType = 18
+	contextActionAddBlocksPartition            contextActionType = 19
+	contextActionDropBlocksPartition           contextActionType = 20
+	contextActionCreateView                    contextActionType = 21
+	contextActionModifyBlocksCharsetAndCollate contextActionType = 22
+	contextActionTruncateBlocksPartition       contextActionType = 23
+	contextActionDropView                      contextActionType = 24
+	contextActionRecoverBlocks                 contextActionType = 25
 )
 
 // AddIndexStr is a string related to the operation of "add index".
 const AddIndexStr = "add index"
 
-var CausetActionMap = map[CausetActionType]string{
-	CausetActionCreateSchema:                  "create schema",
-	CausetActionDropSchema:                    "drop schema",
-	CausetActionCreateBlocks:                  "create Blocks",
-	CausetActionDropBlocks:                    "drop Blocks",
-	CausetActionAddColumn:                     "add column",
-	CausetActionDropColumn:                    "drop column",
-	CausetActionAddIndex:                      AddIndexStr,
-	CausetActionDropIndex:                     "drop index",
-	CausetActionAddForeignKey:                 "add foreign key",
-	CausetActionDropForeignKey:                "drop foreign key",
-	CausetActionTruncateBlocks:                "truncate Blocks",
-	CausetActionModifyColumn:                  "modify column",
-	CausetActionRebaseAutoID:                  "rebase auto_increment ID",
-	CausetActionRenameBlocks:                  "rename Blocks",
-	CausetActionSetDefaultValue:               "set default value",
-	CausetActionShardEventsID:                 "shard Events ID",
-	CausetActionModifyBlocksComment:           "modify Blocks comment",
-	CausetActionRenameIndex:                   "rename index",
-	CausetActionAddBlocksPartition:            "add partition",
-	CausetActionDropBlocksPartition:           "drop partition",
-	CausetActionCreateView:                    "create view",
-	CausetActionModifyBlocksCharsetAndCollate: "modify Blocks charset and collate",
-	CausetActionTruncateBlocksPartition:       "truncate partition",
-	CausetActionDropView:                      "drop view",
-	CausetActionRecoverBlocks:                 "recover Blocks",
+var contextActionMap = map[contextActionType]string{
+	contextActionCreateSchema:                  "create schema",
+	contextActionDropSchema:                    "drop schema",
+	contextActionCreateBlocks:                  "create Blocks",
+	contextActionDropBlocks:                    "drop Blocks",
+	contextActionAddColumn:                     "add column",
+	contextActionDropColumn:                    "drop column",
+	contextActionAddIndex:                      AddIndexStr,
+	contextActionDropIndex:                     "drop index",
+	contextActionAddForeignKey:                 "add foreign key",
+	contextActionDropForeignKey:                "drop foreign key",
+	contextActionTruncateBlocks:                "truncate Blocks",
+	contextActionModifyColumn:                  "modify column",
+	contextActionRebaseAutoID:                  "rebase auto_increment ID",
+	contextActionRenameBlocks:                  "rename Blocks",
+	contextActionSetDefaultValue:               "set default value",
+	contextActionShardEventsID:                 "shard Events ID",
+	contextActionModifyBlocksComment:           "modify Blocks comment",
+	contextActionRenameIndex:                   "rename index",
+	contextActionAddBlocksPartition:            "add partition",
+	contextActionDropBlocksPartition:           "drop partition",
+	contextActionCreateView:                    "create view",
+	contextActionModifyBlocksCharsetAndCollate: "modify Blocks charset and collate",
+	contextActionTruncateBlocksPartition:       "truncate partition",
+	contextActionDropView:                      "drop view",
+	contextActionRecoverBlocks:                 "recover Blocks",
 }
 
-// String return current DBS CausetAction in string
-func (CausetAction CausetActionType) String() string {
-	if v, ok := CausetActionMap[CausetAction]; ok {
+// String return current DBS contextAction in string
+func (contextAction contextActionType) String() string {
+	if v, ok := contextActionMap[contextAction]; ok {
 		return v
 	}
 	return "none"
@@ -126,7 +126,7 @@ func NewDBSReorgMeta() *DBSReorgMeta {
 
 type Batch struct {
 	ID       int64            `json:"id"`
-	Type     CausetActionType `json:"type"`
+	Type     contextActionType `json:"type"`
 	SchemaID int64            `json:"schema_id"`
 	BlocksID int64            `json:"Blocks_id"`
 	State    BatchState       `json:"state"`

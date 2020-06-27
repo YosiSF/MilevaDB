@@ -14,18 +14,18 @@
 package causetnetctx
 
 import (
-	"causet"
+	"context"
 	"fmt"
 
 
 )
 
-// Causetctx is an interface for transaction and executive args environment.
-type Causetctx interface {
+// contextctx is an interface for transaction and executive args environment.
+type contextctx interface {
 	// NewTxn creates a new transaction for further execution.
 	// If old transaction is valid, it is committed first.
 	// It's used in BEGIN statement and dbs statements to commit old transaction.
-	NewTxn(causet.Causetctx) error
+	NewTxn(context.contextctx) error
 
 	// Txn returns the current transaction which is created before executing a statement.
 	// The returned kv.Transaction is not nil, but it maybe pending or invalid.
@@ -36,13 +36,13 @@ type Causetctx interface {
 	// GetClient gets a kv.Client.
 	GetClient() kv.Client
 
-	// SetValue saves a value associated with this causet for key.
+	// SetValue saves a value associated with this context for key.
 	SetValue(key fmt.Stringer, value interface{})
 
-	// Value returns the value associated with this causet for key.
+	// Value returns the value associated with this context for key.
 	Value(key fmt.Stringer) interface{}
 
-	// ClearValue clears the value associated with this causet for key.
+	// ClearValue clears the value associated with this context for key.
 	ClearValue(key fmt.Stringer)
 
 	GetSessionVars() *variable.SessionVars
@@ -52,7 +52,7 @@ type Causetctx interface {
 	// RefreshTxnCtx commits old transaction without retry,
 	// and creates a new transaction.
 	// now just for load data and batch insert.
-	RefreshTxnCtx(causet.Causetctx) error
+	RefreshTxnCtx(context.contextctx) error
 
 	// InitTxnWithStartTS initializes a transaction with startTS.
 	// It should be called right before we builds an Interlock.
@@ -95,5 +95,5 @@ type Causetctx interface {
 	// HasLockedTables uses to check whether this session locked any tables.
 	HasLockedTables() bool
 	// PrepareTSFuture uses to prepare timestamp by future.
-	PrepareTSFuture(ctx causet.Causetctx)
+	PrepareTSFuture(ctx context.contextctx)
 }

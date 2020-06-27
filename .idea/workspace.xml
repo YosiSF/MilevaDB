@@ -20,22 +20,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c7b4911b-a773-427b-986a-8dea14609c51" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/BerolinaSQL/ast/base.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/BerolinaSQL/ast/dml.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/BerolinaSQL/mysql/errcode.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/BerolinaSQL/mysql/type.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/BerolinaSQL/serial/dbs.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/BerolinaSQL/serial/serial.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BerolinaSQL/ast/ast.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/ast/ast.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BerolinaSQL/ast/dbs.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/ast/dbs.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BerolinaSQL/ast/expressions.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/ast/expressions.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BerolinaSQL/container/container.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/container/container.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BerolinaSQL/container/dbs.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/container/dbs.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BerolinaSQL/mysql/charset.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/mysql/charset.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BerolinaSQL/mysql/const.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/mysql/const.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BerolinaSQL/mysql/state.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/mysql/state.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/milevadb-server/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/milevadb-server/main.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

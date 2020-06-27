@@ -78,8 +78,8 @@ func SetPumpsClient(client *pumpcli.PumpsClient) {
 	pumpsClientLock.Unlock()
 }
 
-// GetPrewriteValue gets binlog prewrite value in the causet.
-func GetPrewriteValue(ctx causetnetctx.Causetctx, createIfNotExists bool) *binlog.PrewriteValue {
+// GetPrewriteValue gets binlog prewrite value in the context.
+func GetPrewriteValue(ctx causetnetctx.contextctx, createIfNotExists bool) *binlog.PrewriteValue {
 	vars := ctx.GetSessionVars()
 	v, ok := vars.TxnCtx.Binlog.(*binlog.PrewriteValue)
 	if !ok && createIfNotExists {

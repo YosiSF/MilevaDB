@@ -24,7 +24,7 @@ import (
   "strings"
   "time"
 
-  freelog "github.com/YosiSF/MilevaDB/Errors"
+  freelog "github.com/YosiSF/MilevaDB/BerolinaSQL/Errors"
   log "github.com/sirupsen/logrus"
   "go.uber.org/zap"
   "gopkg.in/natefinch/lumberjack.v2"

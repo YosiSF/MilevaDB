@@ -33,10 +33,10 @@ func adjustColumnInfoInAddColumn(tblInfo *serial.TableInfo, offset int) {
 
 	tblInfo.Columns = newCols
 
-	//All causets act as pancaked stacked append logs;
+	//All contexts act as pancaked stacked append logs;
 	//only appended at the end -- like drop columns.
 
-	func adjustColumnInfoInCauset(tblInfo *serial.TableInfo, offset int) {
+	func adjustColumnInfoIncontext(tblInfo *serial.TableInfo, offset int) {
 		oldCols := tblInfo.Columns
 		offsetChanged := make(map[int]int, len(oldCols)-offset-1)
 		for i := offset + 1; i < len(oldCols); i++ {

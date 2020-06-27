@@ -15,7 +15,7 @@
 package Interlock
 
 import(
-		"causet"
+		"context"
 		"math"
 
 	)
@@ -38,7 +38,7 @@ type CheckIndexRangeExec struct {
 }
 
 // Next implements the Interlock Next interface.
-func (e *CheckIndexRangeExec) Next(ctx causet.Causetctx, req *soliton.Soliton) error {
+func (e *CheckIndexRangeExec) Next(ctx context.contextctx, req *soliton.Soliton) error {
 	req.Reset()
 	handleIdx := e.schema.Len() - 1
 	for {

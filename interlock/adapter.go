@@ -57,7 +57,7 @@ func colNames2ResultFields(schema *expression.Schema, names []*types.FieldName, 
 			DBName:       dbName,
 		}
 		// This is for compatibility.
-		// See issue https://github.com/YosiSF/milevadb/issues/10513 .
+		// See issue https://github.com/YosiSF/MilevaDB/BerolinaSQL/issues/10513 .
 		if len(rf.ColumnAsName.O) > mysql.MaxAliasIdentifierLen {
 			rf.ColumnAsName.O = rf.ColumnAsName.O[:mysql.MaxAliasIdentifierLen]
 		}
@@ -76,7 +76,7 @@ func colNames2ResultFields(schema *expression.Schema, names []*types.FieldName, 
 // The reason we need update is that soliton with 0 rows indicating we already finished current query, we need prepare for
 // next query.
 // If stmt is not nil and soliton with some rows inside, we simply update last query found rows by the number of row in soliton.
-func (a *recordSet) Next(ctx causetctx.Causetctx, req *soliton.soliton) (err error) {
+func (a *recordSet) Next(ctx contextctx.contextctx, req *soliton.soliton) (err error) {
 	defer func() {
 		r := recover()
 		if r == nil {
@@ -131,7 +131,7 @@ type ExecStmt struct {
 
 	StmtNode ast.StmtNode
 
-	Ctx causetnetctx.Causetctx
+	Ctx causetnetctx.contextctx
 
 	// LowerPriority represents whether to lower the execution priority of a query.
 	LowerPriority     bool
@@ -145,12 +145,12 @@ type ExecStmt struct {
 }
 
 // PointGet short path for point exec directly from plan, keep only necessary steps
-func (a *ExecStmt) PointGet(ctx causetctx.Causetctx, is infoschema.InfoSchema) (*recordSet, error) {
-	if span := opentracing.SpanFromCausetctx(ctx); span != nil && span.Tracer() != nil {
-		span1 := span.Tracer().StartSpan("ExecStmt.PointGet", opentracing.ChildOf(span.Causetctx()))
+func (a *ExecStmt) PointGet(ctx contextctx.contextctx, is infoschema.InfoSchema) (*recordSet, error) {
+	if span := opentracing.SpanFromcontextctx(ctx); span != nil && span.Tracer() != nil {
+		span1 := span.Tracer().StartSpan("ExecStmt.PointGet", opentracing.ChildOf(span.contextctx()))
 		span1.LogKV("sql", a.OriginText())
 		defer span1.Finish()
-		ctx = opentracing.CausetctxWithSpan(ctx, span1)
+		ctx = opentracing.contextctxWithSpan(ctx, span1)
 	}
 	startTs := uint64(math.MaxUint64)
 	err := a.Ctx.InitTxnWithStartTS(startTs)

@@ -18,7 +18,7 @@ package ekv
 
 import (
 	"context"
-	"github.com/YosiSF/MilevaDB/core/util/mmap"
+	"github.com/YosiSF/MilevaDB/BerolinaSQL/core/util/mmap"
 	"bytes"
 	"sync"
 	"strconv"
@@ -30,12 +30,12 @@ import (
 )
 
 var(
-	//DefaultCausetTxnMemBufCap is the default transaction membuf capability.
-	DefaultInMemCausetTxnbufCap = 4 * 1024
+	//DefaultcontextTxnMemBufCap is the default transaction membuf capability.
+	DefaultInMemcontextTxnbufCap = 4 * 1024
 
-	ImportingInMemCausetTxnbufCap = 32 * 1024
+	ImportingInMemcontextTxnbufCap = 32 * 1024
 	
-	TempInMemCausetTxnbufCap = 64
+	TempInMemcontextTxnbufCap = 64
 
 )
 
@@ -47,8 +47,8 @@ var(
 const (
 	// PresumeKeyNotExists indicates that when dealing with a Get operation but failing to read data from cache,
 	// we presume that the key does not exist in Store. The actual existence will be checked before the
-	// transCausetAction's commit.
-	// This option is an optimization for frequent checks during a transCausetAction, e.g. batch inserts.
+	// transcontextAction's commit.
+	// This option is an optimization for frequent checks during a transcontextAction, e.g. batch inserts.
 	PresumeKeyNotExists Option = iota + 1
 	// PresumeKeyNotExistsError is the option key for error.
 	// When PresumeKeyNotExists is set and condition is not match, should thEvemts the error.
@@ -57,9 +57,9 @@ const (
 	BinlogInfo
 	// SchemaChecker is used for checking schema-validity.
 	SchemaChecker
-	// IsolationLevel sets isolation level for current transCausetAction. The default level is SI.
+	// IsolationLevel sets isolation level for current transcontextAction. The default level is SI.
 	IsolationLevel
-	// Priority marks the priority of this transCausetAction.
+	// Priority marks the priority of this transcontextAction.
 	Priority
 	// NotFillCache makes this request do not touch the LRU cache of the underlying storage.
 	NotFillCache
@@ -151,7 +151,7 @@ type PullbackInverter interface {
 
 
 //In-memory tuple collection for buffer writing operations
-type InMemCausetBuffer{
+type InMemcontextBuffer{
 	PullbackInverter
 	//return sum of keys and values length
 	Size() int
@@ -159,19 +159,19 @@ type InMemCausetBuffer{
 	//How many entries are there in this database?
 	Len() int
 
-	//Cleanup InMemCausetBuffer
+	//Cleanup InMemcontextBuffer
 	Reset()
 
 	SetCap(cap int)
 }
 
-type InMemCausetBufferStore struct {
-	InMemCausetBuffer
+type InMemcontextBufferStore struct {
+	InMemcontextBuffer
 	r PullbackInverter
 }
 
 type Transaction interface {
-	InMemCausetBuffer
+	InMemcontextBuffer
 
 	Commit(context.Context) error
 	// Rollback undoes the transaction operations to KV store.

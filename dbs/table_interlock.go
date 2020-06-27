@@ -1,4 +1,4 @@
-//Copyyright 2019 EinsteinDB Licensed Under Apache-2.0.package fidel
+//Copyright 2020 WHTCORPS INC
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -10,13 +10,3 @@
 // distributed under the License is distributed on an "AS IS" BASIS,
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-package fidel
-
-import ("fmt"
-		"github.com/YosiSF/BerolinaSQL/container"
-)
-
-type tetrad struct {
-	Tp	 container.contextActionType
-}

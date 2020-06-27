@@ -1,7 +1,7 @@
-package causetnet
+package contextnet
 
 import (
-	"causet"
+	"context"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -343,7 +343,7 @@ const (
 	version38 = 38
 	version39 = 39
 	// version40 is the version that introduce new collation in milevadb,
-	// see https://github.com/YosiSF/milevadb/pull/14574 for more details.
+	// see https://github.com/YosiSF/MilevaDB/BerolinaSQL/pull/14574 for more details.
 	version40 = 40
 	version41 = 41
 	// version42 add storeType and reason column in expr_pushdown_blacklist
@@ -407,7 +407,7 @@ var (
 
 func checkBootstrapped(s Session) (bool, error) {
 	//  Check if system db exists.
-	_, err := s.Execute(causet.Background(), fmt.Sprintf("USE %s;", mysql.SystemDB))
+	_, err := s.Execute(context.Background(), fmt.Sprintf("USE %s;", mysql.SystemDB))
 	if err != nil && schemaReplicant.ErrDatabaseNotExists.NotEqual(err) {
 		logutil.BgLogger().Fatal("check bootstrap error",
 			zap.Error(err))
@@ -423,7 +423,7 @@ func checkBootstrapped(s Session) (bool, error) {
 	isBootstrapped := sVal == varTrue
 	if isBootstrapped {
 		// Make sure that doesn't affect the following operations.
-		if err = s.CommitTxn(causet.Background()); err != nil {
+		if err = s.CommitTxn(context.Background()); err != nil {
 			return false, errors.Trace(err)
 		}
 	}
@@ -435,7 +435,7 @@ func checkBootstrapped(s Session) (bool, error) {
 func getmilevadbVar(s Session, name string) (sVal string, isNull bool, e error) {
 	sql := fmt.Sprintf(`SELECT HIGH_PRIORITY VARIABLE_VALUE FROM %s.%s WHERE VARIABLE_NAME="%s"`,
 		mysql.SystemDB, mysql.milevadbTable, name)
-	ctx := causet.Background()
+	ctx := context.Background()
 	rs, err := s.Execute(ctx, sql)
 	if err != nil {
 		return "", true, errors.Trace(err)
@@ -472,7 +472,7 @@ func upgrade(s Session) {
 	}
 
 	updateBootstrapVer(s)
-	_, err = s.Execute(causet.Background(), "COMMIT")
+	_, err = s.Execute(context.Background(), "COMMIT")
 
 	if err != nil {
 		sleepTime := 1 * time.Second
@@ -564,7 +564,7 @@ func upgradeToVer8(s Session, ver int64) {
 		return
 	}
 	// This is a dummy upgrade, it checks whether upgradeToVer7 success, if not, do it again.
-	if _, err := s.Execute(causet.Background(), "SELECT HIGH_PRIORITY `Process_priv` from mysql.user limit 0"); err == nil {
+	if _, err := s.Execute(context.Background(), "SELECT HIGH_PRIORITY `Process_priv` from mysql.user limit 0"); err == nil {
 		return
 	}
 	upgradeToVer7(s, ver)
@@ -580,7 +580,7 @@ func upgradeToVer9(s Session, ver int64) {
 }
 
 func doReentrantdbs(s Session, sql string, ignorableErrs ...error) {
-	_, err := s.Execute(causet.Background(), sql)
+	_, err := s.Execute(context.Background(), sql)
 	for _, ignorableErr := range ignorableErrs {
 		if terror.ErrorEqual(err, ignorableErr) {
 			return
@@ -606,7 +606,7 @@ func upgradeToVer11(s Session, ver int64) {
 	if ver >= version11 {
 		return
 	}
-	_, err := s.Execute(causet.Background(), "ALTER TABLE mysql.user ADD COLUMN `References_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Grant_priv`")
+	_, err := s.Execute(context.Background(), "ALTER TABLE mysql.user ADD COLUMN `References_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Grant_priv`")
 	if err != nil {
 		if terror.ErrorEqual(err, schemaReplicant.ErrColumnExists) {
 			return
@@ -620,7 +620,7 @@ func upgradeToVer12(s Session, ver int64) {
 	if ver >= version12 {
 		return
 	}
-	ctx := causet.Background()
+	ctx := context.Background()
 	_, err := s.Execute(ctx, "BEGIN")
 	terror.MustNil(err)
 	sql := "SELECT HIGH_PRIORITY user, host, password FROM mysql.user WHERE password != ''"
@@ -675,7 +675,7 @@ func upgradeToVer13(s Session, ver int64) {
 		"ALTER TABLE mysql.user ADD COLUMN `Alter_routine_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Create_routine_priv`",
 		"ALTER TABLE mysql.user ADD COLUMN `Event_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Create_user_priv`",
 	}
-	ctx := causet.Background()
+	ctx := context.Background()
 	for _, sql := range sqls {
 		_, err := s.Execute(ctx, sql)
 		if err != nil {
@@ -704,7 +704,7 @@ func upgradeToVer14(s Session, ver int64) {
 		"ALTER TABLE mysql.db ADD COLUMN `Event_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Execute_priv`",
 		"ALTER TABLE mysql.db ADD COLUMN `Trigger_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Event_priv`",
 	}
-	ctx := causet.Background()
+	ctx := context.Background()
 	for _, sql := range sqls {
 		_, err := s.Execute(ctx, sql)
 		if err != nil {
@@ -721,7 +721,7 @@ func upgradeToVer15(s Session, ver int64) {
 		return
 	}
 	var err error
-	_, err = s.Execute(causet.Background(), CreateGCDeleteRangeTable)
+	_, err = s.Execute(context.Background(), CreateGCDeleteRangeTable)
 	if err != nil {
 		logutil.BgLogger().Fatal("upgradeToVer15 error", zap.Error(err))
 	}
@@ -922,7 +922,7 @@ func upgradeToVer38(s Session, ver int64) {
 		return
 	}
 	var err error
-	_, err = s.Execute(causet.Background(), CreateGlobalPrivTable)
+	_, err = s.Execute(context.Background(), CreateGlobalPrivTable)
 	if err != nil {
 		logutil.BgLogger().Fatal("upgradeToVer38 error", zap.Error(err))
 	}
@@ -1126,7 +1126,7 @@ func doDMLWorks(s Session) {
 
 	writeStmtSummaryVars(s)
 
-	_, err := s.Execute(causet.Background(), "COMMIT")
+	_, err := s.Execute(context.Background(), "COMMIT")
 	if err != nil {
 		sleepTime := 1 * time.Second
 		logutil.BgLogger().Info("doDMLWorks failed", zap.Error(err), zap.Duration("sleeping time", sleepTime))
@@ -1144,7 +1144,7 @@ func doDMLWorks(s Session) {
 }
 
 func mustExecute(s Session, sql string) {
-	_, err := s.Execute(causet.Background(), sql)
+	_, err := s.Execute(context.Background(), sql)
 	if err != nil {
 		debug.PrintStack()
 		logutil.BgLogger().Fatal("mustExecute error", zap.Error(err))
