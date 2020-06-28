@@ -21,7 +21,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/YosiSF/parser"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/berolinasql/container/ast"
+	"github.com/YosiSF/MilevaDB/BerolinaSQL/ast"
 	"charset"
 	"github.com/YosiSF/MilevaDB/BerolinaSQL/BerolinaSQL/serial"
 	"github.com/YosiSF/MilevaDB/BerolinaSQL/BerolinaSQL/mysql"
@@ -230,3 +230,32 @@ type ColDesc struct {
 }
 
 const defaultPrivileges = "select,insert,update,references"
+
+// NewColDesc returns a new ColDesc for a column.
+func NewColDesc(col *Column) *ColDesc {
+
+	// create table
+	name := col.Name
+	nullFlag := "YES"
+	if mysql.HasNotNullFlag(col.Flag) {
+		nullFlag = "NO"
+	}
+	keyFlag := ""
+	if mysql.HasPriKeyFlag(col.Flag) {
+		keyFlag = "PRI"
+	} else if mysql.HasUniKeyFlag(col.Flag) {
+		keyFlag = "UNI"
+	} else if mysql.HasMultipleKeyFlag(col.Flag) {
+		keyFlag = "MUL"
+	}
+	var defaultValue interface{}
+	if !mysql.HasNoDefaultValueFlag(col.Flag) {
+		defaultValue = col.GetDefaultValue()
+		if defaultValStr, ok := defaultValue.(string); ok {
+			if (col.Tp == mysql.TypeTimestamp || col.Tp == mysql.TypeDatetime) &&
+				strings.EqualFold(defaultValStr, ast.CurrentTimestamp) &&
+				col.Decimal > 0 {
+				defaultValue = fmt.Sprintf("%s(%d)", defaultValStr, col.Decimal)
+			}
+		}
+	}

@@ -51,26 +51,7 @@ var replace = map[rune]string{
 	'\r':   "\\r",
 }
 
-// IndentFormatter returns a new Formatter which interprets %i and %u in the
-// Format() formats string as indent and unindent commands. The commands can
-// nest. The Formatter writes to io.Writer 'w' and inserts one 'indent'
-// string per current indent level value.
-// Behaviour of commands reaching negative indent levels is undefined.
-//  IndentFormatter(os.Stdout, "\t").Format("abc%d%%e%i\nx\ny\n%uz\n", 3)
-// output:
-//  abc3%e
-//      x
-//      y
-//  z
-// The Go quoted string literal form of the above is:
-//  "abc%%e\n\tx\n\tx\nz\n"
-// The commands can be scattered between separate invocations of Format(),
-// i.e. the formatter keeps track of the indent level and knows if it is
-// positioned on start of a line and should emit indentation(s).
-// The same output as above can be produced by e.g.:
-//  f := IndentFormatter(os.Stdout, " ")
-//  f.Format("abc%d%%e%i\nx\n", 3)
-//  f.Format("y\n%uz\n")
+
 func IndentFormatter(w io.Writer, indent string) Formatter {
 	return &indentFormatter{w, []byte(indent), 0, stBOL}
 }
