@@ -39,7 +39,7 @@ type ShowNextRowID struct {
 type CheckTable struct {
 	baseSchemaProducer
 
-	DBName             string
+	noedbName             string
 	Table              table.Table
 	IndexInfos         []*serial.IndexInfo
 	IndexLookUpReaders []*PhysicalIndexLookUpReader
@@ -66,7 +66,7 @@ type CheckIndex struct {
 	baseSchemaProducer
 
 	IndexLookUpReader *PhysicalIndexLookUpReader
-	DBName            string
+	noedbName            string
 	IdxName           string
 }
 

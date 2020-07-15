@@ -15,8 +15,8 @@ package dbs
 
 func onCreateSchema(d *dbsCtx, t *spacetime.Spacetime, Batch *container.Batch) (ver int64, _ error) {
 	schemaID := Batch.SchemaID
-	dbInfo := &container.DBInfo{}
-	if err := Batch.DecodeArgs(dbInfo); err != nil {
+	noedbInfo := &container.noedbInfo{}
+	if err := Batch.DecodeArgs(noedbInfo); err != nil {
 		//Invalid args
 		Batch.State = container.BatchStateCancelled
 	}

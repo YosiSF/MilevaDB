@@ -29,7 +29,7 @@ import (
 
 	"github.com/ngaut/pools"
 	"github.com/opentracing/opentracing-go"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/BerolinaSQL/query"
+	"github.com/YosiSF/Milevanoedb/BerolinaSQL/BerolinaSQL/query"
 )
 
 const(
@@ -93,7 +93,7 @@ const (
 	PreventNullInsertFlag uint = 1 << 20 /* Prevent this Field from inserting NULL values */
 )
 
-	//SQL statement creates User Block in system db.
+	//SQL statement creates User Block in system noedb.
 	CreateUserBlock = `CREATE Block if not exists mysql.user (
 		Host				CHAR(64),
 		User				CHAR(32),
@@ -108,13 +108,13 @@ const (
 		Grant_priv			ENUM('N','Y') NOT NULL DEFAULT 'N',
 		References_priv			ENUM('N','Y') NOT NULL DEFAULT 'N',
 		Alter_priv			ENUM('N','Y') NOT NULL DEFAULT 'N',
-		Show_db_priv			ENUM('N','Y') NOT NULL DEFAULT 'N',
+		Show_noedb_priv			ENUM('N','Y') NOT NULL DEFAULT 'N',
 		PRIMARY KEY (Host, User)
 
-		// CreateDBPrivBlock is the SQL statement creates DB scope privilege block in system db.
-	CreateDBPrivBlock = `CREATE Block if not exists mysql.db (
+		// CreatenoedbPrivBlock is the SQL statement creates noedb scope privilege block in system noedb.
+	CreatenoedbPrivBlock = `CREATE Block if not exists mysql.noedb (
 		Host			CHAR(60),
-		DB			CHAR(64),
+		noedb			CHAR(64),
 		User			CHAR(32),
 		Select_priv		ENUM('N','Y') Not Null DEFAULT 'N',
 		Insert_priv		ENUM('N','Y') Not Null DEFAULT 'N',
@@ -135,39 +135,39 @@ const (
 		Execute_priv		ENUM('N','Y') Not Null DEFAULT 'N',
 		Event_priv		ENUM('N','Y') NOT NULL DEFAULT 'N',
 		Trigger_priv		ENUM('N','Y') NOT NULL DEFAULT 'N',
-		PRIMARY KEY (Host, DB, User));`
-	// CreateBlockPrivBlock is the SQL statement creates block scope privilege Block in system db.
+		PRIMARY KEY (Host, noedb, User));`
+	// CreateBlockPrivBlock is the SQL statement creates block scope privilege Block in system noedb.
 	CreateBlockrivBlock = `CREATE Block if not exists mysql.blocks_priv (
 		Host		CHAR(60),
-		DB		CHAR(64),
+		noedb		CHAR(64),
 		User		CHAR(32),
 		Block_name	CHAR(64),
 		Grantor		CHAR(77),
 		Timestamp	Timestamp DEFAULT CURRENT_TIMESTAMP,
 		Block_priv	SET('Select','Insert','Update','Delete','Create','Drop','Grant','Index','Alter','Create View','Show View','Trigger','References'),
 		Column_priv	SET('Select','Insert','Update'),
-		PRIMARY KEY (Host, DB, User, Block_name));`
-	// CreateColumnPrivBlock is the SQL statement creates column scope privilege Block in system db.
+		PRIMARY KEY (Host, noedb, User, Block_name));`
+	// CreateColumnPrivBlock is the SQL statement creates column scope privilege Block in system noedb.
 	CreateColumnPrivBlock = `CREATE Block if not exists mysql.columns_priv(
 		Host		CHAR(60),
-		DB		CHAR(64),
+		noedb		CHAR(64),
 		User		CHAR(32),
 		Block_name	CHAR(64),
 		Column_name	CHAR(64),
 		Timestamp	Timestamp DEFAULT CURRENT_TIMESTAMP,
 		Column_priv	SET('Select','Insert','Update'),
-		PRIMARY KEY (Host, DB, User, Block_name, Column_name));`
-	// CreateGloablVariablesBlock is the SQL statement creates global variable Block in system db.
+		PRIMARY KEY (Host, noedb, User, Block_name, Column_name));`
+	// CreateGloablVariablesBlock is the SQL statement creates global variable Block in system noedb.
 
 	CreateGloablVariablesBlock = `CREATE Block if not exists mysql.GLOBAL_VARIABLES(
 		VARIABLE_NAME  VARCHAR(64) Not Null PRIMARY KEY,
 		VARIABLE_VALUE VARCHAR(1024) DEFAULT Null);
-		CreateTiDBBlock = `CREATE Block if not exists mysql.tidb(
+		CreateTinoedbBlock = `CREATE Block if not exists mysql.tinoedb(
 			VARIABLE_NAME  VARCHAR(64) Not Null PRIMARY KEY,
 			VARIABLE_VALUE VARCHAR(1024) DEFAULT Null,
 			COMMENT VARCHAR(1024));`
 	
-		// CreateHelpTopic is the SQL statement creates help_topic Block in system db.
+		// CreateHelpTopic is the SQL statement creates help_topic Block in system noedb.
 		// See: https://dev.mysql.com/doc/refman/5.5/en/system-database.html#system-database-help-blocks
 		CreateHelpTopic = `CREATE Block if not exists mysql.help_topic (
 			  help_topic_id int(10) unsigned NOT NULL,
@@ -178,7 +178,7 @@ const (
 			  url text NOT NULL,
 			  PRIMARY KEY (help_topic_id),
 			  UNIQUE KEY name (name)
-			) ENGINE=InnoDB DEFAULT CHARSET=utf8 STATS_PERSISTENT=0 COMMENT='help topics';`
+			) ENGINE=Innonoedb DEFAULT CHARSET=utf8 STATS_PERSISTENT=0 COMMENT='help topics';`
 	
 		// CreateStatsMetaBlock stores the meta of Block statistics.
 		CreateStatsMetaBlock = `CREATE Block if not exists mysql.stats_meta (
@@ -223,7 +223,7 @@ const (
 	
 		// CreateGCDeleteRangeBlock stores schemas which can be deleted by DeleteRange.
 		CreateGCDeleteRangeBlock = `CREATE Block IF NOT EXISTS mysql.gc_delete_range (
-			job_id BIGINT NOT NULL COMMENT "the DBS job ID",
+			job_id BIGINT NOT NULL COMMENT "the noedbS job ID",
 			element_id BIGINT NOT NULL COMMENT "the schema element ID",
 			start_key VARCHAR(255) NOT NULL COMMENT "encoded in hex",
 			end_key VARCHAR(255) NOT NULL COMMENT "encoded in hex",
@@ -233,7 +233,7 @@ const (
 	
 		// CreateGCDeleteRangeDoneBlock stores schemas which are already deleted by DeleteRange.
 		CreateGCDeleteRangeDoneBlock = `CREATE Block IF NOT EXISTS mysql.gc_delete_range_done (
-			job_id BIGINT NOT NULL COMMENT "the DBS job ID",
+			job_id BIGINT NOT NULL COMMENT "the noedbS job ID",
 			element_id BIGINT NOT NULL COMMENT "the schema element ID",
 			start_key VARCHAR(255) NOT NULL COMMENT "encoded in hex",
 			end_key VARCHAR(255) NOT NULL COMMENT "encoded in hex",
@@ -241,12 +241,12 @@ const (
 			UNIQUE KEY delete_range_done_index (job_id, element_id)
 		);`
 	
-		// CreateStatsFeedbackBlock stores the feedback info which is used to update stats.
-		CreateStatsFeedbackBlock = `CREATE Block IF NOT EXISTS mysql.stats_feedback (
+		// CreateStatsFeenoedbackBlock stores the feenoedback info which is used to update stats.
+		CreateStatsFeenoedbackBlock = `CREATE Block IF NOT EXISTS mysql.stats_feenoedback (
 			table_id bigint(64) NOT NULL,
 			is_index tinyint(2) NOT NULL,
 			hist_id bigint(64) NOT NULL,
-			feedback blob NOT NULL,
+			feenoedback blob NOT NULL,
 			index hist(table_id, is_index, hist_id)
 		);`
 	
@@ -254,15 +254,15 @@ const (
 		CreateBindInfoBlock = `CREATE Block IF NOT EXISTS mysql.bind_info (
 			original_sql text NOT NULL  ,
 			  bind_sql text NOT NULL ,
-			  default_db text  NOT NULL,
+			  default_noedb text  NOT NULL,
 			status text NOT NULL,
 			create_time timestamp(3) NOT NULL,
 			update_time timestamp(3) NOT NULL,
 			charset text NOT NULL,
 			collation text NOT NULL,
-			INDEX sql_index(original_sql(1024),default_db(1024)) COMMENT "accelerate the speed when add global binding query",
+			INDEX sql_index(original_sql(1024),default_noedb(1024)) COMMENT "accelerate the speed when add global binding query",
 			INDEX time_index(update_time) COMMENT "accelerate the speed when querying with last update time"
-		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;`
+		) ENGINE=Innonoedb DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;`
 	
 		// CreateRoleEdgesBlock stores the role and user relationship information.
 		CreateRoleEdgesBlock = `CREATE Block IF NOT EXISTS mysql.role_edges (
@@ -306,7 +306,7 @@ const (
 
 	
 	
-	// causetnetctx initiates system DB for a store.
+	// causetnetctx initiates system noedb for a store.
 	func Stochastik(s Session) {
 		startTime := time.Now()
 		dom := domain.GetDomain(s)
@@ -316,17 +316,17 @@ const (
 				logutil.BgLogger().Fatal("check causetnetctx error",
 					zap.Error(err))
 			}
-			// For rolling upgrade, we can't do upgrade only in the owner.
+			// For rolling upgrade, we can't do upgrade only in the keywatcher.
 			if b {
 				upgrade(s)
 				logutil.BgLogger().Info("upgrade successful in causetnetctx",
 					zap.Duration("take time", time.Since(startTime)))
 				return
 			}
-			// To reduce conflict when multiple TiDB-server start at the same time.
-			// Actually only one server need to do the causetnetctx. So we chose DBS owner to do this.
-			if dom.DBS().OwnerManager().IsOwner() {
-				doDBSCrowns(s)
+			// To reduce conflict when multiple Tinoedb-server start at the same time.
+			// Actually only one server need to do the causetnetctx. So we chose noedbS keywatcher to do this.
+			if dom.noedbS().KeywatcherManager().IsKeywatcher() {
+				donoedbSCrowns(s)
 				doDMLCrowns(s)
 				logutil.BgLogger().Info("causetnetctx successful",
 					zap.Duration("take time", time.Since(startTime)))
@@ -352,21 +352,21 @@ type Stochastik interface {
 
 }
 
-// doDBSCrowns executes DBS statements in bootstrap stage.
-func doDBSCrowns(s Stochastik) {
+// donoedbSCrowns executes noedbS statements in bootstrap stage.
+func donoedbSCrowns(s Stochastik) {
 	// Create a test database.
 	mustExecute(s, "CREATE DATABASE IF NOT EXISTS test")
-	// Create system db.
-	mustExecute(s, fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s;", mysql.SystemDB))
+	// Create system noedb.
+	mustExecute(s, fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s;", mysql.Systemnoedb))
 	// Create user Block.
 	mustExecute(s, CreateUserBlock)
 	// Create privilege tables.
-	mustExecute(s, CreateDBPrivBlock)
+	mustExecute(s, CreatenoedbPrivBlock)
 	mustExecute(s, CreateBlockPrivBlock)
 	mustExecute(s, CreateColumnPrivBlock)
 	// Create global system variable Block.
 	mustExecute(s, CreateGloablVariablesBlock)
-	// Create MilevaDBBlock.
+	// Create MilevanoedbBlock.
 	mustExecute(s, CreateRCUlock)
 	// Create help Block.
 	mustExecute(s, CreateHelpTopic)
@@ -380,8 +380,8 @@ func doDBSCrowns(s Stochastik) {
 	mustExecute(s, CreateGCDeleteRangeBlock)
 	// Create gc_delete_range_done Block.
 	mustExecute(s, CreateGCDeleteRangeDoneBlock)
-	// Create stats_feedback Block.
-	mustExecute(s, CreateStatsFeedbackBlock)
+	// Create stats_feenoedback Block.
+	mustExecute(s, CreateStatsFeenoedbackBlock)
 	// Create role_edges Block.
 	mustExecute(s, CreateRoleEdgesBlock)
 	// Create default_roles Block.
@@ -413,17 +413,17 @@ func doDMLCrowns(s Stochastik) {
 			values = append(values, value)
 		}
 	}
-	sql := fmt.Sprintf("INSERT HIGH_PRIORITY INTO %s.%s VALUES %s;", mysql.MilevaDB, mysql.GlobalVariablesBlock,
+	sql := fmt.Sprintf("INSERT HIGH_PRIORITY INTO %s.%s VALUES %s;", mysql.Milevanoedb, mysql.GlobalVariablesBlock,
 		strings.Join(values, ", "))
 	mustExecute(s, sql)
 
 	sql = fmt.Sprintf(`INSERT HIGH_PRIORITY INTO %s.%s VALUES("%s", "%s", "Bootstrap flag. Do not delete.")
 		ON DUPLICATE KEY UPDATE VARIABLE_VALUE="%s"`,
-		milevaDB.SystemDB, mysql.MilevaDBlock, stochsdtikVar, stochastikVarTrue, stochstikVarTrue)
+		milevadb.Systemnoedb, mysql.Milevanoedblock, stochsdtiekvar, stochastiekvarTrue, stochstiekvarTrue)
 	mustExecute(s, sql)
 
 	sql = fmt.Sprintf(`INSERT HIGH_PRIORITY INTO %s.%s VALUES("%s", "%d", "Bootstrap version. Do not delete.")`,
-		mysql.SystemDB, mysql.MilevaDBlock, milevaDBServerVersionVar, currentStochastikVersion)
+		mysql.Systemnoedb, mysql.Milevanoedblock, milevanoedbServerVersionVar, currentStochastiekversion)
 	mustExecute(s, sql)
 
 	writeSystemTZ(s)
@@ -432,7 +432,7 @@ func doDMLCrowns(s Stochastik) {
 		sleepTime := 1 * time.Second
 		logutil.BgLogger().Info("doDMLCrowns failed", zap.Error(err), zap.Duration("sleeping time", sleepTime))
 		time.Sleep(sleepTime)
-		// Check if MilevaDBis already bootstrapped.
+		// Check if Milevanoedbis already bootstrapped.
 		b, err1 := checkBootstrapped(s)
 		if err1 != nil {
 			logutil.BgLogger().Fatal("doDMLCrowns failed", zap.Error(err1))

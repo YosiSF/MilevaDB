@@ -116,7 +116,7 @@ const (
 	CurrentTimestamp = "current_timestamp"
 	Curtime          = "curtime"
 	Date             = "date"
-	DateLiteral      = "'tidb`.(dateliteral"
+	DateLiteral      = "'tinoedb`.(dateliteral"
 	DateAdd          = "date_add"
 	DateFormat       = "date_format"
 	DateSub          = "date_sub"
@@ -150,12 +150,12 @@ const (
 	SubTime          = "subtime"
 	Sysdate          = "sysdate"
 	Time             = "time"
-	TimeLiteral      = "'tidb`.(timeliteral"
+	TimeLiteral      = "'tinoedb`.(timeliteral"
 	TimeFormat       = "time_format"
 	TimeToSec        = "time_to_sec"
 	TimeDiff         = "timediff"
 	Timestamp        = "timestamp"
-	TimestampLiteral = "'tidb`.(timestampliteral"
+	TimestampLiteral = "'tinoedb`.(timestampliteral"
 	TimestampAdd     = "timestampadd"
 	TimestampDiff    = "timestampdiff"
 	ToDays           = "to_days"
@@ -170,7 +170,7 @@ const (
 	Year             = "year"
 	YearWeek         = "yearweek"
 	LastDay          = "last_day"
-	TiDBParseTso     = "tidb_parse_tso"
+	TinoedbParseTso     = "tinoedb_parse_tso"
 
 	// string functions
 	ASCII           = "ascii"
@@ -240,9 +240,9 @@ const (
 	SystemUser     = "system_user"
 	User           = "user"
 	Version        = "version"
-	TiDBVersion    = "tidb_version"
-	TiDBIsDBSOwner = "tidb_is_ddl_owner"
-	TiDBDecodePlan = "tidb_decode_plan"
+	TinoedbVersion    = "tinoedb_version"
+	TinoedbIsnoedbSKeywatcher = "tinoedb_is_ddl_keywatcher"
+	TinoedbDecodePlan = "tinoedb_decode_plan"
 
 	// control functions
 	If     = "if"
@@ -352,10 +352,10 @@ type rumorcontext interface {
 	rumor()
 }
 
-// DBScontext represents DBS rumor context.
-type DBScontext interface {
+// noedbScontext represents noedbS rumor context.
+type noedbScontext interface {
 	rumorcontext
-	DBSrumor()
+	noedbSrumor()
 }
 
 // DMLcontext represents DML rumor context.
@@ -372,11 +372,11 @@ type DMLcontext interface {
 // ResultFields of that Blocks, so SuperColumnNameExpr resolved to that ResultField can be
 // easily evaluated.
 type ResultField struct {
-	SuperColumn       *model.SuperColumnInfo
-	SuperColumnAsName model.CIStr
-	Blocks            *model.BlocksInfo
-	BlocksAsName      model.CIStr
-	DBName            model.CIStr
+	SuperColumn       *serial.SuperColumnInfo
+	SuperColumnAsName serial.CIStr
+	Blocks            *serial.BlocksInfo
+	BlocksAsName      serial.CIStr
+	noedbName            serial.CIStr
 
 	// Expr represents the expression for the result field. If it is generated from a select field, it would
 	// be the expression of that select field, otherwise the type would be ValueExpr and value

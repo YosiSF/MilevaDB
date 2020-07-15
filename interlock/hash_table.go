@@ -15,12 +15,9 @@
 
 package Interlock
 
-import(
-	"fmt"
+import (
 	"hash"
 	"hash/fnv"
-	"time"
-
 )
 
 const (
@@ -41,7 +38,7 @@ const (
 	estCountDivisor = 8
 )
 
-// hashcontextctx keeps the needed hash context of a db table in hash join.
+// hashcontextctx keeps the needed hash context of a noedb table in hash join.
 type hashcontextctx struct {
 	allTypes  []*types.FieldType
 	keyColIdx []int

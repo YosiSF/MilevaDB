@@ -15,7 +15,7 @@ package block
 
 import (
 	"github.com/opentracing/opentracing-go"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/fidel/ekv"
+	"github.com/YosiSF/Milevanoedb/BerolinaSQL/fidel/eekv"
 )
 
 //type of block, gives us storage options
@@ -23,7 +23,7 @@ type Type int16
 
 const (
 
-	//NormalBlock, store data in EinsteinDB, mockEinsteinDB, and so on.
+	//NormalBlock, store data in Einsteinnoedb, mockEinsteinnoedb, and so on.
 	NormalBlock Type = iota
 	//memory data struct, stores no data, extract data from the memory struct
 	VirtualBlock
@@ -54,7 +54,7 @@ type AddRecorOption interface {
 type Block interface {
 
 	//Record iterator
-	IterRecords(ctx stochastiktxn.Context, startKey ekv.Key, cols []*Batch, fn RecordIterFunc) error
+	IterRecords(ctx stochastiktxn.Context, startKey eekv.Key, cols []*Batch, fn RecordIterFunc) error
 
 	//EventRowWithBatch return a row event that contains given batch
 	EventWithBatch(ctx stochastiktxn.Context, h int64, cols []*Batch) ([]types.Datum, error)

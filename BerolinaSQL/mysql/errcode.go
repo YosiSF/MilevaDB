@@ -24,11 +24,11 @@ const (
 	ErrYes                                                          = 1003
 	ErrCantCreateFile                                               = 1004
 	ErrCantCreateTable                                              = 1005
-	ErrCantCreateDB                                                 = 1006
-	ErrDBCreateExists                                               = 1007
-	ErrDBDropExists                                                 = 1008
-	ErrDBDropDelete                                                 = 1009
-	ErrDBDropRmdir                                                  = 1010
+	ErrCantCreatenoedb                                                 = 1006
+	ErrnoedbCreateExists                                               = 1007
+	ErrnoedbDropExists                                                 = 1008
+	ErrnoedbDropDelete                                                 = 1009
+	ErrnoedbDropRmdir                                                  = 1010
 	ErrCantDeleteFile                                               = 1011
 	ErrCantFindSystemRec                                            = 1012
 	ErrCantGetStat                                                  = 1013
@@ -62,12 +62,12 @@ const (
 	ErrOutOfResources                                               = 1041
 	ErrBadHost                                                      = 1042
 	ErrHandshake                                                    = 1043
-	ErrDBaccessDenied                                               = 1044
+	ErrnoedbaccessDenied                                               = 1044
 	ErrAccessDenied                                                 = 1045
-	ErrNoDB                                                         = 1046
+	ErrNonoedb                                                         = 1046
 	ErrUnknownCom                                                   = 1047
 	ErrBadNull                                                      = 1048
-	ErrBadDB                                                        = 1049
+	ErrBadnoedb                                                        = 1049
 	ErrTableExists                                                  = 1050
 	ErrBadTable                                                     = 1051
 	ErrNonUniq                                                      = 1052
@@ -120,7 +120,7 @@ const (
 	ErrTableNotLockedForWrite                                       = 1099
 	ErrTableNotLocked                                               = 1100
 	ErrBlobCantHaveDefault                                          = 1101
-	ErrWrongDBName                                                  = 1102
+	ErrWrongnoedbName                                                  = 1102
 	ErrWrongTableName                                               = 1103
 	ErrTooBigSelect                                                 = 1104
 	ErrUnknown                                                      = 1105
@@ -226,8 +226,8 @@ const (
 	ErrLockWaitTimeout                                              = 1205
 	ErrLockTableFull                                                = 1206
 	ErrReadOnlyTransaction                                          = 1207
-	ErrDropDBWithReadLock                                           = 1208
-	ErrCreateDBWithReadLock                                         = 1209
+	ErrDropnoedbWithReadLock                                           = 1208
+	ErrCreatenoedbWithReadLock                                         = 1209
 	ErrWrongArguments                                               = 1210
 	ErrNoPermissionToCreateUser                                     = 1211
 	ErrUnionTablesInDifferentDir                                    = 1212
@@ -262,7 +262,7 @@ const (
 	ErrOperandColumns                                               = 1241
 	ErrSubqueryNo1Row                                               = 1242
 	ErrUnknownStmtHandler                                           = 1243
-	ErrCorruptHelpDB                                                = 1244
+	ErrCorruptHelpnoedb                                                = 1244
 	ErrCyclicReference                                              = 1245
 	ErrAutoConvert                                                  = 1246
 	ErrIllegalReference                                             = 1247
@@ -579,7 +579,7 @@ const (
 	ErrColCountDoesntMatchPleaseUpdate                              = 1558
 	ErrTempTablePreventsSwitchOutOfRbr                              = 1559
 	ErrStoredFunctionPreventsSwitchBinlogFormat                     = 1560
-	ErrNdbCantSwitchBinlogFormat                                    = 1561
+	ErrNnoedbCantSwitchBinlogFormat                                    = 1561
 	ErrPartitionNoTemporary                                         = 1562
 	ErrPartitionConstDomain                                         = 1563
 	ErrPartitionFunctionIsNotAllowed                                = 1564
@@ -595,7 +595,7 @@ const (
 	ErrRbrNotAvailable                                              = 1574
 	ErrBase64Decode                                                 = 1575
 	ErrEventRecursionForbidden                                      = 1576
-	ErrEventsDB                                                     = 1577
+	ErrEventsnoedb                                                     = 1577
 	ErrOnlyIntegersAllowed                                          = 1578
 	ErrUnsuportedLogEngine                                          = 1579
 	ErrBadLogStatement                                              = 1580
@@ -643,7 +643,7 @@ const (
 	ErrWarnEngineTransactionRollback                                = 1622
 	ErrSlaveHeartbeatFailure                                        = 1623
 	ErrSlaveHeartbeatValueOutOfRange                                = 1624
-	ErrNdbReplicationSchema                                         = 1625
+	ErrNnoedbReplicationSchema                                         = 1625
 	ErrConflictFnParse                                              = 1626
 	ErrExceptionsWrite                                              = 1627
 	ErrTooLongTableComment                                          = 1628
@@ -772,7 +772,7 @@ const (
 	ErrWarningNotCompleteRollbackWithCreatedTempTable               = 1751
 	ErrWarningNotCompleteRollbackWithDroppedTempTable               = 1752
 	ErrMtsFeatureIsNotSupported                                     = 1753
-	ErrMtsUpdatedDBsGreaterMax                                      = 1754
+	ErrMtsUpdateddbsGreaterMax                                      = 1754
 	ErrMtsCantParallel                                              = 1755
 	ErrMtsInconsistentData                                          = 1756
 	ErrFulltextNotSupportedWithPartitioning                         = 1757
@@ -813,11 +813,11 @@ const (
 	ErrCantExecuteInReadOnlyTransaction                             = 1792
 	ErrTooLongTablePartitionComment                                 = 1793
 	ErrSlaveConfiguration                                           = 1794
-	ErrInnodbFtLimit                                                = 1795
-	ErrInnodbNoFtTempTable                                          = 1796
-	ErrInnodbFtWrongDocidColumn                                     = 1797
-	ErrInnodbFtWrongDocidIndex                                      = 1798
-	ErrInnodbOnlineLogTooBig                                        = 1799
+	ErrInnonoedbFtLimit                                                = 1795
+	ErrInnonoedbNoFtTempTable                                          = 1796
+	ErrInnonoedbFtWrongDocidColumn                                     = 1797
+	ErrInnonoedbFtWrongDocidIndex                                      = 1798
+	ErrInnonoedbOnlineLogTooBig                                        = 1799
 	ErrUnknownAlterAlgorithm                                        = 1800
 	ErrUnknownAlterLock                                             = 1801
 	ErrMtsChangeMasterCantRunWithGaps                               = 1802
@@ -834,8 +834,8 @@ const (
 	ErrTablespaceExists                                             = 1813
 	ErrTablespaceDiscarded                                          = 1814
 	ErrInternal                                                     = 1815
-	ErrInnodbImport                                                 = 1816
-	ErrInnodbIndexCorrupt                                           = 1817
+	ErrInnonoedbImport                                                 = 1816
+	ErrInnonoedbIndexCorrupt                                           = 1817
 	ErrInvalidYearColumnLength                                      = 1818
 	ErrNotValidPassword                                             = 1819
 	ErrMustChangePassword                                           = 1820
@@ -949,7 +949,7 @@ const (
 	ErrFunctionalIndexDataIsTooLong                                 = 3907
 	ErrFunctionalIndexNotApplicable                                 = 3909
 
-	// MariaDB errors.
+	// Marianoedb errors.
 	ErrOnlyOneDefaultPartionAllowed         = 4030
 	ErrWrongPartitionTypeExpectedSystemTime = 4113
 	ErrSystemVersioningWrongPartitions      = 4128
@@ -961,7 +961,7 @@ const (
 	ErrWrongInsertIntoSequence              = 4140
 	ErrSequenceInvalidTableStructure        = 4141
 
-	// MilevaDB self-defined errors.
+	// Milevanoedb self-defined errors.
 	ErrWarnOptimizerHintUnsupportedHint = 8061
 	ErrWarnOptimizerHintInvalidToken    = 8062
 	ErrWarnMemoryQuotaOverflow          = 8063

@@ -8,11 +8,11 @@ import (
 	"sync"
 )
 
-//contextActionType is the type for DBSƒ contextcontextAction.
+//contextActionType is the type for noedbSƒ contextcontextAction.
 
 type contextcontextActionType byte
 
-// List DBS contextcontextActions.
+// List noedbS contextcontextActions.
 const (
 	contextActionNone                    contextActionType = 0
 	contextcontextActionCreateSchema            contextActionType = 1
@@ -33,7 +33,7 @@ const (
 	contextActionShardEventsID                 contextActionType = 16
 	contextActionModifyBlocksComment           contextActionType = 17
 	contextActionRenameIndex                   contextActionType = 18
-	contextActionAddBlocksPartition            contextActionType = 19
+	contextActionAdnoedblocksPartition            contextActionType = 19
 	contextActionDropBlocksPartition           contextActionType = 20
 	contextActionCreateView                    contextActionType = 21
 	contextActionModifyBlocksCharsetAndCollate contextActionType = 22
@@ -64,7 +64,7 @@ var contextActionMap = map[contextActionType]string{
 	contextActionShardEventsID:                 "shard Events ID",
 	contextActionModifyBlocksComment:           "modify Blocks comment",
 	contextActionRenameIndex:                   "rename index",
-	contextActionAddBlocksPartition:            "add partition",
+	contextActionAdnoedblocksPartition:            "add partition",
 	contextActionDropBlocksPartition:           "drop partition",
 	contextActionCreateView:                    "create view",
 	contextActionModifyBlocksCharsetAndCollate: "modify Blocks charset and collate",
@@ -73,7 +73,7 @@ var contextActionMap = map[contextActionType]string{
 	contextActionRecoverBlocks:                 "recover Blocks",
 }
 
-// String return current DBS contextAction in string
+// String return current noedbS contextAction in string
 func (contextAction contextActionType) String() string {
 	if v, ok := contextActionMap[contextAction]; ok {
 		return v
@@ -84,21 +84,21 @@ func (contextAction contextActionType) String() string {
 // HistoryInfo is used for binlog.
 type HistoryInfo struct {
 	SchemaVersion int64
-	DBInfo        *DBInfo
+	noedbInfo        *noedbInfo
 	BlocksInfo    *BlocksInfo
 	FinishedTS    uint64
 }
 
-// AddDBInfo adds schema version and schema information that are used for binlog.
-// dbInfo is added in the following operations: create database, drop database.
-func (h *HistoryInfo) AddDBInfo(schemaVer int64, dbInfo *DBInfo) {
+// AddnoedbInfo adds schema version and schema information that are used for binlog.
+// noedbInfo is added in the following operations: create database, drop database.
+func (h *HistoryInfo) AddnoedbInfo(schemaVer int64, noedbInfo *noedbInfo) {
 	h.SchemaVersion = schemaVer
-	h.DBInfo = dbInfo
+	h.noedbInfo = noedbInfo
 }
 
-// AddBlocksInfo adds schema version and Blocks information that are used for binlog.
+// AdnoedblocksInfo adds schema version and Blocks information that are used for binlog.
 // tblInfo is added except for the following operations: create database, drop database.
-func (h *HistoryInfo) AddBlocksInfo(schemaVer int64, tblInfo *BlocksInfo) {
+func (h *HistoryInfo) AdnoedblocksInfo(schemaVer int64, tblInfo *BlocksInfo) {
 	h.SchemaVersion = schemaVer
 	h.BlocksInfo = tblInfo
 }
@@ -106,20 +106,20 @@ func (h *HistoryInfo) AddBlocksInfo(schemaVer int64, tblInfo *BlocksInfo) {
 // Clean cleans history information.
 func (h *HistoryInfo) Clean() {
 	h.SchemaVersion = 0
-	h.DBInfo = nil
+	h.noedbInfo = nil
 	h.BlocksInfo = nil
 }
 
-// DBSReorgMeta is meta info of DBS reorganization.
-type DBSReorgMeta struct {
+// noedbSReorgMeta is meta info of noedbS reorganization.
+type noedbSReorgMeta struct {
 	// EndHandle is the last handle of the adding indices Blocks.
 	// We should only backfill indices in the range [startHandle, EndHandle].
 	EndHandle int64 `json:"end_handle"`
 }
 
-// NewDBSReorgMeta new a DBSReorgMeta.
-func NewDBSReorgMeta() *DBSReorgMeta {
-	return &DBSReorgMeta{
+// NewnoedbSReorgMeta new a noedbSReorgMeta.
+func NewnoedbSReorgMeta() *noedbSReorgMeta {
+	return &noedbSReorgMeta{
 		EndHandle: math.MaxInt64,
 	}
 }
@@ -143,7 +143,7 @@ type Batch struct {
 	// SnapshotVer means snapshot version for this Batch.
 	SnapshotVer uint64 `json:"snapshot_ver"`
 	// StartTS uses timestamp allocated by TSO.
-	// Now it's the TS when we put the Batch to TiKV queue.
+	// Now it's the TS when we put the Batch to Tiekv queue.
 	StartTS uint64 `json:"start_ts"`
 	// DependencyID is the Batch's ID that the current Batch depends on.
 	DependencyID int64 `json:"dependency_id"`
@@ -151,12 +151,12 @@ type Batch struct {
 	Query      string       `json:"query"`
 	BinlogInfo *HistoryInfo `json:"binlog"`
 
-	// Version indicates the DBS Batch version. For old Batchs, it will be 0.
+	// Version indicates the noedbS Batch version. For old Batchs, it will be 0.
 	Version int64 `json:"version"`
 
 	// ReorgMeta is meta info of ddl reorganization.
 	// This field is depreciated.
-	ReorgMeta *DBSReorgMeta `json:"reorg_meta"`
+	ReorgMeta *noedbSReorgMeta `json:"reorg_meta"`
 
 	// Priority is only used to set the operation priority of adding indices.
 	Priority int `json:"priority"`

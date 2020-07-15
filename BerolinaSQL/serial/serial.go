@@ -52,11 +52,11 @@ const (
 	// ColumnInfoVersion2 means the column info version is 2.
 	// This is for v2.1.7 to Compatible with older versions charset problem.
 	// Old version such as v2.0.8 treat utf8 as utf8mb4, because there is no UTF8 check in v2.0.8.
-	// After version V2.1.2 (PR#8738) , MilevaDB add UTF8 check, then the user upgrade from v2.0.8 insert some UTF8MB4 characters will got error.
+	// After version V2.1.2 (PR#8738) , Milevanoedb add UTF8 check, then the user upgrade from v2.0.8 insert some UTF8MB4 characters will got error.
 	// This is not compatibility for user. Then we try to fix this in PR #9820, and increase the version number.
 	ColumnInfoVersion2 = uint64(2)
 
-	// CurrLatestColumnInfoVersion means the latest column info in the current MilevaDB.
+	// CurrLatestColumnInfoVersion means the latest column info in the current Milevanoedb.
 	CurrLatestColumnInfoVersion = ColumnInfoVersion2
 )
 
@@ -81,7 +81,7 @@ type ColumnInfo struct {
 	Hidden bool `json:"hidden"`
 	// Version means the version of the column info.
 	// Version = 0: For OriginDefaultValue and DefaultValue of timestamp column will stores the default time in system time zone.
-	//              That is a bug if multiple MilevaDB servers in different system time zone.
+	//              That is a bug if multiple Milevanoedb servers in different system time zone.
 	// Version = 1: For OriginDefaultValue and DefaultValue of timestamp column will stores the default time in UTC time zone.
 	//              This will fix bug in version 0. For compatibility with version 0, we add version field in column info struct.
 	Version uint64 `json:"version"`
@@ -200,24 +200,24 @@ const (
 	// TableInfoVersion2 means the table info version is 2.
 	// This is for v2.1.7 to Compatible with older versions charset problem.
 	// Old version such as v2.0.8 treat utf8 as utf8mb4, because there is no UTF8 check in v2.0.8.
-	// After version V2.1.2 (PR#8738) , MilevaDB add UTF8 check, then the user upgrade from v2.0.8 insert some UTF8MB4 characters will got error.
+	// After version V2.1.2 (PR#8738) , Milevanoedb add UTF8 check, then the user upgrade from v2.0.8 insert some UTF8MB4 characters will got error.
 	// This is not compatibility for user. Then we try to fix this in PR #9820, and increase the version number.
 	TableInfoVersion2 = uint16(2)
 	// TableInfoVersion3 means the table info version is 3.
-	// This version aims to deal with upper-cased charset name in TableInfo stored by versions prior to MilevaDB v2.1.9:
-	// MilevaDB always suppose all charsets / collations as lower-cased and try to convert them if they're not.
+	// This version aims to deal with upper-cased charset name in TableInfo stored by versions prior to Milevanoedb v2.1.9:
+	// Milevanoedb always suppose all charsets / collations as lower-cased and try to convert them if they're not.
 	// However, the convert is missed in some scenarios before v2.1.9, so for all those tables prior to TableInfoVersion3, their
 	// charsets / collations will be converted to lower-case while loading from the storage.
 	TableInfoVersion3 = uint16(3)
 
-	// CurrLatestTableInfoVersion means the latest table info in the current MilevaDB.
+	// CurrLatestTableInfoVersion means the latest table info in the current Milevanoedb.
 	CurrLatestTableInfoVersion = TableInfoVersion3
 )
 
 // ExtraHandleName is the name of ExtraHandle Column.
-var ExtraHandleName = NewCIStr("_milevadb_rowid")
+var ExtraHandleName = NewCIStr("_milevanoedb_rowid")
 
-// TableInfo provides meta data describing a DB table.
+// TableInfo provides meta data describing a noedb table.
 type TableInfo struct {
 	ID      int64  `json:"id"`
 	Name    CIStr  `json:"name"`
@@ -253,15 +253,15 @@ type TableInfo struct {
 	// Now it only uses for compatibility with the old version that already uses this field.
 	OldSchemaID int64 `json:"old_schema_id,omitempty"`
 
-	// ShardRowIDBits specify if the implicit row ID is sharded.
-	ShardRowIDBits uint64
-	// MaxShardRowIDBits uses to record the max ShardRowIDBits be used so far.
-	MaxShardRowIDBits uint64 `json:"max_shard_row_id_bits"`
+	// ShardRowInoedbits specify if the implicit row ID is sharded.
+	ShardRowInoedbits uint64
+	// MaxShardRowInoedbits uses to record the max ShardRowInoedbits be used so far.
+	MaxShardRowInoedbits uint64 `json:"max_shard_row_id_bits"`
 	// AutoRandomBits is used to set the bit number to shard automatically when PKIsHandle.
 	AutoRandomBits uint64 `json:"auto_random_bits"`
 	// PreSplitRegions specify the pre-split region when create table.
 	// The pre-split region num is 2^(PreSplitRegions-1).
-	// And the PreSplitRegions should less than or equal to ShardRowIDBits.
+	// And the PreSplitRegions should less than or equal to ShardRowInoedbits.
 	PreSplitRegions uint64 `json:"pre_split_regions"`
 
 	Partition *PartitionInfo `json:"partition"`
@@ -398,13 +398,13 @@ func (t *TableInfo) GetUpdateTime() time.Time {
 	return TSConvert2Time(t.UpdateTS)
 }
 
-// GetDBID returns the schema ID that is used to create an allocator.
+// GetnoedbID returns the schema ID that is used to create an allocator.
 // TODO: Remove it after removing OldSchemaID.
-func (t *TableInfo) GetDBID(dbID int64) int64 {
+func (t *TableInfo) GetnoedbID(noedbID int64) int64 {
 	if t.OldSchemaID != 0 {
 		return t.OldSchemaID
 	}
-	return dbID
+	return noedbID
 }
 
 // Clone clones TableInfo.
@@ -608,7 +608,7 @@ func (v *ViewCheckOption) String() string {
 	}
 }
 
-// ViewInfo provides meta data describing a DB view.
+// ViewInfo provides meta data describing a noedb view.
 type ViewInfo struct {
 	Algorithm   ViewAlgorithm      `json:"view_algorithm"`
 	Definer     *auth.UserIdentity `json:"view_definer"`
@@ -632,7 +632,7 @@ const (
 	DefaultNegativeSequenceMinValue   = int64(-9223372036854775807)
 )
 
-// SequenceInfo provide meta data describing a DB sequence.
+// SequenceInfo provide meta data describing a noedb sequence.
 type SequenceInfo struct {
 	Start      int64  `json:"sequence_start"`
 	Cache      bool   `json:"sequence_cache"`
@@ -748,7 +748,7 @@ const (
 	IndexTypeRtree
 )
 
-// IndexInfo provides meta data describing a DB index.
+// IndexInfo provides meta data describing a noedb index.
 // It corresponds to the statement `CREATE INDEX Name ON Table (Column);`
 // See https://dev.mysql.com/doc/refman/5.7/en/create-index.html
 type IndexInfo struct {
@@ -840,31 +840,31 @@ func (fk *FKInfo) Clone() *FKInfo {
 	return &nfk
 }
 
-// DBInfo provides meta data describing a DB.
-type DBInfo struct {
+// noedbInfo provides meta data describing a noedb.
+type noedbInfo struct {
 	ID      int64        `json:"id"`      // Database ID
-	Name    CIStr        `json:"db_name"` // DB name.
+	Name    CIStr        `json:"noedb_name"` // noedb name.
 	Charset string       `json:"charset"`
 	Collate string       `json:"collate"`
-	Tables  []*TableInfo `json:"-"` // Tables in the DB.
+	Tables  []*TableInfo `json:"-"` // Tables in the noedb.
 	State   SchemaState  `json:"state"`
 }
 
-// Clone clones DBInfo.
-func (db *DBInfo) Clone() *DBInfo {
-	newInfo := *db
-	newInfo.Tables = make([]*TableInfo, len(db.Tables))
-	for i := range db.Tables {
-		newInfo.Tables[i] = db.Tables[i].Clone()
+// Clone clones noedbInfo.
+func (noedb *noedbInfo) Clone() *noedbInfo {
+	newInfo := *noedb
+	newInfo.Tables = make([]*TableInfo, len(noedb.Tables))
+	for i := range noedb.Tables {
+		newInfo.Tables[i] = noedb.Tables[i].Clone()
 	}
 	return &newInfo
 }
 
-// Copy shallow copies DBInfo.
-func (db *DBInfo) Copy() *DBInfo {
-	newInfo := *db
-	newInfo.Tables = make([]*TableInfo, len(db.Tables))
-	copy(newInfo.Tables, db.Tables)
+// Copy shallow copies noedbInfo.
+func (noedb *noedbInfo) Copy() *noedbInfo {
+	newInfo := *noedb
+	newInfo.Tables = make([]*TableInfo, len(noedb.Tables))
+	copy(newInfo.Tables, noedb.Tables)
 	return &newInfo
 }
 

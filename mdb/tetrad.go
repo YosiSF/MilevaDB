@@ -1,4 +1,4 @@
-//Copyyright 2019 EinsteinDB Licensed Under Apache-2.0.package fidel
+//Copyyright 2019 Einsteinnoedb Licensed Under Apache-2.0.package fidel
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.

@@ -20,7 +20,69 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c7b4911b-a773-427b-986a-8dea14609c51" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/causetnetctx/variable/causetnet.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/causetnetctx/variable/error.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/causetnetctx/variable/mock_globalaccessor.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/causetnetctx/variable/sequence_state.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dbs/util/event.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ekv/causet.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ekv/iteron.rs.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ekv/noedb.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ekv/noether/milevadb.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ekv/noether/noedb_buffer.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ekv/noether/torus.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/expression/aggregation/agg_to_fidel.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/interlock/set.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/util/chunk/chunk.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BerolinaSQL/ast/advisor.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/ast/advisor.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BerolinaSQL/ast/ast.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/ast/ast.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BerolinaSQL/ast/base.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/ast/base.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BerolinaSQL/ast/dbs.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/ast/dbs.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BerolinaSQL/ast/expressions.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/ast/expressions.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BerolinaSQL/ast/functions.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/ast/functions.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BerolinaSQL/charset/charset.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/charset/charset.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BerolinaSQL/container/container.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/container/container.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BerolinaSQL/container/dbs.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/container/dbs.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BerolinaSQL/goyacc/format_yacc.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/goyacc/format_yacc.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BerolinaSQL/lexer.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/lexer.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BerolinaSQL/mysql/const.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/mysql/const.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BerolinaSQL/mysql/errcode.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/mysql/errcode.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BerolinaSQL/mysql/misc.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/mysql/misc.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BerolinaSQL/mysql/state.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/mysql/state.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BerolinaSQL/mysql/util.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/mysql/util.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BerolinaSQL/serial/dbs.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/serial/dbs.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BerolinaSQL/serial/serial.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerolinaSQL/serial/serial.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/block/block.go" beforeDir="false" afterPath="$PROJECT_DIR$/block/block.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/causetnet/bootstrap.go" beforeDir="false" afterPath="$PROJECT_DIR$/causetnet/bootstrap.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/causetnetctx/causetnetctx.go" beforeDir="false" afterPath="$PROJECT_DIR$/causetnetctx/causetnetctx.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/causetnetctx/stochastik.go" beforeDir="false" afterPath="$PROJECT_DIR$/causetnetctx/stochastik.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/config/config.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dbs/dbs.go" beforeDir="false" afterPath="$PROJECT_DIR$/dbs/dbs.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dbs/index.go" beforeDir="false" afterPath="$PROJECT_DIR$/dbs/index.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dbs/schema.go" beforeDir="false" afterPath="$PROJECT_DIR$/dbs/schema.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dbs/table.go" beforeDir="false" afterPath="$PROJECT_DIR$/dbs/table.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ekv/causalimemdb/siman.go" beforeDir="false" afterPath="$PROJECT_DIR$/interlock/aggfuncs/aggfuncs.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ekv/ekv.go" beforeDir="false" afterPath="$PROJECT_DIR$/ekv/ekv.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/errors/errors.go" beforeDir="false" afterPath="$PROJECT_DIR$/errors/errors.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/interlock/adapter.go" beforeDir="false" afterPath="$PROJECT_DIR$/interlock/adapter.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/interlock/hash_table.go" beforeDir="false" afterPath="$PROJECT_DIR$/interlock/hash_table.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/keywatcher/mock.go" beforeDir="false" afterPath="$PROJECT_DIR$/keywatcher/mock.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/keywatcher/semaphore.go" beforeDir="false" afterPath="$PROJECT_DIR$/keywatcher/semaphore.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mdb/tetrad.go" beforeDir="false" afterPath="$PROJECT_DIR$/mdb/tetrad.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/merkle/hash.go" beforeDir="false" afterPath="$PROJECT_DIR$/merkle/hash.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/merkle/merkle.go" beforeDir="false" afterPath="$PROJECT_DIR$/merkle/merkle.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/milevadb-server/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/milevadb-server/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rel-planner/core/common_plans.go" beforeDir="false" afterPath="$PROJECT_DIR$/rel-planner/core/common_plans.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rel-planner/core/encode.go" beforeDir="false" afterPath="$PROJECT_DIR$/rel-planner/core/encode.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spacetime/spacetime.go" beforeDir="false" afterPath="$PROJECT_DIR$/spacetime/spacetime.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/table/column.go" beforeDir="false" afterPath="$PROJECT_DIR$/table/column.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/table/index.go" beforeDir="false" afterPath="$PROJECT_DIR$/table/index.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/table/tables/gen_expr.go" beforeDir="false" afterPath="$PROJECT_DIR$/table/tables/gen_expr.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/util/binlog/binlog.go" beforeDir="false" afterPath="$PROJECT_DIR$/util/binlog/binlog.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/util/codec/codec.go" beforeDir="false" afterPath="$PROJECT_DIR$/util/codec/codec.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/util/format/format.go" beforeDir="false" afterPath="$PROJECT_DIR$/util/format/format.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -50,8 +112,14 @@
     <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="DefaultGoTemplateProperty" value="Go File" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="configurable.Global.GOPATH.is.expanded" value="true" />
+    <property name="configurable.Module.GOPATH.is.expanded" value="true" />
+    <property name="configurable.Project.GOPATH.is.expanded" value="true" />
     <property name="go.gopath.indexing.explicitly.defined" value="true" />
     <property name="go.import.settings.migrated" value="true" />
     <property name="go.sdk.automatically.set" value="true" />
@@ -69,9 +137,26 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/ekv/noether/fs" />
+      <recent name="$PROJECT_DIR$/ekv" />
       <recent name="$PROJECT_DIR$/BerolinaSQL" />
       <recent name="$PROJECT_DIR$" />
     </key>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="c7b4911b-a773-427b-986a-8dea14609c51" name="Default Changelist" comment="" />
+      <created>1594615705192</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1594615705192</updated>
+      <workItem from="1594615716651" duration="946000" />
+      <workItem from="1594617661573" duration="11230000" />
+    </task>
+    <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="2" />
@@ -95,6 +180,10 @@
     <integration-enabled>true</integration-enabled>
   </component>
   <component name="WindowStateProjectService">
+    <state x="235" y="162" key="#GOPATH" timestamp="1594617671908">
+      <screen x="0" y="23" width="1792" height="1017" />
+    </state>
+    <state x="235" y="162" key="#GOPATH/0.23.1792.1017@0.23.1792.1017" timestamp="1594617671908" />
     <state x="418" y="466" key="#GOROOT" timestamp="1592198603378">
       <screen x="0" y="23" width="1792" height="1013" />
     </state>
@@ -115,17 +204,20 @@
       <screen x="0" y="23" width="1792" height="1013" />
     </state>
     <state x="91" y="183" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.23.1792.1013@0.23.1792.1013" timestamp="1592286475656" />
-    <state x="163" y="209" width="667" height="640" key="find.popup" timestamp="1592720923485">
-      <screen x="0" y="23" width="1792" height="1013" />
+    <state x="163" y="206" width="667" height="906" key="find.popup" timestamp="1594766621198">
+      <screen x="0" y="0" width="1792" height="1120" />
     </state>
+    <state x="163" y="206" width="667" height="906" key="find.popup/0.0.1792.1120@0.0.1792.1120" timestamp="1594766621198" />
     <state x="163" y="209" width="667" height="640" key="find.popup/0.23.1792.1013@0.23.1792.1013" timestamp="1592720923485" />
+    <state x="163" y="210" width="667" height="822" key="find.popup/0.23.1792.1017@0.23.1792.1017" timestamp="1594617973154" />
+    <state x="163" y="225" width="667" height="888" key="find.popup/0.23.1792.1097@0.23.1792.1097" timestamp="1594764078676" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/core/block/block.go</url>
-          <line>2</line>
+          <url>file://$PROJECT_DIR$/util/chunk/chunk.go</url>
+          <line>13</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
       </breakpoints>

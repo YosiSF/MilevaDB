@@ -32,18 +32,18 @@ type recordSet struct {
 
 func (a *recordSet) Fields() []*ast.ResultField {
 	if len(a.fields) == 0 {
-		a.fields = colNames2ResultFields(a.Interlock.Schema(), a.stmt.OutputNames, a.stmt.Ctx.GetSessionVars().CurrentDB)
+		a.fields = colNames2ResultFields(a.Interlock.Schema(), a.stmt.OutputNames, a.stmt.Ctx.GetSessionVars().Currentnoedb)
 	}
 	return a.fields
 }
 
-func colNames2ResultFields(schema *expression.Schema, names []*types.FieldName, defaultDB string) []*ast.ResultField {
+func colNames2ResultFields(schema *expression.Schema, names []*types.FieldName, defaultnoedb string) []*ast.ResultField {
 	rfs := make([]*ast.ResultField, 0, schema.Len())
-	defaultDBCIStr := serial.NewCIStr(defaultDB)
+	defaultnoedbCIStr := serial.NewCIStr(defaultnoedb)
 	for i := 0; i < schema.Len(); i++ {
-		dbName := names[i].DBName
-		if dbName.L == "" && names[i].TblName.L != "" {
-			dbName = defaultDBCIStr
+		noedbName := names[i].noedbName
+		if noedbName.L == "" && names[i].TblName.L != "" {
+			noedbName = defaultnoedbCIStr
 		}
 		origColName := names[i].OrigColName
 		if origColName.L == "" {
@@ -54,10 +54,10 @@ func colNames2ResultFields(schema *expression.Schema, names []*types.FieldName, 
 			ColumnAsName: names[i].ColName,
 			Table:        &serial.TableInfo{Name: names[i].OrigTblName},
 			TableAsName:  names[i].TblName,
-			DBName:       dbName,
+			noedbName:       noedbName,
 		}
 		// This is for compatibility.
-		// See issue https://github.com/YosiSF/MilevaDB/BerolinaSQL/issues/10513 .
+		// See issue https://github.com/YosiSF/Milevanoedb/BerolinaSQL/issues/10513 .
 		if len(rf.ColumnAsName.O) > mysql.MaxAliasIdentifierLen {
 			rf.ColumnAsName.O = rf.ColumnAsName.O[:mysql.MaxAliasIdentifierLen]
 		}
@@ -148,7 +148,7 @@ type ExecStmt struct {
 func (a *ExecStmt) PointGet(ctx contextctx.contextctx, is infoschema.InfoSchema) (*recordSet, error) {
 	if span := opentracing.SpanFromcontextctx(ctx); span != nil && span.Tracer() != nil {
 		span1 := span.Tracer().StartSpan("ExecStmt.PointGet", opentracing.ChildOf(span.contextctx()))
-		span1.LogKV("sql", a.OriginText())
+		span1.Logekv("sql", a.OriginText())
 		defer span1.Finish()
 		ctx = opentracing.contextctxWithSpan(ctx, span1)
 	}
@@ -157,7 +157,7 @@ func (a *ExecStmt) PointGet(ctx contextctx.contextctx, is infoschema.InfoSchema)
 	if err != nil {
 		return nil, err
 	}
-	a.Ctx.GetSessionVars().StmtCtx.Priority = kv.PriorityHigh
+	a.Ctx.GetSessionVars().StmtCtx.Priority = ekv.PriorityHigh
 
 	// try to reuse point get Interlock
 	if a.PsStmt.Interlock != nil {

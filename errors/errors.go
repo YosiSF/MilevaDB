@@ -128,13 +128,13 @@ type ErrClass int
 // Error classes.
 const (
 	ClassAutoid ErrClass = iota + 1
-	ClassDBS
+	ClassnoedbS
 	ClassDomain
 	ClassEvaluator
 	ClassExecutor
 	ClassExpression
 	ClassAdmin
-	ClassKV
+	Classekv
 	ClassMeta
 	ClassOptimizer
 	ClassParser
@@ -148,22 +148,22 @@ const (
 	ClassBlocks
 	ClassTypes
 	ClassGlobal
-	ClassMockTikv
+	ClassMockTiekv
 	ClassJSON
-	ClassTiKV
+	ClassTiekv
 	ClassSession
 	// Add more as needed.
 )
 
 var errClz2Str = map[ErrClass]string{
 	ClassAutoid:     "autoid",
-	ClassDBS:        "DBS",
+	ClassnoedbS:        "noedbS",
 	ClassDomain:     "domain",
 	ClassExecutor:   "executor",
 	ClassExpression: "expression",
 	ClassAdmin:      "admin",
 	ClassMeta:       "meta",
-	ClassKV:         "kv",
+	Classekv:         "ekv",
 	ClassOptimizer:  "planner",
 	ClassParser:     "parser",
 	ClassPerfSchema: "perfschema",
@@ -175,9 +175,9 @@ var errClz2Str = map[ErrClass]string{
 	ClassBlocks:      "Blocks",
 	ClassTypes:      "types",
 	ClassGlobal:     "global",
-	ClassMockTikv:   "mocktikv",
+	ClassMockTiekv:   "mocktiekv",
 	ClassJSON:       "json",
-	ClassTiKV:       "tikv",
+	ClassTiekv:       "tiekv",
 	ClassSession:    "session",
 }
 

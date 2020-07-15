@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	// CreateUserTable is the SQL statement creates User table in system db.
+	// CreateUserTable is the SQL statement creates User table in system noedb.
 	CreateUserTable = `CREATE TABLE if not exists mysql.user (
 		Host				CHAR(64),
 		User				CHAR(32),
@@ -28,7 +28,7 @@ const (
 		Grant_priv			ENUM('N','Y') NOT NULL DEFAULT 'N',
 		References_priv			ENUM('N','Y') NOT NULL DEFAULT 'N',
 		Alter_priv			ENUM('N','Y') NOT NULL DEFAULT 'N',
-		Show_db_priv			ENUM('N','Y') NOT NULL DEFAULT 'N',
+		Show_noedb_priv			ENUM('N','Y') NOT NULL DEFAULT 'N',
 		Super_priv			ENUM('N','Y') NOT NULL DEFAULT 'N',
 		Create_tmp_table_priv		ENUM('N','Y') NOT NULL DEFAULT 'N',
 		Lock_tables_priv		ENUM('N','Y') NOT NULL DEFAULT 'N',
@@ -49,17 +49,17 @@ const (
 		FILE_priv				ENUM('N','Y') NOT NULL DEFAULT 'N',
 		Config_priv				ENUM('N','Y') NOT NULL DEFAULT 'N',
 		PRIMARY KEY (Host, User));`
-	// CreateGlobalPrivTable is the SQL statement creates Global scope privilege table in system db.
+	// CreateGlobalPrivTable is the SQL statement creates Global scope privilege table in system noedb.
 	CreateGlobalPrivTable = "CREATE TABLE if not exists mysql.global_priv (" +
 		"Host char(60) NOT NULL DEFAULT ''," +
 		"User char(80) NOT NULL DEFAULT ''," +
 		"Priv longtext NOT NULL DEFAULT ''," +
 		"PRIMARY KEY (Host, User)" +
 		")"
-	// CreateDBPrivTable is the SQL statement creates DB scope privilege table in system db.
-	CreateDBPrivTable = `CREATE TABLE if not exists mysql.db (
+	// CreatenoedbPrivTable is the SQL statement creates noedb scope privilege table in system noedb.
+	CreatenoedbPrivTable = `CREATE TABLE if not exists mysql.noedb (
 		Host			CHAR(60),
-		DB			CHAR(64),
+		noedb			CHAR(64),
 		User			CHAR(32),
 		Select_priv		ENUM('N','Y') Not Null DEFAULT 'N',
 		Insert_priv		ENUM('N','Y') Not Null DEFAULT 'N',
@@ -80,44 +80,44 @@ const (
 		Execute_priv		ENUM('N','Y') Not Null DEFAULT 'N',
 		Event_priv		ENUM('N','Y') NOT NULL DEFAULT 'N',
 		Trigger_priv		ENUM('N','Y') NOT NULL DEFAULT 'N',
-		PRIMARY KEY (Host, DB, User));`
-	// CreateTablePrivTable is the SQL statement creates table scope privilege table in system db.
+		PRIMARY KEY (Host, noedb, User));`
+	// CreateTablePrivTable is the SQL statement creates table scope privilege table in system noedb.
 	CreateTablePrivTable = `CREATE TABLE if not exists mysql.tables_priv (
 		Host		CHAR(60),
-		DB		CHAR(64),
+		noedb		CHAR(64),
 		User		CHAR(32),
 		Table_name	CHAR(64),
 		Grantor		CHAR(77),
 		Timestamp	Timestamp DEFAULT CURRENT_TIMESTAMP,
 		Table_priv	SET('Select','Insert','Update','Delete','Create','Drop','Grant','Index','Alter','Create View','Show View','Trigger','References'),
 		Column_priv	SET('Select','Insert','Update'),
-		PRIMARY KEY (Host, DB, User, Table_name));`
-	// CreateColumnPrivTable is the SQL statement creates column scope privilege table in system db.
+		PRIMARY KEY (Host, noedb, User, Table_name));`
+	// CreateColumnPrivTable is the SQL statement creates column scope privilege table in system noedb.
 	CreateColumnPrivTable = `CREATE TABLE if not exists mysql.columns_priv(
 		Host		CHAR(60),
-		DB		CHAR(64),
+		noedb		CHAR(64),
 		User		CHAR(32),
 		Table_name	CHAR(64),
 		Column_name	CHAR(64),
 		Timestamp	Timestamp DEFAULT CURRENT_TIMESTAMP,
 		Column_priv	SET('Select','Insert','Update'),
-		PRIMARY KEY (Host, DB, User, Table_name, Column_name));`
-	// CreateGlobalVariablesTable is the SQL statement creates global variable table in system db.
-	// TODO: MySQL puts GLOBAL_VARIABLES table in INFORMATION_SCHEMA db.
-	// INFORMATION_SCHEMA is a virtual db in milevadb. So we put this table in system db.
+		PRIMARY KEY (Host, noedb, User, Table_name, Column_name));`
+	// CreateGlobalVariablesTable is the SQL statement creates global variable table in system noedb.
+	// TODO: MySQL puts GLOBAL_VARIABLES table in INFORMATION_SCHEMA noedb.
+	// INFORMATION_SCHEMA is a virtual noedb in milevadb. So we put this table in system noedb.
 	// Maybe we will put it back to INFORMATION_SCHEMA.
 	CreateGlobalVariablesTable = `CREATE TABLE if not exists mysql.GLOBAL_VARIABLES(
 		VARIABLE_NAME  VARCHAR(64) Not Null PRIMARY KEY,
 		VARIABLE_VALUE VARCHAR(1024) DEFAULT Null);`
-	// CreatemilevadbTable is the SQL statement creates a table in system db.
+	// CreatemilevanoedbTable is the SQL statement creates a table in system noedb.
 	// This table is a key-value struct contains some information used by milevadb.
 	// Currently we only put bootstrapped in it which indicates if the system is already bootstrapped.
-	CreatemilevadbTable = `CREATE TABLE if not exists mysql.milevadb(
+	CreatemilevanoedbTable = `CREATE TABLE if not exists mysql.milevadb(
 		VARIABLE_NAME  VARCHAR(64) Not Null PRIMARY KEY,
 		VARIABLE_VALUE VARCHAR(1024) DEFAULT Null,
 		COMMENT VARCHAR(1024));`
 
-	// CreateHelpTopic is the SQL statement creates help_topic table in system db.
+	// CreateHelpTopic is the SQL statement creates help_topic table in system noedb.
 	// See: https://dev.mysql.com/doc/refman/5.5/en/system-database.html#system-database-help-tables
 	CreateHelpTopic = `CREATE TABLE if not exists mysql.help_topic (
   		help_topic_id int(10) unsigned NOT NULL,
@@ -128,7 +128,7 @@ const (
   		url text NOT NULL,
   		PRIMARY KEY (help_topic_id),
   		UNIQUE KEY name (name)
-		) ENGINE=InnoDB DEFAULT CHARSET=utf8 STATS_PERSISTENT=0 COMMENT='help topics';`
+		) ENGINE=Innonoedb DEFAULT CHARSET=utf8 STATS_PERSISTENT=0 COMMENT='help topics';`
 
 	// CreateStatsMetaTable stores the meta of table statistics.
 	CreateStatsMetaTable = `CREATE TABLE if not exists mysql.stats_meta (
@@ -191,12 +191,12 @@ const (
 		UNIQUE KEY delete_range_done_index (job_id, element_id)
 	);`
 
-	// CreateStatsFeedbackTable stores the feedback info which is used to update stats.
-	CreateStatsFeedbackTable = `CREATE TABLE IF NOT EXISTS mysql.stats_feedback (
+	// CreateStatsFeenoedbackTable stores the feenoedback info which is used to update stats.
+	CreateStatsFeenoedbackTable = `CREATE TABLE IF NOT EXISTS mysql.stats_feenoedback (
 		table_id bigint(64) NOT NULL,
 		is_index tinyint(2) NOT NULL,
 		hist_id bigint(64) NOT NULL,
-		feedback blob NOT NULL,
+		feenoedback blob NOT NULL,
 		index hist(table_id, is_index, hist_id)
 	);`
 
@@ -204,15 +204,15 @@ const (
 	CreateBindInfoTable = `CREATE TABLE IF NOT EXISTS mysql.bind_info (
 		original_sql text NOT NULL  ,
       	bind_sql text NOT NULL ,
-      	default_db text  NOT NULL,
+      	default_noedb text  NOT NULL,
 		status text NOT NULL,
 		create_time timestamp(3) NOT NULL,
 		update_time timestamp(3) NOT NULL,
 		charset text NOT NULL,
 		collation text NOT NULL,
-		INDEX sql_index(original_sql(1024),default_db(1024)) COMMENT "accelerate the speed when add global binding query",
+		INDEX sql_index(original_sql(1024),default_noedb(1024)) COMMENT "accelerate the speed when add global binding query",
 		INDEX time_index(update_time) COMMENT "accelerate the speed when querying with last update time"
-	) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;`
+	) ENGINE=Innonoedb DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;`
 
 	// CreateRoleEdgesTable stores the role and user relationship information.
 	CreateRoleEdgesTable = `CREATE TABLE IF NOT EXISTS mysql.role_edges (
@@ -246,7 +246,7 @@ const (
 	// CreateExprPushdownBlacklist stores the expressions which are not allowed to be pushed down.
 	CreateExprPushdownBlacklist = `CREATE TABLE IF NOT EXISTS mysql.expr_pushdown_blacklist (
 		name char(100) NOT NULL,
-		store_type char(100) NOT NULL DEFAULT 'tikv,tiflash,milevadb',
+		store_type char(100) NOT NULL DEFAULT 'tiekv,tiflash,milevadb',
 		reason varchar(200)
 	);`
 
@@ -256,7 +256,7 @@ const (
 	);`
 )
 
-// bootstrap initiates system DB for a store.
+// bootstrap initiates system noedb for a store.
 func bootstrap(s Session) {
 	startTime := time.Now()
 	dom := domain.GetDomain(s)
@@ -266,7 +266,7 @@ func bootstrap(s Session) {
 			logutil.BgLogger().Fatal("check bootstrap error",
 				zap.Error(err))
 		}
-		// For rolling upgrade, we can't do upgrade only in the owner.
+		// For rolling upgrade, we can't do upgrade only in the keywatcher.
 		if b {
 			upgrade(s)
 			logutil.BgLogger().Info("upgrade successful in bootstrap",
@@ -274,8 +274,8 @@ func bootstrap(s Session) {
 			return
 		}
 		// To reduce conflict when multiple milevadb-server start at the same time.
-		// Actually only one server need to do the bootstrap. So we chose dbs owner to do this.
-		if dom.dbs().OwnerManager().IsOwner() {
+		// Actually only one server need to do the bootstrap. So we chose dbs keywatcher to do this.
+		if dom.dbs().KeywatcherManager().IsKeywatcher() {
 			dodbsWorks(s)
 			doDMLWorks(s)
 			logutil.BgLogger().Info("bootstrap successful",
@@ -297,12 +297,12 @@ const (
 	bootstrappedVar = "bootstrapped"
 	// The variable name in mysql.milevadb table.
 	// It is used for getting the version of the milevadb server which bootstrapped the store.
-	milevadbServerVersionVar = "milevadb_server_version"
+	milevanoedbServerVersionVar = "milevanoedb_server_version"
 	// The variable name in mysql.milevadb table and it will be used when we want to know
 	// system timezone.
-	milevadbSystemTZ = "system_tz"
+	milevanoedbSystemTZ = "system_tz"
 	// The variable name in mysql.milevadb table and it will indicate if the new collations are enabled in the milevadb cluster.
-	milevadbNewCollationEnabled = "new_collation_enabled"
+	milevanoedbNewCollationEnabled = "new_collation_enabled"
 	// Const for milevadb server version 2.
 	version2  = 2
 	version3  = 3
@@ -343,14 +343,14 @@ const (
 	version38 = 38
 	version39 = 39
 	// version40 is the version that introduce new collation in milevadb,
-	// see https://github.com/YosiSF/MilevaDB/BerolinaSQL/pull/14574 for more details.
+	// see https://github.com/YosiSF/Milevanoedb/BerolinaSQL/pull/14574 for more details.
 	version40 = 40
 	version41 = 41
 	// version42 add storeType and reason column in expr_pushdown_blacklist
 	version42 = 42
 	// version43 updates global variables related to statement summary.
 	version43 = 43
-	// version44 delete milevadb_isolation_read_engines from mysql.global_variables to avoid unexpected behavior after upgrade.
+	// version44 delete milevanoedb_isolation_read_engines from mysql.global_variables to avoid unexpected behavior after upgrade.
 	version44 = 44
 	// version45 introduces CONFIG_PRIV for SET CONFIG statements.
 	version45 = 45
@@ -406,14 +406,14 @@ var (
 )
 
 func checkBootstrapped(s Session) (bool, error) {
-	//  Check if system db exists.
-	_, err := s.Execute(context.Background(), fmt.Sprintf("USE %s;", mysql.SystemDB))
+	//  Check if system noedb exists.
+	_, err := s.Execute(context.Background(), fmt.Sprintf("USE %s;", mysql.Systemnoedb))
 	if err != nil && schemaReplicant.ErrDatabaseNotExists.NotEqual(err) {
 		logutil.BgLogger().Fatal("check bootstrap error",
 			zap.Error(err))
 	}
 	// Check bootstrapped variable value in milevadb table.
-	sVal, _, err := getmilevadbVar(s, bootstrappedVar)
+	sVal, _, err := getmilevanoedbVar(s, bootstrappedVar)
 	if err != nil {
 		if schemaReplicant.ErrTableNotExists.Equal(err) {
 			return false, nil
@@ -430,11 +430,11 @@ func checkBootstrapped(s Session) (bool, error) {
 	return isBootstrapped, nil
 }
 
-// getmilevadbVar gets variable value from mysql.milevadb table.
+// getmilevanoedbVar gets variable value from mysql.milevadb table.
 // Those variables are used by milevadb server.
-func getmilevadbVar(s Session, name string) (sVal string, isNull bool, e error) {
+func getmilevanoedbVar(s Session, name string) (sVal string, isNull bool, e error) {
 	sql := fmt.Sprintf(`SELECT HIGH_PRIORITY VARIABLE_VALUE FROM %s.%s WHERE VARIABLE_NAME="%s"`,
-		mysql.SystemDB, mysql.milevadbTable, name)
+		mysql.Systemnoedb, mysql.milevanoedbTable, name)
 	ctx := context.Background()
 	rs, err := s.Execute(ctx, sql)
 	if err != nil {
@@ -502,13 +502,13 @@ func upgradeToVer2(s Session, ver int64) {
 	}
 	// Version 2 add two system variable for DistSQL concurrency controlling.
 	// Insert distsql related system variable.
-	distSQLVars := []string{variable.milevadbDistSQLScanConcurrency}
+	distSQLVars := []string{variable.milevanoedbDistSQLScanConcurrency}
 	values := make([]string, 0, len(distSQLVars))
 	for _, v := range distSQLVars {
 		value := fmt.Sprintf(`("%s", "%s")`, v, variable.SysVars[v].Value)
 		values = append(values, value)
 	}
-	sql := fmt.Sprintf("INSERT HIGH_PRIORITY IGNORE INTO %s.%s VALUES %s;", mysql.SystemDB, mysql.GlobalVariablesTable,
+	sql := fmt.Sprintf("INSERT HIGH_PRIORITY IGNORE INTO %s.%s VALUES %s;", mysql.Systemnoedb, mysql.GlobalVariablesTable,
 		strings.Join(values, ", "))
 	mustExecute(s, sql)
 }
@@ -520,7 +520,7 @@ func upgradeToVer3(s Session, ver int64) {
 	}
 	// Version 3 fix tx_read_only variable value.
 	sql := fmt.Sprintf("UPDATE HIGH_PRIORITY %s.%s set variable_value = '0' where variable_name = 'tx_read_only';",
-		mysql.SystemDB, mysql.GlobalVariablesTable)
+		mysql.Systemnoedb, mysql.GlobalVariablesTable)
 	mustExecute(s, sql)
 }
 
@@ -545,7 +545,7 @@ func upgradeToVer6(s Session, ver int64) {
 	if ver >= version6 {
 		return
 	}
-	doReentrantdbs(s, "ALTER TABLE mysql.user ADD COLUMN `Super_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Show_db_priv`", schemaReplicant.ErrColumnExists)
+	doReentrantdbs(s, "ALTER TABLE mysql.user ADD COLUMN `Super_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Show_noedb_priv`", schemaReplicant.ErrColumnExists)
 	// For reasons of compatibility, set the non-exists privilege column value to 'Y', as milevadb doesn't check them in older versions.
 	mustExecute(s, "UPDATE HIGH_PRIORITY mysql.user SET Super_priv='Y'")
 }
@@ -656,7 +656,7 @@ func upgradeToVer12(s Session, ver int64) {
 	}
 
 	sql = fmt.Sprintf(`INSERT HIGH_PRIORITY INTO %s.%s VALUES ("%s", "%d", "milevadb bootstrap version.") ON DUPLICATE KEY UPDATE VARIABLE_VALUE="%d"`,
-		mysql.SystemDB, mysql.milevadbTable, milevadbServerVersionVar, version12, version12)
+		mysql.Systemnoedb, mysql.milevanoedbTable, milevanoedbServerVersionVar, version12, version12)
 	mustExecute(s, sql)
 
 	mustExecute(s, "COMMIT")
@@ -694,15 +694,15 @@ func upgradeToVer14(s Session, ver int64) {
 		return
 	}
 	sqls := []string{
-		"ALTER TABLE mysql.db ADD COLUMN `References_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Grant_priv`",
-		"ALTER TABLE mysql.db ADD COLUMN `Create_tmp_table_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Alter_priv`",
-		"ALTER TABLE mysql.db ADD COLUMN `Lock_tables_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Create_tmp_table_priv`",
-		"ALTER TABLE mysql.db ADD COLUMN `Create_view_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Lock_tables_priv`",
-		"ALTER TABLE mysql.db ADD COLUMN `Show_view_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Create_view_priv`",
-		"ALTER TABLE mysql.db ADD COLUMN `Create_routine_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Show_view_priv`",
-		"ALTER TABLE mysql.db ADD COLUMN `Alter_routine_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Create_routine_priv`",
-		"ALTER TABLE mysql.db ADD COLUMN `Event_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Execute_priv`",
-		"ALTER TABLE mysql.db ADD COLUMN `Trigger_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Event_priv`",
+		"ALTER TABLE mysql.noedb ADD COLUMN `References_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Grant_priv`",
+		"ALTER TABLE mysql.noedb ADD COLUMN `Create_tmp_table_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Alter_priv`",
+		"ALTER TABLE mysql.noedb ADD COLUMN `Lock_tables_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Create_tmp_table_priv`",
+		"ALTER TABLE mysql.noedb ADD COLUMN `Create_view_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Lock_tables_priv`",
+		"ALTER TABLE mysql.noedb ADD COLUMN `Show_view_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Create_view_priv`",
+		"ALTER TABLE mysql.noedb ADD COLUMN `Create_routine_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Show_view_priv`",
+		"ALTER TABLE mysql.noedb ADD COLUMN `Alter_routine_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Create_routine_priv`",
+		"ALTER TABLE mysql.noedb ADD COLUMN `Event_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Execute_priv`",
+		"ALTER TABLE mysql.noedb ADD COLUMN `Trigger_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Event_priv`",
 	}
 	ctx := context.Background()
 	for _, sql := range sqls {
@@ -752,7 +752,7 @@ func upgradeToVer19(s Session, ver int64) {
 	if ver >= version19 {
 		return
 	}
-	doReentrantdbs(s, "ALTER TABLE mysql.db MODIFY User CHAR(32)")
+	doReentrantdbs(s, "ALTER TABLE mysql.noedb MODIFY User CHAR(32)")
 	doReentrantdbs(s, "ALTER TABLE mysql.tables_priv MODIFY User CHAR(32)")
 	doReentrantdbs(s, "ALTER TABLE mysql.columns_priv MODIFY User CHAR(32)")
 }
@@ -761,7 +761,7 @@ func upgradeToVer20(s Session, ver int64) {
 	if ver >= version20 {
 		return
 	}
-	doReentrantdbs(s, CreateStatsFeedbackTable)
+	doReentrantdbs(s, CreateStatsFeenoedbackTable)
 }
 
 func upgradeToVer21(s Session, ver int64) {
@@ -792,7 +792,7 @@ func upgradeToVer23(s Session, ver int64) {
 // writeSystemTZ writes system timezone info into mysql.milevadb
 func writeSystemTZ(s Session) {
 	sql := fmt.Sprintf(`INSERT HIGH_PRIORITY INTO %s.%s VALUES ("%s", "%s", "milevadb Global System Timezone.") ON DUPLICATE KEY UPDATE VARIABLE_VALUE="%s"`,
-		mysql.SystemDB, mysql.milevadbTable, milevadbSystemTZ, timeutil.InferSystemTZ(), timeutil.InferSystemTZ())
+		mysql.Systemnoedb, mysql.milevanoedbTable, milevanoedbSystemTZ, timeutil.InferSystemTZ(), timeutil.InferSystemTZ())
 	mustExecute(s, sql)
 }
 
@@ -804,13 +804,13 @@ func upgradeToVer24(s Session, ver int64) {
 	writeSystemTZ(s)
 }
 
-// upgradeToVer25 updates milevadb_max_soliton_size to new low bound value 32 if previous value is small than 32.
+// upgradeToVer25 updates milevanoedb_max_soliton_size to new low bound value 32 if previous value is small than 32.
 func upgradeToVer25(s Session, ver int64) {
 	if ver >= version25 {
 		return
 	}
 	sql := fmt.Sprintf("UPDATE HIGH_PRIORITY %[1]s.%[2]s SET VARIABLE_VALUE = '%[4]d' WHERE VARIABLE_NAME = '%[3]s' AND VARIABLE_VALUE < %[4]d",
-		mysql.SystemDB, mysql.GlobalVariablesTable, variable.milevadbMaxSolitonsize, variable.DefInitSolitonsize)
+		mysql.Systemnoedb, mysql.GlobalVariablesTable, variable.milevanoedbMaxSolitonsize, variable.DefInitSolitonsize)
 	mustExecute(s, sql)
 }
 
@@ -850,7 +850,7 @@ func upgradeToVer29(s Session, ver int64) {
 	}
 	doReentrantdbs(s, "ALTER TABLE mysql.bind_info change create_time create_time timestamp(3)")
 	doReentrantdbs(s, "ALTER TABLE mysql.bind_info change update_time update_time timestamp(3)")
-	doReentrantdbs(s, "ALTER TABLE mysql.bind_info add index sql_index (original_sql(1024),default_db(1024))", dbs.ErrDupKeyName)
+	doReentrantdbs(s, "ALTER TABLE mysql.bind_info add index sql_index (original_sql(1024),default_noedb(1024))", dbs.ErrDupKeyName)
 }
 
 func upgradeToVer30(s Session, ver int64) {
@@ -892,8 +892,8 @@ func upgradeToVer35(s Session, ver int64) {
 	if ver >= version35 {
 		return
 	}
-	sql := fmt.Sprintf("UPDATE HIGH_PRIORITY %s.%s SET VARIABLE_NAME = '%s' WHERE VARIABLE_NAME = 'milevadb_back_off_weight'",
-		mysql.SystemDB, mysql.GlobalVariablesTable, variable.milevadbBackOffWeight)
+	sql := fmt.Sprintf("UPDATE HIGH_PRIORITY %s.%s SET VARIABLE_NAME = '%s' WHERE VARIABLE_NAME = 'milevanoedb_back_off_weight'",
+		mysql.Systemnoedb, mysql.GlobalVariablesTable, variable.milevanoedbBackOffWeight)
 	mustExecute(s, sql)
 }
 
@@ -911,9 +911,9 @@ func upgradeToVer37(s Session, ver int64) {
 	if ver >= version37 {
 		return
 	}
-	// when upgrade from old milevadb and no 'milevadb_enable_window_function' in GLOBAL_VARIABLES, init it with 0.
+	// when upgrade from old milevadb and no 'milevanoedb_enable_window_function' in GLOBAL_VARIABLES, init it with 0.
 	sql := fmt.Sprintf("INSERT IGNORE INTO  %s.%s (`VARIABLE_NAME`, `VARIABLE_VALUE`) VALUES ('%s', '%d')",
-		mysql.SystemDB, mysql.GlobalVariablesTable, variable.milevadbEnableWindowFunction, 0)
+		mysql.Systemnoedb, mysql.GlobalVariablesTable, variable.milevanoedbEnableWindowFunction, 0)
 	mustExecute(s, sql)
 }
 
@@ -945,7 +945,7 @@ func writeNewCollationParameter(s Session, flag bool) {
 		b = varTrue
 	}
 	sql := fmt.Sprintf(`INSERT HIGH_PRIORITY INTO %s.%s VALUES ("%s", '%s', '%s') ON DUPLICATE KEY UPDATE VARIABLE_VALUE='%s'`,
-		mysql.SystemDB, mysql.milevadbTable, milevadbNewCollationEnabled, b, comment, b)
+		mysql.Systemnoedb, mysql.milevanoedbTable, milevanoedbNewCollationEnabled, b, comment, b)
 	mustExecute(s, sql)
 }
 
@@ -976,21 +976,21 @@ func upgradeToVer42(s Session, ver int64) {
 	if ver >= version42 {
 		return
 	}
-	doReentrantdbs(s, "ALTER TABLE mysql.expr_pushdown_blacklist ADD COLUMN `store_type` char(100) NOT NULL DEFAULT 'tikv,tiflash,milevadb'", schemaReplicant.ErrColumnExists)
+	doReentrantdbs(s, "ALTER TABLE mysql.expr_pushdown_blacklist ADD COLUMN `store_type` char(100) NOT NULL DEFAULT 'tiekv,tiflash,milevadb'", schemaReplicant.ErrColumnExists)
 	doReentrantdbs(s, "ALTER TABLE mysql.expr_pushdown_blacklist ADD COLUMN `reason` varchar(200)", schemaReplicant.ErrColumnExists)
 	writeDefaultExprPushDownBlacklist(s)
 }
 
 // Convert statement summary global variables to non-empty values.
 func writeStmtSummaryVars(s Session) {
-	sql := fmt.Sprintf("UPDATE %s.%s SET variable_value='%%s' WHERE variable_name='%%s' AND variable_value=''", mysql.SystemDB, mysql.GlobalVariablesTable)
+	sql := fmt.Sprintf("UPDATE %s.%s SET variable_value='%%s' WHERE variable_name='%%s' AND variable_value=''", mysql.Systemnoedb, mysql.GlobalVariablesTable)
 	stmtSummaryConfig := config.GetGlobalConfig().StmtSummary
-	mustExecute(s, fmt.Sprintf(sql, variable.BoolToIntStr(stmtSummaryConfig.Enable), variable.milevadbEnableStmtSummary))
-	mustExecute(s, fmt.Sprintf(sql, variable.BoolToIntStr(stmtSummaryConfig.EnableInternalQuery), variable.milevadbStmtSummaryInternalQuery))
-	mustExecute(s, fmt.Sprintf(sql, strconv.Itoa(stmtSummaryConfig.RefreshInterval), variable.milevadbStmtSummaryRefreshInterval))
-	mustExecute(s, fmt.Sprintf(sql, strconv.Itoa(stmtSummaryConfig.HistorySize), variable.milevadbStmtSummaryHistorySize))
-	mustExecute(s, fmt.Sprintf(sql, strconv.FormatUint(uint64(stmtSummaryConfig.MaxStmtCount), 10), variable.milevadbStmtSummaryMaxStmtCount))
-	mustExecute(s, fmt.Sprintf(sql, strconv.FormatUint(uint64(stmtSummaryConfig.MaxSQLLength), 10), variable.milevadbStmtSummaryMaxSQLLength))
+	mustExecute(s, fmt.Sprintf(sql, variable.BoolToIntStr(stmtSummaryConfig.Enable), variable.milevanoedbEnableStmtSummary))
+	mustExecute(s, fmt.Sprintf(sql, variable.BoolToIntStr(stmtSummaryConfig.EnableInternalQuery), variable.milevanoedbStmtSummaryInternalQuery))
+	mustExecute(s, fmt.Sprintf(sql, strconv.Itoa(stmtSummaryConfig.RefreshInterval), variable.milevanoedbStmtSummaryRefreshInterval))
+	mustExecute(s, fmt.Sprintf(sql, strconv.Itoa(stmtSummaryConfig.HistorySize), variable.milevanoedbStmtSummaryHistorySize))
+	mustExecute(s, fmt.Sprintf(sql, strconv.FormatUint(uint64(stmtSummaryConfig.MaxStmtCount), 10), variable.milevanoedbStmtSummaryMaxStmtCount))
+	mustExecute(s, fmt.Sprintf(sql, strconv.FormatUint(uint64(stmtSummaryConfig.MaxSQLLength), 10), variable.milevanoedbStmtSummaryMaxSQLLength))
 }
 
 func upgradeToVer43(s Session, ver int64) {
@@ -1004,7 +1004,7 @@ func upgradeToVer44(s Session, ver int64) {
 	if ver >= version44 {
 		return
 	}
-	mustExecute(s, "DELETE FROM mysql.global_variables where variable_name = \"milevadb_isolation_read_engines\"")
+	mustExecute(s, "DELETE FROM mysql.global_variables where variable_name = \"milevanoedb_isolation_read_engines\"")
 }
 
 func upgradeToVer45(s Session, ver int64) {
@@ -1019,13 +1019,13 @@ func upgradeToVer45(s Session, ver int64) {
 func updateBootstrapVer(s Session) {
 	// Update bootstrap version.
 	sql := fmt.Sprintf(`INSERT HIGH_PRIORITY INTO %s.%s VALUES ("%s", "%d", "milevadb bootstrap version.") ON DUPLICATE KEY UPDATE VARIABLE_VALUE="%d"`,
-		mysql.SystemDB, mysql.milevadbTable, milevadbServerVersionVar, currentBootstrapVersion, currentBootstrapVersion)
+		mysql.Systemnoedb, mysql.milevanoedbTable, milevanoedbServerVersionVar, currentBootstrapVersion, currentBootstrapVersion)
 	mustExecute(s, sql)
 }
 
 // getBootstrapVersion gets bootstrap version from mysql.milevadb table;
 func getBootstrapVersion(s Session) (int64, error) {
-	sVal, isNull, err := getmilevadbVar(s, milevadbServerVersionVar)
+	sVal, isNull, err := getmilevanoedbVar(s, milevanoedbServerVersionVar)
 	if err != nil {
 		return 0, errors.Trace(err)
 	}
@@ -1039,19 +1039,19 @@ func getBootstrapVersion(s Session) (int64, error) {
 func dodbsWorks(s Session) {
 	// Create a test database.
 	mustExecute(s, "CREATE DATABASE IF NOT EXISTS test")
-	// Create system db.
-	mustExecute(s, fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s;", mysql.SystemDB))
+	// Create system noedb.
+	mustExecute(s, fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s;", mysql.Systemnoedb))
 	// Create user table.
 	mustExecute(s, CreateUserTable)
 	// Create privilege tables.
 	mustExecute(s, CreateGlobalPrivTable)
-	mustExecute(s, CreateDBPrivTable)
+	mustExecute(s, CreatenoedbPrivTable)
 	mustExecute(s, CreateTablePrivTable)
 	mustExecute(s, CreateColumnPrivTable)
 	// Create global system variable table.
 	mustExecute(s, CreateGlobalVariablesTable)
 	// Create milevadb table.
-	mustExecute(s, CreatemilevadbTable)
+	mustExecute(s, CreatemilevanoedbTable)
 	// Create help table.
 	mustExecute(s, CreateHelpTopic)
 	// Create stats_meta table.
@@ -1064,8 +1064,8 @@ func dodbsWorks(s Session) {
 	mustExecute(s, CreateGCDeleteRangeTable)
 	// Create gc_delete_range_done table.
 	mustExecute(s, CreateGCDeleteRangeDoneTable)
-	// Create stats_feedback table.
-	mustExecute(s, CreateStatsFeedbackTable)
+	// Create stats_feenoedback table.
+	mustExecute(s, CreateStatsFeenoedbackTable)
 	// Create role_edges table.
 	mustExecute(s, CreateRoleEdgesTable)
 	// Create default_roles table.
@@ -1095,27 +1095,27 @@ func doDMLWorks(s Session) {
 		// Session only variable should not be inserted.
 		if v.Scope != variable.ScopeSession {
 			vVal := v.Value
-			if v.Name == variable.milevadbTxnMode && config.GetGlobalConfig().Store == "tikv" {
+			if v.Name == variable.milevanoedbTxnMode && config.GetGlobalConfig().Store == "tiekv" {
 				vVal = "pessimistic"
 			}
-			if v.Name == variable.milevadbRowFormatVersion {
-				vVal = strconv.Itoa(variable.DefmilevadbRowFormatV2)
+			if v.Name == variable.milevanoedbRowFormatVersion {
+				vVal = strconv.Itoa(variable.DefmilevanoedbRowFormatV2)
 			}
 			value := fmt.Sprintf(`("%s", "%s")`, strings.ToLower(k), vVal)
 			values = append(values, value)
 		}
 	}
-	sql := fmt.Sprintf("INSERT HIGH_PRIORITY INTO %s.%s VALUES %s;", mysql.SystemDB, mysql.GlobalVariablesTable,
+	sql := fmt.Sprintf("INSERT HIGH_PRIORITY INTO %s.%s VALUES %s;", mysql.Systemnoedb, mysql.GlobalVariablesTable,
 		strings.Join(values, ", "))
 	mustExecute(s, sql)
 
 	sql = fmt.Sprintf(`INSERT HIGH_PRIORITY INTO %s.%s VALUES("%s", "%s", "Bootstrap flag. Do not delete.")
 		ON DUPLICATE KEY UPDATE VARIABLE_VALUE="%s"`,
-		mysql.SystemDB, mysql.milevadbTable, bootstrappedVar, varTrue, varTrue)
+		mysql.Systemnoedb, mysql.milevanoedbTable, bootstrappedVar, varTrue, varTrue)
 	mustExecute(s, sql)
 
 	sql = fmt.Sprintf(`INSERT HIGH_PRIORITY INTO %s.%s VALUES("%s", "%d", "Bootstrap version. Do not delete.")`,
-		mysql.SystemDB, mysql.milevadbTable, milevadbServerVersionVar, currentBootstrapVersion)
+		mysql.Systemnoedb, mysql.milevanoedbTable, milevanoedbServerVersionVar, currentBootstrapVersion)
 	mustExecute(s, sql)
 
 	writeSystemTZ(s)

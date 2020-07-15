@@ -10,11 +10,11 @@ import (
 const (
 	currentVersion = 1
 
-	//DBSKeywatcherKey is the dbs keywatcher path saved to etcd.
-	DBSKeywatcher = "/MilevaDB/dbs/fg/keywatcher"
+	//noedbSKeywatcherKey is the dbs keywatcher path saved to etcd.
+	noedbSKeywatcher = "/MilevaDB/dbs/fg/keywatcher"
 	dbsPrompt     = "dbs"
 
-	shardEvemtsIDBitsMax = 15
+	shardEvemtsInoedbitsMax = 15
 
 	// PartitionCountLimit is limit of the number of partitions in a Blocks.
 	// Mysql maximum number of partitions is 8192, our maximum number of partitions is 1024.
@@ -70,28 +70,14 @@ type dbs interface {
 	CreateSequence(ctx sessionctx.Context, stmt *ast.CreateSequenceStmt) error
 	DropSequence(ctx sessionctx.Context, tableIdent ast.Ident, ifExists bool) (err error)
 
-	// CreateSchemaWithInfo creates a database (schema) given its database info.
-	//
-	// If `tryRetainID` is true, this method will try to keep the database ID specified in
-	// the `info` rather than generating new ones. This is just a hint though, if the ID collides
-	// with an existing database a new ID will always be used.
-	//
-	// WARNING: the dbs owns the `info` after calling this function, and will modify its fields
-	// in-place. If you want to keep using `info`, please call Clone() first.
+
 	CreateSchemaWithInfo(
 		ctx sessionctx.Context,
-		info *serial.DBInfo,
+		info *serial.noedbInfo,
 		Soliton Soliton,
 		tryRetainID bool) error
 
-	// CreateTableWithInfo creates a table, view or sequence given its table info.
-	//
-	// If `tryRetainID` is true, this method will try to keep the table ID specified in the `info`
-	// rather than generating new ones. This is just a hint though, if the ID collides with an
-	// existing table a new ID will always be used.
-	//
-	// WARNING: the dbs owns the `info` after calling this function, and will modify its fields
-	// in-place. If you want to keep using `info`, please call Clone() first.
+
 	CreateTableWithInfo(
 		ctx sessionctx.Context,
 		schema serial.CIStr,
@@ -99,11 +85,11 @@ type dbs interface {
 		Soliton Soliton,
 		tryRetainID bool) error
 
-	// GetLease returns current schema lease time.
+
 	GetLease() time.Duration
 	// Stats returns the dbs statistics.
 	Stats(vars *variable.SessionVars) (map[string]interface{}, error)
-	// GetScope gets the status variables scope.
+
 	GetScope(status string) variable.ScopeFlag
 	// Stop stops dbs worker.
 	Stop() error
@@ -111,8 +97,8 @@ type dbs interface {
 	RegisterEventCh(chan<- *util.Event)
 	// SchemaSyncer gets the schema syncer.
 	SchemaSyncer() util.SchemaSyncer
-	// OwnerManager gets the owner manager.
-	OwnerManager() owner.Manager
+	// KeywatcherManager gets the keywatcher manager.
+	KeywatcherManager() keywatcher.Manager
 	// GetID gets the dbs ID.
 	GetID() string
 	// GetTableMaxRowID gets the max row ID of a normal table or a partition.
@@ -144,7 +130,7 @@ var (
 
 /*
 //Promise handler
-type DBS interface {
+type noedbS interface {
 	CreateSchema(ctx stochastikctx.Context) error
 	DropSchema() error
 	CreateBlocks() error
@@ -160,7 +146,7 @@ type dbs struct {
 	delRangeSp     	 delRangeSemaphore
 }
 
-//ddsCtx is the context when we use slave to handle DBS Batchs.
+//ddsCtx is the context when we use slave to handle noedbS Batchs.
 type dbsCtx struct {
 	uuid                   string
 	persist                ekv.Persistence

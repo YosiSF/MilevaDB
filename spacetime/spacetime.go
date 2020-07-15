@@ -1,4 +1,4 @@
-//Copyright 2019 EinsteinDB/Venire Labs Inc
+//Copyright 2019 Einsteinnoedb/Venire Labs Inc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -22,11 +22,11 @@ import (
 	"strconv"
 	"strings"
 	"fmt"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/core/spacetime"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/core/ekv"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/core/curvature"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/core/merkle"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/core/util/binlog"
+	"github.com/YosiSF/Milevanoedb/BerolinaSQL/core/spacetime"
+	"github.com/YosiSF/Milevanoedb/BerolinaSQL/core/eekv"
+	"github.com/YosiSF/Milevanoedb/BerolinaSQL/core/curvature"
+	"github.com/YosiSF/Milevanoedb/BerolinaSQL/core/merkle"
+	"github.com/YosiSF/Milevanoedb/BerolinaSQL/core/util/binlog"
 	"go.uber.org/zap"
 
 
@@ -34,7 +34,7 @@ import (
 	//Spacetime is the metadata structure set
 	// NextGlobalDaggerID -> int64
 	// SchemaReplicantVersion->int64
-	// DBS -> {
+	// noedbS -> {
 	// 		Block:1 -> block spacetime data []byte
 	//		Block:2 -> block spacetime data []byte
 	// 		EID: 1 - > int64
@@ -54,8 +54,8 @@ var (
 	mSpacetimePrefix = []byte("m")
 	mNextglobalDaggerIDKey = []byte("NextGlobalDaggerID")
 	mSchemaReplicantVersionKey = []byte("SchemaReplicantVersionKey")
-	mDBs = []byte("DBs")
-	mDBPrefix = "DB"
+	mdbs = []byte("dbs")
+	mnoedbPrefix = "noedb"
 	mBlockPrefix = "Block"
 	mBlockIDPrefix = "EID"
 )
@@ -68,9 +68,9 @@ type Spacetime struct {
 }
 
 // If the current Meta needs to handle a job, jobListKey is the type of the job's list.
-func NewSpacetime(txn ekv.Transaction, jobListKeys ...JobListKeyType) *Spacetime {
-	txn.SetOption(ekv.Priority, ekv.PriorityHigh)
-	txn.SetOption(ekv.SyncLog, true)
+func NewSpacetime(txn eekv.Transaction, jobListKeys ...JobListKeyType) *Spacetime {
+	txn.SetOption(eekv.Priority, eekv.PriorityHigh)
+	txn.SetOption(eekv.SyncLog, true)
 	t := merkle.NewMerkle(txn, txn, mSpacetimePrefix)
 	listKey := DefaultJobListKey
 	if len(jobListKeys) != 0 {
@@ -85,7 +85,7 @@ func NewSpacetime(txn ekv.Transaction, jobListKeys ...JobListKeyType) *Spacetime
 }
 
 //Meta with snapshot
-func NewSnapshotSpacetime(snapshot ekv.Snapshot) *Spacetime {
+func NewSnapshotSpacetime(snapshot eekv.Snapshot) *Spacetime {
 	t := merkle.NewMerkle(snapshot, nil, mSpacetimePrefix)
 	return &Spacetime{txn: t}
 }

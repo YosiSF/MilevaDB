@@ -1,5 +1,5 @@
-//Copyright 2019 Venire Labs Inc 
-//
+//COPYRIGHT 2020 VENIRE LABS INC WHTCORPS INC ALL RIGHTS RESERVED
+// HYBRID LICENSE [UNMAINTAINED]
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,11 +14,13 @@
 
 package ekv
 
-
-
 import (
+	"encoding/hex"
 	"context"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/core/util/mmap"
+	"github.com/YosiSF/Milevanoedb/causetnetctx/stmtctx"
+	"github.com/YosiSF/Milevanoedb/types"
+	"github.com/YosiSF/Milevanoedb/util/codec"
+	"github.com/YosiSF/Milevanoedb/BerolinaSQL/core/util/mmap"
 	"bytes"
 	"sync"
 	"strconv"
@@ -27,8 +29,9 @@ import (
 	"time"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	_ "sync/atomic"
 )
-
+/*
 var(
 	//DefaultcontextTxnMemBufCap is the default transaction membuf capability.
 	DefaultInMemcontextTxnbufCap = 4 * 1024
@@ -38,6 +41,115 @@ var(
 	TempInMemcontextTxnbufCap = 64
 
 )
+*/
+
+type CausetStore struct {
+	MemBuffer
+	r Retriever
+}
+
+
+// Key represents high-level Key type.
+type Key []byte
+
+// Next returns the next key in byte-order.
+func (k Key) Next() Key {
+	// add 0x0 to the end of key
+	buf := make([]byte, len(k)+1)
+	copy(buf, k)
+	return buf
+}
+
+// PrefixNext returns the next prefix key.
+//
+// Assume there are keys like:
+//
+//   rowkey1
+//   rowkey1_column1
+//   rowkey1_column2
+//   rowKey2
+//
+// If we seek 'rowkey1' Next, we will get 'rowkey1_column1'.
+// If we seek 'rowkey1' PrefixNext, we will get 'rowkey2'.
+func (k Key) PrefixNext() Key {
+	buf := make([]byte, len(k))
+	copy(buf, k)
+	var i int
+	for i = len(k) - 1; i >= 0; i-- {
+		buf[i]++
+		if buf[i] != 0 {
+			break
+		}
+	}
+	if i == -1 {
+		copy(buf, k)
+		buf = append(buf, 0)
+	}
+	return buf
+}
+
+// Cmp returns the comparison result of two key.
+// The result will be 0 if a==b, -1 if a < b, and +1 if a > b.
+func (k Key) Cmp(another Key) int {
+	return bytes.Compare(k, another)
+}
+
+// HasPrefix tests whether the Key begins with prefix.
+func (k Key) HasPrefix(prefix Key) bool {
+	return bytes.HasPrefix(k, prefix)
+}
+
+// Clone returns a deep copy of the Key.
+func (k Key) Clone() Key {
+	ck := make([]byte, len(k))
+	copy(ck, k)
+	return ck
+}
+
+// String implements fmt.Stringer interface.
+func (k Key) String() string {
+	return hex.EncodeToString(k)
+}
+
+//Transitive keys.
+type KeyRange struct {
+
+	//Initial permission.
+	StartKey Key
+	//Deterministic.
+	EndKey   Key
+}
+
+
+func (r *KeyRange) IsPoint() bool {
+	if len(r.StartKey) != len(r.EndKey) {
+
+		startLen := len(r.StartKey)
+		return startLen+1 == len(r.EndKey) &&
+			r.EndKey[startLen] == 0 &&
+			bytes.Equal(r.StartKey, r.EndKey[:startLen])
+	}
+
+	i := len(r.StartKey) - 1
+	for ; i >= 0; i-- {
+		if r.StartKey[i] != 255 {
+			break
+		}
+		if r.EndKey[i] != 0 {
+			return false
+		}
+	}
+	if i < 0 {
+		// In case all bytes in StartKey are 255.
+		return false
+	}
+	// The byte at diffIdx in StartKey should be one less than the byte at diffIdx in EndKey.
+	// And bytes in StartKey and EndKey before diffIdx should be equal.
+	diffOneIdx := i
+	return r.StartKey[diffOneIdx]+1 == r.EndKey[diffOneIdx] &&
+		bytes.Equal(r.StartKey[:diffOneIdx], r.EndKey[:diffOneIdx])
+}
+
 
 
 
@@ -45,23 +157,19 @@ var(
 
 
 const (
-	// PresumeKeyNotExists indicates that when dealing with a Get operation but failing to read data from cache,
-	// we presume that the key does not exist in Store. The actual existence will be checked before the
-	// transcontextAction's commit.
-	// This option is an optimization for frequent checks during a transcontextAction, e.g. batch inserts.
+
 	PresumeKeyNotExists Option = iota + 1
-	// PresumeKeyNotExistsError is the option key for error.
-	// When PresumeKeyNotExists is set and condition is not match, should thEvemts the error.
+
 	PresumeKeyNotExistsError
-	// BinlogInfo contains the binlog data and client.
+
 	BinlogInfo
-	// SchemaChecker is used for checking schema-validity.
+
 	SchemaChecker
 	// IsolationLevel sets isolation level for current transcontextAction. The default level is SI.
 	IsolationLevel
-	// Priority marks the priority of this transcontextAction.
+
 	Priority
-	// NotFillCache makes this request do not touch the LRU cache of the underlying storage.
+
 	NotFillCache
 	// SyncLog decides whether the WAL(write-ahead log) of this request should be synchronized.
 	SyncLog
@@ -117,8 +225,8 @@ type IsoLevel int
 //Pullback is the interface wrapping Get/Seek
 
 type Pullback interface {
-		// Get gets the value for key k from kv store.
-	// If corresponding kv pair does not exist, it returns nil and ErrNotExist.
+		// Get gets the value for key k from ekv store.
+	// If corresponding ekv pair does not exist, it returns nil and ErrNotExist.
 	Get(k Key) ([]byte, error)
 	// Iter creates an Iterator positioned on the first entry that k <= entry's key.
 	// If such entry is not found, it returns an invalid Iterator with no error.
@@ -136,10 +244,10 @@ type Pullback interface {
 
 //Conjugator is the interface wrapping Set/Delete
 type Conjugator interface {
-	// Set sets the value for key k as v into kv store.
+	// Set sets the value for key k as v into ekv store.
 	// v must NOT be nil or empty, otherwise it returns ErrCannotSetNilValue.
 	Set(k Key, v []byte) error
-	// Delete removes the entry for key k from kv store.
+	// Delete removes the entry for key k from ekv store.
 	Delete(k Key) error
 }
 
@@ -174,11 +282,11 @@ type Transaction interface {
 	InMemcontextBuffer
 
 	Commit(context.Context) error
-	// Rollback undoes the transaction operations to KV store.
+	// Rollback undoes the transaction operations to ekv store.
 	Rollback() error
 	// String implements fmt.Stringer interface.
 	String() string
-	// LockKeys tries to lock the entries with the keys in KV store.
+	// LockKeys tries to lock the entries with the keys in ekv store.
 	LockKeys(keys ...Key) error
 	// SetOption sets an option with a value, when val is nil, uses the default
 	// value of this option.
@@ -212,7 +320,7 @@ type GraphRequest struct {
 	Concurrency int
 	// IsolationLevel is the isolation level, default is SI.
 	IsolationLevel IsoLevel
-	// Priority is the priority of this KV request, its value may be PriorityNormal/PriorityLow/PriorityHigh.
+	// Priority is the priority of this ekv request, its value may be PriorityNormal/PriorityLow/PriorityHigh.
 	Priority int
 	// NotFillCache makes this request do not touch the LRU cache of the underlying storage.
 	NotFillCache bool
@@ -239,7 +347,7 @@ type ResultSubset interface {
 	MemSize() int64
 }
 
-// Response represents the response returned from KV layer.
+// Response represents the response returned from ekv layer.
 type GraphResponse interface {
 	// Next returns a resultSubset from a single storage unit.
 	// When full result set is returned, nil is returned.
@@ -248,7 +356,7 @@ type GraphResponse interface {
 	Close() error
 }
 
-// Snapshot defines the interface for the snapshot fetched from KV store.
+// Snapshot defines the interface for the snapshot fetched from ekv store.
 type Snapshot interface {
 	PullbackInverter
 	// BatchGet gets a batch of values from snapshot.
@@ -257,7 +365,7 @@ type Snapshot interface {
 	SetPriority(priority int)
 }
 
-/ Driver is the interface that must be implemented by a KV storage.
+/ Driver is the interface that must be implemented by a ekv storage.
 type Driver interface {
 	// Open returns a new Storage.
 	// The path is the string for storage specific format.

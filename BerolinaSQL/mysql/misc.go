@@ -20,10 +20,10 @@ import (
   "strconv"
   "strings"
 
-  "github.com/YosiSF/MilevaDB/errors"
-  "github.com/YosiSF/MilevaDB/BerolinaSQL/auth"
-  "github.com/YosiSF/MilevaDB/BerolinaSQL/serial"
-  "github.com/YosiSF/MilevaDB/BerolinaSQL/mysql"
+  "github.com/YosiSF/Milevanoedb/errors"
+  "github.com/YosiSF/Milevanoedb/BerolinaSQL/auth"
+  "github.com/YosiSF/Milevanoedb/BerolinaSQL/serial"
+  "github.com/YosiSF/Milevanoedb/BerolinaSQL/mysql"
 )
 
 var (

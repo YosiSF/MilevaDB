@@ -13,9 +13,9 @@
 
 import(
 	"io"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/BerolinaSQL/format"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/BerolinaSQL/serial"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/BerolinaSQL/types"
+	"github.com/YosiSF/Milevanoedb/BerolinaSQL/BerolinaSQL/format"
+	"github.com/YosiSF/Milevanoedb/BerolinaSQL/BerolinaSQL/serial"
+	"github.com/YosiSF/Milevanoedb/BerolinaSQL/BerolinaSQL/types"
 )
 
 package ast
@@ -95,8 +95,8 @@ type StmtNode interface {
 	statement()
 }
 
-// DBSNode represents DBS statement node.
-type DBSNode interface {
+// noedbSNode represents noedbS statement node.
+type noedbSNode interface {
 	StmtNode
 	ddlStatement()
 }
@@ -115,11 +115,11 @@ type DMLNode interface {
 // ResultFields of that table, so ColumnNameExpr resolved to that ResultField can be
 // easily evaluated.
 type ResultField struct {
-	Column       *model.ColumnInfo
-	ColumnAsName model.CIStr
-	Table        *model.TableInfo
-	TableAsName  model.CIStr
-	DBName       model.CIStr
+	Column       *serial.ColumnInfo
+	ColumnAsName serial.CIStr
+	Table        *serial.TableInfo
+	TableAsName  serial.CIStr
+	noedbName       serial.CIStr
 
 	// Expr represents the expression for the result field. If it is generated from a select field, it would
 	// be the expression of that select field, otherwise the type would be ValueExpr and value

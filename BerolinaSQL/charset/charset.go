@@ -3,13 +3,13 @@ package charset
 import(
 
       "strings"
-      "github.com/YosiSF/MilevaDB/BerolinaSQL/mysql"
-      "github.com/YosiSF/MilevaDB/BerolinaSQL/terror"
+      "github.com/YosiSF/Milevanoedb/BerolinaSQL/mysql"
+      "github.com/YosiSF/Milevanoedb/BerolinaSQL/terror"
 )
 
 var (
-	ErrUnknownCollation         = terror.ClassDBS.New(mysql.ErrUnknownCollation, mysql.MySQLErrName[mysql.ErrUnknownCollation])
-	ErrCollationCharsetMismatch = terror.ClassDBS.New(mysql.ErrCollationCharsetMismatch, mysql.MySQLErrName[mysql.ErrCollationCharsetMismatch])
+	ErrUnknownCollation         = terror.ClassnoedbS.New(mysql.ErrUnknownCollation, mysql.MySQLErrName[mysql.ErrUnknownCollation])
+	ErrCollationCharsetMismatch = terror.ClassnoedbS.New(mysql.ErrCollationCharsetMismatch, mysql.MySQLErrName[mysql.ErrCollationCharsetMismatch])
 )
 
 

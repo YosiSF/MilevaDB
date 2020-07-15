@@ -9,7 +9,7 @@ import (
 	"sync"
 
 	"github.com/YosiSF/failpoint"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/util/plancodec"
+	"github.com/YosiSF/Milevanoedb/BerolinaSQL/util/plancodec"
 )
 
 var encoderPool = sync.Pool{

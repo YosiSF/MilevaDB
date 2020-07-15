@@ -21,10 +21,10 @@ import (
 	"time"
 )
 
-// ActionType is the type for DBS action.
+// ActionType is the type for noedbS action.
 type ActionType byte
 
-// List DBS actions.
+// List noedbS actions.
 const (
 	ActionNone                          ActionType = 0
 	ActionCreateSchema                  ActionType = 1
@@ -139,16 +139,16 @@ func (action ActionType) String() string {
 // HistoryInfo is used for binlog.
 type HistoryInfo struct {
 	SchemaVersion int64
-	DBInfo        *DBInfo
+	noedbInfo        *noedbInfo
 	TableInfo     *TableInfo
 	FinishedTS    uint64
 }
 
-// AddDBInfo adds schema version and schema information that are used for binlog.
-// dbInfo is added in the following operations: create database, drop database.
-func (h *HistoryInfo) AddDBInfo(schemaVer int64, dbInfo *DBInfo) {
+// AddnoedbInfo adds schema version and schema information that are used for binlog.
+// noedbInfo is added in the following operations: create database, drop database.
+func (h *HistoryInfo) AddnoedbInfo(schemaVer int64, noedbInfo *noedbInfo) {
 	h.SchemaVersion = schemaVer
-	h.DBInfo = dbInfo
+	h.noedbInfo = noedbInfo
 }
 
 // AddTableInfo adds schema version and table information that are used for binlog.
@@ -161,25 +161,25 @@ func (h *HistoryInfo) AddTableInfo(schemaVer int64, tblInfo *TableInfo) {
 // Clean cleans history information.
 func (h *HistoryInfo) Clean() {
 	h.SchemaVersion = 0
-	h.DBInfo = nil
+	h.noedbInfo = nil
 	h.TableInfo = nil
 }
 
-// DBSReorgMeta is meta info of DBS reorganization.
-type DBSReorgMeta struct {
+// noedbSReorgMeta is meta info of noedbS reorganization.
+type noedbSReorgMeta struct {
 	// EndHandle is the last handle of the adding indices table.
 	// We should only backfill indices in the range [startHandle, EndHandle].
 	EndHandle int64 `json:"end_handle"`
 }
 
-// NewDBSReorgMeta new a DBSReorgMeta.
-func NewDBSReorgMeta() *DBSReorgMeta {
-	return &DBSReorgMeta{
+// NewnoedbSReorgMeta new a noedbSReorgMeta.
+func NewnoedbSReorgMeta() *noedbSReorgMeta {
+	return &noedbSReorgMeta{
 		EndHandle: math.MaxInt64,
 	}
 }
 
-// Job is for a DBS operation.
+// Job is for a noedbS operation.
 type Job struct {
 	ID         int64         `json:"id"`
 	Type       ActionType    `json:"type"`
@@ -200,7 +200,7 @@ type Job struct {
 	// SnapshotVer means snapshot version for this job.
 	SnapshotVer uint64 `json:"snapshot_ver"`
 	// StartTS uses timestamp allocated by TSO.
-	// Now it's the TS when we put the job to TiKV queue.
+	// Now it's the TS when we put the job to Tiekv queue.
 	StartTS uint64 `json:"start_ts"`
 	// DependencyID is the job's ID that the current job depends on.
 	DependencyID int64 `json:"dependency_id"`
@@ -208,12 +208,12 @@ type Job struct {
 	Query      string       `json:"query"`
 	BinlogInfo *HistoryInfo `json:"binlog"`
 
-	// Version indicates the DBS job version. For old jobs, it will be 0.
+	// Version indicates the noedbS job version. For old jobs, it will be 0.
 	Version int64 `json:"version"`
 
 	// ReorgMeta is meta info of dbs reorganization.
 	// This field is depreciated.
-	ReorgMeta *DBSReorgMeta `json:"reorg_meta"`
+	ReorgMeta *noedbSReorgMeta `json:"reorg_meta"`
 
 	// Priority is only used to set the operation priority of adding indices.
 	Priority int `json:"priority"`
@@ -227,12 +227,12 @@ func (job *Job) FinishTableJob(jobState JobState, schemaState SchemaState, ver i
 	job.BinlogInfo.AddTableInfo(ver, tblInfo)
 }
 
-// FinishDBJob is called when a job is finished.
-// It updates the job's state information and adds dbInfo the binlog.
-func (job *Job) FinishDBJob(jobState JobState, schemaState SchemaState, ver int64, dbInfo *DBInfo) {
+// FinishnoedbJob is called when a job is finished.
+// It updates the job's state information and adds noedbInfo the binlog.
+func (job *Job) FinishnoedbJob(jobState JobState, schemaState SchemaState, ver int64, noedbInfo *noedbInfo) {
 	job.State = jobState
 	job.SchemaState = schemaState
-	job.BinlogInfo.AddDBInfo(ver, dbInfo)
+	job.BinlogInfo.AddnoedbInfo(ver, noedbInfo)
 }
 
 // TSConvert2Time converts timestamp to time.
@@ -376,7 +376,7 @@ func (job *Job) IsCancelling() bool {
 	return job.State == JobStateCancelling
 }
 
-// IsSynced returns whether the DBS modification is synced among all MilevaDB servers.
+// IsSynced returns whether the noedbS modification is synced among all Milevanoedb servers.
 func (job *Job) IsSynced() bool {
 	return job.State == JobStateSynced
 }
@@ -398,7 +398,7 @@ type JobState byte
 const (
 	JobStateNone    JobState = 0
 	JobStateRunning JobState = 1
-	// When DBS encountered an unrecoverable error at reorganization state,
+	// When noedbS encountered an unrecoverable error at reorganization state,
 	// some keys has been added already, we need to remove them.
 	// JobStateRollingback is the state to do the rolling back job.
 	JobStateRollingback  JobState = 2
@@ -408,7 +408,7 @@ const (
 	// JobStateSynced is used to mark the information about the completion of this job
 	// has been synchronized to all servers.
 	JobStateSynced JobState = 6
-	// JobStateCancelling is used to mark the DBS job is cancelled by the client, but the DBS work hasn't handle it.
+	// JobStateCancelling is used to mark the noedbS job is cancelled by the client, but the noedbS work hasn't handle it.
 	JobStateCancelling JobState = 7
 )
 
@@ -442,9 +442,9 @@ type SchemaDiff struct {
 	SchemaID int64      `json:"schema_id"`
 	TableID  int64      `json:"table_id"`
 
-	// OldTableID is the table ID before truncate, only used by truncate table DBS.
+	// OldTableID is the table ID before truncate, only used by truncate table noedbS.
 	OldTableID int64 `json:"old_table_id"`
-	// OldSchemaID is the schema ID before rename table, only used by rename table DBS.
+	// OldSchemaID is the schema ID before rename table, only used by rename table noedbS.
 	OldSchemaID int64 `json:"old_schema_id"`
 
 	AffectedOpts []*AffectedOption `json:"affected_options"`

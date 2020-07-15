@@ -17,7 +17,7 @@ DefaultMySQLState = "HY000"
 )
 
 // MySQLState maps error code to MySQL SQLSTATE value.
-// The values are taken from ANSI SQL and ODBC and are more standardized.
+// The values are taken from ANSI SQL and OnoedbC and are more standardized.
 var MySQLState = map[uint16]string{
 ErrDupKey:                              "23000",
 ErrOutofMemory:                         "HY001",
@@ -25,12 +25,12 @@ ErrOutOfSortMemory:                     "HY001",
 ErrConCount:                            "08004",
 ErrBadHost:                             "08S01",
 ErrHandshake:                           "08S01",
-ErrDBaccessDenied:                      "42000",
+ErrnoedbaccessDenied:                      "42000",
 ErrAccessDenied:                        "28000",
-ErrNoDB:                                "3D000",
+ErrNonoedb:                                "3D000",
 ErrUnknownCom:                          "08S01",
 ErrBadNull:                             "23000",
-ErrBadDB:                               "42000",
+ErrBadnoedb:                               "42000",
 ErrTableExists:                         "42S01",
 ErrBadTable:                            "42S02",
 ErrNonUniq:                             "23000",
@@ -65,7 +65,7 @@ ErrBlobsAndNoTerminated:                "42000",
 ErrCantRemoveAllFields:                 "42000",
 ErrCantDropFieldOrKey:                  "42000",
 ErrBlobCantHaveDefault:                 "42000",
-ErrWrongDBName:                         "42000",
+ErrWrongnoedbName:                         "42000",
 ErrWrongTableName:                      "42000",
 ErrTooBigSelect:                        "42000",
 ErrUnknownProcedure:                    "42000",

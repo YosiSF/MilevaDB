@@ -14,9 +14,9 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
-	"github.com/MilevaDB/errors"
+	"github.com/Milevanoedb/errors"
 	tracing "github.com/uber/jaeger-client-go/config"
-	"github.com/MilevaDB/util/hyperlogutil"
+	"github.com/Milevanoedb/util/hyperlogutil"
 	"go.uber.org/atomic"
 
 )

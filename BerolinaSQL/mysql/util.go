@@ -1,4 +1,4 @@
-//EinsteinDB All Rights Reserved - Licensed under Apache-2.0.
+//Einsteinnoedb All Rights Reserved - Licensed under Apache-2.0.
 
 
 package mysql

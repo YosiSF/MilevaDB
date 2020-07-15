@@ -36,43 +36,43 @@ import(
 
 //Flag names
 const (
-	mdbVersion				= "V"
-	mdbConfig				= "config"
-	mdbConfigCheck			= "config-check"
-	mdbStore            = "store"
-	mdbStorePath        = "path"
-	mdbHost             = "host"
-	mdbAdvertiseAddress = "advertise-address"
-	mdbPort             = "P"
-	mdbCors             = "cors"
-	mdbSocket           = "socket"
-	mdbEnableBinlog     = "enable-binlog"
-	mdbRunDBS           = "run-ddl"
-	mdbLogLevel         = "L"
-	mdbLogFile          = "log-file"
-	mdbLogSlowQuery     = "log-slow-query"
-	mdbReportStatus     = "report-status"
-	mdbStatusHost       = "status-host"
-	mdbStatusPort       = "status"
-	mdbMetricsAddr      = "metrics-addr"
-	mdbMetricsInterval  = "metrics-interval"
-	mdbDdlLease         = "lease"
-	mdbTokenLimit       = "token-limit"
-	mdbPluginDir        = "plugin-dir"
-	mdbPluginLoad       = "plugin-load"
-	mdbRepairMode       = "repair-mode"
-	mdbRepairList       = "repair-list"
+	mnoedbVersion				= "V"
+	mnoedbConfig				= "config"
+	mnoedbConfigCheck			= "config-check"
+	mnoedbStore            = "store"
+	mnoedbStorePath        = "path"
+	mnoedbHost             = "host"
+	mnoedbAdvertiseAddress = "advertise-address"
+	mnoedbPort             = "P"
+	mnoedbCors             = "cors"
+	mnoedbSocket           = "socket"
+	mnoedbEnableBinlog     = "enable-binlog"
+	mnoedbRunnoedbS           = "run-ddl"
+	mnoedbLogLevel         = "L"
+	mnoedbLogFile          = "log-file"
+	mnoedbLogSlowQuery     = "log-slow-query"
+	mnoedbReportStatus     = "report-status"
+	mnoedbStatusHost       = "status-host"
+	mnoedbStatusPort       = "status"
+	mnoedbMetricsAddr      = "metrics-addr"
+	mnoedbMetricsInterval  = "metrics-interval"
+	mnoedbDdlLease         = "lease"
+	mnoedbTokenLimit       = "token-limit"
+	mnoedbPluginDir        = "plugin-dir"
+	mnoedbPluginLoad       = "plugin-load"
+	mnoedbRepairMode       = "repair-mode"
+	mnoedbRepairList       = "repair-list"
 
-	mdbProxyProtocolNetworks      = "proxy-protocol-networks"
-	mdbProxyProtocolHeaderTimeout = "proxy-protocol-header-timeout"
-	mdbAffinityCPU				  = "affinity-cpus"
+	mnoedbProxyProtocolNetworks      = "proxy-protocol-networks"
+	mnoedbProxyProtocolHeaderTimeout = "proxy-protocol-header-timeout"
+	mnoedbAffinityCPU				  = "affinity-cpus"
 
 	var (
 
-	version      = flagBoolean(mdbVersion, false, "print version information and exit")
-	configPath   = flag.String(mdbConfig, "", "config file path")
-	configCheck  = flagBoolean(mdbConfigCheck, false, "check config file validity and exit")
-	configStrict = flagBoolean(mdbConfigStrict, false, "enforce config file validity")
+	version      = flagBoolean(mnoedbVersion, false, "print version information and exit")
+	configPath   = flag.String(mnoedbConfig, "", "config file path")
+	configCheck  = flagBoolean(mnoedbConfigCheck, false, "check config file validity and exit")
+	configStrict = flagBoolean(mnoedbConfigStrict, false, "enforce config file validity")
 
 
 	)

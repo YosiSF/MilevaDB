@@ -38,13 +38,13 @@ type stmtNode struct {
 // statement implements StmtNode interface.
 func (sn *stmtNode) statement() {}
 
-// dbsNode implements DBSNode interface.
-// DBS implementations should embed it in.
+// dbsNode implements noedbSNode interface.
+// noedbS implementations should embed it in.
 type dbsNode struct {
 	stmtNode
 }
 
-// dbsStatement implements DBSNode interface.
+// dbsStatement implements noedbSNode interface.
 func (dn *dbsNode) dbsStatement() {}
 
 // dmlNode is the struct implements DMLNode interface.

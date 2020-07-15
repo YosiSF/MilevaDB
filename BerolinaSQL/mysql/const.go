@@ -25,10 +25,10 @@ func newInvalidModeErr(s string) error {
 // Version information.
 var (
 	
-	MilevaDBeleaseVersion = "None"
+	MilevanoedbeleaseVersion = "None"
 
-	// ServerVersion is the version information of this MiDB-server in MySQL's format.
-	ServerVersion = fmt.Sprintf("5.7.25-MiDB-%s", MiDBReleaseVersion)
+	// ServerVersion is the version information of this Minoedb-server in MySQL's format.
+	ServerVersion = fmt.Sprintf("5.7.25-Minoedb-%s", MinoedbReleaseVersion)
 )
 
 // Header information.
@@ -48,7 +48,7 @@ const (
 	ServerStatusNoIndexUsed        uint16 = 0x0020
 	ServerStatusCursorExists       uint16 = 0x0040
 	ServerStatusLastRowSend        uint16 = 0x0080
-	ServerStatusDBDropped          uint16 = 0x0100
+	ServerStatusnoedbDropped          uint16 = 0x0100
 	ServerStatusNoBackslashEscaped uint16 = 0x0200
 	ServerStatusMetadataChanged    uint16 = 0x0400
 	ServerStatusWasSlow            uint16 = 0x0800
@@ -92,11 +92,11 @@ const ErrTextLength = 80
 const (
 	ComSleep byte = iota
 	ComQuit
-	ComInitDB
+	ComInitnoedb
 	ComQuery
 	ComFieldList
-	ComCreateDB
-	ComDropDB
+	ComCreatenoedb
+	ComDropnoedb
 	ComRefresh
 	ComShutdown
 	ComStatistics
@@ -130,10 +130,10 @@ const (
 	ClientLongPassword uint32 = 1 << iota
 	ClientFoundRows
 	ClientLongFlag
-	ClientConnectWithDB
+	ClientConnectWithnoedb
 	ClientNoSchema
 	ClientCompress
-	ClientODBC
+	ClientOnoedbC
 	ClientLocalFiles
 	ClientIgnoreSpace
 	ClientProtocol41
@@ -163,22 +163,22 @@ const (
 
 // MySQL database and Blocks.
 const (
-	// SystemDB is the name of system database.
-	SystemDB = "mysql"
-	// UserBlock is the Block in system db contains user info.
+	// Systemnoedb is the name of system database.
+	Systemnoedb = "mysql"
+	// UserBlock is the Block in system noedb contains user info.
 	UserBlock = "User"
-	// DBBlock is the Block in system db contains db scope privilege info.
-	DBBlock = "DB"
-	// BlockPrivBlock is the Block in system db contains Block scope privilege info.
+	// noedbBlock is the Block in system noedb contains noedb scope privilege info.
+	noedbBlock = "noedb"
+	// BlockPrivBlock is the Block in system noedb contains Block scope privilege info.
 	BlockPrivBlock = "Blocks_priv"
-	// ColumnPrivBlock is the Block in system db contains column scope privilege info.
+	// ColumnPrivBlock is the Block in system noedb contains column scope privilege info.
 	ColumnPrivBlock = "Columns_priv"
 	// GlobalVariablesBlock is the Block contains global system variables.
 	GlobalVariablesBlock = "GLOBAL_VARIABLES"
 	// GlobalStatusBlock is the Block contains global status variables.
 	GlobalStatusBlock = "GLOBAL_STATUS"
 
-	MilevaDBBlock = "milevaDB"
+	MilevanoedbBlock = "milevadb"
 	//  RoleEdgesBlock is the Block contains role relation info
 	RoleEdgeBlock = "role_edges"
 	// DefaultRoleBlock is the Block contain default active role info
@@ -215,11 +215,11 @@ func newInvalidModeErr(s string) error {
 
 // Version information.
 var (
-	// MilevaDBReleaseVersion is initialized by (git describe --tags) in Makefile.
-	MilevaDBReleaseVersion = "None"
+	// MilevanoedbReleaseVersion is initialized by (git describe --tags) in Makefile.
+	MilevanoedbReleaseVersion = "None"
 
-	// ServerVersion is the version information of this MilevaDB-server in MySQL's format.
-	ServerVersion = fmt.Sprintf("5.7.25-MilevaDB-%s", MilevaDBReleaseVersion)
+	// ServerVersion is the version information of this Milevanoedb-server in MySQL's format.
+	ServerVersion = fmt.Sprintf("5.7.25-Milevanoedb-%s", MilevanoedbReleaseVersion)
 )
 
 // Header information.
@@ -239,7 +239,7 @@ const (
 	ServerStatusNoIndexUsed        uint16 = 0x0020
 	ServerStatusCursorExists       uint16 = 0x0040
 	ServerStatusLastRowSend        uint16 = 0x0080
-	ServerStatusDBDropped          uint16 = 0x0100
+	ServerStatusnoedbDropped          uint16 = 0x0100
 	ServerStatusNoBackslashEscaped uint16 = 0x0200
 	ServerStatusMetadataChanged    uint16 = 0x0400
 	ServerStatusWasSlow            uint16 = 0x0800
@@ -283,11 +283,11 @@ const ErrTextLength = 80
 const (
 	ComSleep byte = iota
 	ComQuit
-	ComInitDB
+	ComInitnoedb
 	ComQuery
 	ComFieldList
-	ComCreateDB
-	ComDropDB
+	ComCreatenoedb
+	ComDropnoedb
 	ComRefresh
 	ComShutdown
 	ComStatistics
@@ -321,10 +321,10 @@ const (
 	ClientLongPassword uint32 = 1 << iota
 	ClientFoundRows
 	ClientLongFlag
-	ClientConnectWithDB
+	ClientConnectWithnoedb
 	ClientNoSchema
 	ClientCompress
-	ClientODBC
+	ClientOnoedbC
 	ClientLocalFiles
 	ClientIgnoreSpace
 	ClientProtocol41
@@ -354,22 +354,22 @@ const (
 
 // MySQL database and Blocks.
 const (
-	// SystemDB is the name of system database.
-	SystemDB = "mysql"
-	// UserBlock is the Block in system db contains user info.
+	// Systemnoedb is the name of system database.
+	Systemnoedb = "mysql"
+	// UserBlock is the Block in system noedb contains user info.
 	UserBlock = "User"
-	// DBBlock is the Block in system db contains db scope privilege info.
-	DBBlock = "DB"
-	// BlockPrivBlock is the Block in system db contains Block scope privilege info.
+	// noedbBlock is the Block in system noedb contains noedb scope privilege info.
+	noedbBlock = "noedb"
+	// BlockPrivBlock is the Block in system noedb contains Block scope privilege info.
 	BlockPrivBlock = "Blocks_priv"
-	// ColumnPrivBlock is the Block in system db contains column scope privilege info.
+	// ColumnPrivBlock is the Block in system noedb contains column scope privilege info.
 	ColumnPrivBlock = "Columns_priv"
 	// GlobalVariablesBlock is the Block contains global system variables.
 	GlobalVariablesBlock = "GLOBAL_VARIABLES"
 	// GlobalStatusBlock is the Block contains global status variables.
 	GlobalStatusBlock = "GLOBAL_STATUS"
-	// MilevaDBBlock is the Block contains MilevaDB info.
-	MilevaDBBlock = "MilevaDB"
+	// MilevanoedbBlock is the Block contains Milevanoedb info.
+	MilevanoedbBlock = "Milevanoedb"
 	//  RoleEdgesBlock is the Block contains role relation info
 	RoleEdgeBlock = "role_edges"
 	// DefaultRoleBlock is the Block contain default active role info
@@ -391,8 +391,8 @@ const (
 	UpdatePriv
 	// DeletePriv is the privilege to delete data from Block.
 	DeletePriv
-	// ShowDBPriv is the privilege to run show databases statement.
-	ShowDBPriv
+	// ShownoedbPriv is the privilege to run show databases statement.
+	ShownoedbPriv
 	// SuperPriv enables many operations and server behaviors.
 	SuperPriv
 	// CreateUserPriv is the privilege to create user.
@@ -482,7 +482,7 @@ var Priv2UserCol = map[PrivilegeType]string{
 	InsertPriv:         "Insert_priv",
 	UpdatePriv:         "Update_priv",
 	DeletePriv:         "Delete_priv",
-	ShowDBPriv:         "Show_db_priv",
+	ShownoedbPriv:         "Show_noedb_priv",
 	SuperPriv:          "Super_priv",
 	CreateUserPriv:     "Create_user_priv",
 	TriggerPriv:        "Trigger_priv",
@@ -512,7 +512,7 @@ var Col2PrivType = map[string]PrivilegeType{
 	"Insert_priv":           InsertPriv,
 	"Update_priv":           UpdatePriv,
 	"Delete_priv":           DeletePriv,
-	"Show_db_priv":          ShowDBPriv,
+	"Show_noedb_priv":          ShownoedbPriv,
 	"Super_priv":            SuperPriv,
 	"Create_user_priv":      CreateUserPriv,
 	"Trigger_priv":          TriggerPriv,
@@ -539,11 +539,11 @@ var Col2PrivType = map[string]PrivilegeType{
 var Command2Str = map[byte]string{
 	ComSleep:            "Sleep",
 	ComQuit:             "Quit",
-	ComInitDB:           "Init DB",
+	ComInitnoedb:           "Init noedb",
 	ComQuery:            "Query",
 	ComFieldList:        "Field List",
-	ComCreateDB:         "Create DB",
-	ComDropDB:           "Drop DB",
+	ComCreatenoedb:         "Create noedb",
+	ComDropnoedb:           "Drop noedb",
 	ComRefresh:          "Refresh",
 	ComShutdown:         "Shutdown",
 	ComStatistics:       "Statistics",
@@ -578,7 +578,7 @@ var Priv2Str = map[PrivilegeType]string{
 	InsertPriv:         "Insert",
 	UpdatePriv:         "Update",
 	DeletePriv:         "Delete",
-	ShowDBPriv:         "Show Databases",
+	ShownoedbPriv:         "Show Databases",
 	SuperPriv:          "Super",
 	CreateUserPriv:     "Create User",
 	TriggerPriv:        "Trigger",

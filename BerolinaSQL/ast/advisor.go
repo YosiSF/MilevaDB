@@ -15,7 +15,7 @@ package ast
 
 import (
 
-  "github.com/YosiSF/MilevaDB/BerolinaSQL/format"
+  "github.com/YosiSF/Milevanoedb/BerolinaSQL/format"
 
 )
 
@@ -64,7 +64,7 @@ func (n *IndexAdviseStmt) Accept(v Visitor) (Node, bool) {
 // MaxIndexNumClause represents 'maximum number of indexes' clause in index advise statement.
 type MaxIndexNumClause struct {
 	PerTable uint64
-	PerDB    uint64
+	Pernoedb    uint64
 }
 
 // Restore for max index num clause
@@ -74,9 +74,9 @@ func (n *MaxIndexNumClause) Restore(ctx *format.RestoreCtx) error {
 		ctx.WriteKeyWord(" PER_TABLE ")
 		ctx.WritePlainf("%d", n.PerTable)
 	}
-	if n.PerDB != UnspecifiedSize {
-		ctx.WriteKeyWord(" PER_DB ")
-		ctx.WritePlainf("%d", n.PerDB)
+	if n.Pernoedb != UnspecifiedSize {
+		ctx.WriteKeyWord(" PER_noedb ")
+		ctx.WritePlainf("%d", n.Pernoedb)
 	}
 	return nil
 }

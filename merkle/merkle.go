@@ -17,10 +17,10 @@
 package merkle
 
 import (
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/errors"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/core/ekv"
+	"github.com/YosiSF/Milevanoedb/BerolinaSQL/errors"
+	"github.com/YosiSF/Milevanoedb/BerolinaSQL/core/eekv"
 )
 
 
 // NewMerkle creates a TxStructure with Retriever, RetrieverMutator and key prefix.
-func NewMerkle(reader ekv.PullbackInverter)
+func NewMerkle(reader eekv.PullbackInverter)

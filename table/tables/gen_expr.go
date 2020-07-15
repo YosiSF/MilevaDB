@@ -3,10 +3,10 @@ import (
 
 	"github.com/YosiSF/errors"
 	"github.com/YosiSF/parser"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/ast"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/charset"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/serial"
-	"github.com/YosiSF/MilevaDB/util"
+	"github.com/YosiSF/Milevanoedb/BerolinaSQL/ast"
+	"github.com/YosiSF/Milevanoedb/BerolinaSQL/charset"
+	"github.com/YosiSF/Milevanoedb/BerolinaSQL/serial"
+	"github.com/YosiSF/Milevanoedb/util"
 )
 
 // nameResolver is the visitor to resolve table name and column name.
@@ -41,7 +41,7 @@ func (nr *nameResolver) Leave(inNode ast.Node) (node ast.Node, ok bool) {
 }
 
 // ParseExpression parses an ExprNode from a string.
-// When MilevaDB loads schemaReplicant from EinsteinDB, `GeneratedExprString`
+// When Milevanoedb loads schemaReplicant from Einsteinnoedb, `GeneratedExprString`
 // of `ColumnInfo` is a string field, so we need to parse
 // it into ast.ExprNode. This function is for that.
 func parseExpression(expr string) (node ast.ExprNode, err error) {

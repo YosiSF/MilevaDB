@@ -24,8 +24,8 @@ import (
   "strings"
 
   parser "github.com/cznic/parser/yacc"
-  "github.com/MilevaDB/BerolinaSQL/errors"
-  "github.com/MilevaDB/BerolinaSQL/format"
+  "github.com/Milevanoedb/BerolinaSQL/errors"
+  "github.com/Milevanoedb/BerolinaSQL/format"
 )
 
 func Format(inputFilename string, goldenFilename string) (err error) {

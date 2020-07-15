@@ -10,6 +10,10 @@
 // distributed under the License is distributed on an "AS IS" BASIS,
 // See the License for the specific language governing permissions and
 // limitations under the License.
+package dbs
+
+
+import(
 
 "context"
 "math"
@@ -17,34 +21,32 @@
 "sync/atomic"
 "time"
 
-import(
-
-"github.com/YosiSF/MilevaDB/BerolinaSQL/errors"
+"github.com/YosiSF/Milevanoedb/BerolinaSQL/errors"
 "github.com/YosiSF/failpoint"
-"github.com/YosiSF/MilevaDB/BerolinaSQL/BerolinaSQL/ast"
+"github.com/YosiSF/Milevanoedb/BerolinaSQL/BerolinaSQL/ast"
 "github.com/YosiSF/BerolinaSQL/charset"
 "github.com/YosiSF/BerolinaSQL/serial"
 "github.com/YosiSF/BerolinaSQL/mysql"
-"github.com/YosiSF/MilevaDB/BerolinaSQL/config"
-dbsutil "github.com/YosiSF/MilevaDB/BerolinaSQL/dbs/util"
-"github.com/YosiSF/MilevaDB/BerolinaSQL/expression"
-"github.com/YosiSF/MilevaDB/BerolinaSQL/schemaReplicant"
-"github.com/YosiSF/MilevaDB/BerolinaSQL/ekv"
-"github.com/YosiSF/MilevaDB/BerolinaSQL/meta"
-"github.com/YosiSF/MilevaDB/BerolinaSQL/meta/autoid"
-"github.com/YosiSF/MilevaDB/BerolinaSQL/metrics"
-"github.com/YosiSF/MilevaDB/BerolinaSQL/causetnetctx"
-"github.com/YosiSF/MilevaDB/BerolinaSQL/causetnetctx/variable"
-"github.com/YosiSF/MilevaDB/BerolinaSQL/store/EinsteinDB"
-"github.com/YosiSF/MilevaDB/BerolinaSQL/store/EinsteinDB/oracle"
-"github.com/YosiSF/MilevaDB/BerolinaSQL/table"
-"github.com/YosiSF/MilevaDB/BerolinaSQL/table/tables"
-"github.com/YosiSF/MilevaDB/BerolinaSQL/tablecodec"
-"github.com/YosiSF/MilevaDB/BerolinaSQL/types"
-"github.com/YosiSF/MilevaDB/BerolinaSQL/util"
-"github.com/YosiSF/MilevaDB/BerolinaSQL/util/logutil"
-decoder "github.com/YosiSF/MilevaDB/BerolinaSQL/util/rowDecoder"
-"github.com/YosiSF/MilevaDB/BerolinaSQL/util/timeutil"
+"github.com/YosiSF/Milevanoedb/BerolinaSQL/config"
+dbsutil "github.com/YosiSF/Milevanoedb/BerolinaSQL/dbs/util"
+"github.com/YosiSF/Milevanoedb/BerolinaSQL/expression"
+"github.com/YosiSF/Milevanoedb/BerolinaSQL/schemaReplicant"
+"github.com/YosiSF/Milevanoedb/BerolinaSQL/eekv"
+"github.com/YosiSF/Milevanoedb/BerolinaSQL/meta"
+"github.com/YosiSF/Milevanoedb/BerolinaSQL/meta/autoid"
+"github.com/YosiSF/Milevanoedb/BerolinaSQL/metrics"
+"github.com/YosiSF/Milevanoedb/BerolinaSQL/causetnetctx"
+"github.com/YosiSF/Milevanoedb/BerolinaSQL/causetnetctx/variable"
+"github.com/YosiSF/Milevanoedb/BerolinaSQL/store/Einsteinnoedb"
+"github.com/YosiSF/Milevanoedb/BerolinaSQL/store/Einsteinnoedb/oracle"
+"github.com/YosiSF/Milevanoedb/BerolinaSQL/table"
+"github.com/YosiSF/Milevanoedb/BerolinaSQL/table/tables"
+"github.com/YosiSF/Milevanoedb/BerolinaSQL/tablecodec"
+"github.com/YosiSF/Milevanoedb/BerolinaSQL/types"
+"github.com/YosiSF/Milevanoedb/BerolinaSQL/util"
+"github.com/YosiSF/Milevanoedb/BerolinaSQL/util/logutil"
+decoder "github.com/YosiSF/Milevanoedb/BerolinaSQL/util/rowDecoder"
+"github.com/YosiSF/Milevanoedb/BerolinaSQL/util/timeutil"
 "go.uber.org/zap"
 
 )
@@ -327,7 +329,7 @@ func checkPrimaryKeyNotNull(w *worker, sqlMode mysql.SQLMode, t *meta.Meta, job 
 		return nil, nil
 	}
 
-	dbInfo, err := t.GetDatabase(job.SchemaID)
+	noedbInfo, err := t.GetDatabase(job.SchemaID)
 	if err != nil {
 		return nil, err
 	}
@@ -339,7 +341,7 @@ func checkPrimaryKeyNotNull(w *worker, sqlMode mysql.SQLMode, t *meta.Meta, job 
 		return nil, nil
 	}
 
-	err = modifyColsFromNull2NotNull(w, dbInfo, tblInfo, nullCols, serial.NewCIStr(""), false)
+	err = modifyColsFromNull2NotNull(w, noedbInfo, tblInfo, nullCols, serial.NewCIStr(""), false)
 	if err == nil {
 		return nil, nil
 	}
@@ -521,10 +523,10 @@ func (w *worker) onCreateIndex(d *dbsCtx, t *meta.Meta, job *serial.Job, isPK bo
 		})
 		if err != nil {
 			if errWaitReorgTimeout.Equal(err) {
-				// if timeout, we should return, check for the owner and re-wait job done.
+				// if timeout, we should return, check for the keywatcher and re-wait job done.
 				return ver, nil
 			}
-			if kv.ErrKeyExists.Equal(err) || errCancelleddbsJob.Equal(err) || errCantDecodeIndex.Equal(err) {
+			if ekv.ErrKeyExists.Equal(err) || errCancelleddbsJob.Equal(err) || errCantDecodeIndex.Equal(err) {
 				logutil.BgLogger().Warn("[dbs] run add index job failed, convert job to rollback", zap.String("job", job.String()), zap.Error(err))
 				ver, err = convertAddIdxJob2RollbackJob(t, job, tblInfo, indexInfo, err)
 			}
@@ -743,7 +745,7 @@ type addIndexWorker struct {
 	rowMap             map[int64]types.Datum
 	rowDecoder         *decoder.RowDecoder
 	idxKeyBufs         [][]byte
-	batchCheckKeys     []kv.Key
+	batchCheckKeys     []ekv.Key
 	distinctCheckFlags []bool
 }
 
@@ -801,7 +803,7 @@ func newAddIndexWorker(sessCtx causetnetctx.contextctx, worker *worker, id int, 
 		index:       index,
 		table:       t,
 		rowDecoder:  rowDecoder,
-		priority:    kv.PriorityLow,
+		priority:    ekv.PriorityLow,
 		defaultVals: make([]types.Datum, len(t.Cols())),
 		rowMap:      make(map[int64]types.Datum, len(decodeColMap)),
 	}
@@ -820,7 +822,7 @@ func (w *addIndexWorker) getIndexRecord(handle int64, recordKey []byte, rawRecor
 	cols := t.Cols()
 	idxInfo := w.index.Meta()
 	sysZone := timeutil.SystemLocation()
-	_, err := w.rowDecoder.DecodeAndEvalRowWithMap(w.sessCtx, kv.IntHandle(handle), rawRecord, time.UTC, sysZone, w.rowMap)
+	_, err := w.rowDecoder.DecodeAndEvalRowWithMap(w.sessCtx, ekv.IntHandle(handle), rawRecord, time.UTC, sysZone, w.rowMap)
 	if err != nil {
 		return nil, errors.Trace(errCantDecodeIndex.GenWithStackByArgs(err))
 	}
@@ -896,7 +898,7 @@ func (w *addIndexWorker) getNextHandle(taskRange reorgIndexTask, taskDone bool) 
 // 2. Next handle of entry that we need to process.
 // 3. Boolean indicates whether the task is done.
 // 4. error occurs in fetchRowColVals. nil if no error occurs.
-func (w *addIndexWorker) fetchRowColVals(txn kv.Transaction, taskRange reorgIndexTask) ([]*indexRecord, int64, bool, error) {
+func (w *addIndexWorker) fetchRowColVals(txn ekv.Transaction, taskRange reorgIndexTask) ([]*indexRecord, int64, bool, error) {
 	// TODO: use tableScan to prune columns.
 	w.idxRecords = w.idxRecords[:0]
 	startTime := time.Now()
@@ -905,7 +907,7 @@ func (w *addIndexWorker) fetchRowColVals(txn kv.Transaction, taskRange reorgInde
 	taskDone := false
 	oprStartTime := startTime
 	err := iterateSnapshotRows(w.sessCtx.GetStore(), w.priority, w.table, txn.StartTS(), taskRange.startHandle, taskRange.endHandle, taskRange.endIncluded,
-		func(handle int64, recordKey kv.Key, rawRow []byte) (bool, error) {
+		func(handle int64, recordKey ekv.Key, rawRow []byte) (bool, error) {
 			oprEndTime := time.Now()
 			w.logSlowOperations(oprEndTime.Sub(oprStartTime), "iterateSnapshotRows in fetchRowColVals", 0)
 			oprStartTime = oprEndTime
@@ -961,7 +963,7 @@ func (w *addIndexWorker) initBatchCheckBufs(batchCount int) {
 	w.distinctCheckFlags = w.distinctCheckFlags[:0]
 }
 
-func (w *addIndexWorker) batchCheckUniqueKey(txn kv.Transaction, idxRecords []*indexRecord) error {
+func (w *addIndexWorker) batchCheckUniqueKey(txn ekv.Transaction, idxRecords []*indexRecord) error {
 	idxInfo := w.index.Meta()
 	if !idxInfo.Unique {
 		// non-unique key need not to check, just overwrite it,
@@ -972,7 +974,7 @@ func (w *addIndexWorker) batchCheckUniqueKey(txn kv.Transaction, idxRecords []*i
 	w.initBatchCheckBufs(len(idxRecords))
 	stmtCtx := w.sessCtx.GetSessionVars().StmtCtx
 	for i, record := range idxRecords {
-		idxKey, distinct, err := w.index.GenIndexKey(stmtCtx, record.vals, kv.IntHandle(record.handle), w.idxKeyBufs[i])
+		idxKey, distinct, err := w.index.GenIndexKey(stmtCtx, record.vals, ekv.IntHandle(record.handle), w.idxKeyBufs[i])
 		if err != nil {
 			return errors.Trace(err)
 		}
@@ -1000,7 +1002,7 @@ func (w *addIndexWorker) batchCheckUniqueKey(txn kv.Transaction, idxRecords []*i
 				}
 
 				if handle != idxRecords[i].handle {
-					return errors.Trace(kv.ErrKeyExists)
+					return errors.Trace(ekv.ErrKeyExists)
 				}
 			}
 			idxRecords[i].skip = true
@@ -1029,10 +1031,10 @@ func (w *addIndexWorker) backfillIndexInTxn(handleRange reorgIndexTask) (taskCtx
 	})
 
 	oprStartTime := time.Now()
-	errInTxn = kv.RunInNewTxn(w.sessCtx.GetStore(), true, func(txn kv.Transaction) error {
+	errInTxn = ekv.RunInNewTxn(w.sessCtx.GetStore(), true, func(txn ekv.Transaction) error {
 		taskCtx.addedCount = 0
 		taskCtx.scanCount = 0
-		txn.SetOption(kv.Priority, w.priority)
+		txn.SetOption(ekv.Priority, w.priority)
 
 		idxRecords, nextHandle, taskDone, err := w.fetchRowColVals(txn, handleRange)
 		if err != nil {

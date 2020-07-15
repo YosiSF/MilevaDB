@@ -16,19 +16,19 @@ package ast
 import "errors"
 
 var (
-	_ DBSNode = &AlterTableStmt{}
-	_ DBSNode = &CreateDatabaseStmt{}
-	_ DBSNode = &CreateIndexStmt{}
-	_ DBSNode = &CreateTableStmt{}
-	_ DBSNode = &CreateViewStmt{}
-	_ DBSNode = &CreateSequenceStmt{}
-	_ DBSNode = &DropDatabaseStmt{}
-	_ DBSNode = &DropIndexStmt{}
-	_ DBSNode = &DropTableStmt{}
-	_ DBSNode = &DropSequenceStmt{}
-	_ DBSNode = &RenameTableStmt{}
-	_ DBSNode = &TruncateTableStmt{}
-	_ DBSNode = &RepairTableStmt{}
+	_ noedbSNode = &AlterTableStmt{}
+	_ noedbSNode = &CreateDatabaseStmt{}
+	_ noedbSNode = &CreateIndexStmt{}
+	_ noedbSNode = &CreateTableStmt{}
+	_ noedbSNode = &CreateViewStmt{}
+	_ noedbSNode = &CreateSequenceStmt{}
+	_ noedbSNode = &DropDatabaseStmt{}
+	_ noedbSNode = &DropIndexStmt{}
+	_ noedbSNode = &DropTableStmt{}
+	_ noedbSNode = &DropSequenceStmt{}
+	_ noedbSNode = &RenameTableStmt{}
+	_ noedbSNode = &TruncateTableStmt{}
+	_ noedbSNode = &RepairTableStmt{}
 
 	_ Node = &AlterTableSpec{}
 	_ Node = &ColumnDef{}
@@ -499,7 +499,7 @@ func (n *ColumnOption) Restore(ctx *format.RestoreCtx) error {
 			return errors.Annotate(err, "An error occurred while splicing ColumnOption ON UPDATE Expr")
 		}
 	case ColumnOptionFulltext:
-		return errors.New("TiDB Parser ignore the `ColumnOptionFulltext` type now")
+		return errors.New("Tinoedb Parser ignore the `ColumnOptionFulltext` type now")
 	case ColumnOptionComment:
 		ctx.WriteKeyWord("COMMENT ")
 		if err := n.Expr.Restore(ctx); err != nil {
@@ -598,9 +598,9 @@ type IndexOption struct {
 	node
 
 	KeyBlockSize uint64
-	Tp           model.IndexType
+	Tp           serial.IndexType
 	Comment      string
-	ParserName   model.CIStr
+	ParserName   serial.CIStr
 	Visibility   IndexVisibility
 }
 
@@ -613,7 +613,7 @@ func (n *IndexOption) Restore(ctx *format.RestoreCtx) error {
 		hasPrevOption = true
 	}
 
-	if n.Tp != model.IndexTypeInvalid {
+	if n.Tp != serial.IndexTypeInvalid {
 		if hasPrevOption {
 			ctx.WritePlain(" ")
 		}
@@ -685,8 +685,8 @@ const (
 type Constraint struct {
 	node
 
-	// only supported by MariaDB 10.0.2+ (ADD {INDEX|KEY}, ADD FOREIGN KEY),
-	// see https://mariadb.com/kb/en/library/alter-table/
+	// only supported by Marianoedb 10.0.2+ (ADD {INDEX|KEY}, ADD FOREIGN KEY),
+	// see https://marianoedb.com/kb/en/library/alter-table/
 	IfNotExists bool
 
 	Tp   ConstraintType
@@ -1144,7 +1144,7 @@ type RenameTableStmt struct {
 	OldTable *TableName
 	NewTable *TableName
 
-	// TableToTables is only useful for syncer which depends heavily on tidb parser to do some dirty work for now.
+	// TableToTables is only useful for syncer which depends heavily on tinoedb parser to do some dirty work for now.
 	// TODO: Refactor this when you are going to add full support for multiple schema changes.
 	TableToTables []*TableToTable
 }
@@ -1238,13 +1238,13 @@ type CreateViewStmt struct {
 
 	OrReplace   bool
 	ViewName    *TableName
-	Cols        []model.CIStr
+	Cols        []serial.CIStr
 	Select      StmtNode
-	SchemaCols  []model.CIStr
-	Algorithm   model.ViewAlgorithm
+	SchemaCols  []serial.CIStr
+	Algorithm   serial.ViewAlgorithm
 	Definer     *auth.UserIdentity
-	Security    model.ViewSecurity
-	CheckOption model.ViewCheckOption
+	Security    serial.ViewSecurity
+	CheckOption serial.ViewCheckOption
 }
 
 // Restore implements Node interface.
@@ -1296,7 +1296,7 @@ func (n *CreateViewStmt) Restore(ctx *format.RestoreCtx) error {
 		return errors.Annotate(err, "An error occurred while create CreateViewStmt.Select")
 	}
 
-	if n.CheckOption != model.CheckOptionCascaded {
+	if n.CheckOption != serial.CheckOptionCascaded {
 		ctx.WriteKeyWord(" WITH ")
 		ctx.WriteKeyWord(n.CheckOption.String())
 		ctx.WriteKeyWord(" CHECK OPTION")
@@ -1430,8 +1430,8 @@ const (
 type CreateIndexStmt struct {
 	ddlNode
 
-	// only supported by MariaDB 10.0.2+,
-	// see https://mariadb.com/kb/en/library/create-index/
+	// only supported by Marianoedb 10.0.2+,
+	// see https://marianoedb.com/kb/en/library/create-index/
 	IfNotExists bool
 
 	IndexName               string
@@ -1474,7 +1474,7 @@ func (n *CreateIndexStmt) Restore(ctx *format.RestoreCtx) error {
 	}
 	ctx.WritePlain(")")
 
-	if n.IndexOption.Tp != model.IndexTypeInvalid || n.IndexOption.KeyBlockSize > 0 || n.IndexOption.Comment != "" || len(n.IndexOption.ParserName.O) > 0 || n.IndexOption.Visibility != IndexVisibilityDefault {
+	if n.IndexOption.Tp != serial.IndexTypeInvalid || n.IndexOption.KeyBlockSize > 0 || n.IndexOption.Comment != "" || len(n.IndexOption.ParserName.O) > 0 || n.IndexOption.Visibility != IndexVisibilityDefault {
 		ctx.WritePlain(" ")
 		if err := n.IndexOption.Restore(ctx); err != nil {
 			return errors.Annotate(err, "An error occurred while restore CreateIndexStmt.IndexOption")
@@ -1593,7 +1593,7 @@ type LockTablesStmt struct {
 // TableLock contains the table name and lock type.
 type TableLock struct {
 	Table *TableName
-	Type  model.TableLockType
+	Type  serial.TableLockType
 }
 
 // Accept implements Node Accept interface.
@@ -1773,14 +1773,14 @@ const (
 	RowFormatCompressed
 	RowFormatRedundant
 	RowFormatCompact
-	TokuDBRowFormatDefault
-	TokuDBRowFormatFast
-	TokuDBRowFormatSmall
-	TokuDBRowFormatZlib
-	TokuDBRowFormatQuickLZ
-	TokuDBRowFormatLzma
-	TokuDBRowFormatSnappy
-	TokuDBRowFormatUncompressed
+	TokunoedbRowFormatDefault
+	TokunoedbRowFormatFast
+	TokunoedbRowFormatSmall
+	TokunoedbRowFormatZlib
+	TokunoedbRowFormatQuickLZ
+	TokunoedbRowFormatLzma
+	TokunoedbRowFormatSnappy
+	TokunoedbRowFormatUncompressed
 )
 
 // OnDuplicateKeyHandlingType is the option that handle unique key values in 'CREATE TABLE ... SELECT' or `LOAD DATA`.
@@ -1906,22 +1906,22 @@ func (n *TableOption) Restore(ctx *format.RestoreCtx) error {
 			ctx.WriteKeyWord("REDUNDANT")
 		case RowFormatCompact:
 			ctx.WriteKeyWord("COMPACT")
-		case TokuDBRowFormatDefault:
-			ctx.WriteKeyWord("TOKUDB_DEFAULT")
-		case TokuDBRowFormatFast:
-			ctx.WriteKeyWord("TOKUDB_FAST")
-		case TokuDBRowFormatSmall:
-			ctx.WriteKeyWord("TOKUDB_SMALL")
-		case TokuDBRowFormatZlib:
-			ctx.WriteKeyWord("TOKUDB_ZLIB")
-		case TokuDBRowFormatQuickLZ:
-			ctx.WriteKeyWord("TOKUDB_QUICKLZ")
-		case TokuDBRowFormatLzma:
-			ctx.WriteKeyWord("TOKUDB_LZMA")
-		case TokuDBRowFormatSnappy:
-			ctx.WriteKeyWord("TOKUDB_SNAPPY")
-		case TokuDBRowFormatUncompressed:
-			ctx.WriteKeyWord("TOKUDB_UNCOMPRESSED")
+		case TokunoedbRowFormatDefault:
+			ctx.WriteKeyWord("TOKUnoedb_DEFAULT")
+		case TokunoedbRowFormatFast:
+			ctx.WriteKeyWord("TOKUnoedb_FAST")
+		case TokunoedbRowFormatSmall:
+			ctx.WriteKeyWord("TOKUnoedb_SMALL")
+		case TokunoedbRowFormatZlib:
+			ctx.WriteKeyWord("TOKUnoedb_ZLIB")
+		case TokunoedbRowFormatQuickLZ:
+			ctx.WriteKeyWord("TOKUnoedb_QUICKLZ")
+		case TokunoedbRowFormatLzma:
+			ctx.WriteKeyWord("TOKUnoedb_LZMA")
+		case TokunoedbRowFormatSnappy:
+			ctx.WriteKeyWord("TOKUnoedb_SNAPPY")
+		case TokunoedbRowFormatUncompressed:
+			ctx.WriteKeyWord("TOKUnoedb_UNCOMPRESSED")
 		default:
 			return errors.Errorf("invalid TableOption: TableOptionRowFormat: %d", n.UintValue)
 		}
@@ -2202,12 +2202,12 @@ const (
 	LockTypeExclusive
 )
 
-// AlgorithmType is the algorithm of the DBS operations.
+// AlgorithmType is the algorithm of the noedbS operations.
 // See https://dev.mysql.com/doc/refman/8.0/en/alter-table.html#alter-table-performance.
 type AlgorithmType byte
 
-// DBS algorithms.
-// For now, TiDB only supported inplace and instance algorithms. If the user specify `copy`,
+// noedbS algorithms.
+// For now, Tinoedb only supported inplace and instance algorithms. If the user specify `copy`,
 // will get an error.
 const (
 	AlgorithmTypeDefault AlgorithmType = iota
@@ -2235,12 +2235,12 @@ func (a AlgorithmType) String() string {
 type AlterTableSpec struct {
 	node
 
-	// only supported by MariaDB 10.0.2+ (DROP COLUMN, CHANGE COLUMN, MODIFY COLUMN, DROP INDEX, DROP FOREIGN KEY, DROP PARTITION)
-	// see https://mariadb.com/kb/en/library/alter-table/
+	// only supported by Marianoedb 10.0.2+ (DROP COLUMN, CHANGE COLUMN, MODIFY COLUMN, DROP INDEX, DROP FOREIGN KEY, DROP PARTITION)
+	// see https://marianoedb.com/kb/en/library/alter-table/
 	IfExists bool
 
-	// only supported by MariaDB 10.0.2+ (ADD COLUMN, ADD PARTITION)
-	// see https://mariadb.com/kb/en/library/alter-table/
+	// only supported by Marianoedb 10.0.2+ (ADD COLUMN, ADD PARTITION)
+	// see https://marianoedb.com/kb/en/library/alter-table/
 	IfNotExists bool
 
 	NoWriteToBinlog bool
@@ -2248,7 +2248,7 @@ type AlterTableSpec struct {
 
 	Tp              AlterTableType
 	Name            string
-	IndexName       model.CIStr
+	IndexName       serial.CIStr
 	Constraint      *Constraint
 	Options         []*TableOption
 	OrderByList     []*AlterOrderItem
@@ -2261,10 +2261,10 @@ type AlterTableSpec struct {
 	LockType        LockType
 	Algorithm       AlgorithmType
 	Comment         string
-	FromKey         model.CIStr
-	ToKey           model.CIStr
+	FromKey         serial.CIStr
+	ToKey           serial.CIStr
 	Partition       *PartitionOptions
-	PartitionNames  []model.CIStr
+	PartitionNames  []serial.CIStr
 	PartDefinitions []*PartitionDefinition
 	WithValidation  bool
 	Num             uint64
@@ -2854,22 +2854,22 @@ func (n *TruncateTableStmt) Accept(v Visitor) (Node, bool) {
 }
 
 var (
-	ErrNoParts                              = terror.ClassDBS.NewStd(mysql.ErrNoParts)
-	ErrPartitionColumnList                  = terror.ClassDBS.NewStd(mysql.ErrPartitionColumnList)
-	ErrPartitionRequiresValues              = terror.ClassDBS.NewStd(mysql.ErrPartitionRequiresValues)
-	ErrPartitionsMustBeDefined              = terror.ClassDBS.NewStd(mysql.ErrPartitionsMustBeDefined)
-	ErrPartitionWrongNoPart                 = terror.ClassDBS.NewStd(mysql.ErrPartitionWrongNoPart)
-	ErrPartitionWrongNoSubpart              = terror.ClassDBS.NewStd(mysql.ErrPartitionWrongNoSubpart)
-	ErrPartitionWrongValues                 = terror.ClassDBS.NewStd(mysql.ErrPartitionWrongValues)
-	ErrRowSinglePartitionField              = terror.ClassDBS.NewStd(mysql.ErrRowSinglePartitionField)
-	ErrSubpartition                         = terror.ClassDBS.NewStd(mysql.ErrSubpartition)
-	ErrSystemVersioningWrongPartitions      = terror.ClassDBS.NewStd(mysql.ErrSystemVersioningWrongPartitions)
-	ErrTooManyValues                        = terror.ClassDBS.NewStd(mysql.ErrTooManyValues)
-	ErrWrongPartitionTypeExpectedSystemTime = terror.ClassDBS.NewStd(mysql.ErrWrongPartitionTypeExpectedSystemTime)
+	ErrNoParts                              = terror.ClassnoedbS.NewStd(mysql.ErrNoParts)
+	ErrPartitionColumnList                  = terror.ClassnoedbS.NewStd(mysql.ErrPartitionColumnList)
+	ErrPartitionRequiresValues              = terror.ClassnoedbS.NewStd(mysql.ErrPartitionRequiresValues)
+	ErrPartitionsMustBeDefined              = terror.ClassnoedbS.NewStd(mysql.ErrPartitionsMustBeDefined)
+	ErrPartitionWrongNoPart                 = terror.ClassnoedbS.NewStd(mysql.ErrPartitionWrongNoPart)
+	ErrPartitionWrongNoSubpart              = terror.ClassnoedbS.NewStd(mysql.ErrPartitionWrongNoSubpart)
+	ErrPartitionWrongValues                 = terror.ClassnoedbS.NewStd(mysql.ErrPartitionWrongValues)
+	ErrRowSinglePartitionField              = terror.ClassnoedbS.NewStd(mysql.ErrRowSinglePartitionField)
+	ErrSubpartition                         = terror.ClassnoedbS.NewStd(mysql.ErrSubpartition)
+	ErrSystemVersioningWrongPartitions      = terror.ClassnoedbS.NewStd(mysql.ErrSystemVersioningWrongPartitions)
+	ErrTooManyValues                        = terror.ClassnoedbS.NewStd(mysql.ErrTooManyValues)
+	ErrWrongPartitionTypeExpectedSystemTime = terror.ClassnoedbS.NewStd(mysql.ErrWrongPartitionTypeExpectedSystemTime)
 )
 
 type SubPartitionDefinition struct {
-	Name    model.CIStr
+	Name    serial.CIStr
 	Options []*TableOption
 }
 
@@ -2891,7 +2891,7 @@ type PartitionDefinitionClause interface {
 	// Validate checks if the clause is consistent with the given options.
 	// `pt` can be 0 and `columns` can be -1 to skip checking the clause against
 	// the partition type or number of columns in the expression list.
-	Validate(pt model.PartitionType, columns int) error
+	Validate(pt serial.PartitionType, columns int) error
 }
 
 type PartitionDefinitionClauseNone struct{}
@@ -2904,14 +2904,14 @@ func (n *PartitionDefinitionClauseNone) acceptInPlace(v Visitor) bool {
 	return true
 }
 
-func (n *PartitionDefinitionClauseNone) Validate(pt model.PartitionType, columns int) error {
+func (n *PartitionDefinitionClauseNone) Validate(pt serial.PartitionType, columns int) error {
 	switch pt {
 	case 0:
-	case model.PartitionTypeRange:
+	case serial.PartitionTypeRange:
 		return ErrPartitionRequiresValues.GenWithStackByArgs("RANGE", "LESS THAN")
-	case model.PartitionTypeList:
+	case serial.PartitionTypeList:
 		return ErrPartitionRequiresValues.GenWithStackByArgs("LIST", "IN")
-	case model.PartitionTypeSystemTime:
+	case serial.PartitionTypeSystemTime:
 		return ErrSystemVersioningWrongPartitions
 	}
 	return nil
@@ -2947,9 +2947,9 @@ func (n *PartitionDefinitionClauseLessThan) acceptInPlace(v Visitor) bool {
 	return true
 }
 
-func (n *PartitionDefinitionClauseLessThan) Validate(pt model.PartitionType, columns int) error {
+func (n *PartitionDefinitionClauseLessThan) Validate(pt serial.PartitionType, columns int) error {
 	switch pt {
-	case model.PartitionTypeRange, 0:
+	case serial.PartitionTypeRange, 0:
 	default:
 		return ErrPartitionWrongValues.GenWithStackByArgs("RANGE", "LESS THAN")
 	}
@@ -2968,7 +2968,7 @@ type PartitionDefinitionClauseIn struct {
 }
 
 func (n *PartitionDefinitionClauseIn) restore(ctx *format.RestoreCtx) error {
-	// we special-case an empty list of values to mean MariaDB's "DEFAULT" clause.
+	// we special-case an empty list of values to mean Marianoedb's "DEFAULT" clause.
 	if len(n.Values) == 0 {
 		ctx.WriteKeyWord(" DEFAULT")
 		return nil
@@ -3014,9 +3014,9 @@ func (n *PartitionDefinitionClauseIn) acceptInPlace(v Visitor) bool {
 	return true
 }
 
-func (n *PartitionDefinitionClauseIn) Validate(pt model.PartitionType, columns int) error {
+func (n *PartitionDefinitionClauseIn) Validate(pt serial.PartitionType, columns int) error {
 	switch pt {
-	case model.PartitionTypeList, 0:
+	case serial.PartitionTypeList, 0:
 	default:
 		return ErrPartitionWrongValues.GenWithStackByArgs("LIST", "IN")
 	}
@@ -3058,9 +3058,9 @@ func (n *PartitionDefinitionClauseHistory) acceptInPlace(v Visitor) bool {
 	return true
 }
 
-func (n *PartitionDefinitionClauseHistory) Validate(pt model.PartitionType, columns int) error {
+func (n *PartitionDefinitionClauseHistory) Validate(pt serial.PartitionType, columns int) error {
 	switch pt {
-	case 0, model.PartitionTypeSystemTime:
+	case 0, serial.PartitionTypeSystemTime:
 	default:
 		return ErrWrongPartitionTypeExpectedSystemTime
 	}
@@ -3070,7 +3070,7 @@ func (n *PartitionDefinitionClauseHistory) Validate(pt model.PartitionType, colu
 
 // PartitionDefinition defines a single partition.
 type PartitionDefinition struct {
-	Name    model.CIStr
+	Name    serial.CIStr
 	Clause  PartitionDefinitionClause
 	Options []*TableOption
 	Sub     []*SubPartitionDefinition
@@ -3126,7 +3126,7 @@ func (n *PartitionDefinition) Restore(ctx *format.RestoreCtx) error {
 // PartitionMethod describes how partitions or subpartitions are constructed.
 type PartitionMethod struct {
 	// Tp is the type of the partition function
-	Tp model.PartitionType
+	Tp serial.PartitionType
 	// Linear is a modifier to the HASH and KEY type for choosing a different
 	// algorithm
 	Linear bool
@@ -3153,7 +3153,7 @@ func (n *PartitionMethod) Restore(ctx *format.RestoreCtx) error {
 	ctx.WriteKeyWord(n.Tp.String())
 
 	switch {
-	case n.Tp == model.PartitionTypeSystemTime:
+	case n.Tp == serial.PartitionTypeSystemTime:
 		if n.Expr != nil && n.Unit != TimeUnitInvalid {
 			ctx.WriteKeyWord(" INTERVAL ")
 			if err := n.Expr.Restore(ctx); err != nil {
@@ -3171,7 +3171,7 @@ func (n *PartitionMethod) Restore(ctx *format.RestoreCtx) error {
 		ctx.WritePlain(")")
 
 	default:
-		if n.Tp == model.PartitionTypeRange || n.Tp == model.PartitionTypeList {
+		if n.Tp == serial.PartitionTypeRange || n.Tp == serial.PartitionTypeList {
 			ctx.WriteKeyWord(" COLUMNS")
 		}
 		ctx.WritePlain(" (")
@@ -3252,15 +3252,15 @@ func (n *PartitionOptions) Validate() error {
 	}
 
 	switch n.Tp {
-	case model.PartitionTypeHash, model.PartitionTypeKey:
+	case serial.PartitionTypeHash, serial.PartitionTypeKey:
 		if n.Num == 0 {
 			n.Num = 1
 		}
-	case model.PartitionTypeRange, model.PartitionTypeList:
+	case serial.PartitionTypeRange, serial.PartitionTypeList:
 		if len(n.Definitions) == 0 {
 			return ErrPartitionsMustBeDefined.GenWithStackByArgs(n.Tp)
 		}
-	case model.PartitionTypeSystemTime:
+	case serial.PartitionTypeSystemTime:
 		if len(n.Definitions) < 2 {
 			return ErrSystemVersioningWrongPartitions
 		}

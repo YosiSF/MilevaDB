@@ -19,9 +19,9 @@ import (
 	"strings"
 	"time"
 
-  "github.com/YosiSF/MilevaDB/BerolinaSQL/format"
-  "github.com/YosiSF/MilevaDB/BerolinaSQL/serial"
-  "github.com/YosiSF/MilevaDB/BerolinaSQL/types"
+  "github.com/YosiSF/Milevanoedb/BerolinaSQL/format"
+  "github.com/YosiSF/Milevanoedb/BerolinaSQL/serial"
+  "github.com/YosiSF/Milevanoedb/BerolinaSQL/types"
 
 
 )
@@ -176,7 +176,7 @@ const (
 	Year             = "year"
 	YearWeek         = "yearweek"
 	LastDay          = "last_day"
-	MilevaDBParseTso     = "milevadb_parse_tso"
+	MilevanoedbParseTso     = "milevanoedb_parse_tso"
 
 	// string functions
 	ASCII           = "ascii"
@@ -247,9 +247,9 @@ const (
 	SystemUser     = "system_user"
 	User           = "user"
 	Version        = "version"
-	MilevaDBVersion    = "milevadb_version"
-	MilevaDBIsDBSOwner = "milevadb_is_dbs_owner"
-	MilevaDBDecodePlan = "milevadb_decode_plan"
+	MilevanoedbVersion    = "milevanoedb_version"
+	MilevanoedbIsnoedbSKeywatcher = "milevanoedb_is_dbs_owner"
+	MilevanoedbDecodePlan = "milevanoedb_decode_plan"
 	FormatBytes    = "format_bytes"
 	FormatNanoTime = "format_nano_time"
 
@@ -328,8 +328,8 @@ const (
 	JSONKeys          = "json_keys"
 	JSONLength        = "json_length"
 
-	// MilevaDB internal function.
-	MilevaDBDecodeKey = "milevadb_decode_key"
+	// Milevanoedb internal function.
+	MilevanoedbDecodeKey = "milevanoedb_decode_key"
 
 	// MVCC information fetching function.
 	GetMvccInfo = "get_mvcc_info"

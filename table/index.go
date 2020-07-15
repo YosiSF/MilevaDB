@@ -17,16 +17,16 @@ package table
 import (
 	"context"
 
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/serial"
-	"github.com/YosiSF/MilevaDB/ekv"
-	"github.com/YosiSF/MilevaDB/causetnetctx"
-	"github.com/YosiSF/MilevaDB/causetnetctx/stmtctx"
-	"github.com/YosiSF/MilevaDB/types"
+	"github.com/YosiSF/Milevanoedb/BerolinaSQL/serial"
+	"github.com/YosiSF/Milevanoedb/eekv"
+	"github.com/YosiSF/Milevanoedb/causetnetctx"
+	"github.com/YosiSF/Milevanoedb/causetnetctx/stmtctx"
+	"github.com/YosiSF/Milevanoedb/types"
 )
 
-// IndexIterator is the interface for iterator of index data on Einstein's KV store.
+// IndexIterator is the interface for iterator of index data on Einstein's ekv store.
 type IndexIterator interface {
-	Next() (k []types.Datum, h kv.Handle, err error)
+	Next() (k []types.Datum, h ekv.Handle, err error)
 	Close()
 }
 
@@ -47,7 +47,7 @@ var SkipHandleCheck CreateIdxOptFunc = func(opt *CreateIdxOpt) {
 	opt.SkipHandleCheck = true
 }
 
-// IndexIsUntouched uses to indicate the index kv is untouched.
+// IndexIsUntouched uses to indicate the index ekv is untouched.
 var IndexIsUntouched CreateIdxOptFunc = func(opt *CreateIdxOpt) {
 	opt.Untouched = true
 }
@@ -60,24 +60,24 @@ func WithCtx(ctx context.contextctx) CreateIdxOptFunc {
 	}
 }
 
-// Index is the interface for index data on KV store.
+// Index is the interface for index data on ekv store.
 type Index interface {
 	// Meta returns IndexInfo.
 	Meta() *serial.IndexInfo
 	// Create supports insert into statement.
-	Create(ctx causetnetctx.contextctx, rm kv.RetrieverMutator, indexedValues []types.Datum, h kv.Handle, opts ...CreateIdxOptFunc) (kv.Handle, error)
+	Create(ctx causetnetctx.contextctx, rm ekv.RetrieverMutator, indexedValues []types.Datum, h ekv.Handle, opts ...CreateIdxOptFunc) (ekv.Handle, error)
 	// Delete supports delete from statement.
-	Delete(sc *stmtctx.Statementcontextctx, m kv.Mutator, indexedValues []types.Datum, h kv.Handle) error
+	Delete(sc *stmtctx.Statementcontextctx, m ekv.Mutator, indexedValues []types.Datum, h ekv.Handle) error
 	// Drop supports drop table, drop index statements.
-	Drop(rm kv.RetrieverMutator) error
+	Drop(rm ekv.RetrieverMutator) error
 	// Exist supports check index exists or not.
-	Exist(sc *stmtctx.Statementcontextctx, rm kv.RetrieverMutator, indexedValues []types.Datum, h kv.Handle) (bool, kv.Handle, error)
+	Exist(sc *stmtctx.Statementcontextctx, rm ekv.RetrieverMutator, indexedValues []types.Datum, h ekv.Handle) (bool, ekv.Handle, error)
 	// GenIndexKey generates an index key.
-	GenIndexKey(sc *stmtctx.Statementcontextctx, indexedValues []types.Datum, h kv.Handle, buf []byte) (key []byte, distinct bool, err error)
+	GenIndexKey(sc *stmtctx.Statementcontextctx, indexedValues []types.Datum, h ekv.Handle, buf []byte) (key []byte, distinct bool, err error)
 	// Seek supports where clause.
-	Seek(sc *stmtctx.Statementcontextctx, r kv.Retriever, indexedValues []types.Datum) (iter IndexIterator, hit bool, err error)
+	Seek(sc *stmtctx.Statementcontextctx, r ekv.Retriever, indexedValues []types.Datum) (iter IndexIterator, hit bool, err error)
 	// SeekFirst supports aggregate min and ascend order by.
-	SeekFirst(r kv.Retriever) (iter IndexIterator, err error)
+	SeekFirst(r ekv.Retriever) (iter IndexIterator, err error)
 	// FetchValues fetched index column values in a row.
 	// Param columns is a reused buffer, if it is not nil, FetchValues will fill the index values in it,
 	// and return the buffer, if it is nil, FetchValues will allocate the buffer instead.

@@ -154,7 +154,7 @@ type BinaryOperationExpr struct {
 }
 
 func restoreBinaryOpWithSpacesAround(ctx *format.RestoreCtx, op opcode.Op) error {
-	shouldInsertSpace := ctx.Flags.HasSpacesAroundBinaryOperationFlag() || op.IsKeyword()
+	shouldInsertSpace := ctx.Flags.HasSpacesArounnoedbinaryOperationFlag() || op.IsKeyword()
 	if shouldInsertSpace {
 		ctx.WritePlain(" ")
 	}
@@ -468,11 +468,11 @@ func (n *TableNameExpr) Restore(ctx *format.RestoreCtx) error {
 
 // Format the ExprNode into a Writer.
 func (n *TableNameExpr) Format(w io.Writer) {
-	dbName, tbName := n.Name.Schema.L, n.Name.Name.L
-	if dbName == "" {
+	noedbName, tbName := n.Name.Schema.L, n.Name.Name.L
+	if noedbName == "" {
 		fmt.Fprintf(w, "`%s`", tbName)
 	} else {
-		fmt.Fprintf(w, "`%s`.`%s`", dbName, tbName)
+		fmt.Fprintf(w, "`%s`.`%s`", noedbName, tbName)
 	}
 }
 

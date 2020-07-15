@@ -293,7 +293,7 @@ func (w *worker) onRecoverTable(d *dbsCtx, t *meta.Meta, job *serial.Job) (ver i
 
 		failpoint.Inject("mockRecoverTableCommitErr", func(val failpoint.Value) {
 			if val.(bool) && atomic.CompareAndSwapUint32(&mockRecoverTableCommitErrOnce, 0, 1) {
-				kv.MockCommitErrorEnable()
+				ekv.MockCommitErrorEnable()
 			}
 		})
 
@@ -354,7 +354,7 @@ func checkSafePoint(w *worker, snapshotTS uint64) error {
 	return gcutil.ValidateSnapshot(ctx, snapshotTS)
 }
 
-func getTable(store kv.Storage, schemaID int64, tblInfo *serial.TableInfo) (table.Table, error) {
+func getTable(store ekv.Storage, schemaID int64, tblInfo *serial.TableInfo) (table.Table, error) {
 	allocs := autoid.NewAllocatorsFromTblInfo(store, schemaID, tblInfo)
 	tbl, err := table.TableFromMeta(allocs, tblInfo)
 	return tbl, errors.Trace(err)
@@ -389,7 +389,7 @@ func getTableInfo(t *meta.Meta, tableID, schemaID int64) (*serial.TableInfo, err
 	// Check this table's database.
 	tblInfo, err := t.GetTable(schemaID, tableID)
 	if err != nil {
-		if meta.ErrDBNotExists.Equal(err) {
+		if meta.ErrnoedbNotExists.Equal(err) {
 			return nil, errors.Trace(schemaReplicant.ErrDatabaseNotExists.GenWithStackByArgs(
 				fmt.Sprintf("(Schema ID %d)", schemaID),
 			))
@@ -474,15 +474,15 @@ func onTruncateTable(d *dbsCtx, t *meta.Meta, job *serial.Job) (ver int64, _ err
 	return ver, nil
 }
 
-func onRebaseRowIDType(store kv.Storage, t *meta.Meta, job *serial.Job) (ver int64, _ error) {
+func onRebaseRowIDType(store ekv.Storage, t *meta.Meta, job *serial.Job) (ver int64, _ error) {
 	return onRebaseAutoID(store, t, job, autoid.RowIDAllocType)
 }
 
-func onRebaseAutoRandomType(store kv.Storage, t *meta.Meta, job *serial.Job) (ver int64, _ error) {
+func onRebaseAutoRandomType(store ekv.Storage, t *meta.Meta, job *serial.Job) (ver int64, _ error) {
 	return onRebaseAutoID(store, t, job, autoid.AutoRandomType)
 }
 
-func onRebaseAutoID(store kv.Storage, t *meta.Meta, job *serial.Job, tp autoid.AllocatorType) (ver int64, _ error) {
+func onRebaseAutoID(store ekv.Storage, t *meta.Meta, job *serial.Job, tp autoid.AllocatorType) (ver int64, _ error) {
 	schemaID := job.SchemaID
 	var newBase int64
 	err := job.DecodeArgs(&newBase)
@@ -544,8 +544,8 @@ func onModifyTableAutoIDCache(t *meta.Meta, job *serial.Job) (int64, error) {
 }
 
 func (w *worker) onShardRowID(d *dbsCtx, t *meta.Meta, job *serial.Job) (ver int64, _ error) {
-	var shardRowIDBits uint64
-	err := job.DecodeArgs(&shardRowIDBits)
+	var shardRowInoedbits uint64
+	err := job.DecodeArgs(&shardRowInoedbits)
 	if err != nil {
 		job.State = serial.JobStateCancelled
 		return ver, errors.Trace(err)
@@ -555,21 +555,21 @@ func (w *worker) onShardRowID(d *dbsCtx, t *meta.Meta, job *serial.Job) (ver int
 		job.State = serial.JobStateCancelled
 		return ver, errors.Trace(err)
 	}
-	if shardRowIDBits < tblInfo.ShardRowIDBits {
-		tblInfo.ShardRowIDBits = shardRowIDBits
+	if shardRowInoedbits < tblInfo.ShardRowInoedbits {
+		tblInfo.ShardRowInoedbits = shardRowInoedbits
 	} else {
 		tbl, err := getTable(d.store, job.SchemaID, tblInfo)
 		if err != nil {
 			return ver, errors.Trace(err)
 		}
-		err = verifyNoOverflowShardBits(w.sessPool, tbl, shardRowIDBits)
+		err = verifyNoOverflowSharnoedbits(w.sessPool, tbl, shardRowInoedbits)
 		if err != nil {
 			job.State = serial.JobStateCancelled
 			return ver, err
 		}
-		tblInfo.ShardRowIDBits = shardRowIDBits
-		// MaxShardRowIDBits use to check the overflow of auto ID.
-		tblInfo.MaxShardRowIDBits = shardRowIDBits
+		tblInfo.ShardRowInoedbits = shardRowInoedbits
+		// MaxShardRowInoedbits use to check the overflow of auto ID.
+		tblInfo.MaxShardRowInoedbits = shardRowInoedbits
 	}
 	ver, err = updateVersionAndTableInfo(t, job, tblInfo, true)
 	if err != nil {
@@ -580,7 +580,7 @@ func (w *worker) onShardRowID(d *dbsCtx, t *meta.Meta, job *serial.Job) (ver int
 	return ver, nil
 }
 
-func verifyNoOverflowShardBits(s *sessionPool, tbl table.Table, shardRowIDBits uint64) error {
+func verifyNoOverflowSharnoedbits(s *sessionPool, tbl table.Table, shardRowInoedbits uint64) error {
 	ctx, err := s.get()
 	if err != nil {
 		return errors.Trace(err)
@@ -592,8 +592,8 @@ func verifyNoOverflowShardBits(s *sessionPool, tbl table.Table, shardRowIDBits u
 	if err != nil {
 		return errors.Trace(err)
 	}
-	if tables.OverflowShardBits(autoIncID, shardRowIDBits, autoid.RowIDBitLength) {
-		return autoid.ErrAutoincReadFailed.GenWithStack("shard_row_id_bits %d will cause next global auto ID %v overflow", shardRowIDBits, autoIncID)
+	if tables.OverflowSharnoedbits(autoIncID, shardRowInoedbits, autoid.RowInoedbitLength) {
+		return autoid.ErrAutoincReadFailed.GenWithStack("shard_row_id_bits %d will cause next global auto ID %v overflow", shardRowInoedbits, autoIncID)
 	}
 	return nil
 }
@@ -624,7 +624,7 @@ func onRenameTable(d *dbsCtx, t *meta.Meta, job *serial.Job) (ver int64, _ error
 	shouldDelAutoID := false
 	if newSchemaID != oldSchemaID {
 		shouldDelAutoID = true
-		baseID, err = t.GetAutoTableID(tblInfo.GetDBID(oldSchemaID), tblInfo.ID)
+		baseID, err = t.GetAutoTableID(tblInfo.GetnoedbID(oldSchemaID), tblInfo.ID)
 		if err != nil {
 			job.State = serial.JobStateCancelled
 			return ver, errors.Trace(err)
@@ -699,7 +699,7 @@ func onModifyTableCharsetAndCollate(t *meta.Meta, job *serial.Job) (ver int64, _
 		return ver, errors.Trace(err)
 	}
 
-	dbInfo, err := checkSchemaExistAndCancelNotExistJob(t, job)
+	noedbInfo, err := checkSchemaExistAndCancelNotExistJob(t, job)
 	if err != nil {
 		return ver, errors.Trace(err)
 	}
@@ -710,7 +710,7 @@ func onModifyTableCharsetAndCollate(t *meta.Meta, job *serial.Job) (ver int64, _
 	}
 
 	// double check.
-	_, err = checkAlterTableCharset(tblInfo, dbInfo, toCharset, toCollate, needsOverwriteCols)
+	_, err = checkAlterTableCharset(tblInfo, noedbInfo, toCharset, toCollate, needsOverwriteCols)
 	if err != nil {
 		job.State = serial.JobStateCancelled
 		return ver, errors.Trace(err)
@@ -846,7 +846,7 @@ func checkTableNotExists(d *dbsCtx, t *meta.Meta, schemaID int64, tableName stri
 func checkTableIDNotExists(t *meta.Meta, schemaID, tableID int64) error {
 	tbl, err := t.GetTable(schemaID, tableID)
 	if err != nil {
-		if meta.ErrDBNotExists.Equal(err) {
+		if meta.ErrnoedbNotExists.Equal(err) {
 			return schemaReplicant.ErrDatabaseNotExists.GenWithStackByArgs("")
 		}
 		return errors.Trace(err)
@@ -873,7 +873,7 @@ func checkTableNotExistsFromStore(t *meta.Meta, schemaID int64, tableName string
 	// Check this table's database.
 	tables, err := t.ListTables(schemaID)
 	if err != nil {
-		if meta.ErrDBNotExists.Equal(err) {
+		if meta.ErrnoedbNotExists.Equal(err) {
 			return schemaReplicant.ErrDatabaseNotExists.GenWithStackByArgs("")
 		}
 		return errors.Trace(err)
@@ -1016,7 +1016,7 @@ func onRepairTable(d *dbsCtx, t *meta.Meta, job *serial.Job) (ver int64, _ error
 
 	tblInfo.State = serial.StateNone
 
-	// Check the old DB and old table exist.
+	// Check the old noedb and old table exist.
 	_, err := getTableInfoAndCancelFaultJob(t, job, schemaID)
 	if err != nil {
 		return ver, errors.Trace(err)
