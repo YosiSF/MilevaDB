@@ -82,10 +82,10 @@ func (dt *DirtyTable) IsEmpty() bool {
 // GetDirtyDB returns the DirtyDB bind to the context.
 func GetDirtyDB(ctx causetnetctx.Context) *DirtyDB {
 	var udb *DirtyDB
-	x := ctx.GetSessionVars().TxnCtx.DirtyDB
+	x := ctx.GetCausetNetVars().TxnCtx.DirtyDB
 	if x == nil {
 		udb = &DirtyDB{tables: make(map[int64]*DirtyTable)}
-		ctx.GetSessionVars().TxnCtx.DirtyDB = udb
+		ctx.GetCausetNetVars().TxnCtx.DirtyDB = udb
 	} else {
 		udb = x.(*DirtyDB)
 	}
@@ -245,7 +245,7 @@ func (us *UnionScanExec) getSnapshotRow(ctx context.Context) ([]types.Datum, err
 		}
 		iter := chunk.NewIterator4Chunk(us.snapshotChunkBuffer)
 		for row := iter.Begin(); row != iter.End(); row = iter.Next() {
-			var snapshotHandle kv.Handle
+			var snapshotHandle ekv.Handle
 			snapshotHandle, err = us.belowHandleCols.BuildHandle(row)
 			if err != nil {
 				return nil, err
@@ -294,7 +294,7 @@ func (us *UnionScanExec) shouldPickFirstRow(a, b []types.Datum) (bool, error) {
 }
 
 func (us *UnionScanExec) compare(a, b []types.Datum) (int, error) {
-	sc := us.ctx.GetSessionVars().StmtCtx
+	sc := us.ctx.GetCausetNetVars().StmtCtx
 	for _, colOff := range us.usedIndex {
 		aColumn := a[colOff]
 		bColumn := b[colOff]

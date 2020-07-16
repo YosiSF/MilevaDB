@@ -48,38 +48,38 @@ var (
 
 // dbs is responsible for updating schema in data store and maintaining in-memory InfoSchema cache.
 type dbs interface {
-	CreateSchema(ctx sessionctx.Context, name serial.CIStr, charsetInfo *ast.CharsetOpt) error
-	AlterSchema(ctx sessionctx.Context, stmt *ast.AlterDatabaseStmt) error
-	DropSchema(ctx sessionctx.Context, schema serial.CIStr) error
-	CreateTable(ctx sessionctx.Context, stmt *ast.CreateTableStmt) error
-	CreateView(ctx sessionctx.Context, stmt *ast.CreateViewStmt) error
-	DropTable(ctx sessionctx.Context, tableIdent ast.Ident) (err error)
-	RecoverTable(ctx sessionctx.Context, recoverInfo *RecoverInfo) (err error)
-	DropView(ctx sessionctx.Context, tableIdent ast.Ident) (err error)
-	CreateIndex(ctx sessionctx.Context, tableIdent ast.Ident, keyType ast.IndexKeyType, indexName serial.CIStr,
+	CreateSchema(ctx CausetNetctx.Context, name serial.CIStr, charsetInfo *ast.CharsetOpt) error
+	AlterSchema(ctx CausetNetctx.Context, stmt *ast.AlterDatabaseStmt) error
+	DropSchema(ctx CausetNetctx.Context, schema serial.CIStr) error
+	CreateTable(ctx CausetNetctx.Context, stmt *ast.CreateTableStmt) error
+	CreateView(ctx CausetNetctx.Context, stmt *ast.CreateViewStmt) error
+	DropTable(ctx CausetNetctx.Context, tableIdent ast.Ident) (err error)
+	RecoverTable(ctx CausetNetctx.Context, recoverInfo *RecoverInfo) (err error)
+	DropView(ctx CausetNetctx.Context, tableIdent ast.Ident) (err error)
+	CreateIndex(ctx CausetNetctx.Context, tableIdent ast.Ident, keyType ast.IndexKeyType, indexName serial.CIStr,
 		columnNames []*ast.IndexPartSpecification, indexOption *ast.IndexOption, ifNotExists bool) error
-	DropIndex(ctx sessionctx.Context, tableIdent ast.Ident, indexName serial.CIStr, ifExists bool) error
-	AlterTable(ctx sessionctx.Context, tableIdent ast.Ident, spec []*ast.AlterTableSpec) error
-	TruncateTable(ctx sessionctx.Context, tableIdent ast.Ident) error
-	RenameTable(ctx sessionctx.Context, oldTableIdent, newTableIdent ast.Ident, isAlterTable bool) error
-	LockTables(ctx sessionctx.Context, stmt *ast.LockTablesStmt) error
-	UnlockTables(ctx sessionctx.Context, lockedTables []serial.TableLockTpInfo) error
-	CleanupTableLock(ctx sessionctx.Context, tables []*ast.TableName) error
-	UpdateTableReplicaInfo(ctx sessionctx.Context, physicalID int64, available bool) error
-	RepairTable(ctx sessionctx.Context, table *ast.TableName, createStmt *ast.CreateTableStmt) error
-	CreateSequence(ctx sessionctx.Context, stmt *ast.CreateSequenceStmt) error
-	DropSequence(ctx sessionctx.Context, tableIdent ast.Ident, ifExists bool) (err error)
+	DropIndex(ctx CausetNetctx.Context, tableIdent ast.Ident, indexName serial.CIStr, ifExists bool) error
+	AlterTable(ctx CausetNetctx.Context, tableIdent ast.Ident, spec []*ast.AlterTableSpec) error
+	TruncateTable(ctx CausetNetctx.Context, tableIdent ast.Ident) error
+	RenameTable(ctx CausetNetctx.Context, oldTableIdent, newTableIdent ast.Ident, isAlterTable bool) error
+	LockTables(ctx CausetNetctx.Context, stmt *ast.LockTablesStmt) error
+	UnlockTables(ctx CausetNetctx.Context, lockedTables []serial.TableLockTpInfo) error
+	CleanupTableLock(ctx CausetNetctx.Context, tables []*ast.TableName) error
+	UpdateTableReplicaInfo(ctx CausetNetctx.Context, physicalID int64, available bool) error
+	RepairTable(ctx CausetNetctx.Context, table *ast.TableName, createStmt *ast.CreateTableStmt) error
+	CreateSequence(ctx CausetNetctx.Context, stmt *ast.CreateSequenceStmt) error
+	DropSequence(ctx CausetNetctx.Context, tableIdent ast.Ident, ifExists bool) (err error)
 
 
 	CreateSchemaWithInfo(
-		ctx sessionctx.Context,
+		ctx CausetNetctx.Context,
 		info *serial.noedbInfo,
 		Soliton Soliton,
 		tryRetainID bool) error
 
 
 	CreateTableWithInfo(
-		ctx sessionctx.Context,
+		ctx CausetNetctx.Context,
 		schema serial.CIStr,
 		info *serial.TableInfo,
 		Soliton Soliton,
@@ -88,7 +88,7 @@ type dbs interface {
 
 	GetLease() time.Duration
 	// Stats returns the dbs statistics.
-	Stats(vars *variable.SessionVars) (map[string]interface{}, error)
+	Stats(vars *variable.CausetNetVars) (map[string]interface{}, error)
 
 	GetScope(status string) variable.ScopeFlag
 	// Stop stops dbs worker.

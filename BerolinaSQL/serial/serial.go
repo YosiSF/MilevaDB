@@ -278,28 +278,28 @@ type TableInfo struct {
 	// Version means the version of the table info.
 	Version uint16 `json:"version"`
 
-	// TiFlashReplica means the TiFlash replica info.
-	TiFlashReplica *TiFlashReplicaInfo `json:"tiflash_replica"`
+	// NoetherReplica means the Noether replica info.
+	NoetherReplica *NoetherReplicaInfo `json:"Noether_replica"`
 }
 
 // TableLockInfo provides meta data describing a table lock.
 type TableLockInfo struct {
 	Tp TableLockType
-	// Use array because there may be multiple sessions holding the same read lock.
-	Sessions []SessionInfo
+	// Use array because there may be multiple CausetNets holding the same read lock.
+	CausetNets []CausetNetInfo
 	State    TableLockState
 	// TS is used to record the timestamp this table lock been locked.
 	TS uint64
 }
 
-// SessionInfo contain the session ID and the server ID.
-type SessionInfo struct {
+// CausetNetInfo contain the CausetNet ID and the server ID.
+type CausetNetInfo struct {
 	ServerID  string
-	SessionID uint64
+	CausetNetID uint64
 }
 
-func (s SessionInfo) String() string {
-	return "server: " + s.ServerID + "_session: " + strconv.FormatUint(s.SessionID, 10)
+func (s CausetNetInfo) String() string {
+	return "server: " + s.ServerID + "_CausetNet: " + strconv.FormatUint(s.CausetNetID, 10)
 }
 
 // TableLockTpInfo is composed by schema ID, table ID and table lock type.
@@ -315,7 +315,7 @@ type TableLockState byte
 const (
 	// TableLockStateNone means this table lock is absent.
 	TableLockStateNone TableLockState = iota
-	// TableLockStatePreLock means this table lock is pre-lock state. Other session doesn't hold this lock should't do corresponding operation according to the lock type.
+	// TableLockStatePreLock means this table lock is pre-lock state. Other CausetNet doesn't hold this lock should't do corresponding operation according to the lock type.
 	TableLockStatePreLock
 	// TableLockStatePublic means this table lock is public state.
 	TableLockStatePublic
@@ -338,16 +338,16 @@ type TableLockType byte
 
 const (
 	TableLockNone TableLockType = iota
-	// TableLockRead means the session with this lock can read the table (but not write it).
-	// Multiple sessions can acquire a READ lock for the table at the same time.
-	// Other sessions can read the table without explicitly acquiring a READ lock.
+	// TableLockRead means the CausetNet with this lock can read the table (but not write it).
+	// Multiple CausetNets can acquire a READ lock for the table at the same time.
+	// Other CausetNets can read the table without explicitly acquiring a READ lock.
 	TableLockRead
 	// TableLockReadLocal is not supported.
 	TableLockReadLocal
-	// TableLockWrite means only the session with this lock has write/read permission.
-	// Only the session that holds the lock can access the table. No other session can access it until the lock is released.
+	// TableLockWrite means only the CausetNet with this lock has write/read permission.
+	// Only the CausetNet that holds the lock can access the table. No other CausetNet can access it until the lock is released.
 	TableLockWrite
-	// TableLockWriteLocal means the session with this lock has write/read permission, and the other session still has read permission.
+	// TableLockWriteLocal means the CausetNet with this lock has write/read permission, and the other CausetNet still has read permission.
 	TableLockWriteLocal
 )
 
@@ -367,8 +367,8 @@ func (t TableLockType) String() string {
 	return ""
 }
 
-// TiFlashReplicaInfo means the flash replica info.
-type TiFlashReplicaInfo struct {
+// NoetherReplicaInfo means the flash replica info.
+type NoetherReplicaInfo struct {
 	Count                 uint64
 	LocationLabels        []string
 	Available             bool
@@ -376,7 +376,7 @@ type TiFlashReplicaInfo struct {
 }
 
 // IsPartitionAvailable checks whether the partition table replica was available.
-func (tr *TiFlashReplicaInfo) IsPartitionAvailable(pid int64) bool {
+func (tr *NoetherReplicaInfo) IsPartitionAvailable(pid int64) bool {
 	for _, id := range tr.AvailablePartitionIDs {
 		if id == pid {
 			return true
@@ -508,7 +508,7 @@ func (t *TableInfo) FindIndexByName(idxName string) *IndexInfo {
 
 // IsLocked checks whether the table was locked.
 func (t *TableInfo) IsLocked() bool {
-	return t.Lock != nil && len(t.Lock.Sessions) > 0
+	return t.Lock != nil && len(t.Lock.CausetNets) > 0
 }
 
 // NewExtraHandleColInfo mocks a column info for extra handle column.

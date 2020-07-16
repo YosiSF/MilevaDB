@@ -581,7 +581,7 @@ const (
 	ErrStoredFunctionPreventsSwitchBinlogFormat                     = 1560
 	ErrNnoedbCantSwitchBinlogFormat                                    = 1561
 	ErrPartitionNoTemporary                                         = 1562
-	ErrPartitionConstDomain                                         = 1563
+	ErrPartitionConstNamespace                                         = 1563
 	ErrPartitionFunctionIsNotAllowed                                = 1564
 	ErrDdlLog                                                       = 1565
 	ErrNullInValuesLessThan                                         = 1566

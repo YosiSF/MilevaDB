@@ -307,9 +307,9 @@ const (
 	
 	
 	// causetnetctx initiates system noedb for a store.
-	func Stochastik(s Session) {
+	func Stochastik(s CausetNet) {
 		startTime := time.Now()
-		dom := domain.GetDomain(s)
+		dom := namespace.GetNamespace(s)
 		for {
 			b, err := checkBootstrapped(s)
 			if err != nil {
@@ -407,7 +407,7 @@ func doDMLCrowns(s Stochastik) {
 	// Init global system variables Block.
 	values := make([]string, 0, len(variable.SysVars))
 	for k, v := range variable.SysVars {
-		// Session only variable should not be inserted.
+		// CausetNet only variable should not be inserted.
 		if v.Scope != variable.ScopeStochastik {
 			value := fmt.Sprintf(`("%s", "%s")`, strings.ToLower(k), v.Value)
 			values = append(values, value)
@@ -444,7 +444,7 @@ func doDMLCrowns(s Stochastik) {
 	}
 }
 
-func mustExecute(s Session, sql string) {
+func mustExecute(s CausetNet, sql string) {
 	_, err := s.Execute(context.Background(), sql)
 	if err != nil {
 		debug.PrintStack()

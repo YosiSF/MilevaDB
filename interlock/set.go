@@ -23,7 +23,7 @@ import (
 	"github.com/YosiSF/MilevaDB/BerolinaSQL/charset"
 	"github.com/YosiSF/MilevaDB/BerolinaSQL/mysql"
 	"github.com/YosiSF/MilevaDB/BerolinaSQL/terror"
-	"github.com/YosiSF/MilevaDB/domain"
+	"github.com/YosiSF/MilevaDB/namespace"
 	"github.com/YosiSF/MilevaDB/expression"
 	"github.com/YosiSF/MilevaDB/plugin"
 	"github.com/YosiSF/MilevaDB/causetnetctx/variable"
@@ -52,7 +52,7 @@ func (e *SetInterlock) Next(ctx context.Context, req *chunk.Chunk) error {
 		return nil
 	}
 	e.done = true
-	sessionVars := e.ctx.GetSessionVars()
+	CausetNetVars := e.ctx.GetCausetNetVars()
 	for _, v := range e.vars {
 		// Variable is case insensitive, we use lower case.
 		if v.Name == ast.SetNames || v.Name == ast.SetCharset {
@@ -88,14 +88,14 @@ func (e *SetInterlock) Next(ctx context.Context, req *chunk.Chunk) error {
 			}
 
 			if value.IsNull() {
-				delete(sessionVars.Users, name)
+				delete(CausetNetVars.Users, name)
 			} else {
 				svalue, err1 := value.ToString()
 				if err1 != nil {
 					return err1
 				}
 
-				sessionVars.SetUserVar(name, stringutil.Copy(svalue), value.Collation())
+				CausetNetVars.SetUserVar(name, stringutil.Copy(svalue), value.Collation())
 			}
 			continue
 		}
@@ -123,7 +123,7 @@ func (e *SetInterlock) getSynonyms(varName string) []string {
 }
 
 func (e *SetInterlock) setSysVariable(name string, v *expression.VarAssignment) error {
-	sessionVars := e.ctx.GetSessionVars()
+	CausetNetVars := e.ctx.GetCausetNetVars()
 	sysVar := variable.GetSysVar(name)
 	if sysVar == nil {
 		return variable.ErrUnknownSystemVar.GenWithStackByArgs(name)
@@ -135,7 +135,7 @@ func (e *SetInterlock) setSysVariable(name string, v *expression.VarAssignment) 
 	if v.IsGlobal {
 		// Set global scope system variable.
 		if sysVar.Scope&variable.ScopeGlobal == 0 {
-			return errors.Errorf("Variable '%s' is a SESSION variable and can't be used with SET GLOBAL", name)
+			return errors.Errorf("Variable '%s' is a CausetNet variable and can't be used with SET GLOBAL", name)
 		}
 		value, err := e.getVarValue(v, sysVar)
 		if err != nil {
@@ -148,14 +148,14 @@ func (e *SetInterlock) setSysVariable(name string, v *expression.VarAssignment) 
 		if err != nil {
 			return err
 		}
-		err = sessionVars.GlobalVarsAccessor.SetGlobalSysVar(name, valStr)
+		err = CausetNetVars.GlobalVarsAccessor.SetGlobalSysVar(name, valStr)
 		if err != nil {
 			return err
 		}
 		err = plugin.ForeachPlugin(plugin.Audit, func(p *plugin.Plugin) error {
 			auditPlugin := plugin.DeclareAuditManifest(p.Manifest)
 			if auditPlugin.OnGlobalVariableEvent != nil {
-				auditPlugin.OnGlobalVariableEvent(context.Background(), e.ctx.GetSessionVars(), name, valStr)
+				auditPlugin.OnGlobalVariableEvent(context.Background(), e.ctx.GetCausetNetVars(), name, valStr)
 			}
 			return nil
 		})
@@ -163,37 +163,37 @@ func (e *SetInterlock) setSysVariable(name string, v *expression.VarAssignment) 
 			return err
 		}
 	} else {
-		// Set session scope system variable.
-		if sysVar.Scope&variable.ScopeSession == 0 {
+		// Set CausetNet scope system variable.
+		if sysVar.Scope&variable.ScopeCausetNet == 0 {
 			return errors.Errorf("Variable '%s' is a GLOBAL variable and should be set with SET GLOBAL", name)
 		}
 		value, err := e.getVarValue(v, nil)
 		if err != nil {
 			return err
 		}
-		oldSnapshotTS := sessionVars.SnapshotTS
-		if name == variable.TxnIsolationOneShot && sessionVars.InTxn() {
+		oldSnapshotTS := CausetNetVars.SnapshotTS
+		if name == variable.TxnIsolationOneShot && CausetNetVars.InTxn() {
 			return errors.Trace(ErrCantChangeTxCharacteristics)
 		}
 		if name == variable.MilevaDBFoundInPlanCache {
-			sessionVars.StmtCtx.AppendWarning(fmt.Errorf("Set operation for '%s' will not take effect", variable.MilevaDBFoundInPlanCache))
+			CausetNetVars.StmtCtx.AppendWarning(fmt.Errorf("Set operation for '%s' will not take effect", variable.MilevaDBFoundInPlanCache))
 			return nil
 		}
-		err = variable.SetSessionSystemVar(sessionVars, name, value)
+		err = variable.SetCausetNetSystemVar(CausetNetVars, name, value)
 		if err != nil {
 			return err
 		}
-		newSnapshotIsSet := sessionVars.SnapshotTS > 0 && sessionVars.SnapshotTS != oldSnapshotTS
+		newSnapshotIsSet := CausetNetVars.SnapshotTS > 0 && CausetNetVars.SnapshotTS != oldSnapshotTS
 		if newSnapshotIsSet {
-			err = gcutil.ValidateSnapshot(e.ctx, sessionVars.SnapshotTS)
+			err = gcutil.ValidateSnapshot(e.ctx, CausetNetVars.SnapshotTS)
 			if err != nil {
-				sessionVars.SnapshotTS = oldSnapshotTS
+				CausetNetVars.SnapshotTS = oldSnapshotTS
 				return err
 			}
 		}
 		err = e.loadSnapshotschemareplicantIfNeeded(name)
 		if err != nil {
-			sessionVars.SnapshotTS = oldSnapshotTS
+			CausetNetVars.SnapshotTS = oldSnapshotTS
 			return err
 		}
 		if value.IsNull() {
@@ -204,11 +204,11 @@ func (e *SetInterlock) setSysVariable(name string, v *expression.VarAssignment) 
 			terror.Log(err)
 		}
 		if name != variable.AutoCommit {
-			logutil.BgLogger().Info("set session var", zap.Uint64("conn", sessionVars.ConnectionID), zap.String("name", name), zap.String("val", valStr))
+			logutil.BgLogger().Info("set CausetNet var", zap.Uint64("conn", CausetNetVars.ConnectionID), zap.String("name", name), zap.String("val", valStr))
 		} else {
 			// Some applications will set `autocommit` variable before query.
 			// This will print too many unnecessary log info.
-			logutil.BgLogger().Debug("set session var", zap.Uint64("conn", sessionVars.ConnectionID), zap.String("name", name), zap.String("val", valStr))
+			logutil.BgLogger().Debug("set CausetNet var", zap.Uint64("conn", CausetNetVars.ConnectionID), zap.String("name", name), zap.String("val", valStr))
 		}
 	}
 
@@ -247,45 +247,45 @@ func (e *SetInterlock) setCharset(cs, co string, isSetName bool) error {
 			return charset.ErrCollationCharsetMismatch.GenWithStackByArgs(coll.Name, cs)
 		}
 	}
-	sessionVars := e.ctx.GetSessionVars()
+	CausetNetVars := e.ctx.GetCausetNetVars()
 	if isSetName {
 		for _, v := range variable.SetNamesVariables {
-			if err = sessionVars.SetSystemVar(v, cs); err != nil {
+			if err = CausetNetVars.SetSystemVar(v, cs); err != nil {
 				return errors.Trace(err)
 			}
 		}
-		return errors.Trace(sessionVars.SetSystemVar(variable.CollationConnection, co))
+		return errors.Trace(CausetNetVars.SetSystemVar(variable.CollationConnection, co))
 	}
 	// Set charset statement, see also https://dev.mysql.com/doc/refman/8.0/en/set-character-set.html.
 	for _, v := range variable.SetCharsetVariables {
-		if err = sessionVars.SetSystemVar(v, cs); err != nil {
+		if err = CausetNetVars.SetSystemVar(v, cs); err != nil {
 			return errors.Trace(err)
 		}
 	}
-	csDb, err := sessionVars.GlobalVarsAccessor.GetGlobalSysVar(variable.CharsetDatabase)
+	csDb, err := CausetNetVars.GlobalVarsAccessor.GetGlobalSysVar(variable.CharsetDatabase)
 	if err != nil {
 		return err
 	}
-	coDb, err := sessionVars.GlobalVarsAccessor.GetGlobalSysVar(variable.CollationDatabase)
+	coDb, err := CausetNetVars.GlobalVarsAccessor.GetGlobalSysVar(variable.CollationDatabase)
 	if err != nil {
 		return err
 	}
-	err = sessionVars.SetSystemVar(variable.CharacterSetConnection, csDb)
+	err = CausetNetVars.SetSystemVar(variable.CharacterSetConnection, csDb)
 	if err != nil {
 		return errors.Trace(err)
 	}
-	return errors.Trace(sessionVars.SetSystemVar(variable.CollationConnection, coDb))
+	return errors.Trace(CausetNetVars.SetSystemVar(variable.CollationConnection, coDb))
 }
 
 func (e *SetInterlock) getVarValue(v *expression.VarAssignment, sysVar *variable.SysVar) (value types.Datum, err error) {
 	if v.IsDefault {
-		// To set a SESSION variable to the GLOBAL value or a GLOBAL value
+		// To set a CausetNet variable to the GLOBAL value or a GLOBAL value
 		// to the compiled-in MySQL default value, use the DEFAULT keyword.
 		// See http://dev.mysql.com/doc/refman/5.7/en/set-statement.html
 		if sysVar != nil {
 			value = types.NewStringDatum(sysVar.Value)
 		} else {
-			s, err1 := variable.GetGlobalSystemVar(e.ctx.GetSessionVars(), v.Name)
+			s, err1 := variable.GetGlobalSystemVar(e.ctx.GetCausetNetVars(), v.Name)
 			if err1 != nil {
 				return value, err1
 			}
@@ -301,13 +301,13 @@ func (e *SetInterlock) loadSnapshotschemareplicantIfNeeded(name string) error {
 	if name != variable.MilevaDBSnapshot {
 		return nil
 	}
-	vars := e.ctx.GetSessionVars()
+	vars := e.ctx.GetCausetNetVars()
 	if vars.SnapshotTS == 0 {
 		vars.Snapshotschemareplicant = nil
 		return nil
 	}
 	logutil.BgLogger().Info("load snapshot info schema", zap.Uint64("conn", vars.ConnectionID), zap.Uint64("SnapshotTS", vars.SnapshotTS))
-	dom := domain.GetDomain(e.ctx)
+	dom := namespace.GetNamespace(e.ctx)
 	snapInfo, err := dom.GetSnapshotschemareplicant(vars.SnapshotTS)
 	if err != nil {
 		return err

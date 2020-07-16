@@ -36,7 +36,7 @@ func (e *defaultEvaluator) run(ctx causetnetctx.Context, input, output *chunk.Ch
 	iter := chunk.NewIterator4Chunk(input)
 	if e.vectorizable {
 		for i := range e.outputIdxes {
-			if ctx.GetSessionVars().EnableVectorizedExpression && e.exprs[i].Vectorized() {
+			if ctx.GetCausetNetVars().EnableVectorizedExpression && e.exprs[i].Vectorized() {
 				if err := evalOneVec(ctx, e.exprs[i], input, output, e.outputIdxes[i]); err != nil {
 					return err
 				}

@@ -35,8 +35,8 @@ import (
 )
 
 const (
-	newSessionRetryInterval = 200 * time.Millisecond
-	logIntervalCnt = int(3 * time.Second / newSessionRetryInterval)
+	newCausetNetRetryInterval = 200 * time.Millisecond
+	logIntervalCnt = int(3 * time.Second / newCausetNetRetryInterval)
 )
 
 //A variant of zookeeper's leaderboard prototype
@@ -64,5 +64,5 @@ type Semaphore interface {
 }
 
 const (
-	NewSessionDefault
+	NewCausetNetDefault
 )

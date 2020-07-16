@@ -376,7 +376,7 @@ func VectorizedFilterConsiderNull(ctx causetnetctx.Context, filters []Expression
 	input := iterator.GetChunk()
 	sel := input.Sel()
 	var err error
-	if canVectorized && ctx.GetSessionVars().EnableVectorizedExpression {
+	if canVectorized && ctx.GetCausetNetVars().EnableVectorizedExpression {
 		selected, isNull, err = vectorizedFilter(ctx, filters, iterator, selected, isNull)
 	} else {
 		selected, isNull, err = rowBasedFilter(ctx, filters, iterator, selected, isNull)

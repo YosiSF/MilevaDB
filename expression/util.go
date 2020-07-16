@@ -482,7 +482,7 @@ func ExtractFiltersFromDNFs(ctx causetnetctx.Context, conditions []Expression) [
 // extractFiltersFromDNF extracts the same condition that occurs in every DNF item and remove them from dnf leaves.
 func extractFiltersFromDNF(ctx causetnetctx.Context, dnfFunc *ScalarFunction) ([]Expression, Expression) {
 	dnfItems := FlattenDNFConditions(dnfFunc)
-	sc := ctx.GetSessionVars().StmtCtx
+	sc := ctx.GetCausetNetVars().StmtCtx
 	codeMap := make(map[string]int)
 	hashcode2Expr := make(map[string]Expression)
 	for i, dnfItem := range dnfItems {
@@ -668,8 +668,8 @@ func DatumToConstant(d types.Datum, tp byte) *Constant {
 
 // ParamMarkerExpression generate a getparam function expression.
 func ParamMarkerExpression(ctx causetnetctx.Context, v *driver.ParamMarkerExpr) (Expression, error) {
-	useCache := ctx.GetSessionVars().StmtCtx.UseCache
-	isPointExec := ctx.GetSessionVars().StmtCtx.PointExec
+	useCache := ctx.GetCausetNetVars().StmtCtx.UseCache
+	isPointExec := ctx.GetCausetNetVars().StmtCtx.PointExec
 	tp := types.NewFieldType(mysql.TypeUnspecified)
 	types.DefaultParamTypeForValue(v.GetValue(), tp)
 	value := &Constant{Value: v.Datum, RetType: tp}
@@ -801,7 +801,7 @@ func IsMutableEffectsExpr(expr Expression) bool {
 func RemoveDupExprs(ctx causetnetctx.Context, exprs []Expression) []Expression {
 	res := make([]Expression, 0, len(exprs))
 	exists := make(map[string]struct{}, len(exprs))
-	sc := ctx.GetSessionVars().StmtCtx
+	sc := ctx.GetCausetNetVars().StmtCtx
 	for _, expr := range exprs {
 		if ContainMutableConst(ctx, []Expression{expr}) {
 			res = append(res, expr)
@@ -869,7 +869,7 @@ func ContainVirtualColumn(exprs []Expression) bool {
 // ContainMutableConst checks if the expressions contain a lazy constant.
 func ContainMutableConst(ctx causetnetctx.Context, exprs []Expression) bool {
 	// Treat all constants immutable if plan cache is not enabled for this query.
-	if !ctx.GetSessionVars().StmtCtx.UseCache {
+	if !ctx.GetCausetNetVars().StmtCtx.UseCache {
 		return false
 	}
 	for _, expr := range exprs {

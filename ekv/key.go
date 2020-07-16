@@ -380,7 +380,7 @@ func (m *HandleMap) Range(fn func(h Handle, val interface{}) bool) {
 	}
 }
 
-// BuildHandleFromDatumRow builds kv.Handle from cols in row.
+// BuildHandleFromDatumRow builds ekv.Handle from cols in row.
 func BuildHandleFromDatumRow(sctx *stmtctx.StatementContext, row []types.Datum, handleOrdinals []int) (Handle, error) {
 	pkDts := make([]types.Datum, 0, len(handleOrdinals))
 	for _, ordinal := range handleOrdinals {

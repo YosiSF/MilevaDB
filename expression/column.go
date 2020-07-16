@@ -77,7 +77,7 @@ func (col *CorrelatedColumn) EvalInt(ctx causetnetctx.Context, row chunk.Row) (i
 		return 0, true, nil
 	}
 	if col.GetType().Hybrid() {
-		res, err := col.Data.ToInt64(ctx.GetSessionVars().StmtCtx)
+		res, err := col.Data.ToInt64(ctx.GetCausetNetVars().StmtCtx)
 		return res, err != nil, err
 	}
 	return col.Data.GetInt64(), false, nil
@@ -338,10 +338,10 @@ func (col *Column) EvalInt(ctx causetnetctx.Context, row chunk.Row) (int64, bool
 			return 0, true, nil
 		}
 		if val.Kind() == types.KindMysqlBit {
-			val, err := val.GetBinaryLiteral().ToInt(ctx.GetSessionVars().StmtCtx)
+			val, err := val.GetBinaryLiteral().ToInt(ctx.GetCausetNetVars().StmtCtx)
 			return int64(val), err != nil, err
 		}
-		res, err := val.ToInt64(ctx.GetSessionVars().StmtCtx)
+		res, err := val.ToInt64(ctx.GetCausetNetVars().StmtCtx)
 		return res, err != nil, err
 	}
 	if row.IsNull(col.Index) {

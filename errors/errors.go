@@ -129,7 +129,7 @@ type ErrClass int
 const (
 	ClassAutoid ErrClass = iota + 1
 	ClassnoedbS
-	ClassDomain
+	ClassNamespace
 	ClassEvaluator
 	ClassExecutor
 	ClassExpression
@@ -151,14 +151,14 @@ const (
 	ClassMockTiekv
 	ClassJSON
 	ClassTiekv
-	ClassSession
+	ClassCausetNet
 	// Add more as needed.
 )
 
 var errClz2Str = map[ErrClass]string{
 	ClassAutoid:     "autoid",
 	ClassnoedbS:        "noedbS",
-	ClassDomain:     "domain",
+	ClassNamespace:     "namespace",
 	ClassExecutor:   "executor",
 	ClassExpression: "expression",
 	ClassAdmin:      "admin",
@@ -178,7 +178,7 @@ var errClz2Str = map[ErrClass]string{
 	ClassMockTiekv:   "mocktiekv",
 	ClassJSON:       "json",
 	ClassTiekv:       "tiekv",
-	ClassSession:    "session",
+	ClassCausetNet:    "CausetNet",
 }
 
 // String implements fmt.Stringer interface.

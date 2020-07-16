@@ -136,7 +136,7 @@ func truncateTrailingSpaces(v *types.Datum) {
 
 // CastValues casts values based on columns type.
 func CastValues(ctx causetnetctx.contextctx, rec []types.Datum, cols []*Column) (err error) {
-	sc := ctx.GetSessionVars().StmtCtx
+	sc := ctx.GetCausetNetVars().StmtCtx
 	for _, c := range cols {
 		var converted types.Datum
 		converted, err = CastValue(ctx, rec[c.Offset], c.ToInfo())
@@ -154,9 +154,9 @@ func CastValues(ctx causetnetctx.contextctx, rec []types.Datum, cols []*Column) 
 }
 
 func handleWrongUtf8Value(ctx causetnetctx.contextctx, col *serial.ColumnInfo, casted *types.Datum, str string, i int) (types.Datum, error) {
-	sc := ctx.GetSessionVars().StmtCtx
+	sc := ctx.GetCausetNetVars().StmtCtx
 	err := ErrTruncatedWrongValueForField.FastGen("incorrect utf8 value %x(%s) for column %s", casted.GetBytes(), str, col.Name)
-	logutil.BgLogger().Error("incorrect UTF-8 value", zap.Uint64("conn", ctx.GetSessionVars().ConnectionID), zap.Error(err))
+	logutil.BgLogger().Error("incorrect UTF-8 value", zap.Uint64("conn", ctx.GetCausetNetVars().ConnectionID), zap.Error(err))
 	// Truncate to valid utf8 string.
 	truncateVal := types.NewStringDatum(str[:i])
 	err = sc.HandleTruncate(err)
@@ -164,7 +164,7 @@ func handleWrongUtf8Value(ctx causetnetctx.contextctx, col *serial.ColumnInfo, c
 }
 
 func CastValue(ctx causetnetctx.contextctx, val types.Datum, col *serial.ColumnInfo) (casted types.Datum, err error) {
-	sc := ctx.GetSessionVars().StmtCtx
+	sc := ctx.GetCausetNetVars().StmtCtx
 	casted, err = val.ConvertTo(sc, &col.FieldType)
 	// TODO: make sure all truncate errors are handled by ConvertTo.
 	if types.ErrTruncated.Equal(err) {
@@ -184,7 +184,7 @@ func CastValue(ctx causetnetctx.contextctx, val types.Datum, col *serial.ColumnI
 		truncateTrailingSpaces(&casted)
 	}
 
-	if ctx.GetSessionVars().SkipUTF8Check {
+	if ctx.GetCausetNetVars().SkipUTF8Check {
 		return casted, nil
 	}
 	if !mysql.IsUTF8Charset(col.Charset) {

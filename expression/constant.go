@@ -58,8 +58,8 @@ type ParamMarker struct {
 
 // GetUserVar returns the corresponding user variable presented in the `EXECUTE` statement or `COM_EXECUTE` command.
 func (d *ParamMarker) GetUserVar() types.Datum {
-	sessionVars := d.ctx.GetSessionVars()
-	return sessionVars.PreparedParams[d.order]
+	CausetNetVars := d.ctx.GetCausetNetVars()
+	return CausetNetVars.PreparedParams[d.order]
 }
 
 // String implements fmt.Stringer interface.
@@ -176,7 +176,7 @@ func (c *Constant) Eval(row chunk.Row) (types.Datum, error) {
 		if c.DeferredExpr != nil {
 			sf, sfOk := c.DeferredExpr.(*ScalarFunction)
 			if sfOk {
-				val, err := dt.ConvertTo(sf.GetCtx().GetSessionVars().StmtCtx, c.RetType)
+				val, err := dt.ConvertTo(sf.GetCtx().GetCausetNetVars().StmtCtx, c.RetType)
 				if err != nil {
 					return dt, err
 				}
@@ -200,10 +200,10 @@ func (c *Constant) EvalInt(ctx causetnetctx.Context, row chunk.Row) (int64, bool
 	if c.GetType().Tp == mysql.TypeNull || dt.IsNull() {
 		return 0, true, nil
 	} else if dt.Kind() == types.KindBinaryLiteral {
-		val, err := dt.GetBinaryLiteral().ToInt(ctx.GetSessionVars().StmtCtx)
+		val, err := dt.GetBinaryLiteral().ToInt(ctx.GetCausetNetVars().StmtCtx)
 		return int64(val), err != nil, err
 	} else if c.GetType().Hybrid() || dt.Kind() == types.KindString {
-		res, err := dt.ToInt64(ctx.GetSessionVars().StmtCtx)
+		res, err := dt.ToInt64(ctx.GetCausetNetVars().StmtCtx)
 		return res, false, err
 	}
 	return dt.GetInt64(), false, nil
@@ -222,7 +222,7 @@ func (c *Constant) EvalReal(ctx causetnetctx.Context, row chunk.Row) (float64, b
 		return 0, true, nil
 	}
 	if c.GetType().Hybrid() || dt.Kind() == types.KindBinaryLiteral || dt.Kind() == types.KindString {
-		res, err := dt.ToFloat64(ctx.GetSessionVars().StmtCtx)
+		res, err := dt.ToFloat64(ctx.GetCausetNetVars().StmtCtx)
 		return res, false, err
 	}
 	return dt.GetFloat64(), false, nil
@@ -256,7 +256,7 @@ func (c *Constant) EvalDecimal(ctx causetnetctx.Context, row chunk.Row) (*types.
 	if c.GetType().Tp == mysql.TypeNull || dt.IsNull() {
 		return nil, true, nil
 	}
-	res, err := dt.ToDecimal(ctx.GetSessionVars().StmtCtx)
+	res, err := dt.ToDecimal(ctx.GetCausetNetVars().StmtCtx)
 	return res, false, err
 }
 
@@ -316,7 +316,7 @@ func (c *Constant) Equal(ctx causetnetctx.Context, b Expression) bool {
 	if err1 != nil || err2 != nil {
 		return false
 	}
-	con, err := c.Value.CompareDatum(ctx.GetSessionVars().StmtCtx, &y.Value)
+	con, err := c.Value.CompareDatum(ctx.GetCausetNetVars().StmtCtx, &y.Value)
 	if err != nil || con != 0 {
 		return false
 	}

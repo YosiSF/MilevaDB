@@ -35,13 +35,13 @@ type Context interface {
 	NewTxn(context.Context) error
 
 	// Txn returns the current transaction which is created before executing a statement.
-	// The returned kv.Transaction is not nil, but it maybe pending or invalid.
+	// The returned ekv.Transaction is not nil, but it maybe pending or invalid.
 	// If the active parameter is true, call this function will wait for the pending txn
 	// to become valid.
-	Txn(active bool) (kv.Transaction, error)
+	Txn(active bool) (ekv.Transaction, error)
 
-	// GetClient gets a kv.Client.
-	GetClient() kv.Client
+	// GetClient gets a ekv.Client.
+	GetClient() ekv.Client
 
 	// SetValue saves a value associated with this context for key.
 	SetValue(key fmt.Stringer, value interface{})
@@ -52,9 +52,9 @@ type Context interface {
 	// ClearValue clears the value associated with this context for key.
 	ClearValue(key fmt.Stringer)
 
-	GetSessionVars() *variable.SessionVars
+	GetCausetNetVars() *variable.CausetNetVars
 
-	GetSessionManager() util.SessionManager
+	GetCausetNetManager() util.CausetNetManager
 
 	// RefreshTxnCtx commits old transaction without retry,
 	// and creates a new transaction.
@@ -65,8 +65,8 @@ type Context interface {
 	// It should be called right before we builds an executor.
 	InitTxnWithStartTS(startTS uint64) error
 
-	// GetStore returns the store of session.
-	GetStore() kv.Storage
+	// GetStore returns the store of CausetNet.
+	GetStore() ekv.Storage
 
 	// PreparedPlanCache returns the cache of the physical plan
 	PreparedPlanCache() *kvcache.SimpleLRUCache
@@ -84,22 +84,22 @@ type Context interface {
 	// StmtGetMutation gets the binlog mutation for current statement.
 	StmtGetMutation(int64) *binlog.TableMutation
 	// StmtAddDirtyTableOP adds the dirty table operation for current statement.
-	StmtAddDirtyTableOP(op int, physicalID int64, handle kv.Handle)
+	StmtAddDirtyTableOP(op int, physicalID int64, handle ekv.Handle)
 	// DDLOwnerChecker returns keywatcher.DDLOwnerChecker.
 	DDLOwnerChecker() keywatcher.DDLOwnerChecker
-	// AddTableLock adds table lock to the session lock map.
+	// AddTableLock adds table lock to the CausetNet lock map.
 	AddTableLock([]serial.TableLockTpInfo)
-	// ReleaseTableLocks releases table locks in the session lock map.
+	// ReleaseTableLocks releases table locks in the CausetNet lock map.
 	ReleaseTableLocks(locks []serial.TableLockTpInfo)
-	// ReleaseTableLockByTableID releases table locks in the session lock map by table ID.
+	// ReleaseTableLockByTableID releases table locks in the CausetNet lock map by table ID.
 	ReleaseTableLockByTableIDs(tableIDs []int64)
 	// CheckTableLocked checks the table lock.
 	CheckTableLocked(tblID int64) (bool, serial.TableLockType)
-	// GetAllTableLocks gets all table locks table id and db id hold by the session.
+	// GetAllTableLocks gets all table locks table id and db id hold by the CausetNet.
 	GetAllTableLocks() []serial.TableLockTpInfo
-	// ReleaseAllTableLocks releases all table locks hold by the session.
+	// ReleaseAllTableLocks releases all table locks hold by the CausetNet.
 	ReleaseAllTableLocks()
-	// HasLockedTables uses to check whether this session locked any tables.
+	// HasLockedTables uses to check whether this CausetNet locked any tables.
 	HasLockedTables() bool
 	// PrepareTSFuture uses to prepare timestamp by future.
 	PrepareTSFuture(ctx context.Context)
@@ -125,7 +125,7 @@ const (
 	QueryString basicCtxType = 1
 	// Initing is the key for indicating if the server is running bootstrap or upgrade job.
 	Initing basicCtxType = 2
-	// LastExecuteDDL is the key for whether the session execute a ddl command last time.
+	// LastExecuteDDL is the key for whether the CausetNet execute a ddl command last time.
 	LastExecuteDBS basicCtxType = 3
 )
 
@@ -136,5 +136,5 @@ var ConnID = connIDCtxKeyType{}
 
 // SetCommitCtx sets connection id into context
 func SetCommitCtx(ctx context.Context, sessCtx Context) context.Context {
-	return context.WithValue(ctx, ConnID, sessCtx.GetSessionVars().ConnectionID)
+	return context.WithValue(ctx, ConnID, sessCtx.GetCausetNetVars().ConnectionID)
 }

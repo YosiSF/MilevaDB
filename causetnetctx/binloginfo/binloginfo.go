@@ -23,7 +23,7 @@ func init() {
 }
 
 // pumpsClient is the client to write binlog, it is opened on server start and never close,
-// shared by all sessions.
+// shared by all CausetNets.
 var pumpsClient *pumpcli.PumpsClient
 var pumpsClientLock sync.RWMutex
 var shardPat = regexp.MustCompile(`SHARD_ROW_ID_BITS\s*=\s*\d+\s*`)
@@ -80,10 +80,10 @@ func SetPumpsClient(client *pumpcli.PumpsClient) {
 
 // GetPrewriteValue gets binlog prewrite value in the context.
 func GetPrewriteValue(ctx causetnetctx.contextctx, createIfNotExists bool) *binlog.PrewriteValue {
-	vars := ctx.GetSessionVars()
+	vars := ctx.GetCausetNetVars()
 	v, ok := vars.TxnCtx.Binlog.(*binlog.PrewriteValue)
 	if !ok && createIfNotExists {
-		schemaVer := ctx.GetSessionVars().TxnCtx.SchemaVersion
+		schemaVer := ctx.GetCausetNetVars().TxnCtx.SchemaVersion
 		v = &binlog.PrewriteValue{SchemaVersion: schemaVer}
 		vars.TxnCtx.Binlog = v
 	}

@@ -259,7 +259,7 @@ func (e *HashAggExec) Open(ctx context.Context) error {
 	e.prepared = false
 
 	e.memTracker = memory.NewTracker(e.id, -1)
-	e.memTracker.AttachTo(e.ctx.GetSessionVars().StmtCtx.MemTracker)
+	e.memTracker.AttachTo(e.ctx.GetCausetNetVars().StmtCtx.MemTracker)
 
 	if e.isUnparallelExec {
 		e.initForUnparallelExec()
@@ -278,9 +278,9 @@ func (e *HashAggExec) initForUnparallelExec() {
 }
 
 func (e *HashAggExec) initForParallelExec(ctx causetnetctx.Context) {
-	sessionVars := e.ctx.GetSessionVars()
-	finalConcurrency := sessionVars.HashAggFinalConcurrency()
-	partialConcurrency := sessionVars.HashAggPartialConcurrency()
+	CausetNetVars := e.ctx.GetCausetNetVars()
+	finalConcurrency := CausetNetVars.HashAggFinalConcurrency()
+	partialConcurrency := CausetNetVars.HashAggPartialConcurrency()
 	e.isChildReturnEmpty = true
 	e.finalOutputCh = make(chan *AfFinalResult, finalConcurrency)
 	e.inputCh = make(chan *HashAggInput, partialConcurrency)
@@ -364,7 +364,7 @@ func recoveryHashAgg(output chan *AfFinalResult, r interface{}) {
 }
 
 func (w *HashAggPartialWorker) run(ctx causetnetctx.Context, waitGroup *sync.WaitGroup, finalConcurrency int) {
-	needShuffle, sc := false, ctx.GetSessionVars().StmtCtx
+	needShuffle, sc := false, ctx.GetCausetNetVars().StmtCtx
 	defer func() {
 		if r := recover(); r != nil {
 			recoveryHashAgg(w.globalOutputCh, r)
@@ -460,7 +460,7 @@ func getGroupKey(ctx causetnetctx.Context, input *chunk.Chunk, groupKey [][]byte
 			newTp.Flen = 0
 			tp = &newTp
 		}
-		groupKey, err = codec.HashGroupKey(ctx.GetSessionVars().StmtCtx, input.NumRows(), buf, groupKey, tp)
+		groupKey, err = codec.HashGroupKey(ctx.GetCausetNetVars().StmtCtx, input.NumRows(), buf, groupKey, tp)
 		if err != nil {
 			expression.PutColumn(buf)
 			return nil, err
@@ -505,7 +505,7 @@ func (w *HashAggFinalWorker) consumeIntermData(sctx causetnetctx.Context) (err e
 		ok               bool
 		intermDataBuffer [][]aggfuncs.PartialResult
 		groupKeys        []string
-		sc               = sctx.GetSessionVars().StmtCtx
+		sc               = sctx.GetCausetNetVars().StmtCtx
 	)
 	for {
 		if input, ok = w.getPartialInput(); !ok {

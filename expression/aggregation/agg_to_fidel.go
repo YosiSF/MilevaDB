@@ -4,7 +4,7 @@ import (
 	"github.com/YosiSF/errors"
 	"github.com/YosiSF/BerolinaSQL/ast"
 	"github.com/YosiSF/MilevaDB/expression"
-	"github.com/YosiSF/MilevaDB/kv"
+	"github.com/YosiSF/MilevaDB/ekv"
 	"github.com/YosiSF/MilevaDB/causetnetctx"
 	"github.com/YosiSF/MilevaDB/causetnetctx/stmtctx"
 	"github.com/YosiSF/MilevaDB/types"
@@ -49,7 +49,7 @@ func AggFuncToPBExpr(sc *stmtctx.StatementContext, client ekv.Client, aggFunc *A
 	case ast.AggFuncJsonObjectAgg:
 		noe = noether.ExprType_JsonObjectAgg
 	}
-	if !client.IsRequestTypeSupported(kv.ReqTypeSelect, int64(noe)) {
+	if !client.IsRequestTypeSupported(ekv.ReqTypeSelect, int64(noe)) {
 		return nil
 	}
 
@@ -94,7 +94,7 @@ func PBExprToAggFuncDesc(ctx causetnetctx.Context, aggFunc *noether.Expr, fieldT
 		return nil, errors.Errorf("unknown aggregation function type: %v", aggFunc.Tp)
 	}
 
-	args, err := expression.PBToExprs(aggFunc.Children, fieldTps, ctx.GetSessionVars().StmtCtx)
+	args, err := expression.PBToExprs(aggFunc.Children, fieldTps, ctx.GetCausetNetVars().StmtCtx)
 	if err != nil {
 		return nil, err
 	}

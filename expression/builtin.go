@@ -683,7 +683,7 @@ var funcs = map[string]functionClass{
 	ast.Coercibility: &coercibilityFunctionClass{baseFunctionClass{ast.Coercibility, 1, 1}},
 	ast.Collation:    &collationFunctionClass{baseFunctionClass{ast.Collation, 1, 1}},
 	ast.RowCount:     &rowCountFunctionClass{baseFunctionClass{ast.RowCount, 0, 0}},
-	ast.SessionUser:  &userFunctionClass{baseFunctionClass{ast.SessionUser, 0, 0}},
+	ast.CausetNetUser:  &userFunctionClass{baseFunctionClass{ast.CausetNetUser, 0, 0}},
 	ast.SystemUser:   &userFunctionClass{baseFunctionClass{ast.SystemUser, 0, 0}},
 
 	// See https://dev.mysql.com/doc/refman/8.0/en/performance-schema-functions.html

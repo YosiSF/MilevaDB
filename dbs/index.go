@@ -972,7 +972,7 @@ func (w *addIndexWorker) batchCheckUniqueKey(txn ekv.Transaction, idxRecords []*
 	}
 
 	w.initBatchCheckBufs(len(idxRecords))
-	stmtCtx := w.sessCtx.GetSessionVars().StmtCtx
+	stmtCtx := w.sessCtx.GetCausetNetVars().StmtCtx
 	for i, record := range idxRecords {
 		idxKey, distinct, err := w.index.GenIndexKey(stmtCtx, record.vals, ekv.IntHandle(record.handle), w.idxKeyBufs[i])
 		if err != nil {

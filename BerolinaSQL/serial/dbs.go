@@ -56,8 +56,8 @@ const (
 	ActionLockTable                     ActionType = 27
 	ActionUnlockTable                   ActionType = 28
 	ActionRepairTable                   ActionType = 29
-	ActionSetTiFlashReplica             ActionType = 30
-	ActionUpdateTiFlashReplicaStatus    ActionType = 31
+	ActionSetNoetherReplica             ActionType = 30
+	ActionUpdateNoetherReplicaStatus    ActionType = 31
 	ActionAddPrimaryKey                 ActionType = 32
 	ActionDropPrimaryKey                ActionType = 33
 	ActionCreateSequence                ActionType = 34
@@ -110,8 +110,8 @@ var actionMap = map[ActionType]string{
 	ActionLockTable:                     "lock table",
 	ActionUnlockTable:                   "unlock table",
 	ActionRepairTable:                   "repair table",
-	ActionSetTiFlashReplica:             "set tiflash replica",
-	ActionUpdateTiFlashReplicaStatus:    "update tiflash replica status",
+	ActionSetNoetherReplica:             "set Noether replica",
+	ActionUpdateNoetherReplicaStatus:    "update Noether replica status",
 	ActionAddPrimaryKey:                 AddPrimaryKeyStr,
 	ActionDropPrimaryKey:                "drop primary key",
 	ActionCreateSequence:                "create sequence",

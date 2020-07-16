@@ -218,9 +218,9 @@ func EvalBool(ctx causetnetctx.Context, exprList CNFExprs, row chunk.Row) (bool,
 			continue
 		}
 
-		i, err := data.ToBool(ctx.GetSessionVars().StmtCtx)
+		i, err := data.ToBool(ctx.GetCausetNetVars().StmtCtx)
 		if err != nil {
-			i, err = HandleOverflowOnSelection(ctx.GetSessionVars().StmtCtx, i, err)
+			i, err = HandleOverflowOnSelection(ctx.GetCausetNetVars().StmtCtx, i, err)
 			if err != nil {
 				return false, false, err
 
@@ -314,7 +314,7 @@ func VecEvalBool(ctx causetnetctx.Context, exprList CNFExprs, input *chunk.Chunk
 			return nil, nil, err
 		}
 
-		err = toBool(ctx.GetSessionVars().StmtCtx, eType, buf, sel, isZero)
+		err = toBool(ctx.GetCausetNetVars().StmtCtx, eType, buf, sel, isZero)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -448,7 +448,7 @@ func toBool(sc *stmtctx.StatementContext, eType types.EvalType, buf *chunk.Colum
 // the environment variables and whether the expression can be vectorized.
 func EvalExpr(ctx causetnetctx.Context, expr Expression, input *chunk.Chunk, result *chunk.Column) (err error) {
 	evalType := expr.GetType().EvalType()
-	if expr.Vectorized() && ctx.GetSessionVars().EnableVectorizedExpression {
+	if expr.Vectorized() && ctx.GetCausetNetVars().EnableVectorizedExpression {
 		switch evalType {
 		case types.ETInt:
 			err = expr.VecEvalInt(ctx, input, result)
@@ -760,7 +760,7 @@ func ColumnInfos2ColumnsAndNames(ctx causetnetctx.Context, dbName, tblName seria
 		newCol := &Column{
 			RetType:  &col.FieldType,
 			ID:       col.ID,
-			UniqueID: ctx.GetSessionVars().AllocPlanColumnID(),
+			UniqueID: ctx.GetCausetNetVars().AllocPlanColumnID(),
 			Index:    col.Offset,
 			OrigName: names[i].String(),
 			IsHidden: col.Hidden,
@@ -788,7 +788,7 @@ func IsBinaryLiteral(expr Expression) bool {
 	return ok && con.Value.Kind() == types.KindBinaryLiteral
 }
 
-func canFuncBePushed(sf *ScalarFunction, storeType kv.StoreType) bool {
+func canFuncBePushed(sf *ScalarFunction, storeType ekv.StoreType) bool {
 	// Use the failpoint to control whether to push down an expression in the integration test.
 	// Push down all expression if the `failpoint expression` is `all`, otherwise, check
 	// whether scalar function's name is contained in the enabled expression list (e.g.`ne,eq,lt`).
@@ -973,11 +973,11 @@ func canFuncBePushed(sf *ScalarFunction, storeType kv.StoreType) bool {
 	}
 	if ret {
 		switch storeType {
-		case kv.TiFlash:
+		case ekv.Noether:
 			ret = scalarExprSupportedByFlash(sf)
-		case kv.TiKV:
+		case ekv.TiKV:
 			ret = scalarExprSupportedByTiKV(sf)
-		case kv.MilevaDB:
+		case ekv.MilevaDB:
 			ret = scalarExprSupportedByMilevaDB(sf)
 		}
 	}
@@ -987,23 +987,23 @@ func canFuncBePushed(sf *ScalarFunction, storeType kv.StoreType) bool {
 	return ret
 }
 
-func storeTypeMask(storeType kv.StoreType) uint32 {
-	if storeType == kv.UnSpecified {
-		return 1<<kv.TiKV | 1<<kv.TiFlash | 1<<kv.MilevaDB
+func storeTypeMask(storeType ekv.StoreType) uint32 {
+	if storeType == ekv.UnSpecified {
+		return 1<<ekv.TiKV | 1<<ekv.Noether | 1<<ekv.MilevaDB
 	}
 	return 1 << storeType
 }
 
 // IsPushDownEnabled returns true if the input expr is not in the expr_pushdown_blacklist
-func IsPushDownEnabled(name string, storeType kv.StoreType) bool {
+func IsPushDownEnabled(name string, storeType ekv.StoreType) bool {
 	value, exists := DefaultExprPushDownBlacklist.Load().(map[string]uint32)[name]
 	if exists {
 		mask := storeTypeMask(storeType)
 		return !(value&mask == mask)
 	}
 
-	if storeType != kv.TiFlash && name == ast.AggFuncApproxCountDistinct {
-		// Can not push down approx_count_distinct to other store except tiflash by now.
+	if storeType != ekv.Noether && name == ast.AggFuncApproxCountDistinct {
+		// Can not push down approx_count_distinct to other store except Noether by now.
 		return false
 	}
 
@@ -1018,7 +1018,7 @@ func init() {
 	DefaultExprPushDownBlacklist.Store(make(map[string]uint32))
 }
 
-func canScalarFuncPushDown(scalarFunc *ScalarFunction, pc PbConverter, storeType kv.StoreType) bool {
+func canScalarFuncPushDown(scalarFunc *ScalarFunction, pc PbConverter, storeType ekv.StoreType) bool {
 	fbCode := scalarFunc.Function.PbCode()
 	if fbCode <= noether.ScalarFuncSig_Unspecified {
 		failpoint.Inject("PanicIfPbCodeUnspecified", func() {
@@ -1050,8 +1050,8 @@ func canScalarFuncPushDown(scalarFunc *ScalarFunction, pc PbConverter, storeType
 	return true
 }
 
-func canExprPushDown(expr Expression, pc PbConverter, storeType kv.StoreType) bool {
-	if storeType == kv.TiFlash && expr.GetType().Tp == mysql.TypeDuration {
+func canExprPushDown(expr Expression, pc PbConverter, storeType ekv.StoreType) bool {
+	if storeType == ekv.Noether && expr.GetType().Tp == mysql.TypeDuration {
 		return false
 	}
 	switch x := expr.(type) {
@@ -1066,7 +1066,7 @@ func canExprPushDown(expr Expression, pc PbConverter, storeType kv.StoreType) bo
 }
 
 // PushDownExprs split the input exprs into pushed and remained, pushed include all the exprs that can be pushed down
-func PushDownExprs(sc *stmtctx.StatementContext, exprs []Expression, client kv.Client, storeType kv.StoreType) (pushed []Expression, remained []Expression) {
+func PushDownExprs(sc *stmtctx.StatementContext, exprs []Expression, client ekv.Client, storeType ekv.StoreType) (pushed []Expression, remained []Expression) {
 	pc := PbConverter{sc: sc, client: client}
 	for _, expr := range exprs {
 		if canExprPushDown(expr, pc, storeType) {
@@ -1079,7 +1079,7 @@ func PushDownExprs(sc *stmtctx.StatementContext, exprs []Expression, client kv.C
 }
 
 // CanExprsPushDown return true if all the expr in exprs can be pushed down
-func CanExprsPushDown(sc *stmtctx.StatementContext, exprs []Expression, client kv.Client, storeType kv.StoreType) bool {
+func CanExprsPushDown(sc *stmtctx.StatementContext, exprs []Expression, client ekv.Client, storeType ekv.StoreType) bool {
 	_, remained := PushDownExprs(sc, exprs, client, storeType)
 	return len(remained) == 0
 }

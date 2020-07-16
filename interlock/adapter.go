@@ -29,7 +29,7 @@ type recordSet struct {
 
 func (a *recordSet) Fields() []*ast.ResultField {
 	if len(a.fields) == 0 {
-		a.fields = colNames2ResultFields(a.Interlock.Schema(), a.stmt.OutputNames, a.stmt.Ctx.GetSessionVars().Currentnoedb)
+		a.fields = colNames2ResultFields(a.Interlock.Schema(), a.stmt.OutputNames, a.stmt.Ctx.GetCausetNetVars().Currentnoedb)
 	}
 	return a.fields
 }
@@ -69,7 +69,7 @@ func colNames2ResultFields(schema *expression.Schema, names []*types.FieldName, 
 }
 
 // Next use uses recordSet's Interlock to get next available soliton for later usage.
-// If soliton does not contain any rows, then we update last query found rows in session variable as current found rows.
+// If soliton does not contain any rows, then we update last query found rows in CausetNet variable as current found rows.
 // The reason we need update is that soliton with 0 rows indicating we already finished current query, we need prepare for
 // next query.
 // If stmt is not nil and soliton with some rows inside, we simply update last query found rows by the number of row in soliton.
@@ -91,12 +91,12 @@ func (a *recordSet) Next(ctx contextctx.contextctx, req *soliton.soliton) (err e
 	numRows := req.NumRows()
 	if numRows == 0 {
 		if a.stmt != nil {
-			a.stmt.Ctx.GetSessionVars().LastFoundRows = a.stmt.Ctx.GetSessionVars().StmtCtx.FoundRows()
+			a.stmt.Ctx.GetCausetNetVars().LastFoundRows = a.stmt.Ctx.GetCausetNetVars().StmtCtx.FoundRows()
 		}
 		return nil
 	}
 	if a.stmt != nil {
-		a.stmt.Ctx.GetSessionVars().StmtCtx.AddFoundRows(uint64(numRows))
+		a.stmt.Ctx.GetCausetNetVars().StmtCtx.AddFoundRows(uint64(numRows))
 	}
 	return nil
 }
@@ -154,7 +154,7 @@ func (a *ExecStmt) PointGet(ctx contextctx.contextctx, is infoschema.InfoSchema)
 	if err != nil {
 		return nil, err
 	}
-	a.Ctx.GetSessionVars().StmtCtx.Priority = ekv.PriorityHigh
+	a.Ctx.GetCausetNetVars().StmtCtx.Priority = ekv.PriorityHigh
 
 	// try to reuse point get Interlock
 	if a.PsStmt.Interlock != nil {
@@ -203,7 +203,7 @@ func (a *ExecStmt) IsPrepared() bool {
 // IsReadOnly returns true if a statement is read only.
 // If current StmtNode is an ExecuteStmt, we can get its prepared stmt,
 // then using ast.IsReadOnly function to determine a statement is read only or not.
-func (a *ExecStmt) IsReadOnly(vars *variable.SessionVars) bool {
+func (a *ExecStmt) IsReadOnly(vars *variable.CausetNetVars) bool {
 	if execStmt, ok := a.StmtNode.(*ast.ExecuteStmt); ok {
 		s, err := getPreparedStmt(execStmt, vars)
 		if err != nil {

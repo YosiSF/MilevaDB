@@ -295,7 +295,7 @@ func (t *Tracker) BytesToString(numBytes int64) string {
 }
 
 // AttachToGlobalTracker attach the tracker to the global tracker
-// AttachToGlobalTracker should be called at the initialization for the session executor's tracker
+// AttachToGlobalTracker should be called at the initialization for the CausetNet executor's tracker
 func (t *Tracker) AttachToGlobalTracker(globalTracker *Tracker) {
 	if globalTracker == nil {
 		return

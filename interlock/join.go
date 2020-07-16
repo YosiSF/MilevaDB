@@ -144,10 +144,10 @@ func (e *HashJoinExec) Open(ctx context.Context) error {
 
 	e.prepared = false
 	e.memTracker = memory.NewTracker(e.id, -1)
-	e.memTracker.AttachTo(e.ctx.GetSessionVars().StmtCtx.MemTracker)
+	e.memTracker.AttachTo(e.ctx.GetCausetNetVars().StmtCtx.MemTracker)
 
 	e.diskTracker = disk.NewTracker(e.id, -1)
-	e.diskTracker.AttachTo(e.ctx.GetSessionVars().StmtCtx.DiskTracker)
+	e.diskTracker.AttachTo(e.ctx.GetCausetNetVars().StmtCtx.DiskTracker)
 
 	e.closeCh = make(chan struct{})
 	e.finished.Store(false)
@@ -244,7 +244,7 @@ func (e *HashJoinExec) fetchBuildSideRows(ctx context.Context, chkCh chan<- *chu
 		if e.finished.Load().(bool) {
 			return
 		}
-		chk := chunk.NewChunkWithCapacity(e.buildSideExec.base().retFieldTypes, e.ctx.GetSessionVars().MaxChunkSize)
+		chk := chunk.NewChunkWithCapacity(e.buildSideExec.base().retFieldTypes, e.ctx.GetCausetNetVars().MaxChunkSize)
 		err = Next(ctx, e.buildSideExec, chk)
 		if err != nil {
 			e.buildFinished <- errors.Trace(err)
@@ -681,7 +681,7 @@ func (e *HashJoinExec) buildHashTableForList(buildSideResultCh <-chan *chunk.Chu
 				defer actionSpill.(*chunk.SpillDiskAction).WaitForTest()
 			}
 		})
-		e.ctx.GetSessionVars().StmtCtx.MemTracker.FallbackOldAndSetNewAction(actionSpill)
+		e.ctx.GetCausetNetVars().StmtCtx.MemTracker.FallbackOldAndSetNewAction(actionSpill)
 	}
 	for chk := range buildSideResultCh {
 		if e.finished.Load().(bool) {
@@ -780,7 +780,7 @@ func (e *NestedLoopApplyExec) Open(ctx context.Context) error {
 	e.innerList = chunk.NewList(retTypes(e.innerExec), e.initCap, e.maxChunkSize)
 
 	e.memTracker = memory.NewTracker(e.id, -1)
-	e.memTracker.AttachTo(e.ctx.GetSessionVars().StmtCtx.MemTracker)
+	e.memTracker.AttachTo(e.ctx.GetCausetNetVars().StmtCtx.MemTracker)
 
 	e.innerList.GetMemTracker().SetLabel(innerListLabel)
 	e.innerList.GetMemTracker().AttachTo(e.memTracker)
@@ -883,7 +883,7 @@ func (e *NestedLoopApplyExec) Next(ctx context.Context, req *chunk.Chunk) (err e
 				var key []byte
 				for _, col := range e.outerSchema {
 					*col.Data = e.outerRow.GetDatum(col.Index, col.RetType)
-					key, err = codec.EncodeKey(e.ctx.GetSessionVars().StmtCtx, key, *col.Data)
+					key, err = codec.EncodeKey(e.ctx.GetCausetNetVars().StmtCtx, key, *col.Data)
 					if err != nil {
 						return err
 					}

@@ -17,7 +17,7 @@ import (
 	"sync"
 )
 
-// SequenceState cache all sequence's latest value accessed by lastval() builtins. It's a session scoped
+// SequenceState cache all sequence's latest value accessed by lastval() builtins. It's a CausetNet scoped
 // variable, and all public methods of SequenceState are currently-safe.
 type SequenceState struct {
 	mu sync.Mutex
@@ -30,7 +30,7 @@ func NewSequenceState() *SequenceState {
 	return &SequenceState{mu: sync.Mutex{}, latestValueMap: make(map[int64]int64)}
 }
 
-// UpdateState will update the last value of specified sequenceID in a session.
+// UpdateState will update the last value of specified sequenceID in a CausetNet.
 func (ss *SequenceState) UpdateState(sequenceID, value int64) {
 	ss.mu.Lock()
 	defer ss.mu.Unlock()

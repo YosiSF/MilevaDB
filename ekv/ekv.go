@@ -103,8 +103,8 @@ TxnTotalSizeLimit uint64 = config.DefTxnTotalSizeLimit
 
 // Getter is the interface for the Get method.
 type Getter interface {
-// Get gets the value for key k from kv store.
-// If corresponding kv pair does not exist, it returns nil and ErrNotExist.
+// Get gets the value for key k from ekv store.
+// If corresponding ekv pair does not exist, it returns nil and ErrNotExist.
 Get(ctx context.Context, k Key) ([]byte, error)
 }
 
@@ -126,10 +126,10 @@ IterReverse(k Key) (Iterator, error)
 
 // Mutator is the interface wraps the basic Set and Delete methods.
 type Mutator interface {
-// Set sets the value for key k as v into kv store.
+// Set sets the value for key k as v into ekv store.
 // v must NOT be nil or empty, otherwise it returns ErrCannotSetNilValue.
 Set(k Key, v []byte) error
-// Delete removes the entry for key k from kv store.
+// Delete removes the entry for key k from ekv store.
 Delete(k Key) error
 }
 
@@ -139,7 +139,7 @@ Retriever
 Mutator
 }
 
-// MemBuffer is an in-memory kv collection, can be used to buffer write operations.
+// MemBuffer is an in-memory ekv collection, can be used to buffer write operations.
 type MemBuffer interface {
 RetrieverMutator
 // Size returns sum of keys and values length.
@@ -191,7 +191,7 @@ GetSnapshot() Snapshot
 SetVars(vars *Variables)
 // GetVars gets variables from the transaction.
 GetVars() *Variables
-// BatchGet gets kv from the memory buffer of statement and transaction, and the kv storage.
+// BatchGet gets ekv from the memory buffer of statement and transaction, and the ekv storage.
 // Do not use len(value) == 0 or value == nil to represent non-exist.
 // If a key doesn't exist, there shouldn't be any corresponding entry in the result map.
 BatchGet(ctx context.Context, keys []Key) (map[string][]byte, error)
@@ -251,8 +251,8 @@ type StoreType uint8
 const (
 // TiKV means the type of a store is TiKV.
 TiKV StoreType = iota
-// TiFlash means the type of a store is TiFlash.
-TiFlash
+// Noether means the type of a store is Noether.
+Noether
 // MilevaDB means the type of a store is MilevaDB.
 MilevaDB
 // UnSpecified means the store type is unknown
@@ -261,8 +261,8 @@ UnSpecified = 255
 
 // Name returns the name of store type.
 func (t StoreType) Name() string {
-if t == TiFlash {
-return "tiflash"
+if t == Noether {
+return "Noether"
 } else if t == MilevaDB {
 return "MilevaDB"
 } else if t == TiKV {
@@ -271,7 +271,7 @@ return "tikv"
 return "unspecified"
 }
 
-// Request represents a kv request.
+// Request represents a ekv request.
 type Request struct {
 // Tp is the request type.
 Tp        int64
@@ -308,7 +308,7 @@ StoreType StoreType
 Cacheable bool
 // SchemaVer is for any schema-ful storage to validate schema correctness if necessary.
 SchemaVar int64
-// BatchCop indicates whether send batch coprocessor request to tiflash.
+// BatchCop indicates whether send batch coprocessor request to Noether.
 BatchCop bool
 // TaskID is an unique ID for an execution of a statement
 TaskID uint64
@@ -405,7 +405,7 @@ Next() error
 Close()
 }
 
-// SplittableStore is the kv store which supports split regions.
+// SplittableStore is the ekv store which supports split regions.
 type SplittableStore interface {
 SplitRegions(ctx context.Context, splitKey [][]byte, scatter bool) (regionID []uint64, err error)
 WaitScatterRegionFinish(ctx context.Context, regionID uint64, backOff int) error

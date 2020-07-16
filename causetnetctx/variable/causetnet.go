@@ -13,7 +13,7 @@ import (
 	"github.com/YosiSF/MilevaDB/BerolinaSQL/mysql"
 	pumpcli "github.com/YosiSF/MilevaDB-tools/MilevaDB-binlog/pump_client"
 	"github.com/YosiSF/MilevaDB/causetnetctx/stmtctx"
-	"github.com/YosiSF/MilevaDB/kv"
+	"github.com/YosiSF/MilevaDB/ekv"
 	"github.com/YosiSF/MilevaDB/meta/autoid"
 	"github.com/YosiSF/MilevaDB/store/tikv/oracle"
 	"github.com/YosiSF/MilevaDB/types"
@@ -175,9 +175,9 @@ func (tc *TransactionContext) AddUnchangedRowKey(key []byte) {
 }
 
 // CollectUnchangedRowKeys collects unchanged row keys for pessimistic lock.
-func (tc *TransactionContext) CollectUnchangedRowKeys(buf []kv.Key) []kv.Key {
+func (tc *TransactionContext) CollectUnchangedRowKeys(buf []ekv.Key) []ekv.Key {
 	for key := range tc.unchangedRowKeys {
-		buf = append(buf, kv.Key(key))
+		buf = append(buf, ekv.Key(key))
 	}
 	tc.unchangedRowKeys = nil
 	return buf
@@ -201,7 +201,7 @@ func (tc *TransactionContext) UpdateDeltaForTable(physicalTableID int64, delta i
 }
 
 // GetKeyInPessimisticLockCache gets a key in pessimistic lock cache.
-func (tc *TransactionContext) GetKeyInPessimisticLockCache(key kv.Key) (val []byte, ok bool) {
+func (tc *TransactionContext) GetKeyInPessimisticLockCache(key ekv.Key) (val []byte, ok bool) {
 	if tc.pessimisticLockCache == nil {
 		return nil, false
 	}
@@ -213,7 +213,7 @@ func (tc *TransactionContext) GetKeyInPessimisticLockCache(key kv.Key) (val []by
 }
 
 // SetPessimisticLockCache sets a key value pair into pessimistic lock cache.
-func (tc *TransactionContext) SetPessimisticLockCache(key kv.Key, val []byte) {
+func (tc *TransactionContext) SetPessimisticLockCache(key ekv.Key, val []byte) {
 	if tc.pessimisticLockCache == nil {
 		tc.pessimisticLockCache = map[string][]byte{}
 	}
@@ -317,8 +317,8 @@ const (
 	oneShotUse
 )
 
-// SessionVars is to handle user-defined or global variables in the current session.
-type SessionVars struct {
+// CausetNetVars is to handle user-defined or global variables in the current CausetNet.
+type CausetNetVars struct {
 	Concurrency
 	MemQuota
 	BatchSize
@@ -350,7 +350,7 @@ type SessionVars struct {
 	TxnCtx *TransactionContext
 
 	// KVVars is the variables for KV storage.
-	KVVars *kv.Variables
+	KVVars *ekv.Variables
 
 	// txnIsolationLevelOneShot is used to implements "set transaction isolation level ..."
 	txnIsolationLevelOneShot struct {
@@ -358,7 +358,7 @@ type SessionVars struct {
 		value string
 	}
 
-	// Status stands for the session status. e.g. in transaction or not, auto commit is on or off, and so on.
+	// Status stands for the CausetNet status. e.g. in transaction or not, auto commit is on or off, and so on.
 	Status uint16
 
 	// ClientCapability is client's capability.
@@ -367,7 +367,7 @@ type SessionVars struct {
 	// TLSConnectionState is the TLS connection state (nil if not using TLS).
 	TLSConnectionState *tls.ConnectionState
 
-	// ConnectionID is the connection id of the current session.
+	// ConnectionID is the connection id of the current CausetNet.
 	ConnectionID uint64
 
 	// PlanID is the unique id of logical and physical plan.
@@ -376,19 +376,19 @@ type SessionVars struct {
 	// PlanColumnID is the unique id for column when building plan.
 	PlanColumnID int64
 
-	// User is the user identity with which the session login.
+	// User is the user identity with which the CausetNet login.
 	User *auth.UserIdentity
 
-	// CurrentDB is the default database of this session.
+	// CurrentDB is the default database of this CausetNet.
 	CurrentDB string
 
-	// StrictSQLMode indicates if the session is in strict mode.
+	// StrictSQLMode indicates if the CausetNet is in strict mode.
 	StrictSQLMode bool
 
-	// CommonGlobalLoaded indicates if common global variable has been loaded for this session.
+	// CommonGlobalLoaded indicates if common global variable has been loaded for this CausetNet.
 	CommonGlobalLoaded bool
 
-	// InRestrictedSQL indicates if the session is handling restricted SQL execution.
+	// InRestrictedSQL indicates if the CausetNet is handling restricted SQL execution.
 	InRestrictedSQL bool
 
 	// SnapshotTS is used for reading history data. For simplicity, SnapshotTS only supports distsql request.
@@ -413,14 +413,14 @@ type SessionVars struct {
 	// AllowAggPushDown can be set to false to forbid aggregation push down.
 	AllowAggPushDown bool
 
-	// AllowDistinctAggPushDown can be set true to allow agg with distinct push down to tikv/tiflash.
+	// AllowDistinctAggPushDown can be set true to allow agg with distinct push down to tikv/Noether.
 	AllowDistinctAggPushDown bool
 
 	// AllowWriteRowID can be set to false to forbid write data to _MilevaDB_rowid.
 	// This variable is currently not recommended to be turned on.
 	AllowWriteRowID bool
 
-	// AllowBatchCop means if we should send batch coprocessor to TiFlash. Default value is 1, means to use batch cop in case of aggregation and join.
+	// AllowBatchCop means if we should send batch coprocessor to Noether. Default value is 1, means to use batch cop in case of aggregation and join.
 	// If value is set to 2 , which means to force to send batch cop for any query. Value is set to 0 means never use batch cop.
 	AllowBatchCop int
 
@@ -439,11 +439,11 @@ type SessionVars struct {
 	CopCPUFactor float64
 	// NetworkFactor is the network cost of transferring 1 byte data.
 	NetworkFactor float64
-	// ScanFactor is the IO cost of scanning 1 byte data on TiKV and TiFlash.
+	// ScanFactor is the IO cost of scanning 1 byte data on TiKV and Noether.
 	ScanFactor float64
-	// DescScanFactor is the IO cost of scanning 1 byte data on TiKV and TiFlash in desc order.
+	// DescScanFactor is the IO cost of scanning 1 byte data on TiKV and Noether in desc order.
 	DescScanFactor float64
-	// SeekFactor is the IO cost of seeking the start value of a range in TiKV or TiFlash.
+	// SeekFactor is the IO cost of seeking the start value of a range in TiKV or Noether.
 	SeekFactor float64
 	// MemoryFactor is the memory cost of storing one tuple.
 	MemoryFactor float64
@@ -456,7 +456,7 @@ type SessionVars struct {
 	// See http://dev.mysql.com/doc/refman/5.7/en/miscellaneous-functions.html#function_values
 	CurrInsertValues chunk.Row
 
-	// Per-connection time zones. Each client that connects has its own time zone setting, given by the session time_zone variable.
+	// Per-connection time zones. Each client that connects has its own time zone setting, given by the CausetNet time_zone variable.
 	// See https://dev.mysql.com/doc/refman/5.7/en/time-zone-support.html
 	TimeZone *time.Location
 
@@ -531,7 +531,7 @@ type SessionVars struct {
 	// ConstraintCheckInPlace indicates whether to check the constraint when the SQL executing.
 	ConstraintCheckInPlace bool
 
-	// CommandValue indicates which command current session is doing.
+	// CommandValue indicates which command current CausetNet is doing.
 	CommandValue uint32
 
 	// MilevaDBOptJoinReorderThreshold defines the minimal number of join nodes
@@ -558,7 +558,7 @@ type SessionVars struct {
 	// Killed is a flag to indicate that this query is killed.
 	Killed uint32
 
-	// ConnectionInfo indicates current connection info used by current session, only be lazy assigned by plugin.
+	// ConnectionInfo indicates current connection info used by current CausetNet, only be lazy assigned by plugin.
 	ConnectionInfo *ConnectionInfo
 
 	// use noop funcs or not
@@ -582,10 +582,10 @@ type SessionVars struct {
 	// DurationWaitTS is the duration of waiting for a snapshot TS
 	DurationWaitTS time.Duration
 
-	// PrevStmt is used to store the previous executed statement in the current session.
+	// PrevStmt is used to store the previous executed statement in the current CausetNet.
 	PrevStmt fmt.Stringer
 
-	// prevStmtDigest is used to store the digest of the previous statement in the current session.
+	// prevStmtDigest is used to store the digest of the previous statement in the current CausetNet.
 	prevStmtDigest string
 
 	// AllowRemoveAutoInc indicates whether a user can drop the auto_increment column attribute or not.
@@ -606,10 +606,10 @@ type SessionVars struct {
 	enableIndexMerge bool
 
 	// replicaRead is used for reading data from replicas, only follower is supported at this time.
-	replicaRead kv.ReplicaReadType
+	replicaRead ekv.ReplicaReadType
 
 	// IsolationReadEngines is used to isolation read, MilevaDB only read from the stores whose engine type is in the engines.
-	IsolationReadEngines map[kv.StoreType]struct{}
+	IsolationReadEngines map[ekv.StoreType]struct{}
 
 	PlannerSelectBlockAsName []ast.HintTable
 
@@ -628,10 +628,10 @@ type SessionVars struct {
 	// All cached snapshots will be released at the end of retrieving
 	InspectionTableCache map[string]TableSnapshot
 
-	// RowEncoder is reused in session for encode row data.
+	// RowEncoder is reused in CausetNet for encode row data.
 	RowEncoder rowcodec.Encoder
 
-	// SequenceState cache all sequence's latest value accessed by lastval() builtins. It's a session scoped
+	// SequenceState cache all sequence's latest value accessed by lastval() builtins. It's a CausetNet scoped
 	// variable, and all public methods of SequenceState are currently-safe.
 	SequenceState *SequenceState
 

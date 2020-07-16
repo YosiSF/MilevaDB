@@ -33,11 +33,11 @@ import (
 	"github.com/YosiSF/MilevaDB/BerolinaSQL/mysql"
 	"github.com/YosiSF/MilevaDB/BerolinaSQL/terror"
 	"github.com/YosiSF/MilevaDB/config"
-	"github.com/YosiSF/MilevaDB/domain"
-	"github.com/YosiSF/MilevaDB/domain/infosync"
+	"github.com/YosiSF/MilevaDB/namespace"
+	"github.com/YosiSF/MilevaDB/namespace/infosync"
 	"github.com/YosiSF/MilevaDB/expression"
 	"github.com/YosiSF/MilevaDB/schemareplicant"
-	"github.com/YosiSF/MilevaDB/kv"
+	"github.com/YosiSF/MilevaDB/ekv"
 	"github.com/YosiSF/MilevaDB/meta"
 	"github.com/YosiSF/MilevaDB/meta/autoid"
 	plannercore "github.com/YosiSF/MilevaDB/rel-planner/core"
@@ -212,12 +212,12 @@ func newBaseInterlock(ctx causetnetctx.Context, schema *expression.Schema, id fm
 		ctx:          ctx,
 		id:           id,
 		schema:       schema,
-		initCap:      ctx.GetSessionVars().InitChunkSize,
-		maxChunkSize: ctx.GetSessionVars().MaxChunkSize,
+		initCap:      ctx.GetCausetNetVars().InitChunkSize,
+		maxChunkSize: ctx.GetCausetNetVars().MaxChunkSize,
 	}
-	if ctx.GetSessionVars().StmtCtx.RuntimeStatsColl != nil {
+	if ctx.GetCausetNetVars().StmtCtx.RuntimeStatsColl != nil {
 		if e.id != nil {
-			e.runtimeStats = e.ctx.GetSessionVars().StmtCtx.RuntimeStatsColl.GetRootStats(e.id.String())
+			e.runtimeStats = e.ctx.GetCausetNetVars().StmtCtx.RuntimeStatsColl.GetRootStats(e.id.String())
 		}
 	}
 	if schema != nil {
@@ -255,7 +255,7 @@ func Next(ctx context.Context, e Interlock, req *chunk.Chunk) error {
 		start := time.Now()
 		defer func() { base.runtimeStats.Record(time.Since(start), req.NumRows()) }()
 	}
-	sessVars := base.ctx.GetSessionVars()
+	sessVars := base.ctx.GetCausetNetVars()
 	if atomic.LoadUint32(&sessVars.Killed) == 1 {
 		return ErrQueryInterrupted
 	}
@@ -269,7 +269,7 @@ func Next(ctx context.Context, e Interlock, req *chunk.Chunk) error {
 	if err != nil {
 		return err
 	}
-	// recheck whether the session/query is killed during the Next()
+	// recheck whether the CausetNet/query is killed during the Next()
 	if atomic.LoadUint32(&sessVars.Killed) == 1 {
 		err = ErrQueryInterrupted
 	}
@@ -317,7 +317,7 @@ func (e *ShowNextRowIDExec) Next(ctx context.Context, req *chunk.Chunk) error {
 	if e.done {
 		return nil
 	}
-	is := domain.GetDomain(e.ctx).schemareplicant()
+	is := namespace.GetNamespace(e.ctx).schemareplicant()
 	tbl, err := is.TableByName(e.tblName.Schema, e.tblName.Name)
 	if err != nil {
 		return err
@@ -429,7 +429,7 @@ type DDLJobRetriever struct {
 	cacheJobs      []*serial.Job
 }
 
-func (e *DDLJobRetriever) initial(txn kv.Transaction) error {
+func (e *DDLJobRetriever) initial(txn ekv.Transaction) error {
 	jobs, err := admin.GetDDLJobs(txn)
 	if err != nil {
 		return err
@@ -817,7 +817,7 @@ type ShowSlowExec struct {
 	baseInterlock
 
 	ShowSlow *ast.ShowSlow
-	result   []*domain.SlowQueryInfo
+	result   []*namespace.SlowQueryInfo
 	cursor   int
 }
 
@@ -827,7 +827,7 @@ func (e *ShowSlowExec) Open(ctx context.Context) error {
 		return err
 	}
 
-	dom := domain.GetDomain(e.ctx)
+	dom := namespace.GetNamespace(e.ctx)
 	e.result = dom.ShowSlowQuery(e.ShowSlow)
 	return nil
 }
@@ -877,7 +877,7 @@ type SelectLockExec struct {
 	baseInterlock
 
 	Lock ast.SelectLockType
-	keys []kv.Key
+	keys []ekv.Key
 
 	tblID2Handle     map[int64][]plannercore.HandleCols
 	partitionedTable []table.PartitionedTable
@@ -943,23 +943,23 @@ func (e *SelectLockExec) Next(ctx context.Context, req *chunk.Chunk) error {
 		}
 		return nil
 	}
-	lockWaitTime := e.ctx.GetSessionVars().LockWaitTimeout
+	lockWaitTime := e.ctx.GetCausetNetVars().LockWaitTimeout
 	if e.Lock == ast.SelectLockForUpdateNoWait {
-		lockWaitTime = kv.LockNoWait
+		lockWaitTime = ekv.LockNoWait
 	}
 
 	if len(e.keys) > 0 {
 		// This operation is only for schema validator check.
 		for id := range e.tblID2Handle {
-			e.ctx.GetSessionVars().TxnCtx.UpdateDeltaForTable(id, 0, 0, map[int64]int64{})
+			e.ctx.GetCausetNetVars().TxnCtx.UpdateDeltaForTable(id, 0, 0, map[int64]int64{})
 		}
 	}
 
-	return doLockKeys(ctx, e.ctx, newLockCtx(e.ctx.GetSessionVars(), lockWaitTime), e.keys...)
+	return doLockKeys(ctx, e.ctx, newLockCtx(e.ctx.GetCausetNetVars(), lockWaitTime), e.keys...)
 }
 
-func newLockCtx(seVars *variable.SessionVars, lockWaitTime int64) *kv.LockCtx {
-	return &kv.LockCtx{
+func newLockCtx(seVars *variable.CausetNetVars, lockWaitTime int64) *ekv.LockCtx {
+	return &ekv.LockCtx{
 		Killed:                &seVars.Killed,
 		ForUpdateTS:           seVars.TxnCtx.GetForUpdateTS(),
 		LockWaitTime:          lockWaitTime,
@@ -975,10 +975,10 @@ func newLockCtx(seVars *variable.SessionVars, lockWaitTime int64) *kv.LockCtx {
 // waitTime means the lock operation will wait in milliseconds if target key is already
 // locked by others. used for (select for update nowait) situation
 // except 0 means alwaysWait 1 means nowait
-func doLockKeys(ctx context.Context, se causetnetctx.Context, lockCtx *kv.LockCtx, keys ...kv.Key) error {
-	sctx := se.GetSessionVars().StmtCtx
+func doLockKeys(ctx context.Context, se causetnetctx.Context, lockCtx *ekv.LockCtx, keys ...ekv.Key) error {
+	sctx := se.GetCausetNetVars().StmtCtx
 	if !sctx.InUpdateStmt && !sctx.InDeleteStmt {
-		se.GetSessionVars().TxnCtx.ForUpdate = true
+		se.GetCausetNetVars().TxnCtx.ForUpdate = true
 	}
 	// Lock keys only once when finished fetching all results.
 	txn, err := se.Txn(true)
@@ -1095,7 +1095,7 @@ func init() {
 	// So we assign a function implemented in the Interlock package to the plan package to avoid the dependency cycle.
 	plannercore.EvalSubqueryFirstRow = func(ctx context.Context, p plannercore.PhysicalPlan, is schemareplicant.schemareplicant, sctx causetnetctx.Context) ([]types.Datum, error) {
 		defer func(begin time.Time) {
-			s := sctx.GetSessionVars()
+			s := sctx.GetCausetNetVars()
 			s.RewritePhaseInfo.PreprocessSubQueries++
 			s.RewritePhaseInfo.DurationPreprocessSubQuery += time.Since(begin)
 		}(time.Now())
@@ -1187,7 +1187,7 @@ func (e *SelectionExec) Open(ctx context.Context) error {
 
 func (e *SelectionExec) open(ctx context.Context) error {
 	e.memTracker = memory.NewTracker(e.id, -1)
-	e.memTracker.AttachTo(e.ctx.GetSessionVars().StmtCtx.MemTracker)
+	e.memTracker.AttachTo(e.ctx.GetCausetNetVars().StmtCtx.MemTracker)
 	e.childResult = newFirstChunk(e.children[0])
 	e.memTracker.Consume(e.childResult.MemoryUsage())
 	e.batched = expression.Vectorizable(e.filters)
@@ -1298,7 +1298,7 @@ func (e *TableScanExec) nextChunk4schemareplicant(ctx context.Context, chk *chun
 			columns[i] = table.ToColumn(colInfo)
 		}
 		mutableRow := chunk.MutRowFromTypes(retTypes(e))
-		err := e.t.IterRecords(e.ctx, nil, columns, func(_ kv.Handle, rec []types.Datum, cols []*table.Column) (bool, error) {
+		err := e.t.IterRecords(e.ctx, nil, columns, func(_ ekv.Handle, rec []types.Datum, cols []*table.Column) (bool, error) {
 			mutableRow.SetDatums(rec...)
 			e.virtualTableChunkList.AppendRow(mutableRow.ToRow())
 			return true, nil
@@ -1519,10 +1519,10 @@ func (e *UnionExec) Close() error {
 	return e.baseInterlock.Close()
 }
 
-// ResetContextOfStmt resets the StmtContext and session variables.
+// ResetContextOfStmt resets the StmtContext and CausetNet variables.
 // Before every execution, we must clear statement context.
 func ResetContextOfStmt(ctx causetnetctx.Context, s ast.StmtNode) (err error) {
-	vars := ctx.GetSessionVars()
+	vars := ctx.GetCausetNetVars()
 	// Detach the Memory and disk tracker for the previous stmtCtx from GlobalMemoryUsageTracker and GlobalDiskUsageTracker
 	if stmtCtx := vars.StmtCtx; stmtCtx != nil {
 		if stmtCtx.DiskTracker != nil {
@@ -1544,14 +1544,14 @@ func ResetContextOfStmt(ctx causetnetctx.Context, s ast.StmtNode) (err error) {
 	}
 	switch config.GetGlobalConfig().OOMAction {
 	case config.OOMActionCancel:
-		action := &memory.PanicOnExceed{ConnID: ctx.GetSessionVars().ConnectionID}
-		action.SetLogHook(domain.GetDomain(ctx).ExpensiveQueryHandle().LogOnQueryExceedMemQuota)
+		action := &memory.PanicOnExceed{ConnID: ctx.GetCausetNetVars().ConnectionID}
+		action.SetLogHook(namespace.GetNamespace(ctx).ExpensiveQueryHandle().LogOnQueryExceedMemQuota)
 		sc.MemTracker.SetActionOnExceed(action)
 	case config.OOMActionLog:
 		fallthrough
 	default:
-		action := &memory.LogOnExceed{ConnID: ctx.GetSessionVars().ConnectionID}
-		action.SetLogHook(domain.GetDomain(ctx).ExpensiveQueryHandle().LogOnQueryExceedMemQuota)
+		action := &memory.LogOnExceed{ConnID: ctx.GetCausetNetVars().ConnectionID}
+		action.SetLogHook(namespace.GetNamespace(ctx).ExpensiveQueryHandle().LogOnQueryExceedMemQuota)
 		sc.MemTracker.SetActionOnExceed(action)
 	}
 	if execStmt, ok := s.(*ast.ExecuteStmt); ok {
@@ -1670,7 +1670,7 @@ func ResetContextOfStmt(ctx causetnetctx.Context, s ast.StmtNode) (err error) {
 }
 
 // ResetUpdateStmtCtx resets statement context for UpdateStmt.
-func ResetUpdateStmtCtx(sc *stmtctx.StatementContext, stmt *ast.UpdateStmt, vars *variable.SessionVars) {
+func ResetUpdateStmtCtx(sc *stmtctx.StatementContext, stmt *ast.UpdateStmt, vars *variable.CausetNetVars) {
 	sc.InUpdateStmt = true
 	sc.DupKeyAsWarning = stmt.IgnoreErr
 	sc.BadNullAsWarning = !vars.StrictSQLMode || stmt.IgnoreErr

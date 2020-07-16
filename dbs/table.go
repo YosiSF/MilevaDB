@@ -450,10 +450,10 @@ func onTruncateTable(d *dbsCtx, t *meta.Meta, job *serial.Job) (ver int64, _ err
 		}
 	}
 
-	// Clear the tiflash replica available status.
-	if tblInfo.TiFlashReplica != nil {
-		tblInfo.TiFlashReplica.AvailablePartitionIDs = nil
-		tblInfo.TiFlashReplica.Available = false
+	// Clear the Noether replica available status.
+	if tblInfo.NoetherReplica != nil {
+		tblInfo.NoetherReplica.AvailablePartitionIDs = nil
+		tblInfo.NoetherReplica.Available = false
 	}
 
 	tblInfo.ID = newTableID
@@ -580,7 +580,7 @@ func (w *worker) onShardRowID(d *dbsCtx, t *meta.Meta, job *serial.Job) (ver int
 	return ver, nil
 }
 
-func verifyNoOverflowSharnoedbits(s *sessionPool, tbl table.Table, shardRowInoedbits uint64) error {
+func verifyNoOverflowSharnoedbits(s *CausetNetPool, tbl table.Table, shardRowInoedbits uint64) error {
 	ctx, err := s.get()
 	if err != nil {
 		return errors.Trace(err)
@@ -741,7 +741,7 @@ func onModifyTableCharsetAndCollate(t *meta.Meta, job *serial.Job) (ver int64, _
 }
 
 func onSetTableFlashReplica(t *meta.Meta, job *serial.Job) (ver int64, _ error) {
-	var replicaInfo ast.TiFlashReplicaSpec
+	var replicaInfo ast.NoetherReplicaSpec
 	if err := job.DecodeArgs(&replicaInfo); err != nil {
 		job.State = serial.JobStateCancelled
 		return ver, errors.Trace(err)
@@ -753,12 +753,12 @@ func onSetTableFlashReplica(t *meta.Meta, job *serial.Job) (ver int64, _ error) 
 	}
 
 	if replicaInfo.Count > 0 {
-		tblInfo.TiFlashReplica = &serial.TiFlashReplicaInfo{
+		tblInfo.NoetherReplica = &serial.NoetherReplicaInfo{
 			Count:          replicaInfo.Count,
 			LocationLabels: replicaInfo.Labels,
 		}
 	} else {
-		tblInfo.TiFlashReplica = nil
+		tblInfo.NoetherReplica = nil
 	}
 
 	ver, err = updateVersionAndTableInfo(t, job, tblInfo, true)
@@ -781,33 +781,33 @@ func onUpdateFlashReplicaStatus(t *meta.Meta, job *serial.Job) (ver int64, _ err
 	if err != nil {
 		return ver, errors.Trace(err)
 	}
-	if tblInfo.TiFlashReplica == nil || (tblInfo.ID == physicalID && tblInfo.TiFlashReplica.Available == available) ||
-		(tblInfo.ID != physicalID && available == tblInfo.TiFlashReplica.IsPartitionAvailable(physicalID)) {
+	if tblInfo.NoetherReplica == nil || (tblInfo.ID == physicalID && tblInfo.NoetherReplica.Available == available) ||
+		(tblInfo.ID != physicalID && available == tblInfo.NoetherReplica.IsPartitionAvailable(physicalID)) {
 		job.State = serial.JobStateCancelled
 		return ver, errors.Errorf("the replica available status of table %s is already updated", tblInfo.Name.String())
 	}
 
 	if tblInfo.ID == physicalID {
-		tblInfo.TiFlashReplica.Available = available
+		tblInfo.NoetherReplica.Available = available
 	} else if pi := tblInfo.GetPartitionInfo(); pi != nil {
 		// Partition replica become available.
 		if available {
 			allAvailable := true
 			for _, p := range pi.Definitions {
 				if p.ID == physicalID {
-					tblInfo.TiFlashReplica.AvailablePartitionIDs = append(tblInfo.TiFlashReplica.AvailablePartitionIDs, physicalID)
+					tblInfo.NoetherReplica.AvailablePartitionIDs = append(tblInfo.NoetherReplica.AvailablePartitionIDs, physicalID)
 				}
-				allAvailable = allAvailable && tblInfo.TiFlashReplica.IsPartitionAvailable(p.ID)
+				allAvailable = allAvailable && tblInfo.NoetherReplica.IsPartitionAvailable(p.ID)
 			}
-			tblInfo.TiFlashReplica.Available = allAvailable
+			tblInfo.NoetherReplica.Available = allAvailable
 		} else {
 			// Partition replica become unavailable.
-			for i, id := range tblInfo.TiFlashReplica.AvailablePartitionIDs {
+			for i, id := range tblInfo.NoetherReplica.AvailablePartitionIDs {
 				if id == physicalID {
-					newIDs := tblInfo.TiFlashReplica.AvailablePartitionIDs[:i]
-					newIDs = append(newIDs, tblInfo.TiFlashReplica.AvailablePartitionIDs[i+1:]...)
-					tblInfo.TiFlashReplica.AvailablePartitionIDs = newIDs
-					tblInfo.TiFlashReplica.Available = false
+					newIDs := tblInfo.NoetherReplica.AvailablePartitionIDs[:i]
+					newIDs = append(newIDs, tblInfo.NoetherReplica.AvailablePartitionIDs[i+1:]...)
+					tblInfo.NoetherReplica.AvailablePartitionIDs = newIDs
+					tblInfo.NoetherReplica.Available = false
 					break
 				}
 			}

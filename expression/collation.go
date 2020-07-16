@@ -48,8 +48,8 @@ func (c *collationInfo) CharsetAndCollation(ctx causetnetctx.Context) (string, s
 		return c.charset, c.collation
 	}
 
-	if ctx != nil && ctx.GetSessionVars() != nil {
-		c.charset, c.collation = ctx.GetSessionVars().GetCharsetInfo()
+	if ctx != nil && ctx.GetCausetNetVars() != nil {
+		c.charset, c.collation = ctx.GetCausetNetVars().GetCharsetInfo()
 	}
 	if c.charset == "" || c.collation == "" {
 		c.charset, c.collation = charset.GetDefaultCharsetAndCollate()
@@ -167,8 +167,8 @@ func DeriveCollationFromExprs(ctx causetnetctx.Context, exprs ...Expression) (ds
 	curCoer := CoercibilityCoercible
 	curCollationPriority := -1
 	dstCharset, dstCollation = charset.GetDefaultCharsetAndCollate()
-	if ctx != nil && ctx.GetSessionVars() != nil {
-		dstCharset, dstCollation = ctx.GetSessionVars().GetCharsetInfo()
+	if ctx != nil && ctx.GetCausetNetVars() != nil {
+		dstCharset, dstCollation = ctx.GetCausetNetVars().GetCharsetInfo()
 		if dstCharset == "" || dstCollation == "" {
 			dstCharset, dstCollation = charset.GetDefaultCharsetAndCollate()
 		}

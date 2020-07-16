@@ -1239,7 +1239,7 @@ type VariableExpr struct {
 	Name string
 	// IsGlobal indicates whether this variable is global.
 	IsGlobal bool
-	// IsSystem indicates whether this variable is a system variable in current session.
+	// IsSystem indicates whether this variable is a system variable in current CausetNet.
 	IsSystem bool
 	// ExplicitScope indicates whether this variable scope is set explicitly.
 	ExplicitScope bool
@@ -1255,7 +1255,7 @@ func (n *VariableExpr) Restore(ctx *format.RestoreCtx) error {
 			if n.IsGlobal {
 				ctx.WriteKeyWord("GLOBAL")
 			} else {
-				ctx.WriteKeyWord("SESSION")
+				ctx.WriteKeyWord("CausetNet")
 			}
 			ctx.WritePlain(".")
 		}

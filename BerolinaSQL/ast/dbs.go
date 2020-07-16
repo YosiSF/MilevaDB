@@ -2172,8 +2172,8 @@ const (
 	AlterTableIndexInvisible
 	// TODO: Add more actions
 	AlterTableOrderByColumns
-	// AlterTableSetTiFlashReplica uses to set the table TiFlash replica.
-	AlterTableSetTiFlashReplica
+	// AlterTableSetNoetherReplica uses to set the table Noether replica.
+	AlterTableSetNoetherReplica
 )
 
 // LockType is the type for AlterTableSpec.
@@ -2269,10 +2269,10 @@ type AlterTableSpec struct {
 	WithValidation  bool
 	Num             uint64
 	Visibility      IndexVisibility
-	TiFlashReplica  *TiFlashReplicaSpec
+	NoetherReplica  *NoetherReplicaSpec
 }
 
-type TiFlashReplicaSpec struct {
+type NoetherReplicaSpec struct {
 	Count  uint64
 	Labels []string
 }
@@ -2298,14 +2298,14 @@ func (n *AlterOrderItem) Restore(ctx *format.RestoreCtx) error {
 // Restore implements Node interface.
 func (n *AlterTableSpec) Restore(ctx *format.RestoreCtx) error {
 	switch n.Tp {
-	case AlterTableSetTiFlashReplica:
-		ctx.WriteKeyWord("SET TIFLASH REPLICA ")
-		ctx.WritePlainf("%d", n.TiFlashReplica.Count)
-		if len(n.TiFlashReplica.Labels) == 0 {
+	case AlterTableSetNoetherReplica:
+		ctx.WriteKeyWord("SET Noether REPLICA ")
+		ctx.WritePlainf("%d", n.NoetherReplica.Count)
+		if len(n.NoetherReplica.Labels) == 0 {
 			break
 		}
 		ctx.WriteKeyWord(" LOCATION LABELS ")
-		for i, v := range n.TiFlashReplica.Labels {
+		for i, v := range n.NoetherReplica.Labels {
 			if i > 0 {
 				ctx.WritePlain(", ")
 			}

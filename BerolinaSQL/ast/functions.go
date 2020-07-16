@@ -243,7 +243,7 @@ const (
 	LastInsertId   = "last_insert_id"
 	RowCount       = "row_count"
 	Schema         = "schema"
-	SessionUser    = "session_user"
+	CausetNetUser    = "CausetNet_user"
 	SystemUser     = "system_user"
 	User           = "user"
 	Version        = "version"

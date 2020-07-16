@@ -33,7 +33,7 @@ var (
 // The return values:
 //     1. changed (bool) : does the update really change the row values. e.g. update set i = 1 where i = 1;
 //     2. err (error) : error in the update.
-func updateRecord(ctx context.Context, sctx causetnetctx.Context, h kv.Handle, oldData, newData []types.Datum, modified []bool, t table.Table,
+func updateRecord(ctx context.Context, sctx causetnetctx.Context, h ekv.Handle, oldData, newData []types.Datum, modified []bool, t table.Table,
 	onDup bool, memTracker *memory.Tracker) (bool, error) {
 	if span := opentracing.SpanFromContext(ctx); span != nil && span.Tracer() != nil {
 		span1 := span.Tracer().StartSpan("Interlock.updateRecord", opentracing.ChildOf(span.Context()))
@@ -46,11 +46,11 @@ func updateRecord(ctx context.Context, sctx causetnetctx.Context, h kv.Handle, o
 	}
 	memUsageOfTxnState := txn.Size()
 	defer memTracker.Consume(int64(txn.Size() - memUsageOfTxnState))
-	sc := sctx.GetSessionVars().StmtCtx
+	sc := sctx.GetCausetNetVars().StmtCtx
 	changed, handleChanged := false, false
 	//cache the previous txn mem usage tuple.
 	onUpdateSpecified := make(map[int]bool)
-	var newHandle kv.Handle
+	var newHandle ekv.Handle
 
 	// We can iterate on public columns not writable columns,
 	// because all of them are sorted by their `Offset`, which
@@ -97,7 +97,7 @@ func updateRecord(ctx context.Context, sctx causetnetctx.Context, h kv.Handle, o
 			}
 			if col.IsPKHandleColumn(t.Meta()) {
 				handleChanged = true
-				newHandle = kv.IntHandle(newData[i].GetInt64())
+				newHandle = ekv.IntHandle(newData[i].GetInt64())
 				// Rebase auto random id if the field is changed.
 				if err := rebaseAutoRandomValue(sctx, t, &newData[i], col); err != nil {
 					return false, err
@@ -110,11 +110,11 @@ func updateRecord(ctx context.Context, sctx causetnetctx.Context, h kv.Handle, o
 				for _, idxCol := range pkIdx.Columns {
 					pkDts = append(pkDts, newData[idxCol.Offset])
 				}
-				handleBytes, err := codec.EncodeKey(sctx.GetSessionVars().StmtCtx, nil, pkDts...)
+				handleBytes, err := codec.EncodeKey(sctx.GetCausetNetVars().StmtCtx, nil, pkDts...)
 				if err != nil {
 					return false, err
 				}
-				newHandle, err = kv.NewCommonHandle(handleBytes)
+				newHandle, err = ekv.NewCommonHandle(handleBytes)
 				if err != nil {
 					return false, err
 				}
@@ -132,7 +132,7 @@ func updateRecord(ctx context.Context, sctx causetnetctx.Context, h kv.Handle, o
 	// If no changes, nothing to do, return directly.
 	if !changed {
 		// See https://dev.mysql.com/doc/refman/5.7/en/mysql-real-connect.html  CLIENT_FOUND_ROWS
-		if sctx.GetSessionVars().ClientCapability&mysql.ClientFoundRows > 0 {
+		if sctx.GetCausetNetVars().ClientCapability&mysql.ClientFoundRows > 0 {
 			sc.AddAffectedRows(1)
 		}
 
@@ -146,7 +146,7 @@ func updateRecord(ctx context.Context, sctx causetnetctx.Context, h kv.Handle, o
 		}
 
 		unchangedRowKey := tablecodec.EncodeRowKeyWithHandle(physicalID, h)
-		txnCtx := sctx.GetSessionVars().TxnCtx
+		txnCtx := sctx.GetCausetNetVars().TxnCtx
 		if txnCtx.IsPessimistic {
 			txnCtx.AddUnchangedRowKey(unchangedRowKey)
 		}

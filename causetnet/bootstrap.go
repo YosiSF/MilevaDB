@@ -246,7 +246,7 @@ const (
 	// CreateExprPushdownBlacklist stores the expressions which are not allowed to be pushed down.
 	CreateExprPushdownBlacklist = `CREATE TABLE IF NOT EXISTS mysql.expr_pushdown_blacklist (
 		name char(100) NOT NULL,
-		store_type char(100) NOT NULL DEFAULT 'tiekv,tiflash,milevadb',
+		store_type char(100) NOT NULL DEFAULT 'tiekv,Noether,milevadb',
 		reason varchar(200)
 	);`
 
@@ -257,9 +257,9 @@ const (
 )
 
 // bootstrap initiates system noedb for a store.
-func bootstrap(s Session) {
+func bootstrap(s CausetNet) {
 	startTime := time.Now()
-	dom := domain.GetDomain(s)
+	dom := namespace.GetNamespace(s)
 	for {
 		b, err := checkBootstrapped(s)
 		if err != nil {
@@ -357,7 +357,7 @@ const (
 )
 
 var (
-	bootstrapVersion = []func(Session, int64){
+	bootstrapVersion = []func(CausetNet, int64){
 		upgradeToVer2,
 		upgradeToVer3,
 		upgradeToVer4,
@@ -405,7 +405,7 @@ var (
 	}
 )
 
-func checkBootstrapped(s Session) (bool, error) {
+func checkBootstrapped(s CausetNet) (bool, error) {
 	//  Check if system noedb exists.
 	_, err := s.Execute(context.Background(), fmt.Sprintf("USE %s;", mysql.Systemnoedb))
 	if err != nil && schemaReplicant.ErrDatabaseNotExists.NotEqual(err) {
@@ -432,7 +432,7 @@ func checkBootstrapped(s Session) (bool, error) {
 
 // getmilevanoedbVar gets variable value from mysql.milevadb table.
 // Those variables are used by milevadb server.
-func getmilevanoedbVar(s Session, name string) (sVal string, isNull bool, e error) {
+func getmilevanoedbVar(s CausetNet, name string) (sVal string, isNull bool, e error) {
 	sql := fmt.Sprintf(`SELECT HIGH_PRIORITY VARIABLE_VALUE FROM %s.%s WHERE VARIABLE_NAME="%s"`,
 		mysql.Systemnoedb, mysql.milevanoedbTable, name)
 	ctx := context.Background()
@@ -459,7 +459,7 @@ func getmilevanoedbVar(s Session, name string) (sVal string, isNull bool, e erro
 
 // upgrade function  will do some upgrade works, when the system is bootstrapped by low version milevadb server
 // For example, add new system variables into mysql.global_variables table.
-func upgrade(s Session) {
+func upgrade(s CausetNet) {
 	ver, err := getBootstrapVersion(s)
 	terror.MustNil(err)
 	if ver >= currentBootstrapVersion {
@@ -496,7 +496,7 @@ func upgrade(s Session) {
 }
 
 // upgradeToVer2 updates to version 2.
-func upgradeToVer2(s Session, ver int64) {
+func upgradeToVer2(s CausetNet, ver int64) {
 	if ver >= version2 {
 		return
 	}
@@ -514,7 +514,7 @@ func upgradeToVer2(s Session, ver int64) {
 }
 
 // upgradeToVer3 updates to version 3.
-func upgradeToVer3(s Session, ver int64) {
+func upgradeToVer3(s CausetNet, ver int64) {
 	if ver >= version3 {
 		return
 	}
@@ -525,7 +525,7 @@ func upgradeToVer3(s Session, ver int64) {
 }
 
 // upgradeToVer4 updates to version 4.
-func upgradeToVer4(s Session, ver int64) {
+func upgradeToVer4(s CausetNet, ver int64) {
 	if ver >= version4 {
 		return
 	}
@@ -533,7 +533,7 @@ func upgradeToVer4(s Session, ver int64) {
 	mustExecute(s, sql)
 }
 
-func upgradeToVer5(s Session, ver int64) {
+func upgradeToVer5(s CausetNet, ver int64) {
 	if ver >= version5 {
 		return
 	}
@@ -541,7 +541,7 @@ func upgradeToVer5(s Session, ver int64) {
 	mustExecute(s, CreateStatsBucketsTable)
 }
 
-func upgradeToVer6(s Session, ver int64) {
+func upgradeToVer6(s CausetNet, ver int64) {
 	if ver >= version6 {
 		return
 	}
@@ -550,7 +550,7 @@ func upgradeToVer6(s Session, ver int64) {
 	mustExecute(s, "UPDATE HIGH_PRIORITY mysql.user SET Super_priv='Y'")
 }
 
-func upgradeToVer7(s Session, ver int64) {
+func upgradeToVer7(s CausetNet, ver int64) {
 	if ver >= version7 {
 		return
 	}
@@ -559,7 +559,7 @@ func upgradeToVer7(s Session, ver int64) {
 	mustExecute(s, "UPDATE HIGH_PRIORITY mysql.user SET Process_priv='Y'")
 }
 
-func upgradeToVer8(s Session, ver int64) {
+func upgradeToVer8(s CausetNet, ver int64) {
 	if ver >= version8 {
 		return
 	}
@@ -570,7 +570,7 @@ func upgradeToVer8(s Session, ver int64) {
 	upgradeToVer7(s, ver)
 }
 
-func upgradeToVer9(s Session, ver int64) {
+func upgradeToVer9(s CausetNet, ver int64) {
 	if ver >= version9 {
 		return
 	}
@@ -579,7 +579,7 @@ func upgradeToVer9(s Session, ver int64) {
 	mustExecute(s, "UPDATE HIGH_PRIORITY mysql.user SET Trigger_priv='Y'")
 }
 
-func doReentrantdbs(s Session, sql string, ignorableErrs ...error) {
+func doReentrantdbs(s CausetNet, sql string, ignorableErrs ...error) {
 	_, err := s.Execute(context.Background(), sql)
 	for _, ignorableErr := range ignorableErrs {
 		if terror.ErrorEqual(err, ignorableErr) {
@@ -591,7 +591,7 @@ func doReentrantdbs(s Session, sql string, ignorableErrs ...error) {
 	}
 }
 
-func upgradeToVer10(s Session, ver int64) {
+func upgradeToVer10(s CausetNet, ver int64) {
 	if ver >= version10 {
 		return
 	}
@@ -602,7 +602,7 @@ func upgradeToVer10(s Session, ver int64) {
 	doReentrantdbs(s, "ALTER TABLE mysql.stats_histograms DROP COLUMN use_count_to_estimate", dbs.ErrCantDropFieldOrKey)
 }
 
-func upgradeToVer11(s Session, ver int64) {
+func upgradeToVer11(s CausetNet, ver int64) {
 	if ver >= version11 {
 		return
 	}
@@ -616,7 +616,7 @@ func upgradeToVer11(s Session, ver int64) {
 	mustExecute(s, "UPDATE HIGH_PRIORITY mysql.user SET References_priv='Y'")
 }
 
-func upgradeToVer12(s Session, ver int64) {
+func upgradeToVer12(s CausetNet, ver int64) {
 	if ver >= version12 {
 		return
 	}
@@ -662,7 +662,7 @@ func upgradeToVer12(s Session, ver int64) {
 	mustExecute(s, "COMMIT")
 }
 
-func upgradeToVer13(s Session, ver int64) {
+func upgradeToVer13(s CausetNet, ver int64) {
 	if ver >= version13 {
 		return
 	}
@@ -689,7 +689,7 @@ func upgradeToVer13(s Session, ver int64) {
 	mustExecute(s, "UPDATE HIGH_PRIORITY mysql.user SET Create_view_priv='Y',Show_view_priv='Y' WHERE Create_priv='Y'")
 }
 
-func upgradeToVer14(s Session, ver int64) {
+func upgradeToVer14(s CausetNet, ver int64) {
 	if ver >= version14 {
 		return
 	}
@@ -716,7 +716,7 @@ func upgradeToVer14(s Session, ver int64) {
 	}
 }
 
-func upgradeToVer15(s Session, ver int64) {
+func upgradeToVer15(s CausetNet, ver int64) {
 	if ver >= version15 {
 		return
 	}
@@ -727,28 +727,28 @@ func upgradeToVer15(s Session, ver int64) {
 	}
 }
 
-func upgradeToVer16(s Session, ver int64) {
+func upgradeToVer16(s CausetNet, ver int64) {
 	if ver >= version16 {
 		return
 	}
 	doReentrantdbs(s, "ALTER TABLE mysql.stats_histograms ADD COLUMN `cm_sketch` blob", schemaReplicant.ErrColumnExists)
 }
 
-func upgradeToVer17(s Session, ver int64) {
+func upgradeToVer17(s CausetNet, ver int64) {
 	if ver >= version17 {
 		return
 	}
 	doReentrantdbs(s, "ALTER TABLE mysql.user MODIFY User CHAR(32)")
 }
 
-func upgradeToVer18(s Session, ver int64) {
+func upgradeToVer18(s CausetNet, ver int64) {
 	if ver >= version18 {
 		return
 	}
 	doReentrantdbs(s, "ALTER TABLE mysql.stats_histograms ADD COLUMN `tot_col_size` bigint(64) NOT NULL DEFAULT 0", schemaReplicant.ErrColumnExists)
 }
 
-func upgradeToVer19(s Session, ver int64) {
+func upgradeToVer19(s CausetNet, ver int64) {
 	if ver >= version19 {
 		return
 	}
@@ -757,14 +757,14 @@ func upgradeToVer19(s Session, ver int64) {
 	doReentrantdbs(s, "ALTER TABLE mysql.columns_priv MODIFY User CHAR(32)")
 }
 
-func upgradeToVer20(s Session, ver int64) {
+func upgradeToVer20(s CausetNet, ver int64) {
 	if ver >= version20 {
 		return
 	}
 	doReentrantdbs(s, CreateStatsFeenoedbackTable)
 }
 
-func upgradeToVer21(s Session, ver int64) {
+func upgradeToVer21(s CausetNet, ver int64) {
 	if ver >= version21 {
 		return
 	}
@@ -775,14 +775,14 @@ func upgradeToVer21(s Session, ver int64) {
 	doReentrantdbs(s, "ALTER TABLE mysql.gc_delete_range DROP INDEX element_id", dbs.ErrCantDropFieldOrKey)
 }
 
-func upgradeToVer22(s Session, ver int64) {
+func upgradeToVer22(s CausetNet, ver int64) {
 	if ver >= version22 {
 		return
 	}
 	doReentrantdbs(s, "ALTER TABLE mysql.stats_histograms ADD COLUMN `stats_ver` bigint(64) NOT NULL DEFAULT 0", schemaReplicant.ErrColumnExists)
 }
 
-func upgradeToVer23(s Session, ver int64) {
+func upgradeToVer23(s CausetNet, ver int64) {
 	if ver >= version23 {
 		return
 	}
@@ -790,14 +790,14 @@ func upgradeToVer23(s Session, ver int64) {
 }
 
 // writeSystemTZ writes system timezone info into mysql.milevadb
-func writeSystemTZ(s Session) {
+func writeSystemTZ(s CausetNet) {
 	sql := fmt.Sprintf(`INSERT HIGH_PRIORITY INTO %s.%s VALUES ("%s", "%s", "milevadb Global System Timezone.") ON DUPLICATE KEY UPDATE VARIABLE_VALUE="%s"`,
 		mysql.Systemnoedb, mysql.milevanoedbTable, milevanoedbSystemTZ, timeutil.InferSystemTZ(), timeutil.InferSystemTZ())
 	mustExecute(s, sql)
 }
 
 // upgradeToVer24 initializes `System` timezone according to docs/design/2018-09-10-adding-tz-env.md
-func upgradeToVer24(s Session, ver int64) {
+func upgradeToVer24(s CausetNet, ver int64) {
 	if ver >= version24 {
 		return
 	}
@@ -805,7 +805,7 @@ func upgradeToVer24(s Session, ver int64) {
 }
 
 // upgradeToVer25 updates milevanoedb_max_soliton_size to new low bound value 32 if previous value is small than 32.
-func upgradeToVer25(s Session, ver int64) {
+func upgradeToVer25(s CausetNet, ver int64) {
 	if ver >= version25 {
 		return
 	}
@@ -814,7 +814,7 @@ func upgradeToVer25(s Session, ver int64) {
 	mustExecute(s, sql)
 }
 
-func upgradeToVer26(s Session, ver int64) {
+func upgradeToVer26(s CausetNet, ver int64) {
 	if ver >= version26 {
 		return
 	}
@@ -829,21 +829,21 @@ func upgradeToVer26(s Session, ver int64) {
 	mustExecute(s, "UPDATE HIGH_PRIORITY mysql.user SET Create_view_priv='Y',Show_view_priv='Y' WHERE Create_priv='Y'")
 }
 
-func upgradeToVer27(s Session, ver int64) {
+func upgradeToVer27(s CausetNet, ver int64) {
 	if ver >= version27 {
 		return
 	}
 	doReentrantdbs(s, "ALTER TABLE mysql.stats_histograms ADD COLUMN `correlation` double NOT NULL DEFAULT 0", schemaReplicant.ErrColumnExists)
 }
 
-func upgradeToVer28(s Session, ver int64) {
+func upgradeToVer28(s CausetNet, ver int64) {
 	if ver >= version28 {
 		return
 	}
 	doReentrantdbs(s, CreateBindInfoTable)
 }
 
-func upgradeToVer29(s Session, ver int64) {
+func upgradeToVer29(s CausetNet, ver int64) {
 	// upgradeToVer29 only need to be run when the current version is 28.
 	if ver != version28 {
 		return
@@ -853,42 +853,42 @@ func upgradeToVer29(s Session, ver int64) {
 	doReentrantdbs(s, "ALTER TABLE mysql.bind_info add index sql_index (original_sql(1024),default_noedb(1024))", dbs.ErrDupKeyName)
 }
 
-func upgradeToVer30(s Session, ver int64) {
+func upgradeToVer30(s CausetNet, ver int64) {
 	if ver >= version30 {
 		return
 	}
 	mustExecute(s, CreateStatsTopNTable)
 }
 
-func upgradeToVer31(s Session, ver int64) {
+func upgradeToVer31(s CausetNet, ver int64) {
 	if ver >= version31 {
 		return
 	}
 	doReentrantdbs(s, "ALTER TABLE mysql.stats_histograms ADD COLUMN `last_analyze_pos` blob default null", schemaReplicant.ErrColumnExists)
 }
 
-func upgradeToVer32(s Session, ver int64) {
+func upgradeToVer32(s CausetNet, ver int64) {
 	if ver >= version32 {
 		return
 	}
 	doReentrantdbs(s, "ALTER TABLE mysql.tables_priv MODIFY table_priv SET('Select','Insert','Update','Delete','Create','Drop','Grant', 'Index', 'Alter', 'Create View', 'Show View', 'Trigger', 'References')")
 }
 
-func upgradeToVer33(s Session, ver int64) {
+func upgradeToVer33(s CausetNet, ver int64) {
 	if ver >= version33 {
 		return
 	}
 	doReentrantdbs(s, CreateExprPushdownBlacklist)
 }
 
-func upgradeToVer34(s Session, ver int64) {
+func upgradeToVer34(s CausetNet, ver int64) {
 	if ver >= version34 {
 		return
 	}
 	doReentrantdbs(s, CreateOptRuleBlacklist)
 }
 
-func upgradeToVer35(s Session, ver int64) {
+func upgradeToVer35(s CausetNet, ver int64) {
 	if ver >= version35 {
 		return
 	}
@@ -897,7 +897,7 @@ func upgradeToVer35(s Session, ver int64) {
 	mustExecute(s, sql)
 }
 
-func upgradeToVer36(s Session, ver int64) {
+func upgradeToVer36(s CausetNet, ver int64) {
 	if ver >= version36 {
 		return
 	}
@@ -907,7 +907,7 @@ func upgradeToVer36(s Session, ver int64) {
 	mustExecute(s, "UPDATE HIGH_PRIORITY mysql.user SET Create_tmp_table_priv='Y',Lock_tables_priv='Y',Create_routine_priv='Y',Alter_routine_priv='Y',Event_priv='Y' WHERE Super_priv='Y'")
 }
 
-func upgradeToVer37(s Session, ver int64) {
+func upgradeToVer37(s CausetNet, ver int64) {
 	if ver >= version37 {
 		return
 	}
@@ -917,7 +917,7 @@ func upgradeToVer37(s Session, ver int64) {
 	mustExecute(s, sql)
 }
 
-func upgradeToVer38(s Session, ver int64) {
+func upgradeToVer38(s CausetNet, ver int64) {
 	if ver >= version38 {
 		return
 	}
@@ -928,7 +928,7 @@ func upgradeToVer38(s Session, ver int64) {
 	}
 }
 
-func upgradeToVer39(s Session, ver int64) {
+func upgradeToVer39(s CausetNet, ver int64) {
 	if ver >= version39 {
 		return
 	}
@@ -938,7 +938,7 @@ func upgradeToVer39(s Session, ver int64) {
 	mustExecute(s, "UPDATE HIGH_PRIORITY mysql.user SET File_priv='Y' where Super_priv='Y'")
 }
 
-func writeNewCollationParameter(s Session, flag bool) {
+func writeNewCollationParameter(s CausetNet, flag bool) {
 	comment := "If the new collations are enabled. Do not edit it."
 	b := varFalse
 	if flag {
@@ -949,7 +949,7 @@ func writeNewCollationParameter(s Session, flag bool) {
 	mustExecute(s, sql)
 }
 
-func upgradeToVer40(s Session, ver int64) {
+func upgradeToVer40(s CausetNet, ver int64) {
 	if ver >= version40 {
 		return
 	}
@@ -957,7 +957,7 @@ func upgradeToVer40(s Session, ver int64) {
 	writeNewCollationParameter(s, false)
 }
 
-func upgradeToVer41(s Session, ver int64) {
+func upgradeToVer41(s CausetNet, ver int64) {
 	if ver >= version41 {
 		return
 	}
@@ -966,23 +966,23 @@ func upgradeToVer41(s Session, ver int64) {
 }
 
 // writeDefaultExprPushDownBlacklist writes default expr pushdown blacklist into mysql.expr_pushdown_blacklist
-func writeDefaultExprPushDownBlacklist(s Session) {
+func writeDefaultExprPushDownBlacklist(s CausetNet) {
 	mustExecute(s, "INSERT HIGH_PRIORITY INTO mysql.expr_pushdown_blacklist VALUES"+
-		"('date_add','tiflash', 'DST(daylight saving time) does not take effect in TiFlash date_add'),"+
-		"('cast','tiflash', 'Behavior of some corner cases(overflow, truncate etc) is different in TiFlash and milevadb')")
+		"('date_add','Noether', 'DST(daylight saving time) does not take effect in Noether date_add'),"+
+		"('cast','Noether', 'Behavior of some corner cases(overflow, truncate etc) is different in Noether and milevadb')")
 }
 
-func upgradeToVer42(s Session, ver int64) {
+func upgradeToVer42(s CausetNet, ver int64) {
 	if ver >= version42 {
 		return
 	}
-	doReentrantdbs(s, "ALTER TABLE mysql.expr_pushdown_blacklist ADD COLUMN `store_type` char(100) NOT NULL DEFAULT 'tiekv,tiflash,milevadb'", schemaReplicant.ErrColumnExists)
+	doReentrantdbs(s, "ALTER TABLE mysql.expr_pushdown_blacklist ADD COLUMN `store_type` char(100) NOT NULL DEFAULT 'tiekv,Noether,milevadb'", schemaReplicant.ErrColumnExists)
 	doReentrantdbs(s, "ALTER TABLE mysql.expr_pushdown_blacklist ADD COLUMN `reason` varchar(200)", schemaReplicant.ErrColumnExists)
 	writeDefaultExprPushDownBlacklist(s)
 }
 
 // Convert statement summary global variables to non-empty values.
-func writeStmtSummaryVars(s Session) {
+func writeStmtSummaryVars(s CausetNet) {
 	sql := fmt.Sprintf("UPDATE %s.%s SET variable_value='%%s' WHERE variable_name='%%s' AND variable_value=''", mysql.Systemnoedb, mysql.GlobalVariablesTable)
 	stmtSummaryConfig := config.GetGlobalConfig().StmtSummary
 	mustExecute(s, fmt.Sprintf(sql, variable.BoolToIntStr(stmtSummaryConfig.Enable), variable.milevanoedbEnableStmtSummary))
@@ -993,21 +993,21 @@ func writeStmtSummaryVars(s Session) {
 	mustExecute(s, fmt.Sprintf(sql, strconv.FormatUint(uint64(stmtSummaryConfig.MaxSQLLength), 10), variable.milevanoedbStmtSummaryMaxSQLLength))
 }
 
-func upgradeToVer43(s Session, ver int64) {
+func upgradeToVer43(s CausetNet, ver int64) {
 	if ver >= version43 {
 		return
 	}
 	writeStmtSummaryVars(s)
 }
 
-func upgradeToVer44(s Session, ver int64) {
+func upgradeToVer44(s CausetNet, ver int64) {
 	if ver >= version44 {
 		return
 	}
 	mustExecute(s, "DELETE FROM mysql.global_variables where variable_name = \"milevanoedb_isolation_read_engines\"")
 }
 
-func upgradeToVer45(s Session, ver int64) {
+func upgradeToVer45(s CausetNet, ver int64) {
 	if ver >= version45 {
 		return
 	}
@@ -1016,7 +1016,7 @@ func upgradeToVer45(s Session, ver int64) {
 }
 
 // updateBootstrapVer updates bootstrap version variable in mysql.milevadb table.
-func updateBootstrapVer(s Session) {
+func updateBootstrapVer(s CausetNet) {
 	// Update bootstrap version.
 	sql := fmt.Sprintf(`INSERT HIGH_PRIORITY INTO %s.%s VALUES ("%s", "%d", "milevadb bootstrap version.") ON DUPLICATE KEY UPDATE VARIABLE_VALUE="%d"`,
 		mysql.Systemnoedb, mysql.milevanoedbTable, milevanoedbServerVersionVar, currentBootstrapVersion, currentBootstrapVersion)
@@ -1024,7 +1024,7 @@ func updateBootstrapVer(s Session) {
 }
 
 // getBootstrapVersion gets bootstrap version from mysql.milevadb table;
-func getBootstrapVersion(s Session) (int64, error) {
+func getBootstrapVersion(s CausetNet) (int64, error) {
 	sVal, isNull, err := getmilevanoedbVar(s, milevanoedbServerVersionVar)
 	if err != nil {
 		return 0, errors.Trace(err)
@@ -1036,7 +1036,7 @@ func getBootstrapVersion(s Session) (int64, error) {
 }
 
 // dodbsWorks executes dbs statements in bootstrap stage.
-func dodbsWorks(s Session) {
+func dodbsWorks(s CausetNet) {
 	// Create a test database.
 	mustExecute(s, "CREATE DATABASE IF NOT EXISTS test")
 	// Create system noedb.
@@ -1082,7 +1082,7 @@ func dodbsWorks(s Session) {
 
 // doDMLWorks executes DML statements in bootstrap stage.
 // All the statements run in a single transaction.
-func doDMLWorks(s Session) {
+func doDMLWorks(s CausetNet) {
 	mustExecute(s, "BEGIN")
 
 	// Insert a default user with empty password.
@@ -1092,8 +1092,8 @@ func doDMLWorks(s Session) {
 	// Init global system variables table.
 	values := make([]string, 0, len(variable.SysVars))
 	for k, v := range variable.SysVars {
-		// Session only variable should not be inserted.
-		if v.Scope != variable.ScopeSession {
+		// CausetNet only variable should not be inserted.
+		if v.Scope != variable.ScopeCausetNet {
 			vVal := v.Value
 			if v.Name == variable.milevanoedbTxnMode && config.GetGlobalConfig().Store == "tiekv" {
 				vVal = "pessimistic"
@@ -1143,7 +1143,7 @@ func doDMLWorks(s Session) {
 	}
 }
 
-func mustExecute(s Session, sql string) {
+func mustExecute(s CausetNet, sql string) {
 	_, err := s.Execute(context.Background(), sql)
 	if err != nil {
 		debug.PrintStack()
