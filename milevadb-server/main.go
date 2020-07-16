@@ -47,7 +47,7 @@ const (
 	mnoedbCors             = "cors"
 	mnoedbSocket           = "socket"
 	mnoedbEnableBinlog     = "enable-binlog"
-	mnoedbRunnoedbS           = "run-ddl"
+	mnoedbRunnoedbS           = "run-dbs"
 	mnoedbLogLevel         = "L"
 	mnoedbLogFile          = "log-file"
 	mnoedbLogSlowQuery     = "log-slow-query"

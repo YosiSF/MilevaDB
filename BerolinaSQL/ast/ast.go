@@ -98,7 +98,7 @@ type StmtNode interface {
 // noedbSNode represents noedbS statement node.
 type noedbSNode interface {
 	StmtNode
-	ddlStatement()
+	dbsStatement()
 }
 
 // DMLNode represents DML statement node.

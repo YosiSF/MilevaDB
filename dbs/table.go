@@ -1016,7 +1016,7 @@ func onRepairTable(d *dbsCtx, t *meta.Meta, job *serial.Job) (ver int64, _ error
 
 	tblInfo.State = serial.StateNone
 
-	// Check the old noedb and old table exist.
+	// Check the old DB and old table exist.
 	_, err := getTableInfoAndCancelFaultJob(t, job, schemaID)
 	if err != nil {
 		return ver, errors.Trace(err)

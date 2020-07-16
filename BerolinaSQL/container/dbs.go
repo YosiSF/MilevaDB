@@ -147,14 +147,14 @@ type Batch struct {
 	StartTS uint64 `json:"start_ts"`
 	// DependencyID is the Batch's ID that the current Batch depends on.
 	DependencyID int64 `json:"dependency_id"`
-	// Query string of the ddl Batch.
+	// Query string of the dbs Batch.
 	Query      string       `json:"query"`
 	BinlogInfo *HistoryInfo `json:"binlog"`
 
 	// Version indicates the noedbS Batch version. For old Batchs, it will be 0.
 	Version int64 `json:"version"`
 
-	// ReorgMeta is meta info of ddl reorganization.
+	// ReorgMeta is meta info of dbs reorganization.
 	// This field is depreciated.
 	ReorgMeta *noedbSReorgMeta `json:"reorg_meta"`
 

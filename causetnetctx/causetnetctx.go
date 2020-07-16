@@ -31,7 +31,7 @@ import (
 type Context interface {
 	// NewTxn creates a new transaction for further execution.
 	// If old transaction is valid, it is committed first.
-	// It's used in BEGIN statement and DDL statements to commit old transaction.
+	// It's used in BEGIN statement and DBS statements to commit old transaction.
 	NewTxn(context.Context) error
 
 	// Txn returns the current transaction which is created before executing a statement.
@@ -85,8 +85,8 @@ type Context interface {
 	StmtGetMutation(int64) *binlog.TableMutation
 	// StmtAddDirtyTableOP adds the dirty table operation for current statement.
 	StmtAddDirtyTableOP(op int, physicalID int64, handle ekv.Handle)
-	// DDLOwnerChecker returns keywatcher.DDLOwnerChecker.
-	DDLOwnerChecker() keywatcher.DDLOwnerChecker
+	// DBSOwnerChecker returns keywatcher.DBSOwnerChecker.
+	DBSOwnerChecker() keywatcher.DBSOwnerChecker
 	// AddTableLock adds table lock to the CausetNet lock map.
 	AddTableLock([]serial.TableLockTpInfo)
 	// ReleaseTableLocks releases table locks in the CausetNet lock map.
@@ -125,7 +125,7 @@ const (
 	QueryString basicCtxType = 1
 	// Initing is the key for indicating if the server is running bootstrap or upgrade job.
 	Initing basicCtxType = 2
-	// LastExecuteDDL is the key for whether the CausetNet execute a ddl command last time.
+	// LastExecuteDBS is the key for whether the CausetNet execute a dbs command last time.
 	LastExecuteDBS basicCtxType = 3
 )
 

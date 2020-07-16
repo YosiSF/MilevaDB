@@ -805,7 +805,7 @@ var funcs = map[string]functionClass{
 	ast.MilevaDBDecodeKey: &MilevaDBDecodeKeyFunctionClass{baseFunctionClass{ast.MilevaDBDecodeKey, 1, 1}},
 	// This function is used to show MilevaDB-server version info.
 	ast.MilevaDBVersion:    &MilevaDBVersionFunctionClass{baseFunctionClass{ast.MilevaDBVersion, 0, 0}},
-	ast.MilevaDBIsDDLOwner: &MilevaDBIsDDLOwnerFunctionClass{baseFunctionClass{ast.MilevaDBIsDDLOwner, 0, 0}},
+	ast.MilevaDBIsDBSOwner: &MilevaDBIsDBSOwnerFunctionClass{baseFunctionClass{ast.MilevaDBIsDBSOwner, 0, 0}},
 	ast.MilevaDBParseTso:   &MilevaDBParseTsoFunctionClass{baseFunctionClass{ast.MilevaDBParseTso, 1, 1}},
 	ast.MilevaDBDecodePlan: &MilevaDBDecodePlanFunctionClass{baseFunctionClass{ast.MilevaDBDecodePlan, 1, 1}},
 

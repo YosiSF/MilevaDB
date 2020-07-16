@@ -55,7 +55,7 @@ var (
 	mNextglobalDaggerIDKey = []byte("NextGlobalDaggerID")
 	mSchemaReplicantVersionKey = []byte("SchemaReplicantVersionKey")
 	mdbs = []byte("dbs")
-	mnoedbPrefix = "noedb"
+	mnoedbPrefix = "DB"
 	mBlockPrefix = "Block"
 	mBlockIDPrefix = "EID"
 )

@@ -469,12 +469,12 @@ func EvalExpr(ctx causetnetctx.Context, expr Expression, input *chunk.Chunk, res
 		}
 	} else {
 		ind, n := 0, input.NumRows()
-		iter := chunk.NewIterator4Chunk(input)
+		iteron := chunk.NewIterator4Chunk(input)
 		switch evalType {
 		case types.ETInt:
 			result.ResizeInt64(n, false)
 			i64s := result.Int64s()
-			for it := iter.Begin(); it != iter.End(); it = iter.Next() {
+			for it := iteron.Begin(); it != iteron.End(); it = iteron.Next() {
 				value, isNull, err := expr.EvalInt(ctx, it)
 				if err != nil {
 					return err
@@ -489,7 +489,7 @@ func EvalExpr(ctx causetnetctx.Context, expr Expression, input *chunk.Chunk, res
 		case types.ETReal:
 			result.ResizeFloat64(n, false)
 			f64s := result.Float64s()
-			for it := iter.Begin(); it != iter.End(); it = iter.Next() {
+			for it := iteron.Begin(); it != iteron.End(); it = iteron.Next() {
 				value, isNull, err := expr.EvalReal(ctx, it)
 				if err != nil {
 					return err
@@ -504,7 +504,7 @@ func EvalExpr(ctx causetnetctx.Context, expr Expression, input *chunk.Chunk, res
 		case types.ETDuration:
 			result.ResizeGoDuration(n, false)
 			d64s := result.GoDurations()
-			for it := iter.Begin(); it != iter.End(); it = iter.Next() {
+			for it := iteron.Begin(); it != iteron.End(); it = iteron.Next() {
 				value, isNull, err := expr.EvalDuration(ctx, it)
 				if err != nil {
 					return err
@@ -519,7 +519,7 @@ func EvalExpr(ctx causetnetctx.Context, expr Expression, input *chunk.Chunk, res
 		case types.ETDatetime, types.ETTimestamp:
 			result.ResizeTime(n, false)
 			t64s := result.Times()
-			for it := iter.Begin(); it != iter.End(); it = iter.Next() {
+			for it := iteron.Begin(); it != iteron.End(); it = iteron.Next() {
 				value, isNull, err := expr.EvalTime(ctx, it)
 				if err != nil {
 					return err
@@ -533,7 +533,7 @@ func EvalExpr(ctx causetnetctx.Context, expr Expression, input *chunk.Chunk, res
 			}
 		case types.ETString:
 			result.ReserveString(n)
-			for it := iter.Begin(); it != iter.End(); it = iter.Next() {
+			for it := iteron.Begin(); it != iteron.End(); it = iteron.Next() {
 				value, isNull, err := expr.EvalString(ctx, it)
 				if err != nil {
 					return err
@@ -546,7 +546,7 @@ func EvalExpr(ctx causetnetctx.Context, expr Expression, input *chunk.Chunk, res
 			}
 		case types.ETJson:
 			result.ReserveJSON(n)
-			for it := iter.Begin(); it != iter.End(); it = iter.Next() {
+			for it := iteron.Begin(); it != iteron.End(); it = iteron.Next() {
 				value, isNull, err := expr.EvalJSON(ctx, it)
 				if err != nil {
 					return err
@@ -560,7 +560,7 @@ func EvalExpr(ctx causetnetctx.Context, expr Expression, input *chunk.Chunk, res
 		case types.ETDecimal:
 			result.ResizeDecimal(n, false)
 			d64s := result.Decimals()
-			for it := iter.Begin(); it != iter.End(); it = iter.Next() {
+			for it := iteron.Begin(); it != iteron.End(); it = iteron.Next() {
 				value, isNull, err := expr.EvalDecimal(ctx, it)
 				if err != nil {
 					return err
@@ -975,8 +975,8 @@ func canFuncBePushed(sf *ScalarFunction, storeType ekv.StoreType) bool {
 		switch storeType {
 		case ekv.Noether:
 			ret = scalarExprSupportedByFlash(sf)
-		case ekv.TiKV:
-			ret = scalarExprSupportedByTiKV(sf)
+		case ekv.EinsteinDB:
+			ret = scalarExprSupportedByEinsteinDB(sf)
 		case ekv.MilevaDB:
 			ret = scalarExprSupportedByMilevaDB(sf)
 		}
@@ -989,7 +989,7 @@ func canFuncBePushed(sf *ScalarFunction, storeType ekv.StoreType) bool {
 
 func storeTypeMask(storeType ekv.StoreType) uint32 {
 	if storeType == ekv.UnSpecified {
-		return 1<<ekv.TiKV | 1<<ekv.Noether | 1<<ekv.MilevaDB
+		return 1<<ekv.EinsteinDB | 1<<ekv.Noether | 1<<ekv.MilevaDB
 	}
 	return 1 << storeType
 }
@@ -1010,7 +1010,7 @@ func IsPushDownEnabled(name string, storeType ekv.StoreType) bool {
 	return true
 }
 
-// DefaultExprPushDownBlacklist indicates the expressions which can not be pushed down to TiKV.
+// DefaultExprPushDownBlacklist indicates the expressions which can not be pushed down to EinsteinDB.
 var DefaultExprPushDownBlacklist *atomic.Value
 
 func init() {
@@ -1084,7 +1084,7 @@ func CanExprsPushDown(sc *stmtctx.StatementContext, exprs []Expression, client e
 	return len(remained) == 0
 }
 
-func scalarExprSupportedByTiKV(function *ScalarFunction) bool {
+func scalarExprSupportedByEinsteinDB(function *ScalarFunction) bool {
 	switch function.FuncName.L {
 	case ast.Substr, ast.Substring, ast.DateAdd, ast.TimestampDiff,
 		ast.FromUnixTime:

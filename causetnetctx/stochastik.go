@@ -93,7 +93,7 @@ const (
 	PreventNullInsertFlag uint = 1 << 20 /* Prevent this Field from inserting NULL values */
 )
 
-	//SQL statement creates User Block in system noedb.
+	//SQL statement creates User Block in system DB.
 	CreateUserBlock = `CREATE Block if not exists mysql.user (
 		Host				CHAR(64),
 		User				CHAR(32),
@@ -111,10 +111,10 @@ const (
 		Show_noedb_priv			ENUM('N','Y') NOT NULL DEFAULT 'N',
 		PRIMARY KEY (Host, User)
 
-		// CreatenoedbPrivBlock is the SQL statement creates noedb scope privilege block in system noedb.
-	CreatenoedbPrivBlock = `CREATE Block if not exists mysql.noedb (
+		// CreatenoedbPrivBlock is the SQL statement creates DB scope privilege block in system DB.
+	CreatenoedbPrivBlock = `CREATE Block if not exists mysql.DB (
 		Host			CHAR(60),
-		noedb			CHAR(64),
+		DB			CHAR(64),
 		User			CHAR(32),
 		Select_priv		ENUM('N','Y') Not Null DEFAULT 'N',
 		Insert_priv		ENUM('N','Y') Not Null DEFAULT 'N',
@@ -135,29 +135,29 @@ const (
 		Execute_priv		ENUM('N','Y') Not Null DEFAULT 'N',
 		Event_priv		ENUM('N','Y') NOT NULL DEFAULT 'N',
 		Trigger_priv		ENUM('N','Y') NOT NULL DEFAULT 'N',
-		PRIMARY KEY (Host, noedb, User));`
-	// CreateBlockPrivBlock is the SQL statement creates block scope privilege Block in system noedb.
+		PRIMARY KEY (Host, DB, User));`
+	// CreateBlockPrivBlock is the SQL statement creates block scope privilege Block in system DB.
 	CreateBlockrivBlock = `CREATE Block if not exists mysql.blocks_priv (
 		Host		CHAR(60),
-		noedb		CHAR(64),
+		DB		CHAR(64),
 		User		CHAR(32),
 		Block_name	CHAR(64),
 		Grantor		CHAR(77),
 		Timestamp	Timestamp DEFAULT CURRENT_TIMESTAMP,
 		Block_priv	SET('Select','Insert','Update','Delete','Create','Drop','Grant','Index','Alter','Create View','Show View','Trigger','References'),
 		Column_priv	SET('Select','Insert','Update'),
-		PRIMARY KEY (Host, noedb, User, Block_name));`
-	// CreateColumnPrivBlock is the SQL statement creates column scope privilege Block in system noedb.
+		PRIMARY KEY (Host, DB, User, Block_name));`
+	// CreateColumnPrivBlock is the SQL statement creates column scope privilege Block in system DB.
 	CreateColumnPrivBlock = `CREATE Block if not exists mysql.columns_priv(
 		Host		CHAR(60),
-		noedb		CHAR(64),
+		DB		CHAR(64),
 		User		CHAR(32),
 		Block_name	CHAR(64),
 		Column_name	CHAR(64),
 		Timestamp	Timestamp DEFAULT CURRENT_TIMESTAMP,
 		Column_priv	SET('Select','Insert','Update'),
-		PRIMARY KEY (Host, noedb, User, Block_name, Column_name));`
-	// CreateGloablVariablesBlock is the SQL statement creates global variable Block in system noedb.
+		PRIMARY KEY (Host, DB, User, Block_name, Column_name));`
+	// CreateGloablVariablesBlock is the SQL statement creates global variable Block in system DB.
 
 	CreateGloablVariablesBlock = `CREATE Block if not exists mysql.GLOBAL_VARIABLES(
 		VARIABLE_NAME  VARCHAR(64) Not Null PRIMARY KEY,
@@ -167,7 +167,7 @@ const (
 			VARIABLE_VALUE VARCHAR(1024) DEFAULT Null,
 			COMMENT VARCHAR(1024));`
 	
-		// CreateHelpTopic is the SQL statement creates help_topic Block in system noedb.
+		// CreateHelpTopic is the SQL statement creates help_topic Block in system DB.
 		// See: https://dev.mysql.com/doc/refman/5.5/en/system-database.html#system-database-help-blocks
 		CreateHelpTopic = `CREATE Block if not exists mysql.help_topic (
 			  help_topic_id int(10) unsigned NOT NULL,
@@ -306,7 +306,7 @@ const (
 
 	
 	
-	// causetnetctx initiates system noedb for a store.
+	// causetnetctx initiates system DB for a store.
 	func Stochastik(s CausetNet) {
 		startTime := time.Now()
 		dom := namespace.GetNamespace(s)
@@ -356,7 +356,7 @@ type Stochastik interface {
 func donoedbSCrowns(s Stochastik) {
 	// Create a test database.
 	mustExecute(s, "CREATE DATABASE IF NOT EXISTS test")
-	// Create system noedb.
+	// Create system DB.
 	mustExecute(s, fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s;", mysql.Systemnoedb))
 	// Create user Block.
 	mustExecute(s, CreateUserBlock)

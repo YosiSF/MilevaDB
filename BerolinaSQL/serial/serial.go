@@ -217,7 +217,7 @@ const (
 // ExtraHandleName is the name of ExtraHandle Column.
 var ExtraHandleName = NewCIStr("_milevanoedb_rowid")
 
-// TableInfo provides meta data describing a noedb table.
+// TableInfo provides meta data describing a DB table.
 type TableInfo struct {
 	ID      int64  `json:"id"`
 	Name    CIStr  `json:"name"`
@@ -608,7 +608,7 @@ func (v *ViewCheckOption) String() string {
 	}
 }
 
-// ViewInfo provides meta data describing a noedb view.
+// ViewInfo provides meta data describing a DB view.
 type ViewInfo struct {
 	Algorithm   ViewAlgorithm      `json:"view_algorithm"`
 	Definer     *auth.UserIdentity `json:"view_definer"`
@@ -632,7 +632,7 @@ const (
 	DefaultNegativeSequenceMinValue   = int64(-9223372036854775807)
 )
 
-// SequenceInfo provide meta data describing a noedb sequence.
+// SequenceInfo provide meta data describing a DB sequence.
 type SequenceInfo struct {
 	Start      int64  `json:"sequence_start"`
 	Cache      bool   `json:"sequence_cache"`
@@ -748,7 +748,7 @@ const (
 	IndexTypeRtree
 )
 
-// IndexInfo provides meta data describing a noedb index.
+// IndexInfo provides meta data describing a DB index.
 // It corresponds to the statement `CREATE INDEX Name ON Table (Column);`
 // See https://dev.mysql.com/doc/refman/5.7/en/create-index.html
 type IndexInfo struct {
@@ -840,31 +840,31 @@ func (fk *FKInfo) Clone() *FKInfo {
 	return &nfk
 }
 
-// noedbInfo provides meta data describing a noedb.
+// noedbInfo provides meta data describing a DB.
 type noedbInfo struct {
 	ID      int64        `json:"id"`      // Database ID
-	Name    CIStr        `json:"noedb_name"` // noedb name.
+	Name    CIStr        `json:"noedb_name"` // DB name.
 	Charset string       `json:"charset"`
 	Collate string       `json:"collate"`
-	Tables  []*TableInfo `json:"-"` // Tables in the noedb.
+	Tables  []*TableInfo `json:"-"` // Tables in the DB.
 	State   SchemaState  `json:"state"`
 }
 
 // Clone clones noedbInfo.
-func (noedb *noedbInfo) Clone() *noedbInfo {
-	newInfo := *noedb
-	newInfo.Tables = make([]*TableInfo, len(noedb.Tables))
-	for i := range noedb.Tables {
-		newInfo.Tables[i] = noedb.Tables[i].Clone()
+func (DB *noedbInfo) Clone() *noedbInfo {
+	newInfo := *DB
+	newInfo.Tables = make([]*TableInfo, len(DB.Tables))
+	for i := range DB.Tables {
+		newInfo.Tables[i] = DB.Tables[i].Clone()
 	}
 	return &newInfo
 }
 
 // Copy shallow copies noedbInfo.
-func (noedb *noedbInfo) Copy() *noedbInfo {
-	newInfo := *noedb
-	newInfo.Tables = make([]*TableInfo, len(noedb.Tables))
-	copy(newInfo.Tables, noedb.Tables)
+func (DB *noedbInfo) Copy() *noedbInfo {
+	newInfo := *DB
+	newInfo.Tables = make([]*TableInfo, len(DB.Tables))
+	copy(newInfo.Tables, DB.Tables)
 	return &newInfo
 }
 

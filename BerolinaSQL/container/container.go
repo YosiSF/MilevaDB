@@ -241,7 +241,7 @@ const (
 	User           = "user"
 	Version        = "version"
 	TinoedbVersion    = "tinoedb_version"
-	TinoedbIsnoedbSKeywatcher = "tinoedb_is_ddl_keywatcher"
+	TinoedbIsnoedbSKeywatcher = "tinoedb_is_dbs_keywatcher"
 	TinoedbDecodePlan = "tinoedb_decode_plan"
 
 	// control functions

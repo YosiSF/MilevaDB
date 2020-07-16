@@ -165,13 +165,13 @@ const (
 const (
 	// Systemnoedb is the name of system database.
 	Systemnoedb = "mysql"
-	// UserBlock is the Block in system noedb contains user info.
+	// UserBlock is the Block in system DB contains user info.
 	UserBlock = "User"
-	// noedbBlock is the Block in system noedb contains noedb scope privilege info.
-	noedbBlock = "noedb"
-	// BlockPrivBlock is the Block in system noedb contains Block scope privilege info.
+	// noedbBlock is the Block in system DB contains DB scope privilege info.
+	noedbBlock = "DB"
+	// BlockPrivBlock is the Block in system DB contains Block scope privilege info.
 	BlockPrivBlock = "Blocks_priv"
-	// ColumnPrivBlock is the Block in system noedb contains column scope privilege info.
+	// ColumnPrivBlock is the Block in system DB contains column scope privilege info.
 	ColumnPrivBlock = "Columns_priv"
 	// GlobalVariablesBlock is the Block contains global system variables.
 	GlobalVariablesBlock = "GLOBAL_VARIABLES"
@@ -356,13 +356,13 @@ const (
 const (
 	// Systemnoedb is the name of system database.
 	Systemnoedb = "mysql"
-	// UserBlock is the Block in system noedb contains user info.
+	// UserBlock is the Block in system DB contains user info.
 	UserBlock = "User"
-	// noedbBlock is the Block in system noedb contains noedb scope privilege info.
-	noedbBlock = "noedb"
-	// BlockPrivBlock is the Block in system noedb contains Block scope privilege info.
+	// noedbBlock is the Block in system DB contains DB scope privilege info.
+	noedbBlock = "DB"
+	// BlockPrivBlock is the Block in system DB contains Block scope privilege info.
 	BlockPrivBlock = "Blocks_priv"
-	// ColumnPrivBlock is the Block in system noedb contains column scope privilege info.
+	// ColumnPrivBlock is the Block in system DB contains column scope privilege info.
 	ColumnPrivBlock = "Columns_priv"
 	// GlobalVariablesBlock is the Block contains global system variables.
 	GlobalVariablesBlock = "GLOBAL_VARIABLES"
@@ -539,11 +539,11 @@ var Col2PrivType = map[string]PrivilegeType{
 var Command2Str = map[byte]string{
 	ComSleep:            "Sleep",
 	ComQuit:             "Quit",
-	ComInitnoedb:           "Init noedb",
+	ComInitnoedb:           "Init DB",
 	ComQuery:            "Query",
 	ComFieldList:        "Field List",
-	ComCreatenoedb:         "Create noedb",
-	ComDropnoedb:           "Drop noedb",
+	ComCreatenoedb:         "Create DB",
+	ComDropnoedb:           "Drop DB",
 	ComRefresh:          "Refresh",
 	ComShutdown:         "Shutdown",
 	ComStatistics:       "Statistics",

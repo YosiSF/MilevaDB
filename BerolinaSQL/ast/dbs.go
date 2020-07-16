@@ -86,7 +86,7 @@ func (n *DatabaseOption) Restore(ctx *format.RestoreCtx) error {
 // CreateDatabaseStmt is a statement to create a database.
 // See https://dev.mysql.com/doc/refman/5.7/en/create-database.html
 type CreateDatabaseStmt struct {
-	ddlNode
+	dbsNode
 
 	IfNotExists bool
 	Name        string
@@ -123,7 +123,7 @@ func (n *CreateDatabaseStmt) Accept(v Visitor) (Node, bool) {
 // AlterDatabaseStmt is a statement to change the structure of a database.
 // See https://dev.mysql.com/doc/refman/5.7/en/alter-database.html
 type AlterDatabaseStmt struct {
-	ddlNode
+	dbsNode
 
 	Name                 string
 	AlterDefaultDatabase bool
@@ -160,7 +160,7 @@ func (n *AlterDatabaseStmt) Accept(v Visitor) (Node, bool) {
 // DropDatabaseStmt is a statement to drop a database and all tables in the database.
 // See https://dev.mysql.com/doc/refman/5.7/en/drop-database.html
 type DropDatabaseStmt struct {
-	ddlNode
+	dbsNode
 
 	IfExists bool
 	Name     string
@@ -897,7 +897,7 @@ func (n *ColumnDef) Validate() bool {
 // CreateTableStmt is a statement to create a table.
 // See https://dev.mysql.com/doc/refman/5.7/en/create-table.html
 type CreateTableStmt struct {
-	ddlNode
+	dbsNode
 
 	IfNotExists bool
 	IsTemporary bool
@@ -1041,7 +1041,7 @@ func (n *CreateTableStmt) Accept(v Visitor) (Node, bool) {
 // DropTableStmt is a statement to drop one or more tables.
 // See https://dev.mysql.com/doc/refman/5.7/en/drop-table.html
 type DropTableStmt struct {
-	ddlNode
+	dbsNode
 
 	IfExists    bool
 	Tables      []*TableName
@@ -1095,7 +1095,7 @@ func (n *DropTableStmt) Accept(v Visitor) (Node, bool) {
 
 // DropSequenceStmt is a statement to drop a Sequence.
 type DropSequenceStmt struct {
-	ddlNode
+	dbsNode
 
 	IfExists  bool
 	Sequences []*TableName
@@ -1139,7 +1139,7 @@ func (n *DropSequenceStmt) Accept(v Visitor) (Node, bool) {
 // RenameTableStmt is a statement to rename a table.
 // See http://dev.mysql.com/doc/refman/5.7/en/rename-table.html
 type RenameTableStmt struct {
-	ddlNode
+	dbsNode
 
 	OldTable *TableName
 	NewTable *TableName
@@ -1234,7 +1234,7 @@ func (n *TableToTable) Accept(v Visitor) (Node, bool) {
 // CreateViewStmt is a statement to create a View.
 // See https://dev.mysql.com/doc/refman/5.7/en/create-view.html
 type CreateViewStmt struct {
-	ddlNode
+	dbsNode
 
 	OrReplace   bool
 	ViewName    *TableName
@@ -1326,7 +1326,7 @@ func (n *CreateViewStmt) Accept(v Visitor) (Node, bool) {
 
 // CreateSequenceStmt is a statement to create a Sequence.
 type CreateSequenceStmt struct {
-	ddlNode
+	dbsNode
 
 	// TODO : support or replace if need : care for it will conflict on temporaryOpt.
 	IfNotExists bool
@@ -1428,7 +1428,7 @@ const (
 // CreateIndexStmt is a statement to create an index.
 // See https://dev.mysql.com/doc/refman/5.7/en/create-index.html
 type CreateIndexStmt struct {
-	ddlNode
+	dbsNode
 
 	// only supported by Marianoedb 10.0.2+,
 	// see https://marianoedb.com/kb/en/library/create-index/
@@ -1530,7 +1530,7 @@ func (n *CreateIndexStmt) Accept(v Visitor) (Node, bool) {
 // DropIndexStmt is a statement to drop the index.
 // See https://dev.mysql.com/doc/refman/5.7/en/drop-index.html
 type DropIndexStmt struct {
-	ddlNode
+	dbsNode
 
 	IfExists  bool
 	IndexName string
@@ -1585,7 +1585,7 @@ func (n *DropIndexStmt) Accept(v Visitor) (Node, bool) {
 
 // LockTablesStmt is a statement to lock tables.
 type LockTablesStmt struct {
-	ddlNode
+	dbsNode
 
 	TableLocks []TableLock
 }
@@ -1630,7 +1630,7 @@ func (n *LockTablesStmt) Restore(ctx *format.RestoreCtx) error {
 
 // UnlockTablesStmt is a statement to unlock tables.
 type UnlockTablesStmt struct {
-	ddlNode
+	dbsNode
 }
 
 // Accept implements Node Accept interface.
@@ -1647,7 +1647,7 @@ func (n *UnlockTablesStmt) Restore(ctx *format.RestoreCtx) error {
 
 // CleanupTableLockStmt is a statement to cleanup table lock.
 type CleanupTableLockStmt struct {
-	ddlNode
+	dbsNode
 
 	Tables []*TableName
 }
@@ -1685,7 +1685,7 @@ func (n *CleanupTableLockStmt) Restore(ctx *format.RestoreCtx) error {
 
 // RepairTableStmt is a statement to repair tableInfo.
 type RepairTableStmt struct {
-	ddlNode
+	dbsNode
 	Table      *TableName
 	CreateStmt *CreateTableStmt
 }
@@ -2774,7 +2774,7 @@ func (n *AlterTableSpec) Accept(v Visitor) (Node, bool) {
 // AlterTableStmt is a statement to change the structure of a table.
 // See https://dev.mysql.com/doc/refman/5.7/en/alter-table.html
 type AlterTableStmt struct {
-	ddlNode
+	dbsNode
 
 	Table *TableName
 	Specs []*AlterTableSpec
@@ -2824,7 +2824,7 @@ func (n *AlterTableStmt) Accept(v Visitor) (Node, bool) {
 // TruncateTableStmt is a statement to empty a table completely.
 // See https://dev.mysql.com/doc/refman/5.7/en/truncate-table.html
 type TruncateTableStmt struct {
-	ddlNode
+	dbsNode
 
 	Table *TableName
 }
@@ -3338,7 +3338,7 @@ func (n *PartitionOptions) Accept(v Visitor) (Node, bool) {
 
 // RecoverTableStmt is a statement to recover dropped table.
 type RecoverTableStmt struct {
-	ddlNode
+	dbsNode
 
 	JobID  int64
 	Table  *TableName
@@ -3382,7 +3382,7 @@ func (n *RecoverTableStmt) Accept(v Visitor) (Node, bool) {
 
 // FlashBackTableStmt is a statement to restore a dropped/truncate table.
 type FlashBackTableStmt struct {
-	ddlNode
+	dbsNode
 
 	Table   *TableName
 	NewName string

@@ -381,7 +381,7 @@ func Eventf(ctx context.Context, format string, args ...interface{}) {
 	}
 }
 
-// SetTag sets tag kv-pair in current tracing span
+// SetTag sets tag ekv-pair in current tracing span
 func SetTag(ctx context.Context, key string, value interface{}) {
 	if span := opentracing.SpanFromContext(ctx); span != nil && span.Tracer() != nil {
 		span.SetTag(key, value)

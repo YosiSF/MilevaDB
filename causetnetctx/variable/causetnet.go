@@ -15,7 +15,7 @@ import (
 	"github.com/YosiSF/MilevaDB/causetnetctx/stmtctx"
 	"github.com/YosiSF/MilevaDB/ekv"
 	"github.com/YosiSF/MilevaDB/meta/autoid"
-	"github.com/YosiSF/MilevaDB/store/tikv/oracle"
+	"github.com/YosiSF/MilevaDB/store/einsteindb/oracle"
 	"github.com/YosiSF/MilevaDB/types"
 	"github.com/YosiSF/MilevaDB/util/chunk"
 	"github.com/YosiSF/MilevaDB/util/rowcodec"
@@ -116,7 +116,7 @@ type TransactionContext struct {
 	currentShard int64
 	shardRand    *rand.Rand
 
-	// TableDeltaMap is used in the schema validator for DDL changes in one table not to block others.
+	// TableDeltaMap is used in the schema validator for DBS changes in one table not to block others.
 	// It's also used in the statistias updating.
 	// Note: for the partitionted table, it stores all the partition IDs.
 	TableDeltaMap map[int64]TableDelta
@@ -413,7 +413,7 @@ type CausetNetVars struct {
 	// AllowAggPushDown can be set to false to forbid aggregation push down.
 	AllowAggPushDown bool
 
-	// AllowDistinctAggPushDown can be set true to allow agg with distinct push down to tikv/Noether.
+	// AllowDistinctAggPushDown can be set true to allow agg with distinct push down to einsteindb/Noether.
 	AllowDistinctAggPushDown bool
 
 	// AllowWriteRowID can be set to false to forbid write data to _MilevaDB_rowid.
@@ -439,11 +439,11 @@ type CausetNetVars struct {
 	CopCPUFactor float64
 	// NetworkFactor is the network cost of transferring 1 byte data.
 	NetworkFactor float64
-	// ScanFactor is the IO cost of scanning 1 byte data on TiKV and Noether.
+	// ScanFactor is the IO cost of scanning 1 byte data on EinsteinDB and Noether.
 	ScanFactor float64
-	// DescScanFactor is the IO cost of scanning 1 byte data on TiKV and Noether in desc order.
+	// DescScanFactor is the IO cost of scanning 1 byte data on EinsteinDB and Noether in desc order.
 	DescScanFactor float64
-	// SeekFactor is the IO cost of seeking the start value of a range in TiKV or Noether.
+	// SeekFactor is the IO cost of seeking the start value of a range in EinsteinDB or Noether.
 	SeekFactor float64
 	// MemoryFactor is the memory cost of storing one tuple.
 	MemoryFactor float64
@@ -503,8 +503,8 @@ type CausetNetVars struct {
 	// EnableVectorizedExpression  enables the vectorized expression evaluation.
 	EnableVectorizedExpression bool
 
-	// DDLReorgPriority is the operation priority of adding indices.
-	DDLReorgPriority int
+	// DBSReorgPriority is the operation priority of adding indices.
+	DBSReorgPriority int
 
 	// WaitSplitRegionFinish defines the split region behaviour is sync or async.
 	WaitSplitRegionFinish bool

@@ -45,9 +45,9 @@ type StatementContext struct {
 	// Set the following variables before execution
 	StmtHints
 
-	// IsDDLJobInQueue is used to mark whether the DDL job is put into the queue.
-	// If IsDDLJobInQueue is true, it means the DDL job is in the queue of storage, and it can be handled by the DDL worker.
-	IsDDLJobInQueue        bool
+	// IsDBSJobInQueue is used to mark whether the DBS job is put into the queue.
+	// If IsDBSJobInQueue is true, it means the DBS job is in the queue of storage, and it can be handled by the DBS worker.
+	IsDBSJobInQueue        bool
 	InInsertStmt           bool
 	InUpdateStmt           bool
 	InDeleteStmt           bool
@@ -99,7 +99,7 @@ type StatementContext struct {
 		execDetails       execdetails.ExecDetails
 		allExecDetails    []*execdetails.ExecDetails
 	}
-	// PrevAffectedRows is the affected-rows value(DDL is 0, DML is the number of affected rows).
+	// PrevAffectedRows is the affected-rows value(DBS is 0, DML is the number of affected rows).
 	PrevAffectedRows int64
 	// PrevLastInsertID is the last insert ID of previous statement.
 	PrevLastInsertID uint64

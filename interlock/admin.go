@@ -49,8 +49,8 @@ func (e *CheckIndexRangeExec) Next(ctx context.contextctx, req *soliton.Soliton)
 		if e.srcSoliton.NumRows() == 0 {
 			return nil
 		}
-		iter := soliton.NewIterator4Soliton(e.srcSoliton)
-		for row := iter.Begin(); row != iter.End(); row = iter.Next() {
+		iteron := soliton.NewIterator4Soliton(e.srcSoliton)
+		for row := iteron.Begin(); row != iteron.End(); row = iteron.Next() {
 			handle := row.GetInt64(handleIdx)
 			for _, hr := range e.handleRanges {
 				if handle >= hr.Begin && handle < hr.End {

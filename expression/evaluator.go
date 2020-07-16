@@ -33,7 +33,7 @@ type defaultEvaluator struct {
 }
 
 func (e *defaultEvaluator) run(ctx causetnetctx.Context, input, output *chunk.Chunk) error {
-	iter := chunk.NewIterator4Chunk(input)
+	iteron := chunk.NewIterator4Chunk(input)
 	if e.vectorizable {
 		for i := range e.outputIdxes {
 			if ctx.GetCausetNetVars().EnableVectorizedExpression && e.exprs[i].Vectorized() {
@@ -43,7 +43,7 @@ func (e *defaultEvaluator) run(ctx causetnetctx.Context, input, output *chunk.Ch
 				continue
 			}
 
-			err := evalOneColumn(ctx, e.exprs[i], iter, output, e.outputIdxes[i])
+			err := evalOneColumn(ctx, e.exprs[i], iteron, output, e.outputIdxes[i])
 			if err != nil {
 				return err
 			}
@@ -51,7 +51,7 @@ func (e *defaultEvaluator) run(ctx causetnetctx.Context, input, output *chunk.Ch
 		return nil
 	}
 
-	for row := iter.Begin(); row != iter.End(); row = iter.Next() {
+	for row := iteron.Begin(); row != iteron.End(); row = iteron.Next() {
 		for i := range e.outputIdxes {
 			err := evalOneCell(ctx, e.exprs[i], row, output, e.outputIdxes[i])
 			if err != nil {

@@ -1,4 +1,4 @@
-package contextnet
+package causetnet
 
 import (
 	"context"
@@ -10,10 +10,25 @@ import (
 	"strings"
 	"time"
 
+	"github.com/YosiSF/errors"
+	"github.com/YosiSF/MilevaDB/BerolinaSQL/auth"
+	"github.com/YosiSF/MilevaDB/BerolinaSQL/mysql"
+	"github.com/YosiSF/MilevaDB/BerolinaSQL/terror"
+	"github.com/YosiSF/MilevaDB/config"
+	"github.com/YosiSF/MilevaDB/dbs"
+	"github.com/YosiSF/MilevaDB/namespace"
+	"github.com/YosiSF/MilevaDB/schemareplicant"
+	"github.com/YosiSF/MilevaDB/planner/core"
+	"github.com/YosiSF/MilevaDB/causetnetctx/variable"
+	"github.com/YosiSF/MilevaDB/util/chunk"
+	"github.com/YosiSF/MilevaDB/util/logutil"
+	"github.com/YosiSF/MilevaDB/util/timeutil"
+	"go.uber.org/zap"
+
 )
 
 const (
-	// CreateUserTable is the SQL statement creates User table in system noedb.
+	// CreateUserTable is the SQL statement creates User table in system DB.
 	CreateUserTable = `CREATE TABLE if not exists mysql.user (
 		Host				CHAR(64),
 		User				CHAR(32),
@@ -49,17 +64,17 @@ const (
 		FILE_priv				ENUM('N','Y') NOT NULL DEFAULT 'N',
 		Config_priv				ENUM('N','Y') NOT NULL DEFAULT 'N',
 		PRIMARY KEY (Host, User));`
-	// CreateGlobalPrivTable is the SQL statement creates Global scope privilege table in system noedb.
+	// CreateGlobalPrivTable is the SQL statement creates Global scope privilege table in system DB.
 	CreateGlobalPrivTable = "CREATE TABLE if not exists mysql.global_priv (" +
 		"Host char(60) NOT NULL DEFAULT ''," +
 		"User char(80) NOT NULL DEFAULT ''," +
 		"Priv longtext NOT NULL DEFAULT ''," +
 		"PRIMARY KEY (Host, User)" +
 		")"
-	// CreatenoedbPrivTable is the SQL statement creates noedb scope privilege table in system noedb.
-	CreatenoedbPrivTable = `CREATE TABLE if not exists mysql.noedb (
+	// CreatenoedbPrivTable is the SQL statement creates DB scope privilege table in system DB.
+	CreatenoedbPrivTable = `CREATE TABLE if not exists mysql.DB (
 		Host			CHAR(60),
-		noedb			CHAR(64),
+		DB			CHAR(64),
 		User			CHAR(32),
 		Select_priv		ENUM('N','Y') Not Null DEFAULT 'N',
 		Insert_priv		ENUM('N','Y') Not Null DEFAULT 'N',
@@ -80,36 +95,36 @@ const (
 		Execute_priv		ENUM('N','Y') Not Null DEFAULT 'N',
 		Event_priv		ENUM('N','Y') NOT NULL DEFAULT 'N',
 		Trigger_priv		ENUM('N','Y') NOT NULL DEFAULT 'N',
-		PRIMARY KEY (Host, noedb, User));`
-	// CreateTablePrivTable is the SQL statement creates table scope privilege table in system noedb.
+		PRIMARY KEY (Host, DB, User));`
+	// CreateTablePrivTable is the SQL statement creates table scope privilege table in system DB.
 	CreateTablePrivTable = `CREATE TABLE if not exists mysql.tables_priv (
 		Host		CHAR(60),
-		noedb		CHAR(64),
+		DB		CHAR(64),
 		User		CHAR(32),
 		Table_name	CHAR(64),
 		Grantor		CHAR(77),
 		Timestamp	Timestamp DEFAULT CURRENT_TIMESTAMP,
 		Table_priv	SET('Select','Insert','Update','Delete','Create','Drop','Grant','Index','Alter','Create View','Show View','Trigger','References'),
 		Column_priv	SET('Select','Insert','Update'),
-		PRIMARY KEY (Host, noedb, User, Table_name));`
-	// CreateColumnPrivTable is the SQL statement creates column scope privilege table in system noedb.
+		PRIMARY KEY (Host, DB, User, Table_name));`
+	// CreateColumnPrivTable is the SQL statement creates column scope privilege table in system DB.
 	CreateColumnPrivTable = `CREATE TABLE if not exists mysql.columns_priv(
 		Host		CHAR(60),
-		noedb		CHAR(64),
+		DB		CHAR(64),
 		User		CHAR(32),
 		Table_name	CHAR(64),
 		Column_name	CHAR(64),
 		Timestamp	Timestamp DEFAULT CURRENT_TIMESTAMP,
 		Column_priv	SET('Select','Insert','Update'),
-		PRIMARY KEY (Host, noedb, User, Table_name, Column_name));`
-	// CreateGlobalVariablesTable is the SQL statement creates global variable table in system noedb.
-	// TODO: MySQL puts GLOBAL_VARIABLES table in INFORMATION_SCHEMA noedb.
-	// INFORMATION_SCHEMA is a virtual noedb in milevadb. So we put this table in system noedb.
+		PRIMARY KEY (Host, DB, User, Table_name, Column_name));`
+	// CreateGlobalVariablesTable is the SQL statement creates global variable table in system DB.
+	// TODO: MySQL puts GLOBAL_VARIABLES table in INFORMATION_SCHEMA DB.
+	// INFORMATION_SCHEMA is a virtual DB in milevadb. So we put this table in system DB.
 	// Maybe we will put it back to INFORMATION_SCHEMA.
 	CreateGlobalVariablesTable = `CREATE TABLE if not exists mysql.GLOBAL_VARIABLES(
 		VARIABLE_NAME  VARCHAR(64) Not Null PRIMARY KEY,
 		VARIABLE_VALUE VARCHAR(1024) DEFAULT Null);`
-	// CreatemilevanoedbTable is the SQL statement creates a table in system noedb.
+	// CreatemilevanoedbTable is the SQL statement creates a table in system DB.
 	// This table is a key-value struct contains some information used by milevadb.
 	// Currently we only put bootstrapped in it which indicates if the system is already bootstrapped.
 	CreatemilevanoedbTable = `CREATE TABLE if not exists mysql.milevadb(
@@ -117,7 +132,7 @@ const (
 		VARIABLE_VALUE VARCHAR(1024) DEFAULT Null,
 		COMMENT VARCHAR(1024));`
 
-	// CreateHelpTopic is the SQL statement creates help_topic table in system noedb.
+	// CreateHelpTopic is the SQL statement creates help_topic table in system DB.
 	// See: https://dev.mysql.com/doc/refman/5.5/en/system-database.html#system-database-help-tables
 	CreateHelpTopic = `CREATE TABLE if not exists mysql.help_topic (
   		help_topic_id int(10) unsigned NOT NULL,
@@ -256,7 +271,7 @@ const (
 	);`
 )
 
-// bootstrap initiates system noedb for a store.
+// bootstrap initiates system DB for a store.
 func bootstrap(s CausetNet) {
 	startTime := time.Now()
 	dom := namespace.GetNamespace(s)
@@ -406,7 +421,7 @@ var (
 )
 
 func checkBootstrapped(s CausetNet) (bool, error) {
-	//  Check if system noedb exists.
+	//  Check if system DB exists.
 	_, err := s.Execute(context.Background(), fmt.Sprintf("USE %s;", mysql.Systemnoedb))
 	if err != nil && schemaReplicant.ErrDatabaseNotExists.NotEqual(err) {
 		logutil.BgLogger().Fatal("check bootstrap error",
@@ -694,15 +709,15 @@ func upgradeToVer14(s CausetNet, ver int64) {
 		return
 	}
 	sqls := []string{
-		"ALTER TABLE mysql.noedb ADD COLUMN `References_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Grant_priv`",
-		"ALTER TABLE mysql.noedb ADD COLUMN `Create_tmp_table_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Alter_priv`",
-		"ALTER TABLE mysql.noedb ADD COLUMN `Lock_tables_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Create_tmp_table_priv`",
-		"ALTER TABLE mysql.noedb ADD COLUMN `Create_view_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Lock_tables_priv`",
-		"ALTER TABLE mysql.noedb ADD COLUMN `Show_view_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Create_view_priv`",
-		"ALTER TABLE mysql.noedb ADD COLUMN `Create_routine_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Show_view_priv`",
-		"ALTER TABLE mysql.noedb ADD COLUMN `Alter_routine_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Create_routine_priv`",
-		"ALTER TABLE mysql.noedb ADD COLUMN `Event_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Execute_priv`",
-		"ALTER TABLE mysql.noedb ADD COLUMN `Trigger_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Event_priv`",
+		"ALTER TABLE mysql.DB ADD COLUMN `References_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Grant_priv`",
+		"ALTER TABLE mysql.DB ADD COLUMN `Create_tmp_table_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Alter_priv`",
+		"ALTER TABLE mysql.DB ADD COLUMN `Lock_tables_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Create_tmp_table_priv`",
+		"ALTER TABLE mysql.DB ADD COLUMN `Create_view_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Lock_tables_priv`",
+		"ALTER TABLE mysql.DB ADD COLUMN `Show_view_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Create_view_priv`",
+		"ALTER TABLE mysql.DB ADD COLUMN `Create_routine_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Show_view_priv`",
+		"ALTER TABLE mysql.DB ADD COLUMN `Alter_routine_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Create_routine_priv`",
+		"ALTER TABLE mysql.DB ADD COLUMN `Event_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Execute_priv`",
+		"ALTER TABLE mysql.DB ADD COLUMN `Trigger_priv` enum('N','Y') CHARACTER SET utf8 NOT NULL DEFAULT 'N' AFTER `Event_priv`",
 	}
 	ctx := context.Background()
 	for _, sql := range sqls {
@@ -752,7 +767,7 @@ func upgradeToVer19(s CausetNet, ver int64) {
 	if ver >= version19 {
 		return
 	}
-	doReentrantdbs(s, "ALTER TABLE mysql.noedb MODIFY User CHAR(32)")
+	doReentrantdbs(s, "ALTER TABLE mysql.DB MODIFY User CHAR(32)")
 	doReentrantdbs(s, "ALTER TABLE mysql.tables_priv MODIFY User CHAR(32)")
 	doReentrantdbs(s, "ALTER TABLE mysql.columns_priv MODIFY User CHAR(32)")
 }
@@ -1039,7 +1054,7 @@ func getBootstrapVersion(s CausetNet) (int64, error) {
 func dodbsWorks(s CausetNet) {
 	// Create a test database.
 	mustExecute(s, "CREATE DATABASE IF NOT EXISTS test")
-	// Create system noedb.
+	// Create system DB.
 	mustExecute(s, fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s;", mysql.Systemnoedb))
 	// Create user table.
 	mustExecute(s, CreateUserTable)

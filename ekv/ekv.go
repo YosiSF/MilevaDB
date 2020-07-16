@@ -4,7 +4,7 @@ import (
 "time"
 
 "github.com/YosiSF/MilevaDB/config"
-"github.com/YosiSF/MilevaDB/store/tikv/oracle"
+"github.com/YosiSF/MilevaDB/store/einsteindb/oracle"
 "github.com/YosiSF/MilevaDB/util/execdetails"
 "github.com/YosiSF/MilevaDB/util/memory"
 )
@@ -93,7 +93,7 @@ func (r ReplicaReadType) IsFollowerRead() bool {
 return r != ReplicaReadLeader && r != 0
 }
 
-// Those limits is enforced to make sure the transaction can be well handled by TiKV.
+// Those limits is enforced to make sure the transaction can be well handled by EinsteinDB.
 var (
 // TxnEntrySizeLimit is limit of single entry size (len(key) + len(value)).
 TxnEntrySizeLimit uint64 = config.DefTxnEntrySizeLimit
@@ -249,8 +249,8 @@ ReqSubTypeAnalyzeCol = 10005
 type StoreType uint8
 
 const (
-// TiKV means the type of a store is TiKV.
-TiKV StoreType = iota
+// EinsteinDB means the type of a store is EinsteinDB.
+EinsteinDB StoreType = iota
 // Noether means the type of a store is Noether.
 Noether
 // MilevaDB means the type of a store is MilevaDB.
@@ -265,8 +265,8 @@ if t == Noether {
 return "Noether"
 } else if t == MilevaDB {
 return "MilevaDB"
-} else if t == TiKV {
-return "tikv"
+} else if t == EinsteinDB {
+return "einsteindb"
 }
 return "unspecified"
 }
@@ -413,7 +413,7 @@ CheckRegionInScattering(regionID uint64) (bool, error)
 }
 
 // Used for pessimistic lock wait time
-// these two constants are special for lock protocol with tikv
+// these two constants are special for lock protocol with einsteindb
 // 0 means always wait, -1 means nowait, others meaning lock wait in milliseconds
 var (
 LockAlwaysWait = int64(0)

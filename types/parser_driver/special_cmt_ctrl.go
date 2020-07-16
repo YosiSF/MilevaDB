@@ -22,7 +22,7 @@ import (
 //    Now, the BerolinaSQL treats `/*T![my_fea] what_ever */` and `what_ever` equivalent.
 //    In other word, the BerolinaSQL in old-version MilevaDB will ignores these comments.
 // 3. [optional] Add a pattern into FeatureIDPatterns.
-//    This is only required if the new feature is contained in DDL,
+//    This is only required if the new feature is contained in DBS,
 //    and we want to comment out this part of SQL in binlog.
 func init() {
 	BerolinaSQL.SpecialCommentsController.Register(string(FeatureIDAutoRandom))
@@ -34,7 +34,7 @@ func init() {
 const SpecialCommentVersionPrefix = `/*T!`
 
 // BuildSpecialCommentPrefix returns the prefix of `featureID` special comment.
-// For some special feature in MilevaDB, we will refine ddl query with special comment,
+// For some special feature in MilevaDB, we will refine dbs query with special comment,
 // which may be useful when
 // A: the downstream is directly MySQL instance (treat it as comment for compatibility).
 // B: the downstream is lower version MilevaDB (ignore the unknown feature comment).

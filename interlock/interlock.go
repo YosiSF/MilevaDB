@@ -74,9 +74,9 @@ var (
 	_ Interlock = &SelectionExec{}
 	_ Interlock = &SelectLockExec{}
 	_ Interlock = &ShowNextRowIDExec{}
-	_ Interlock = &ShowDDLExec{}
-	_ Interlock = &ShowDDLJobsExec{}
-	_ Interlock = &ShowDDLJobQueriesExec{}
+	_ Interlock = &ShowDBSExec{}
+	_ Interlock = &ShowDBSJobsExec{}
+	_ Interlock = &ShowDBSJobQueriesExec{}
 	_ Interlock = &SortExec{}
 	_ Interlock = &StreamAggExec{}
 	_ Interlock = &TableDualExec{}
@@ -276,8 +276,8 @@ func Next(ctx context.Context, e Interlock, req *chunk.Chunk) error {
 	return err
 }
 
-// CancelDDLJobsExec represents a cancel DDL jobs Interlock.
-type CancelDDLJobsExec struct {
+// CancelDBSJobsExec represents a cancel DBS jobs Interlock.
+type CancelDBSJobsExec struct {
 	baseInterlock
 
 	cursor int
@@ -286,7 +286,7 @@ type CancelDDLJobsExec struct {
 }
 
 // Next implements the Interlock Next interface.
-func (e *CancelDDLJobsExec) Next(ctx context.Context, req *chunk.Chunk) error {
+func (e *CancelDBSJobsExec) Next(ctx context.Context, req *chunk.Chunk) error {
 	req.GrowAndReset(e.maxChunkSize)
 	if e.cursor >= len(e.jobIDs) {
 		return nil
@@ -361,36 +361,36 @@ func (e *ShowNextRowIDExec) Next(ctx context.Context, req *chunk.Chunk) error {
 	return nil
 }
 
-// ShowDDLExec represents a show DDL Interlock.
-type ShowDDLExec struct {
+// ShowDBSExec represents a show DBS Interlock.
+type ShowDBSExec struct {
 	baseInterlock
 
-	ddlOwnerID string
+	dbsOwnerID string
 	selfID     string
-	ddlInfo    *admin.DDLInfo
+	dbsInfo    *admin.DBSInfo
 	done       bool
 }
 
 // Next implements the Interlock Next interface.
-func (e *ShowDDLExec) Next(ctx context.Context, req *chunk.Chunk) error {
+func (e *ShowDBSExec) Next(ctx context.Context, req *chunk.Chunk) error {
 	req.Reset()
 	if e.done {
 		return nil
 	}
 
-	ddlJobs := ""
+	dbsJobs := ""
 	query := ""
-	l := len(e.ddlInfo.Jobs)
-	for i, job := range e.ddlInfo.Jobs {
-		ddlJobs += job.String()
+	l := len(e.dbsInfo.Jobs)
+	for i, job := range e.dbsInfo.Jobs {
+		dbsJobs += job.String()
 		query += job.Query
 		if i != l-1 {
-			ddlJobs += "\n"
+			dbsJobs += "\n"
 			query += "\n"
 		}
 	}
 
-	serverInfo, err := infosync.GetServerInfoByID(ctx, e.ddlOwnerID)
+	serverInfo, err := infosync.GetServerInfoByID(ctx, e.dbsOwnerID)
 	if err != nil {
 		return err
 	}
@@ -398,10 +398,10 @@ func (e *ShowDDLExec) Next(ctx context.Context, req *chunk.Chunk) error {
 	serverAddress := serverInfo.IP + ":" +
 		strconv.FormatUint(uint64(serverInfo.Port), 10)
 
-	req.AppendInt64(0, e.ddlInfo.SchemaVer)
-	req.AppendString(1, e.ddlOwnerID)
+	req.AppendInt64(0, e.dbsInfo.SchemaVer)
+	req.AppendString(1, e.dbsOwnerID)
 	req.AppendString(2, serverAddress)
-	req.AppendString(3, ddlJobs)
+	req.AppendString(3, dbsJobs)
 	req.AppendString(4, e.selfID)
 	req.AppendString(5, query)
 
@@ -409,18 +409,18 @@ func (e *ShowDDLExec) Next(ctx context.Context, req *chunk.Chunk) error {
 	return nil
 }
 
-// ShowDDLJobsExec represent a show DDL jobs Interlock.
-type ShowDDLJobsExec struct {
+// ShowDBSJobsExec represent a show DBS jobs Interlock.
+type ShowDBSJobsExec struct {
 	baseInterlock
-	DDLJobRetriever
+	DBSJobRetriever
 
 	jobNumber int
 	is        schemareplicant.schemareplicant
 	done      bool
 }
 
-// DDLJobRetriever retrieve the DDLJobs.
-type DDLJobRetriever struct {
+// DBSJobRetriever retrieve the DBSJobs.
+type DBSJobRetriever struct {
 	runningJobs    []*serial.Job
 	historyJobIter *meta.LastJobIterator
 	cursor         int
@@ -429,13 +429,13 @@ type DDLJobRetriever struct {
 	cacheJobs      []*serial.Job
 }
 
-func (e *DDLJobRetriever) initial(txn ekv.Transaction) error {
-	jobs, err := admin.GetDDLJobs(txn)
+func (e *DBSJobRetriever) initial(txn ekv.Transaction) error {
+	jobs, err := admin.GetDBSJobs(txn)
 	if err != nil {
 		return err
 	}
 	m := meta.NewMeta(txn)
-	e.historyJobIter, err = m.GetLastHistoryDDLJobsIterator()
+	e.historyJobIter, err = m.GetLastHistoryDBSJobsIterator()
 	if err != nil {
 		return err
 	}
@@ -444,7 +444,7 @@ func (e *DDLJobRetriever) initial(txn ekv.Transaction) error {
 	return nil
 }
 
-func (e *DDLJobRetriever) appendJobToChunk(req *chunk.Chunk, job *serial.Job, checker privilege.Manager) {
+func (e *DBSJobRetriever) appendJobToChunk(req *chunk.Chunk, job *serial.Job, checker privilege.Manager) {
 	schemaName := job.SchemaName
 	tableName := ""
 	finishTS := uint64(0)
@@ -457,7 +457,7 @@ func (e *DDLJobRetriever) appendJobToChunk(req *chunk.Chunk, job *serial.Job, ch
 			schemaName = job.BinlogInfo.DBInfo.Name.L
 		}
 	}
-	// For compatibility, the old version of DDL Job wasn't store the schema name and table name.
+	// For compatibility, the old version of DBS Job wasn't store the schema name and table name.
 	if len(schemaName) == 0 {
 		schemaName = getSchemaName(e.is, job.SchemaID)
 	}
@@ -497,10 +497,10 @@ func ts2Time(timestamp uint64) types.Time {
 	return types.NewTime(types.FromGoTime(t), mysql.TypeDatetime, types.DefaultFsp)
 }
 
-// ShowDDLJobQueriesExec represents a show DDL job queries Interlock.
-// The jobs id that is given by 'admin show ddl job queries' statement,
+// ShowDBSJobQueriesExec represents a show DBS job queries Interlock.
+// The jobs id that is given by 'admin show dbs job queries' statement,
 // only be searched in the latest 10 history jobs
-type ShowDDLJobQueriesExec struct {
+type ShowDBSJobQueriesExec struct {
 	baseInterlock
 
 	cursor int
@@ -509,7 +509,7 @@ type ShowDDLJobQueriesExec struct {
 }
 
 // Open implements the Interlock Open interface.
-func (e *ShowDDLJobQueriesExec) Open(ctx context.Context) error {
+func (e *ShowDBSJobQueriesExec) Open(ctx context.Context) error {
 	if err := e.baseInterlock.Open(ctx); err != nil {
 		return err
 	}
@@ -517,11 +517,11 @@ func (e *ShowDDLJobQueriesExec) Open(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	jobs, err := admin.GetDDLJobs(txn)
+	jobs, err := admin.GetDBSJobs(txn)
 	if err != nil {
 		return err
 	}
-	historyJobs, err := admin.GetHistoryDDLJobs(txn, admin.DefNumHistoryJobs)
+	historyJobs, err := admin.GetHistoryDBSJobs(txn, admin.DefNumHistoryJobs)
 	if err != nil {
 		return err
 	}
@@ -533,7 +533,7 @@ func (e *ShowDDLJobQueriesExec) Open(ctx context.Context) error {
 }
 
 // Next implements the Interlock Next interface.
-func (e *ShowDDLJobQueriesExec) Next(ctx context.Context, req *chunk.Chunk) error {
+func (e *ShowDBSJobQueriesExec) Next(ctx context.Context, req *chunk.Chunk) error {
 	req.GrowAndReset(e.maxChunkSize)
 	if e.cursor >= len(e.jobs) {
 		return nil
@@ -554,7 +554,7 @@ func (e *ShowDDLJobQueriesExec) Next(ctx context.Context, req *chunk.Chunk) erro
 }
 
 // Open implements the Interlock Open interface.
-func (e *ShowDDLJobsExec) Open(ctx context.Context) error {
+func (e *ShowDBSJobsExec) Open(ctx context.Context) error {
 	if err := e.baseInterlock.Open(ctx); err != nil {
 		return err
 	}
@@ -562,11 +562,11 @@ func (e *ShowDDLJobsExec) Open(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	e.DDLJobRetriever.is = e.is
+	e.DBSJobRetriever.is = e.is
 	if e.jobNumber == 0 {
 		e.jobNumber = admin.DefNumHistoryJobs
 	}
-	err = e.DDLJobRetriever.initial(txn)
+	err = e.DBSJobRetriever.initial(txn)
 	if err != nil {
 		return err
 	}
@@ -574,14 +574,14 @@ func (e *ShowDDLJobsExec) Open(ctx context.Context) error {
 }
 
 // Next implements the Interlock Next interface.
-func (e *ShowDDLJobsExec) Next(ctx context.Context, req *chunk.Chunk) error {
+func (e *ShowDBSJobsExec) Next(ctx context.Context, req *chunk.Chunk) error {
 	req.GrowAndReset(e.maxChunkSize)
 	if (e.cursor - len(e.runningJobs)) >= e.jobNumber {
 		return nil
 	}
 	count := 0
 
-	// Append running ddl jobs.
+	// Append running dbs jobs.
 	if e.cursor < len(e.runningJobs) {
 		numCurBatch := mathutil.Min(req.Capacity(), len(e.runningJobs)-e.cursor)
 		for i := e.cursor; i < e.cursor+numCurBatch; i++ {
@@ -591,7 +591,7 @@ func (e *ShowDDLJobsExec) Next(ctx context.Context, req *chunk.Chunk) error {
 		count += numCurBatch
 	}
 
-	// Append history ddl jobs.
+	// Append history dbs jobs.
 	var err error
 	if count < req.Capacity() {
 		num := req.Capacity() - count
@@ -919,8 +919,8 @@ func (e *SelectLockExec) Next(ctx context.Context, req *chunk.Chunk) error {
 	}
 
 	if req.NumRows() > 0 {
-		iter := chunk.NewIterator4Chunk(req)
-		for row := iter.Begin(); row != iter.End(); row = iter.Next() {
+		iteron := chunk.NewIterator4Chunk(req)
+		for row := iteron.Begin(); row != iteron.End(); row = iteron.Next() {
 			for id, cols := range e.tblID2Handle {
 				physicalID := id
 				if pt, ok := e.tblID2Table[id]; ok {
@@ -1572,7 +1572,7 @@ func ResetContextOfStmt(ctx causetnetctx.Context, s ast.StmtNode) (err error) {
 	// TODO: Many same bool variables here.
 	// We should set only two variables (
 	// IgnoreErr and StrictSQLMode) to avoid setting the same bool variables and
-	// pushing them down to TiKV as flags.
+	// pushing them down to EinsteinDB as flags.
 	switch stmt := s.(type) {
 	case *ast.UpdateStmt:
 		ResetUpdateStmtCtx(sc, stmt, vars)
@@ -1686,9 +1686,9 @@ func ResetUpdateStmtCtx(sc *stmtctx.StatementContext, stmt *ast.UpdateStmt, vars
 func FillVirtualColumnValue(virtualRetTypes []*types.FieldType, virtualColumnIndex []int,
 	schema *expression.Schema, columns []*serial.ColumnInfo, sctx causetnetctx.Context, req *chunk.Chunk) error {
 	virCols := chunk.NewChunkWithCapacity(virtualRetTypes, req.Capacity())
-	iter := chunk.NewIterator4Chunk(req)
+	iteron := chunk.NewIterator4Chunk(req)
 	for i, idx := range virtualColumnIndex {
-		for row := iter.Begin(); row != iter.End(); row = iter.Next() {
+		for row := iteron.Begin(); row != iteron.End(); row = iteron.Next() {
 			datum, err := schema.Columns[idx].EvalVirtualColumn(row)
 			if err != nil {
 				return err

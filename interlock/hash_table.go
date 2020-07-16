@@ -38,7 +38,7 @@ const (
 	estCountDivisor = 8
 )
 
-// hashcontextctx keeps the needed hash context of a noedb table in hash join.
+// hashcontextctx keeps the needed hash context of a DB table in hash join.
 type hashcontextctx struct {
 	allTypes  []*types.FieldType
 	keyColIdx []int

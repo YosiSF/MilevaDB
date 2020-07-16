@@ -446,11 +446,11 @@ func (e *HashJoinExec) joinMatchedProbeSideRow2ChunkForOuterHashJoin(workerID ui
 		return true, joinResult
 	}
 
-	iter := chunk.NewIterator4Slice(buildSideRows)
+	iteron := chunk.NewIterator4Slice(buildSideRows)
 	var outerMatchStatus []outerRowStatusFlag
 	rowIdx := 0
-	for iter.Begin(); iter.Current() != iter.End(); {
-		outerMatchStatus, err = e.joiners[workerID].tryToMatchOuters(iter, probeSideRow, joinResult.chk, outerMatchStatus)
+	for iteron.Begin(); iteron.Current() != iteron.End(); {
+		outerMatchStatus, err = e.joiners[workerID].tryToMatchOuters(iteron, probeSideRow, joinResult.chk, outerMatchStatus)
 		if err != nil {
 			joinResult.err = err
 			return false, joinResult
@@ -482,10 +482,10 @@ func (e *HashJoinExec) joinMatchedProbeSideRow2Chunk(workerID uint, probeKey uin
 		e.joiners[workerID].onMissMatch(false, probeSideRow, joinResult.chk)
 		return true, joinResult
 	}
-	iter := chunk.NewIterator4Slice(buildSideRows)
+	iteron := chunk.NewIterator4Slice(buildSideRows)
 	hasMatch, hasNull := false, false
-	for iter.Begin(); iter.Current() != iter.End(); {
-		matched, isNull, err := e.joiners[workerID].tryToMatchInners(probeSideRow, iter, joinResult.chk)
+	for iteron.Begin(); iteron.Current() != iteron.End(); {
+		matched, isNull, err := e.joiners[workerID].tryToMatchInners(probeSideRow, iteron, joinResult.chk)
 		if err != nil {
 			joinResult.err = err
 			return false, joinResult
