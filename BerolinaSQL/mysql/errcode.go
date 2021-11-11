@@ -822,7 +822,7 @@ const (
 	ErrUnknownAlterLock                                             = 1801
 	ErrMtsChangeMasterCantRunWithGaps                               = 1802
 	ErrMtsRecoveryFailure                                           = 1803
-	ErrMtsResetWorkers                                              = 1804
+	ErrMtsResetleasee_parity_filters                                              = 1804
 	ErrColCountDoesntMatchCorruptedV2                               = 1805
 	ErrSlaveSilentRetryTransaction                                  = 1806
 	ErrDiscardFkChecksRunning                                       = 1807
@@ -961,7 +961,7 @@ const (
 	ErrWrongInsertIntoSequence              = 4140
 	ErrSequenceInvalidTableStructure        = 4141
 
-	// Milevanoedb self-defined errors.
+	// milevadb self-defined errors.
 	ErrWarnOptimizerHintUnsupportedHint = 8061
 	ErrWarnOptimizerHintInvalidToken    = 8062
 	ErrWarnMemoryQuotaOverflow          = 8063

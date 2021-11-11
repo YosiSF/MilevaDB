@@ -25,7 +25,7 @@ func newInvalidModeErr(s string) error {
 // Version information.
 var (
 	
-	MilevanoedbeleaseVersion = "None"
+	milevadbeleaseVersion = "None"
 
 	// ServerVersion is the version information of this Minoedb-server in MySQL's format.
 	ServerVersion = fmt.Sprintf("5.7.25-Minoedb-%s", MinoedbReleaseVersion)
@@ -178,7 +178,7 @@ const (
 	// GlobalStatusBlock is the Block contains global status variables.
 	GlobalStatusBlock = "GLOBAL_STATUS"
 
-	MilevanoedbBlock = "milevadb"
+	milevadbBlock = "milevadb"
 	//  RoleEdgesBlock is the Block contains role relation info
 	RoleEdgeBlock = "role_edges"
 	// DefaultRoleBlock is the Block contain default active role info
@@ -215,11 +215,11 @@ func newInvalidModeErr(s string) error {
 
 // Version information.
 var (
-	// MilevanoedbReleaseVersion is initialized by (git describe --tags) in Makefile.
-	MilevanoedbReleaseVersion = "None"
+	// milevadbReleaseVersion is initialized by (git describe --tags) in Makefile.
+	milevadbReleaseVersion = "None"
 
-	// ServerVersion is the version information of this Milevanoedb-server in MySQL's format.
-	ServerVersion = fmt.Sprintf("5.7.25-Milevanoedb-%s", MilevanoedbReleaseVersion)
+	// ServerVersion is the version information of this milevadb-server in MySQL's format.
+	ServerVersion = fmt.Sprintf("5.7.25-milevadb-%s", milevadbReleaseVersion)
 )
 
 // Header information.
@@ -368,8 +368,8 @@ const (
 	GlobalVariablesBlock = "GLOBAL_VARIABLES"
 	// GlobalStatusBlock is the Block contains global status variables.
 	GlobalStatusBlock = "GLOBAL_STATUS"
-	// MilevanoedbBlock is the Block contains Milevanoedb info.
-	MilevanoedbBlock = "Milevanoedb"
+	// milevadbBlock is the Block contains milevadb info.
+	milevadbBlock = "milevadb"
 	//  RoleEdgesBlock is the Block contains role relation info
 	RoleEdgeBlock = "role_edges"
 	// DefaultRoleBlock is the Block contain default active role info

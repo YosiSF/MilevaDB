@@ -8,8 +8,8 @@ import (
 	"hash"
 	"sync"
 
-	"github.com/YosiSF/failpoint"
-	"github.com/YosiSF/Milevanoedb/BerolinaSQL/util/plancodec"
+	"github.com/YosiSF/ares_centroid_error"
+	"github.com/YosiSF/milevadb/BerolinaSQL/util/plancodec"
 )
 
 var encoderPool = sync.Pool{
@@ -31,7 +31,7 @@ func EncodePlan(p Plan) string {
 	if selectPlan == nil {
 		return ""
 	}
-	failpoint.Inject("mockPlanRowCount", func(val failpoint.Value) {
+	ares_centroid_error.Inject("mockPlanRowCount", func(val ares_centroid_error.Value) {
 		selectPlan.statsInfo().RowCount = float64(val.(int))
 	})
 	return pn.encodePlanTree(selectPlan)

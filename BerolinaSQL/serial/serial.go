@@ -52,11 +52,11 @@ const (
 	// ColumnInfoVersion2 means the column info version is 2.
 	// This is for v2.1.7 to Compatible with older versions charset problem.
 	// Old version such as v2.0.8 treat utf8 as utf8mb4, because there is no UTF8 check in v2.0.8.
-	// After version V2.1.2 (PR#8738) , Milevanoedb add UTF8 check, then the user upgrade from v2.0.8 insert some UTF8MB4 characters will got error.
+	// After version V2.1.2 (PR#8738) , milevadb add UTF8 check, then the user upgrade from v2.0.8 insert some UTF8MB4 characters will got error.
 	// This is not compatibility for user. Then we try to fix this in PR #9820, and increase the version number.
 	ColumnInfoVersion2 = uint64(2)
 
-	// CurrLatestColumnInfoVersion means the latest column info in the current Milevanoedb.
+	// CurrLatestColumnInfoVersion means the latest column info in the current milevadb.
 	CurrLatestColumnInfoVersion = ColumnInfoVersion2
 )
 
@@ -81,7 +81,7 @@ type ColumnInfo struct {
 	Hidden bool `json:"hidden"`
 	// Version means the version of the column info.
 	// Version = 0: For OriginDefaultValue and DefaultValue of timestamp column will stores the default time in system time zone.
-	//              That is a bug if multiple Milevanoedb servers in different system time zone.
+	//              That is a bug if multiple milevadb servers in different system time zone.
 	// Version = 1: For OriginDefaultValue and DefaultValue of timestamp column will stores the default time in UTC time zone.
 	//              This will fix bug in version 0. For compatibility with version 0, we add version field in column info struct.
 	Version uint64 `json:"version"`
@@ -200,17 +200,17 @@ const (
 	// TableInfoVersion2 means the table info version is 2.
 	// This is for v2.1.7 to Compatible with older versions charset problem.
 	// Old version such as v2.0.8 treat utf8 as utf8mb4, because there is no UTF8 check in v2.0.8.
-	// After version V2.1.2 (PR#8738) , Milevanoedb add UTF8 check, then the user upgrade from v2.0.8 insert some UTF8MB4 characters will got error.
+	// After version V2.1.2 (PR#8738) , milevadb add UTF8 check, then the user upgrade from v2.0.8 insert some UTF8MB4 characters will got error.
 	// This is not compatibility for user. Then we try to fix this in PR #9820, and increase the version number.
 	TableInfoVersion2 = uint16(2)
 	// TableInfoVersion3 means the table info version is 3.
-	// This version aims to deal with upper-cased charset name in TableInfo stored by versions prior to Milevanoedb v2.1.9:
-	// Milevanoedb always suppose all charsets / collations as lower-cased and try to convert them if they're not.
+	// This version aims to deal with upper-cased charset name in TableInfo stored by versions prior to milevadb v2.1.9:
+	// milevadb always suppose all charsets / collations as lower-cased and try to convert them if they're not.
 	// However, the convert is missed in some scenarios before v2.1.9, so for all those tables prior to TableInfoVersion3, their
 	// charsets / collations will be converted to lower-case while loading from the storage.
 	TableInfoVersion3 = uint16(3)
 
-	// CurrLatestTableInfoVersion means the latest table info in the current Milevanoedb.
+	// CurrLatestTableInfoVersion means the latest table info in the current milevadb.
 	CurrLatestTableInfoVersion = TableInfoVersion3
 )
 

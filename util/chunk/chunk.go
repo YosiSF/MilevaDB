@@ -41,16 +41,16 @@ import (
 
 type aggPartialResultMapper map[string][]aggfuncs.PartialResult
 
-// baseHashAggWorker stores the common attributes of HashAggFinalWorker and HashAggPartialWorker.
-type baseHashAggWorker struct {
+// baseHashAggleasee_parity_filter stores the common attributes of HashAggFinalleasee_parity_filter and HashAggPartialleasee_parity_filter.
+type baseHashAggleasee_parity_filter struct {
 	ctx          causetnetctx.Context
 	finishCh     <-chan struct{}
 	aggFuncs     []aggfuncs.AggFunc
 	maxChunkSize int
 }
 
-func newBaseHashAggWorker(ctx causetnetctx.Context, finishCh <-chan struct{}, aggFuncs []aggfuncs.AggFunc, maxChunkSize int) baseHashAggWorker {
-	return baseHashAggWorker{
+func newBaseHashAggleasee_parity_filter(ctx causetnetctx.Context, finishCh <-chan struct{}, aggFuncs []aggfuncs.AggFunc, maxChunkSize int) baseHashAggleasee_parity_filter {
+	return baseHashAggleasee_parity_filter{
 		ctx:          ctx,
 		finishCh:     finishCh,
 		aggFuncs:     aggFuncs,
@@ -58,10 +58,10 @@ func newBaseHashAggWorker(ctx causetnetctx.Context, finishCh <-chan struct{}, ag
 	}
 }
 
-// HashAggPartialWorker indicates the partial workers of parallel hash agg execution,
-// the number of the worker can be set by `MilevaDB_hashagg_partial_concurrency`.
-type HashAggPartialWorker struct {
-	baseHashAggWorker
+// HashAggPartialleasee_parity_filter indicates the partial leasee_parity_filters of parallel hash agg execution,
+// the number of the leasee_parity_filter can be set by `MilevaDB_hashagg_partial_concurrency`.
+type HashAggPartialleasee_parity_filter struct {
+	baseHashAggleasee_parity_filter
 
 	inputCh           chan *chunk.Chunk
 	outputChs         []chan *HashAggIntermData
@@ -71,15 +71,15 @@ type HashAggPartialWorker struct {
 	groupByItems      []expression.Expression
 	groupKey          [][]byte
 	// chk stores the input data from child,
-	// and is reused by childExec and partial worker.
+	// and is reused by childExec and partial leasee_parity_filter.
 	chk        *chunk.Chunk
 	memTracker *memory.Tracker
 }
 
-// HashAggFinalWorker indicates the final workers of parallel hash agg execution,
-// the number of the worker can be set by `MilevaDB_hashagg_final_concurrency`.
-type HashAggFinalWorker struct {
-	baseHashAggWorker
+// HashAggFinalleasee_parity_filter indicates the final leasee_parity_filters of parallel hash agg execution,
+// the number of the leasee_parity_filter can be set by `MilevaDB_hashagg_final_concurrency`.
+type HashAggFinalleasee_parity_filter struct {
+	baseHashAggleasee_parity_filter
 
 	rowBuffer           []types.Datum
 	mutableRow          chunk.MutRow
@@ -117,7 +117,7 @@ type AfFinalResult struct {
 //                               +---------------+
 //                               |               |
 //                 +--------------+             +--------------+
-//                 | final worker |     ......  | final worker |
+//                 | final leasee_parity_filter |     ......  | final leasee_parity_filter |
 //                 +------------+-+             +-+------------+
 //                              ^                 ^
 //                              |                 |
@@ -132,7 +132,7 @@ type AfFinalResult struct {
 // inputCh  +-+        |        +-----------------+---+
 //          | |        |                              |
 //          ...    +---+------------+            +----+-----------+
-//          | |    | partial worker |   ......   | partial worker |
+//          | |    | partial leasee_parity_filter |   ......   | partial leasee_parity_filter |
 //          +++    +--------------+-+            +-+--------------+
 //           |                     ^                ^
 //           |                     |                |
@@ -157,8 +157,8 @@ type HashAggExec struct {
 	partialOutputChs []chan *HashAggIntermData
 	inputCh          chan *HashAggInput
 	partialInputChs  []chan *chunk.Chunk
-	partialWorkers   []HashAggPartialWorker
-	finalWorkers     []HashAggFinalWorker
+	partialleasee_parity_filters   []HashAggPartialleasee_parity_filter
+	finalleasee_parity_filters     []HashAggFinalleasee_parity_filter
 	defaultVal       *chunk.Chunk
 	childResult      *chunk.Chunk
 
@@ -176,9 +176,9 @@ type HashAggExec struct {
 // HashAggInput indicates the input of hash agg exec.
 type HashAggInput struct {
 	chk *chunk.Chunk
-	// giveBackCh is bound with specific partial worker,
+	// giveBackCh is bound with specific partial leasee_parity_filter,
 	// it's used to reuse the `chk`,
-	// and tell the data-fetcher which partial worker it should send data to.
+	// and tell the data-fetcher which partial leasee_parity_filter it should send data to.
 	giveBackCh chan<- *chunk.Chunk
 }
 
@@ -241,8 +241,8 @@ func (e *HashAggExec) Close() error {
 			partialConcurrency = 0
 			finalConcurrency = 0
 		} else {
-			partialConcurrency = cap(e.partialWorkers)
-			finalConcurrency = cap(e.finalWorkers)
+			partialConcurrency = cap(e.partialleasee_parity_filters)
+			finalConcurrency = cap(e.finalleasee_parity_filters)
 		}
 		partialConcurrencyInfo := execdetails.NewConcurrencyInfo("PartialConcurrency", partialConcurrency)
 		finalConcurrencyInfo := execdetails.NewConcurrencyInfo("FinalConcurrency", finalConcurrency)
@@ -295,13 +295,13 @@ func (e *HashAggExec) initForParallelExec(ctx causetnetctx.Context) {
 		e.partialOutputChs[i] = make(chan *HashAggIntermData, partialConcurrency)
 	}
 
-	e.partialWorkers = make([]HashAggPartialWorker, partialConcurrency)
-	e.finalWorkers = make([]HashAggFinalWorker, finalConcurrency)
+	e.partialleasee_parity_filters = make([]HashAggPartialleasee_parity_filter, partialConcurrency)
+	e.finalleasee_parity_filters = make([]HashAggFinalleasee_parity_filter, finalConcurrency)
 
-	// Init partial workers.
+	// Init partial leasee_parity_filters.
 	for i := 0; i < partialConcurrency; i++ {
-		w := HashAggPartialWorker{
-			baseHashAggWorker: newBaseHashAggWorker(e.ctx, e.finishCh, e.PartialAggFuncs, e.maxChunkSize),
+		w := HashAggPartialleasee_parity_filter{
+			baseHashAggleasee_parity_filter: newBaseHashAggleasee_parity_filter(e.ctx, e.finishCh, e.PartialAggFuncs, e.maxChunkSize),
 			inputCh:           e.partialInputChs[i],
 			outputChs:         e.partialOutputChs,
 			giveBackCh:        e.inputCh,
@@ -313,7 +313,7 @@ func (e *HashAggExec) initForParallelExec(ctx causetnetctx.Context) {
 			memTracker:        e.memTracker,
 		}
 		e.memTracker.Consume(w.chk.MemoryUsage())
-		e.partialWorkers[i] = w
+		e.partialleasee_parity_filters[i] = w
 
 		input := &HashAggInput{
 			chk:        newFirstChunk(e.children[0]),
@@ -323,10 +323,10 @@ func (e *HashAggExec) initForParallelExec(ctx causetnetctx.Context) {
 		e.inputCh <- input
 	}
 
-	// Init final workers.
+	// Init final leasee_parity_filters.
 	for i := 0; i < finalConcurrency; i++ {
-		e.finalWorkers[i] = HashAggFinalWorker{
-			baseHashAggWorker:   newBaseHashAggWorker(e.ctx, e.finishCh, e.FinalAggFuncs, e.maxChunkSize),
+		e.finalleasee_parity_filters[i] = HashAggFinalleasee_parity_filter{
+			baseHashAggleasee_parity_filter:   newBaseHashAggleasee_parity_filter(e.ctx, e.finishCh, e.FinalAggFuncs, e.maxChunkSize),
 			partialResultMap:    make(aggPartialResultMapper),
 			groupSet:            set.NewStringSet(),
 			inputCh:             e.partialOutputChs[i],
@@ -336,11 +336,11 @@ func (e *HashAggExec) initForParallelExec(ctx causetnetctx.Context) {
 			mutableRow:          chunk.MutRowFromTypes(retTypes(e)),
 			groupKeys:           make([][]byte, 0, 8),
 		}
-		e.finalWorkers[i].finalResultHolderCh <- newFirstChunk(e)
+		e.finalleasee_parity_filters[i].finalResultHolderCh <- newFirstChunk(e)
 	}
 }
 
-func (w *HashAggPartialWorker) getChildInput() bool {
+func (w *HashAggPartialleasee_parity_filter) getChildInput() bool {
 	select {
 	case <-w.finishCh:
 		return false
@@ -363,7 +363,7 @@ func recoveryHashAgg(output chan *AfFinalResult, r interface{}) {
 	logutil.BgLogger().Error("parallel hash aggregation panicked", zap.Error(err), zap.Stack("stack"))
 }
 
-func (w *HashAggPartialWorker) run(ctx causetnetctx.Context, waitGroup *sync.WaitGroup, finalConcurrency int) {
+func (w *HashAggPartialleasee_parity_filter) run(ctx causetnetctx.Context, waitGroup *sync.WaitGroup, finalConcurrency int) {
 	needShuffle, sc := false, ctx.GetCausetNetVars().StmtCtx
 	defer func() {
 		if r := recover(); r != nil {
@@ -389,7 +389,7 @@ func (w *HashAggPartialWorker) run(ctx causetnetctx.Context, waitGroup *sync.Wai
 	}
 }
 
-func (w *HashAggPartialWorker) updatePartialResult(ctx causetnetctx.Context, sc *stmtctx.StatementContext, chk *chunk.Chunk, finalConcurrency int) (err error) {
+func (w *HashAggPartialleasee_parity_filter) updatePartialResult(ctx causetnetctx.Context, sc *stmtctx.StatementContext, chk *chunk.Chunk, finalConcurrency int) (err error) {
 	w.groupKey, err = getGroupKey(w.ctx, chk, w.groupKey, w.groupByItems)
 	if err != nil {
 		return err
@@ -409,16 +409,16 @@ func (w *HashAggPartialWorker) updatePartialResult(ctx causetnetctx.Context, sc 
 	return nil
 }
 
-// shuffleIntermData shuffles the intermediate data of partial workers to corresponded final workers.
+// shuffleIntermData shuffles the intermediate data of partial leasee_parity_filters to corresponded final leasee_parity_filters.
 // We only support parallel execution for single-machine, so process of encode and decode can be skipped.
-func (w *HashAggPartialWorker) shuffleIntermData(sc *stmtctx.StatementContext, finalConcurrency int) {
+func (w *HashAggPartialleasee_parity_filter) shuffleIntermData(sc *stmtctx.StatementContext, finalConcurrency int) {
 	groupKeysSlice := make([][]string, finalConcurrency)
 	for groupKey := range w.partialResultsMap {
-		finalWorkerIdx := int(murmur3.Sum32([]byte(groupKey))) % finalConcurrency
-		if groupKeysSlice[finalWorkerIdx] == nil {
-			groupKeysSlice[finalWorkerIdx] = make([]string, 0, len(w.partialResultsMap)/finalConcurrency)
+		finalleasee_parity_filterIdx := int(murmur3.Sum32([]byte(groupKey))) % finalConcurrency
+		if groupKeysSlice[finalleasee_parity_filterIdx] == nil {
+			groupKeysSlice[finalleasee_parity_filterIdx] = make([]string, 0, len(w.partialResultsMap)/finalConcurrency)
 		}
-		groupKeysSlice[finalWorkerIdx] = append(groupKeysSlice[finalWorkerIdx], groupKey)
+		groupKeysSlice[finalleasee_parity_filterIdx] = append(groupKeysSlice[finalleasee_parity_filterIdx], groupKey)
 	}
 
 	for i := range groupKeysSlice {
@@ -470,7 +470,7 @@ func getGroupKey(ctx causetnetctx.Context, input *chunk.Chunk, groupKey [][]byte
 	return groupKey, nil
 }
 
-func (w baseHashAggWorker) getPartialResult(sc *stmtctx.StatementContext, groupKey [][]byte, mapper aggPartialResultMapper) [][]aggfuncs.PartialResult {
+func (w baseHashAggleasee_parity_filter) getPartialResult(sc *stmtctx.StatementContext, groupKey [][]byte, mapper aggPartialResultMapper) [][]aggfuncs.PartialResult {
 	n := len(groupKey)
 	partialResults := make([][]aggfuncs.PartialResult, n)
 	for i := 0; i < n; i++ {
@@ -487,7 +487,7 @@ func (w baseHashAggWorker) getPartialResult(sc *stmtctx.StatementContext, groupK
 	return partialResults
 }
 
-func (w *HashAggFinalWorker) getPartialInput() (input *HashAggIntermData, ok bool) {
+func (w *HashAggFinalleasee_parity_filter) getPartialInput() (input *HashAggIntermData, ok bool) {
 	select {
 	case <-w.finishCh:
 		return nil, false
@@ -499,7 +499,7 @@ func (w *HashAggFinalWorker) getPartialInput() (input *HashAggIntermData, ok boo
 	return
 }
 
-func (w *HashAggFinalWorker) consumeIntermData(sctx causetnetctx.Context) (err error) {
+func (w *HashAggFinalleasee_parity_filter) consumeIntermData(sctx causetnetctx.Context) (err error) {
 	var (
 		input            *HashAggIntermData
 		ok               bool

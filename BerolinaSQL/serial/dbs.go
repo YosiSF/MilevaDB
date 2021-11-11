@@ -376,7 +376,7 @@ func (job *Job) IsCancelling() bool {
 	return job.State == JobStateCancelling
 }
 
-// IsSynced returns whether the noedbS modification is synced among all Milevanoedb servers.
+// IsSynced returns whether the noedbS modification is synced among all milevadb servers.
 func (job *Job) IsSynced() bool {
 	return job.State == JobStateSynced
 }

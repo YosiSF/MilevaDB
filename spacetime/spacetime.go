@@ -22,11 +22,11 @@ import (
 	"strconv"
 	"strings"
 	"fmt"
-	"github.com/YosiSF/Milevanoedb/BerolinaSQL/core/spacetime"
-	"github.com/YosiSF/Milevanoedb/BerolinaSQL/core/eekv"
-	"github.com/YosiSF/Milevanoedb/BerolinaSQL/core/curvature"
-	"github.com/YosiSF/Milevanoedb/BerolinaSQL/core/merkle"
-	"github.com/YosiSF/Milevanoedb/BerolinaSQL/core/util/binlog"
+	"github.com/YosiSF/milevadb/BerolinaSQL/core/spacetime"
+	"github.com/YosiSF/milevadb/BerolinaSQL/core/eekv"
+	"github.com/YosiSF/milevadb/BerolinaSQL/core/curvature"
+	"github.com/YosiSF/milevadb/BerolinaSQL/core/merkle"
+	"github.com/YosiSF/milevadb/BerolinaSQL/core/util/binlog"
 	"go.uber.org/zap"
 
 
