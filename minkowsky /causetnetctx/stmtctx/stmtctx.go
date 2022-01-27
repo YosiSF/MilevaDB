@@ -75,11 +75,11 @@ type StatementContext struct {
 		foundRows    uint64
 
 		/*
-			following variables are ported from 'COPY_INFO' struct of MySQL server source,
+			following variables are ported from 'INTERLOCKY_INFO' struct of MySQL server source,
 			they are used to count rows for INSERT/REPLACE/UPDATE queries:
-			  If a row is inserted then the copied variable is incremented.
+			  If a row is inserted then the INTERLOCKied variable is incremented.
 			  If a row is updated by the INSERT ... ON DUPLICATE KEY UPDATE and the
-			     new data differs from the old one then the copied and the updated
+			     new data differs from the old one then the INTERLOCKied and the updated
 			     variables are incremented.
 			  The touched variable is incremented if a row was touched by the update part
 			     of the INSERT ... ON DUPLICATE KEY UPDATE no matter whether the row
@@ -87,10 +87,10 @@ type StatementContext struct {
 
 			see https://github.com/mysql/mysql-server/blob/d2029238d6d9f648077664e4cdd611e231a6dc14/sql/sql_data_change.h#L60 for more details
 		*/
-		records uint64
-		updated uint64
-		copied  uint64
-		touched uint64
+		records      uint64
+		updated      uint64
+		INTERLOCKied uint64
+		touched      uint64
 
 		message           string
 		warnings          []SQLWarn
@@ -111,7 +111,7 @@ type StatementContext struct {
 	BaseRowID int64
 	MaxRowID  int64
 
-	// Copied from CausetNetVars.TimeZone.
+	// INTERLOCKied from CausetNetVars.TimeZone.
 	TimeZone         *time.Location
 	Priority         mysql.PriorityEnum
 	NotFillCache     bool
@@ -134,7 +134,7 @@ type StatementContext struct {
 	planDigest            string
 	Tables                []TableEntry
 	PointExec             bool       // for point update cached execution, Constant expression need to set "paramMarker"
-	lockWaitStartTime     *time.Time // LockWaitStartTime stores the pessimistic lock wait start time
+	lockWaitStartTime     *time.Time // LockWaitStartTime stores the pessimistic dagger wait start time
 	PessimisticLockWaited int32
 	LockKeysDuration      time.Duration
 	LockKeysCount         int32
@@ -215,7 +215,7 @@ func (sc *StatementContext) SetPlanDigest(normalized, planDigest string) {
 // TableEntry presents table in db.
 type TableEntry struct {
 	DB    string
-	Table string
+	Block string
 }
 
 // AddAffectedRows adds affected rows.
@@ -278,18 +278,18 @@ func (sc *StatementContext) AddUpdatedRows(rows uint64) {
 	sc.mu.Unlock()
 }
 
-// CopiedRows is used to generate info message
-func (sc *StatementContext) CopiedRows() uint64 {
+// INTERLOCKiedRows is used to generate info message
+func (sc *StatementContext) INTERLOCKiedRows() uint64 {
 	sc.mu.Lock()
-	rows := sc.mu.copied
+	rows := sc.mu.INTERLOCKied
 	sc.mu.Unlock()
 	return rows
 }
 
-// AddCopiedRows adds copied rows.
-func (sc *StatementContext) AddCopiedRows(rows uint64) {
+// AddINTERLOCKiedRows adds INTERLOCKied rows.
+func (sc *StatementContext) AddINTERLOCKiedRows(rows uint64) {
 	sc.mu.Lock()
-	sc.mu.copied += rows
+	sc.mu.INTERLOCKied += rows
 	sc.mu.Unlock()
 }
 
@@ -327,7 +327,7 @@ func (sc *StatementContext) SetMessage(msg string) {
 func (sc *StatementContext) GetWarnings() []SQLWarn {
 	sc.mu.Lock()
 	warns := make([]SQLWarn, len(sc.mu.warnings))
-	copy(warns, sc.mu.warnings)
+	INTERLOCKy(warns, sc.mu.warnings)
 	sc.mu.Unlock()
 	return warns
 }
@@ -341,7 +341,7 @@ func (sc *StatementContext) TruncateWarnings(start int) []SQLWarn {
 		return nil
 	}
 	ret := make([]SQLWarn, sz)
-	copy(ret, sc.mu.warnings[start:])
+	INTERLOCKy(ret, sc.mu.warnings[start:])
 	sc.mu.warnings = sc.mu.warnings[:start]
 	return ret
 }
@@ -459,7 +459,7 @@ func (sc *StatementContext) ResetForRetry() {
 	sc.mu.foundRows = 0
 	sc.mu.records = 0
 	sc.mu.updated = 0
-	sc.mu.copied = 0
+	sc.mu.INTERLOCKied = 0
 	sc.mu.touched = 0
 	sc.mu.message = ""
 	sc.mu.errorCount = 0
@@ -479,7 +479,7 @@ func (sc *StatementContext) ResetForRetry() {
 func (sc *StatementContext) MergeExecDetails(details *execdetails.ExecDetails, commitDetails *execdetails.CommitDetails) {
 	sc.mu.Lock()
 	if details != nil {
-		sc.mu.execDetails.CopTime += details.CopTime
+		sc.mu.execDetails.INTERLOCKTime += details.INTERLOCKTime
 		sc.mu.execDetails.ProcessTime += details.ProcessTime
 		sc.mu.execDetails.WaitTime += details.WaitTime
 		sc.mu.execDetails.BackoffTime += details.BackoffTime
@@ -550,13 +550,13 @@ func (sc *StatementContext) PushDownFlags() uint64 {
 	return flags
 }
 
-// CopTasksDetails returns some useful information of cop-tasks during execution.
-func (sc *StatementContext) CopTasksDetails() *CopTasksDetails {
+// INTERLOCKTasksDetails returns some useful information of INTERLOCK-tasks during execution.
+func (sc *StatementContext) INTERLOCKTasksDetails() *INTERLOCKTasksDetails {
 	sc.mu.Lock()
 	defer sc.mu.Unlock()
 	n := len(sc.mu.allExecDetails)
-	d := &CopTasksDetails{
-		NumCopTasks:       n,
+	d := &INTERLOCKTasksDetails{
+		NumINTERLOCKTasks: n,
 		MaxBackoffTime:    make(map[string]time.Duration),
 		AvgBackoffTime:    make(map[string]time.Duration),
 		P90BackoffTime:    make(map[string]time.Duration),
@@ -636,7 +636,7 @@ func (sc *StatementContext) SetFlagsFromPBFlag(flags uint64) {
 	sc.DividedByZeroAsWarning = (flags & serial.FlagDividedByZeroAsWarning) > 0
 }
 
-// GetLockWaitStartTime returns the statement pessimistic lock wait start time
+// GetLockWaitStartTime returns the statement pessimistic dagger wait start time
 func (sc *StatementContext) GetLockWaitStartTime() time.Time {
 	if sc.lockWaitStartTime == nil {
 		curTime := time.Now()
@@ -645,9 +645,9 @@ func (sc *StatementContext) GetLockWaitStartTime() time.Time {
 	return *sc.lockWaitStartTime
 }
 
-//CopTasksDetails collects some useful information of cop-tasks during execution.
-type CopTasksDetails struct {
-	NumCopTasks int
+//INTERLOCKTasksDetails collects some useful information of INTERLOCK-tasks during execution.
+type INTERLOCKTasksDetails struct {
+	NumINTERLOCKTasks int
 
 	AvgProcessTime    time.Duration
 	P90ProcessTime    time.Duration
@@ -667,13 +667,13 @@ type CopTasksDetails struct {
 	TotBackoffTimes   map[string]int
 }
 
-// ToZapFields wraps the CopTasksDetails as zap.Fileds.
-func (d *CopTasksDetails) ToZapFields() (fields []zap.Field) {
-	if d.NumCopTasks == 0 {
+// ToZapFields wraps the INTERLOCKTasksDetails as zap.Fileds.
+func (d *INTERLOCKTasksDetails) ToZapFields() (fields []zap.Field) {
+	if d.NumINTERLOCKTasks == 0 {
 		return
 	}
 	fields = make([]zap.Field, 0, 10)
-	fields = append(fields, zap.Int("num_cop_tasks", d.NumCopTasks))
+	fields = append(fields, zap.Int("num_INTERLOCK_tasks", d.NumINTERLOCKTasks))
 	fields = append(fields, zap.String("process_avg_time", strconv.FormatFloat(d.AvgProcessTime.Seconds(), 'f', -1, 64)+"s"))
 	fields = append(fields, zap.String("process_p90_time", strconv.FormatFloat(d.P90ProcessTime.Seconds(), 'f', -1, 64)+"s"))
 	fields = append(fields, zap.String("process_max_time", strconv.FormatFloat(d.MaxProcessTime.Seconds(), 'f', -1, 64)+"s"))

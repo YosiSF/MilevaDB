@@ -588,13 +588,13 @@ func (bm *binaryModifier) rebuildTo(buf []byte) ([]byte, TypeCode) {
 	elemCount := bj.GetElemCount()
 	var valEntryStart int
 	if bj.TypeCode == TypeCodeArray {
-		copySize := headerSize + elemCount*valEntrySize
+		INTERLOCKySize := headerSize + elemCount*valEntrySize
 		valEntryStart = headerSize
-		buf = append(buf, bj.Value[:copySize]...)
+		buf = append(buf, bj.Value[:INTERLOCKySize]...)
 	} else {
-		copySize := headerSize + elemCount*(keyEntrySize+valEntrySize)
+		INTERLOCKySize := headerSize + elemCount*(keyEntrySize+valEntrySize)
 		valEntryStart = headerSize + elemCount*keyEntrySize
-		buf = append(buf, bj.Value[:copySize]...)
+		buf = append(buf, bj.Value[:INTERLOCKySize]...)
 		if elemCount > 0 {
 			firstKeyOff := int(endian.Uint32(bj.Value[headerSize:]))
 			lastKeyOff := int(endian.Uint32(bj.Value[headerSize+(elemCount-1)*keyEntrySize:]))

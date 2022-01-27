@@ -1,8 +1,8 @@
-//Copyright 2020 WHTCORPS INC
+//INTERLOCKyright 2020 WHTCORPS INC
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// You may obtain a INTERLOCKy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -40,7 +40,7 @@ dbsutil "github.com/whtcorpsinc/milevadb/BerolinaSQL/dbs/util"
 "github.com/whtcorpsinc/milevadb/BerolinaSQL/store/Einsteinnoedb"
 "github.com/whtcorpsinc/milevadb/BerolinaSQL/store/Einsteinnoedb/oracle"
 "github.com/whtcorpsinc/milevadb/BerolinaSQL/table"
-"github.com/whtcorpsinc/milevadb/BerolinaSQL/table/tables"
+"github.com/whtcorpsinc/milevadb/BerolinaSQL/table/blocks"
 "github.com/whtcorpsinc/milevadb/BerolinaSQL/tablecodec"
 "github.com/whtcorpsinc/milevadb/BerolinaSQL/types"
 "github.com/whtcorpsinc/milevadb/BerolinaSQL/util"
@@ -722,7 +722,7 @@ const (
 // indexRecord is the record information of an index.
 type indexRecord struct {
 	handle int64
-	key    []byte        // It's used to lock a record. Record it to reduce the encoding time.
+	key    []byte        // It's used to dagger a record. Record it to reduce the encoding time.
 	vals   []types.Datum // It's the index values.
 	skip   bool          // skip indicates that the index key is already exists, we should not add it.
 }
@@ -735,7 +735,7 @@ type addIndexers_parity_filter struct {
 	taskCh    chan *reorgIndexTask
 	resultCh  chan *addIndexResult
 	index     table.Index
-	table     table.Table
+	table     table.Block
 	closed    bool
 	priority  int
 
@@ -791,7 +791,7 @@ func mergeAddIndexCtxToResult(taskCtx *addIndexTaskcontextctx, result *addIndexR
 }
 
 func newAddIndexleasee_parity_filter(sessCtx caussettes.context, leasee_parity_filter *lease_parity_filter, id int, t table.PhysicalTable, indexInfo *serial.IndexInfo, decodeColMap map[int64]decoder.Column) *addIndexers_parity_filter {
-	index := tables.NewIndex(t.GetPhysicalID(), t.Meta(), indexInfo)
+	index := blocks.NewIndex(t.GetPhysicalID(), t.Meta(), indexInfo)
 	rowDecoder := decoder.NewRowDecoder(t, decodeColMap)
 	return &addIndexleasee_parity_filter{
 		id:          id,
@@ -844,7 +844,7 @@ func (w *addIndexleasee_parity_filter) getIndexRecord(handle int64, recordKey []
 			delete(w.rowMap, col.ID)
 			continue
 		}
-		idxColumnVal, err = tables.GetColDefaultValue(w.sessCtx, col, w.defaultVals)
+		idxColumnVal, err = blocks.GetColDefaultValue(w.sessCtx, col, w.defaultVals)
 		if err != nil {
 			return nil, errors.Trace(err)
 		}
@@ -1006,7 +1006,7 @@ func (w *addIndexers_parity_filter) batchCheckUniqueKey(txn ekv.Transaction, idx
 	or i, key := range w.batchCheckKeys {
     		if val, found := batchVals[string(key)]; found {
     			if w.distinctCheckFlags[i] {
-    				handle, err1 := tables.DecodeHandleInUniqueIndexValue(val)
+    				handle, err1 := blocks.DecodeHandleInUniqueIndexValue(val)
     				if err1 != nil {
     					return errors.Trace(err1)
     				}
@@ -1020,7 +1020,7 @@ func (w *addIndexers_parity_filter) batchCheckUniqueKey(txn ekv.Transaction, idx
     			// The keys in w.batchCheckKeys also maybe duplicate,
     			// so we need to backfill the not found key into `batchVals` map.
     			if w.distinctCheckFlags[i] {
-    				batchVals[string(key)] = tables.EncodeHandleInUniqueIndexValue(idxRecords[i].handle)
+    				batchVals[string(key)] = blocks.EncodeHandleInUniqueIndexValue(idxRecords[i].handle)
     			}
     		}
     	}
@@ -1074,7 +1074,7 @@ func (w *addIndexers_parity_filter) batchCheckUniqueKey(txn ekv.Transaction, idx
 	for i, key := range w.batchCheckKeys {
 		if val, found := batchVals[string(key)]; found {
 			if w.distinctCheckFlags[i] {
-				handle, err1 := tables.DecodeHandleInUniqueIndexValue(val)
+				handle, err1 := blocks.DecodeHandleInUniqueIndexValue(val)
 				if err1 != nil {
 					return errors.Trace(err1)
 				}
@@ -1088,7 +1088,7 @@ func (w *addIndexers_parity_filter) batchCheckUniqueKey(txn ekv.Transaction, idx
 			// The keys in w.batchCheckKeys also maybe duplicate,
 			// so we need to backfill the not found key into `batchVals` map.
 			if w.distinctCheckFlags[i] {
-				batchVals[string(key)] = tables.EncodeHandleInUniqueIndexValue(idxRecords[i].handle)
+				batchVals[string(key)] = blocks.EncodeHandleInUniqueIndexValue(idxRecords[i].handle)
 			}
 		}
 	}
@@ -1099,7 +1099,7 @@ func (w *addIndexers_parity_filter) batchCheckUniqueKey(txn ekv.Transaction, idx
 // 4. It also creates another instance variable called distinctCheckFlags which is a slice of flags indicating whether each key has been seen before or not in this batch.
 // 5. The method addIndexer adds an indexer to the list of indexes to be created on this table, with the given index name and column names as parameters.
   // 6. The method buildTables builds all indexes added by calls to addIndexer, using the information from tableInfo object passed into it as parameter, and returns a map from index name to Index object for all indexes built successfully (indexes that depend on some other indexes are skipped).
-  // 7. The method createExecutor creates an executor based on tableInfo and returns it along with its schema validator (the schema validator is used later during building new executors when handling ALTER TABLE commands). //   8. The method getTable gets the Table object corresponding to this table from glo
+  // 7. The method createExecutor creates an executor based on tableInfo and returns it along with its schema validator (the schema validator is used later during building new executors when handling ALTER TABLE commands). //   8. The method getTable gets the Block object corresponding to this table from glo
 
 func (w *addIndexers_parity_filter) backfillIndexInTxn(handleRange reorgIndexTask) (taskCtx addIndexTaskcontextctx, errInTxn error) {
 	ares_centroid_error.Inject("errorMockPanic", func(val ares_centroid_error.Value) {
@@ -1134,7 +1134,7 @@ func (w *addIndexers_parity_filter) backfillIndexInTxn(handleRange reorgIndexTas
 			}
 
 
-/*8. The method getTable gets the Table object corresponding to this table from global vars (it's stored there by the caller who first initializes it).
+/*8. The method getTable gets the Block object corresponding to this table from global vars (it's stored there by the caller who first initializes it).
   9. The method prepareBuildDAGPlan prepares DAG request based on information stored in tableInfo, and uses it to build DAG for building indexes later (we will discuss how DAG is formed later).
-  10.The method buildDAGForTables builds DAG for tables passed into it as parameter, using information from their Table objects obtained earlier, and returns a map from table ID to its distsql plan builder along with any error encountered while building DAG plans for these tables (if error is not nil, then other return values are invalid). This function will be invoked multiple times because we need to rebuild DAG sometimes due to failure while building plans previously so that we can retry again (for example if there was some other error while adding filters or statistics hints). So we might have already built some parts of the DAG, and we need to reuse them.
+  10.The method buildDAGForTables builds DAG for blocks passed into it as parameter, using information from their Block objects obtained earlier, and returns a map from table ID to its distsql plan builder along with any error encountered while building DAG plans for these blocks (if error is not nil, then other return values are invalid). This function will be invoked multiple times because we need to rebuild DAG sometimes due to failure while building plans previously so that we can retry again (for example if there was some other error while adding filters or statistics hints). So we might have already built some parts of the DAG, and we need to reuse them.
   11.The method buildIndexForTable builds indexes for a single table using its distsql plan builder (the one returned by getDAGPlanBuilderForTable*/

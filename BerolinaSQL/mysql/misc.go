@@ -2,7 +2,7 @@
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// You may obtain a INTERLOCKy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -200,8 +200,8 @@ type ExplainStmt struct {
 func (n *ExplainStmt) Restore(ctx *format.RestoreCtx) error {
 	if showStmt, ok := n.Stmt.(*ShowStmt); ok {
 		ctx.WriteKeyWord("DESC ")
-		if err := showStmt.Table.Restore(ctx); err != nil {
-			return errors.Annotate(err, "An error occurred while restore ExplainStmt.ShowStmt.Table")
+		if err := showStmt.Block.Restore(ctx); err != nil {
+			return errors.Annotate(err, "An error occurred while restore ExplainStmt.ShowStmt.Block")
 		}
 		if showStmt.Column != nil {
 			ctx.WritePlain(" ")

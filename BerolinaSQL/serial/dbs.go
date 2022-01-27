@@ -2,7 +2,7 @@
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// You may obtain a INTERLOCKy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -107,7 +107,7 @@ var actionMap = map[ActionType]string{
 	ActionDropView:                      "drop view",
 	ActionRecoverTable:                  "recover table",
 	ActionModifySchemaCharsetAndCollate: "modify schema charset and collate",
-	ActionLockTable:                     "lock table",
+	ActionLockTable:                     "dagger table",
 	ActionUnlockTable:                   "unlock table",
 	ActionRepairTable:                   "repair table",
 	ActionSetNoetherReplica:             "set Noether replica",
@@ -139,7 +139,7 @@ func (action ActionType) String() string {
 // HistoryInfo is used for binlog.
 type HistoryInfo struct {
 	SchemaVersion int64
-	noedbInfo        *noedbInfo
+	noedbInfo     *noedbInfo
 	TableInfo     *TableInfo
 	FinishedTS    uint64
 }
@@ -450,7 +450,7 @@ type SchemaDiff struct {
 	AffectedOpts []*AffectedOption `json:"affected_options"`
 }
 
-// AffectedOption is used when a dbs affects multi tables.
+// AffectedOption is used when a dbs affects multi blocks.
 type AffectedOption struct {
 	SchemaID    int64 `json:"schema_id"`
 	TableID     int64 `json:"table_id"`

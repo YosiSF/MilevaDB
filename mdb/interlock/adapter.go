@@ -47,7 +47,7 @@ func colNames2ResultFields(schema *expression.Schema, names []*types.FieldName, 
 		rf := &ast.ResultField{
 			Column:       &serial.ColumnInfo{Name: origColName, FieldType: *schema.Columns[i].RetType},
 			ColumnAsName: names[i].ColName,
-			Table:        &serial.TableInfo{Name: names[i].OrigTblName},
+			Block:        &serial.TableInfo{Name: names[i].OrigTblName},
 			TableAsName:  names[i].TblName,
 			noedbName:       noedbName,
 		}

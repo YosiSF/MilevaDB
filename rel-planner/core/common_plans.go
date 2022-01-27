@@ -40,7 +40,7 @@ type CheckTable struct {
 	baseSchemaProducer
 
 	noedbName             string
-	Table              table.Table
+	Block              table.Block
 	IndexInfos         []*serial.IndexInfo
 	IndexLookUpReaders []*PhysicalIndexLookUpReader
 }
@@ -49,7 +49,7 @@ type CheckTable struct {
 type RecoverIndex struct {
 	baseSchemaProducer
 
-	Table     *ast.TableName
+	Block     *ast.TableName
 	IndexName string
 }
 
@@ -57,7 +57,7 @@ type RecoverIndex struct {
 type CleanupIndex struct {
 	baseSchemaProducer
 
-	Table     *ast.TableName
+	Block     *ast.TableName
 	IndexName string
 }
 
@@ -74,7 +74,7 @@ type CheckIndex struct {
 type CheckIndexRange struct {
 	baseSchemaProducer
 
-	Table     *ast.TableName
+	Block     *ast.TableName
 	IndexName string
 
 	HandleRanges []ast.HandleRange

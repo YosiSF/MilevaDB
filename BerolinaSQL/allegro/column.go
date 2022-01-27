@@ -220,7 +220,7 @@ func (col *Column) VecEvalInt(ctx causetnetctx.Context, input *chunk.Chunk, resu
 		}
 		return nil
 	}
-	input.Column(col.Index).CopyReconstruct(input.Sel(), result)
+	input.Column(col.Index).INTERLOCKyReconstruct(input.Sel(), result)
 	return nil
 }
 
@@ -253,7 +253,7 @@ func (col *Column) VecEvalReal(ctx causetnetctx.Context, input *chunk.Chunk, res
 		}
 		return nil
 	}
-	input.Column(col.Index).CopyReconstruct(input.Sel(), result)
+	input.Column(col.Index).INTERLOCKyReconstruct(input.Sel(), result)
 	return nil
 }
 
@@ -275,31 +275,31 @@ func (col *Column) VecEvalString(ctx causetnetctx.Context, input *chunk.Chunk, r
 		}
 		return nil
 	}
-	input.Column(col.Index).CopyReconstruct(input.Sel(), result)
+	input.Column(col.Index).INTERLOCKyReconstruct(input.Sel(), result)
 	return nil
 }
 
 // VecEvalDecimal evaluates this expression in a vectorized manner.
 func (col *Column) VecEvalDecimal(ctx causetnetctx.Context, input *chunk.Chunk, result *chunk.Column) error {
-	input.Column(col.Index).CopyReconstruct(input.Sel(), result)
+	input.Column(col.Index).INTERLOCKyReconstruct(input.Sel(), result)
 	return nil
 }
 
 // VecEvalTime evaluates this expression in a vectorized manner.
 func (col *Column) VecEvalTime(ctx causetnetctx.Context, input *chunk.Chunk, result *chunk.Column) error {
-	input.Column(col.Index).CopyReconstruct(input.Sel(), result)
+	input.Column(col.Index).INTERLOCKyReconstruct(input.Sel(), result)
 	return nil
 }
 
 // VecEvalDuration evaluates this expression in a vectorized manner.
 func (col *Column) VecEvalDuration(ctx causetnetctx.Context, input *chunk.Chunk, result *chunk.Column) error {
-	input.Column(col.Index).CopyReconstruct(input.Sel(), result)
+	input.Column(col.Index).INTERLOCKyReconstruct(input.Sel(), result)
 	return nil
 }
 
 // VecEvalJSON evaluates this expression in a vectorized manner.
 func (col *Column) VecEvalJSON(ctx causetnetctx.Context, input *chunk.Chunk, result *chunk.Column) error {
-	input.Column(col.Index).CopyReconstruct(input.Sel(), result)
+	input.Column(col.Index).INTERLOCKyReconstruct(input.Sel(), result)
 	return nil
 }
 

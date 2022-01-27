@@ -10,8 +10,8 @@ import (
 
 /*
 	From MySQL 5.7, JSON path expression grammar:
-		pathExpression ::= scope (pathLeg)*
-		scope ::= [ columnReference ] '$'
+		pathExpression ::= sINTERLOCKe (pathLeg)*
+		sINTERLOCKe ::= [ columnReference ] '$'
 		columnReference ::= // omit...
 		pathLeg ::= member | arrayLocation | '**'
 		member ::= '.' (keyName | '*')
@@ -19,7 +19,7 @@ import (
 		keyName ::= ECMAScript-identifier | ECMAScript-string-literal
 
 	And some implementation limits in MySQL 5.7:
-		1) columnReference in scope must be empty now;
+		1) columnReference in sINTERLOCKe must be empty now;
 		2) double asterisk(**) could not be last leg;
 
 	Examples:

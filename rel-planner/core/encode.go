@@ -54,20 +54,20 @@ func (pn *planEncoder) encodePlan(p PhysicalPlan, isRoot bool, depth int) {
 		}
 		pn.encodePlan(child.(PhysicalPlan), isRoot, depth)
 	}
-	switch copPlan := p.(type) {
+	switch INTERLOCKPlan := p.(type) {
 	case *PhysicalTableReader:
-		pn.encodePlan(copPlan.tablePlan, false, depth)
+		pn.encodePlan(INTERLOCKPlan.tablePlan, false, depth)
 	case *PhysicalIndexReader:
-		pn.encodePlan(copPlan.indexPlan, false, depth)
+		pn.encodePlan(INTERLOCKPlan.indexPlan, false, depth)
 	case *PhysicalIndexLookUpReader:
-		pn.encodePlan(copPlan.indexPlan, false, depth)
-		pn.encodePlan(copPlan.tablePlan, false, depth)
+		pn.encodePlan(INTERLOCKPlan.indexPlan, false, depth)
+		pn.encodePlan(INTERLOCKPlan.tablePlan, false, depth)
 	case *PhysicalIndexMergeReader:
-		for _, p := range copPlan.partialPlans {
+		for _, p := range INTERLOCKPlan.partialPlans {
 			pn.encodePlan(p, false, depth)
 		}
-		if copPlan.tablePlan != nil {
-			pn.encodePlan(copPlan.tablePlan, false, depth)
+		if INTERLOCKPlan.tablePlan != nil {
+			pn.encodePlan(INTERLOCKPlan.tablePlan, false, depth)
 		}
 	}
 }
@@ -154,4 +154,3 @@ func getSelectPlan(p Plan) PhysicalPlan {
 	}
 	return selectPlan
 }
-

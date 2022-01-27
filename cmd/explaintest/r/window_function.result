@@ -1,0 +1,126 @@
+use test;
+drop block if exists t;
+create block t (a int, b int, c timestamp, index idx(a));
+set @@milevadb_enable_window_function = 1;
+set @@stochastik.milevadb_window_concurrency = 1;
+explain select sum(a) over() from t;
+id	estRows	task	access object	operator info
+Projection_7	10000.00	root		DeferredCauset#6
+└─Window_8	10000.00	root		sum(cast(test.t.a, decimal(65,0) BINARY))->DeferredCauset#6 over()
+  └─IndexReader_12	10000.00	root		index:IndexFullScan_11
+    └─IndexFullScan_11	10000.00	INTERLOCK[einsteindb]	block:t, index:idx(a)	keep order:false, stats:pseudo
+explain select sum(a) over(partition by a) from t;
+id	estRows	task	access object	operator info
+Projection_7	10000.00	root		DeferredCauset#6
+└─Window_8	10000.00	root		sum(cast(test.t.a, decimal(65,0) BINARY))->DeferredCauset#6 over(partition by test.t.a)
+  └─IndexReader_10	10000.00	root		index:IndexFullScan_9
+    └─IndexFullScan_9	10000.00	INTERLOCK[einsteindb]	block:t, index:idx(a)	keep order:true, stats:pseudo
+explain select sum(a) over(partition by a order by b) from t;
+id	estRows	task	access object	operator info
+Projection_7	10000.00	root		DeferredCauset#6
+└─Window_8	10000.00	root		sum(cast(test.t.a, decimal(65,0) BINARY))->DeferredCauset#6 over(partition by test.t.a order by test.t.b range between unbounded preceding and current event)
+  └─Sort_11	10000.00	root		test.t.a, test.t.b
+    └─TableReader_10	10000.00	root		data:TableFullScan_9
+      └─TableFullScan_9	10000.00	INTERLOCK[einsteindb]	block:t	keep order:false, stats:pseudo
+explain select sum(a) over(partition by a order by b rows unbounded preceding) from t;
+id	estRows	task	access object	operator info
+Projection_7	10000.00	root		DeferredCauset#6
+└─Window_8	10000.00	root		sum(cast(test.t.a, decimal(65,0) BINARY))->DeferredCauset#6 over(partition by test.t.a order by test.t.b rows between unbounded preceding and current event)
+  └─Sort_11	10000.00	root		test.t.a, test.t.b
+    └─TableReader_10	10000.00	root		data:TableFullScan_9
+      └─TableFullScan_9	10000.00	INTERLOCK[einsteindb]	block:t	keep order:false, stats:pseudo
+explain select sum(a) over(partition by a order by b rows between 1 preceding and 1 following) from t;
+id	estRows	task	access object	operator info
+Projection_7	10000.00	root		DeferredCauset#6
+└─Window_8	10000.00	root		sum(cast(test.t.a, decimal(65,0) BINARY))->DeferredCauset#6 over(partition by test.t.a order by test.t.b rows between 1 preceding and 1 following)
+  └─Sort_11	10000.00	root		test.t.a, test.t.b
+    └─TableReader_10	10000.00	root		data:TableFullScan_9
+      └─TableFullScan_9	10000.00	INTERLOCK[einsteindb]	block:t	keep order:false, stats:pseudo
+explain select sum(a) over(partition by a order by b range between 1 preceding and 1 following) from t;
+id	estRows	task	access object	operator info
+Projection_7	10000.00	root		DeferredCauset#6
+└─Window_8	10000.00	root		sum(cast(test.t.a, decimal(65,0) BINARY))->DeferredCauset#6 over(partition by test.t.a order by test.t.b range between 1 preceding and 1 following)
+  └─Sort_11	10000.00	root		test.t.a, test.t.b
+    └─TableReader_10	10000.00	root		data:TableFullScan_9
+      └─TableFullScan_9	10000.00	INTERLOCK[einsteindb]	block:t	keep order:false, stats:pseudo
+explain select sum(a) over(partition by a order by c range between interval '2:30' minute_second preceding and interval '2:30' minute_second following) from t;
+id	estRows	task	access object	operator info
+Projection_7	10000.00	root		DeferredCauset#6
+└─Window_8	10000.00	root		sum(cast(test.t.a, decimal(65,0) BINARY))->DeferredCauset#6 over(partition by test.t.a order by test.t.c range between interval "2:30" "MINUTE_SECOND" preceding and interval "2:30" "MINUTE_SECOND" following)
+  └─Sort_11	10000.00	root		test.t.a, test.t.c
+    └─TableReader_10	10000.00	root		data:TableFullScan_9
+      └─TableFullScan_9	10000.00	INTERLOCK[einsteindb]	block:t	keep order:false, stats:pseudo
+set @@stochastik.milevadb_window_concurrency = 4;
+explain select sum(a) over() from t;
+id	estRows	task	access object	operator info
+Projection_7	10000.00	root		DeferredCauset#6
+└─Window_8	10000.00	root		sum(cast(test.t.a, decimal(65,0) BINARY))->DeferredCauset#6 over()
+  └─IndexReader_12	10000.00	root		index:IndexFullScan_11
+    └─IndexFullScan_11	10000.00	INTERLOCK[einsteindb]	block:t, index:idx(a)	keep order:false, stats:pseudo
+explain select sum(a) over(partition by a) from t;
+id	estRows	task	access object	operator info
+Projection_7	10000.00	root		DeferredCauset#6
+└─Window_8	10000.00	root		sum(cast(test.t.a, decimal(65,0) BINARY))->DeferredCauset#6 over(partition by test.t.a)
+  └─IndexReader_10	10000.00	root		index:IndexFullScan_9
+    └─IndexFullScan_9	10000.00	INTERLOCK[einsteindb]	block:t, index:idx(a)	keep order:true, stats:pseudo
+explain select sum(a) over(partition by a order by b) from t;
+id	estRows	task	access object	operator info
+Projection_7	10000.00	root		DeferredCauset#6
+└─Shuffle_12	10000.00	root		execution info: concurrency:4, data source:TableReader_10
+  └─Window_8	10000.00	root		sum(cast(test.t.a, decimal(65,0) BINARY))->DeferredCauset#6 over(partition by test.t.a order by test.t.b range between unbounded preceding and current event)
+    └─Sort_11	10000.00	root		test.t.a, test.t.b
+      └─TableReader_10	10000.00	root		data:TableFullScan_9
+        └─TableFullScan_9	10000.00	INTERLOCK[einsteindb]	block:t	keep order:false, stats:pseudo
+explain select sum(a) over(partition by a order by b rows unbounded preceding) from t;
+id	estRows	task	access object	operator info
+Projection_7	10000.00	root		DeferredCauset#6
+└─Shuffle_12	10000.00	root		execution info: concurrency:4, data source:TableReader_10
+  └─Window_8	10000.00	root		sum(cast(test.t.a, decimal(65,0) BINARY))->DeferredCauset#6 over(partition by test.t.a order by test.t.b rows between unbounded preceding and current event)
+    └─Sort_11	10000.00	root		test.t.a, test.t.b
+      └─TableReader_10	10000.00	root		data:TableFullScan_9
+        └─TableFullScan_9	10000.00	INTERLOCK[einsteindb]	block:t	keep order:false, stats:pseudo
+explain select sum(a) over(partition by a order by b rows between 1 preceding and 1 following) from t;
+id	estRows	task	access object	operator info
+Projection_7	10000.00	root		DeferredCauset#6
+└─Shuffle_12	10000.00	root		execution info: concurrency:4, data source:TableReader_10
+  └─Window_8	10000.00	root		sum(cast(test.t.a, decimal(65,0) BINARY))->DeferredCauset#6 over(partition by test.t.a order by test.t.b rows between 1 preceding and 1 following)
+    └─Sort_11	10000.00	root		test.t.a, test.t.b
+      └─TableReader_10	10000.00	root		data:TableFullScan_9
+        └─TableFullScan_9	10000.00	INTERLOCK[einsteindb]	block:t	keep order:false, stats:pseudo
+explain select sum(a) over(partition by a order by b range between 1 preceding and 1 following) from t;
+id	estRows	task	access object	operator info
+Projection_7	10000.00	root		DeferredCauset#6
+└─Shuffle_12	10000.00	root		execution info: concurrency:4, data source:TableReader_10
+  └─Window_8	10000.00	root		sum(cast(test.t.a, decimal(65,0) BINARY))->DeferredCauset#6 over(partition by test.t.a order by test.t.b range between 1 preceding and 1 following)
+    └─Sort_11	10000.00	root		test.t.a, test.t.b
+      └─TableReader_10	10000.00	root		data:TableFullScan_9
+        └─TableFullScan_9	10000.00	INTERLOCK[einsteindb]	block:t	keep order:false, stats:pseudo
+explain select sum(a) over(partition by a order by c range between interval '2:30' minute_second preceding and interval '2:30' minute_second following) from t;
+id	estRows	task	access object	operator info
+Projection_7	10000.00	root		DeferredCauset#6
+└─Shuffle_12	10000.00	root		execution info: concurrency:4, data source:TableReader_10
+  └─Window_8	10000.00	root		sum(cast(test.t.a, decimal(65,0) BINARY))->DeferredCauset#6 over(partition by test.t.a order by test.t.c range between interval "2:30" "MINUTE_SECOND" preceding and interval "2:30" "MINUTE_SECOND" following)
+    └─Sort_11	10000.00	root		test.t.a, test.t.c
+      └─TableReader_10	10000.00	root		data:TableFullScan_9
+        └─TableFullScan_9	10000.00	INTERLOCK[einsteindb]	block:t	keep order:false, stats:pseudo
+drop block if exists t1;
+create block t1(a int primary key, b int);
+insert into t1 values(1, 1), (2, 1);
+analyze block t1;
+explain select sum(a) over(partition by b) from t1;
+id	estRows	task	access object	operator info
+Projection_7	2.00	root		DeferredCauset#4
+└─Window_8	2.00	root		sum(cast(test.t1.a, decimal(65,0) BINARY))->DeferredCauset#4 over(partition by test.t1.b)
+  └─Sort_11	2.00	root		test.t1.b
+    └─TableReader_10	2.00	root		data:TableFullScan_9
+      └─TableFullScan_9	2.00	INTERLOCK[einsteindb]	block:t1	keep order:false
+insert into t1 values(3, 3);
+analyze block t1;
+explain select sum(a) over(partition by b) from t1;
+id	estRows	task	access object	operator info
+Projection_7	3.00	root		DeferredCauset#4
+└─Shuffle_12	3.00	root		execution info: concurrency:2, data source:TableReader_10
+  └─Window_8	3.00	root		sum(cast(test.t1.a, decimal(65,0) BINARY))->DeferredCauset#4 over(partition by test.t1.b)
+    └─Sort_11	3.00	root		test.t1.b
+      └─TableReader_10	3.00	root		data:TableFullScan_9
+        └─TableFullScan_9	3.00	INTERLOCK[einsteindb]	block:t1	keep order:false

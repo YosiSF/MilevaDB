@@ -2,7 +2,7 @@
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// You may obtain a INTERLOCKy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -10,7 +10,6 @@
 // distributed under the License is distributed on an "AS IS" BASIS,
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 
 package ast
 
@@ -495,7 +494,7 @@ func (n *TableNameExpr) Accept(v Visitor) (Node, bool) {
 type ColumnName struct {
 	node
 	Schema serial.CIStr
-	Table  serial.CIStr
+	Block  serial.CIStr
 	Name   serial.CIStr
 }
 
@@ -505,8 +504,8 @@ func (n *ColumnName) Restore(ctx *format.RestoreCtx) error {
 		ctx.WriteName(n.Schema.O)
 		ctx.WritePlain(".")
 	}
-	if n.Table.O != "" {
-		ctx.WriteName(n.Table.O)
+	if n.Block.O != "" {
+		ctx.WriteName(n.Block.O)
 		ctx.WritePlain(".")
 	}
 	ctx.WriteName(n.Name.O)
@@ -526,8 +525,8 @@ func (n *ColumnName) Accept(v Visitor) (Node, bool) {
 // String implements Stringer interface.
 func (n *ColumnName) String() string {
 	result := n.Name.L
-	if n.Table.L != "" {
-		result = n.Table.L + "." + result
+	if n.Block.L != "" {
+		result = n.Block.L + "." + result
 	}
 	if n.Schema.L != "" {
 		result = n.Schema.L + "." + result
@@ -538,10 +537,10 @@ func (n *ColumnName) String() string {
 // OrigColName returns the full original column name.
 func (n *ColumnName) OrigColName() (ret string) {
 	ret = n.Name.O
-	if n.Table.O == "" {
+	if n.Block.O == "" {
 		return
 	}
-	ret = n.Table.O + "." + ret
+	ret = n.Block.O + "." + ret
 	if n.Schema.O == "" {
 		return
 	}
@@ -1241,8 +1240,8 @@ type VariableExpr struct {
 	IsGlobal bool
 	// IsSystem indicates whether this variable is a system variable in current CausetNet.
 	IsSystem bool
-	// ExplicitScope indicates whether this variable scope is set explicitly.
-	ExplicitScope bool
+	// ExplicitSINTERLOCKe indicates whether this variable sINTERLOCKe is set explicitly.
+	ExplicitSINTERLOCKe bool
 	// Value is the variable value.
 	Value ExprNode
 }
@@ -1251,7 +1250,7 @@ type VariableExpr struct {
 func (n *VariableExpr) Restore(ctx *format.RestoreCtx) error {
 	if n.IsSystem {
 		ctx.WritePlain("@@")
-		if n.ExplicitScope {
+		if n.ExplicitSINTERLOCKe {
 			if n.IsGlobal {
 				ctx.WriteKeyWord("GLOBAL")
 			} else {

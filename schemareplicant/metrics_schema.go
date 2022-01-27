@@ -1,8 +1,8 @@
-// Copyright 2020 WHTCORPS INC, Inc.
+// INTERLOCKyright 2020 WHTCORPS INC, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// You may obtain a INTERLOCKy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -20,14 +20,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/BerolinaSQL/perceptron"
 	"github.com/whtcorpsinc/BerolinaSQL/allegrosql"
-	"github.com/whtcorpsinc/milevadb/spacetime/autoid"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
+	"github.com/whtcorpsinc/BerolinaSQL/perceptron"
+	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/milevadb/causet"
 	"github.com/whtcorpsinc/milevadb/soliton"
 	"github.com/whtcorpsinc/milevadb/soliton/set"
+	"github.com/whtcorpsinc/milevadb/spacetime/autoid"
+	"github.com/whtcorpsinc/milevadb/stochastikctx"
 )
 
 const (
@@ -50,11 +50,11 @@ func init() {
 		metricBlocks = append(metricBlocks, blockInfo)
 	}
 	dbInfo := &perceptron.DBInfo{
-		ID:      dbID,
-		Name:    perceptron.NewCIStr(soliton.MetricSchemaName.O),
-		Charset: allegrosql.DefaultCharset,
+		ID:          dbID,
+		Name:        perceptron.NewCIStr(soliton.MetricSchemaName.O),
+		Charset:     allegrosql.DefaultCharset,
 		DefCauslate: allegrosql.DefaultDefCauslationName,
-		Blocks:  metricBlocks,
+		Blocks:      metricBlocks,
 	}
 	RegisterVirtualBlock(dbInfo, blockFromMeta)
 }
@@ -160,8 +160,8 @@ func blockFromMeta(alloc autoid.SlabPredictors, spacetime *perceptron.BlockInfo)
 	t := &metricSchemaBlock{
 		schemareplicantBlock: schemareplicantBlock{
 			spacetime: spacetime,
-			defcaus: defCausumns,
-			tp:   causet.VirtualBlock,
+			defcaus:   defCausumns,
+			tp:        causet.VirtualBlock,
 		},
 	}
 	return t, nil

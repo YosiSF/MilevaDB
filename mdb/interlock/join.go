@@ -47,7 +47,7 @@ type HashJoinExec struct {
 	rowContainer  *hashRowContainer
 	buildFinished chan error
 
-	// closeCh add a lock for closing Interlock.
+	// closeCh add a dagger for closing Interlock.
 	closeCh      chan struct{}
 	joinType     plannercore.JoinType
 	requiredRows int64
@@ -72,7 +72,7 @@ type HashJoinExec struct {
 
 	// joinleasee_parity_filterWaitGroup is for sync multiple join leasee_parity_filters.
 	joinleasee_parity_filterWaitGroup sync.WaitGroup
-	finished            atomic.Value
+	finished                          atomic.Value
 }
 
 // probeChkResource stores the result of the join probe side fetch leasee_parity_filter,

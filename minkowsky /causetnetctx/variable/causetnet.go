@@ -99,16 +99,16 @@ type stmtFuture struct {
 	cachedTS uint64
 }
 
-// TransactionContext is used to store variables that has transaction scope.
+// TransactionContext is used to store variables that has transaction sINTERLOCKe.
 type TransactionContext struct {
-	forUpdateTS   uint64
-	stmtFuture    oracle.Future
-	DirtyDB       interface{}
-	Binlog        interface{}
-	schemareplicant    interface{}
-	History       interface{}
-	SchemaVersion int64
-	StartTS       uint64
+	forUpdateTS     uint64
+	stmtFuture      oracle.Future
+	DirtyDB         interface{}
+	Binlog          interface{}
+	schemareplicant interface{}
+	History         interface{}
+	SchemaVersion   int64
+	StartTS         uint64
 
 	// ShardStep indicates the max size of continuous rowid shard in one transaction.
 	ShardStep    int
@@ -121,7 +121,7 @@ type TransactionContext struct {
 	// Note: for the partitionted table, it stores all the partition IDs.
 	TableDeltaMap map[int64]TableDelta
 
-	// unchangedRowKeys is used to store the unchanged rows that needs to lock for pessimistic transaction.
+	// unchangedRowKeys is used to store the unchanged rows that needs to dagger for pessimistic transaction.
 	unchangedRowKeys map[string]struct{}
 
 	// pessimisticLockCache is the cache for pessimistic locked keys,
@@ -166,7 +166,7 @@ func (tc *TransactionContext) updateShard() {
 	tc.currentShard = int64(murmur3.Sum32(buf[:]))
 }
 
-// AddUnchangedRowKey adds an unchanged row key in update statement for pessimistic lock.
+// AddUnchangedRowKey adds an unchanged row key in update statement for pessimistic dagger.
 func (tc *TransactionContext) AddUnchangedRowKey(key []byte) {
 	if tc.unchangedRowKeys == nil {
 		tc.unchangedRowKeys = map[string]struct{}{}
@@ -174,7 +174,7 @@ func (tc *TransactionContext) AddUnchangedRowKey(key []byte) {
 	tc.unchangedRowKeys[string(key)] = struct{}{}
 }
 
-// CollectUnchangedRowKeys collects unchanged row keys for pessimistic lock.
+// CollectUnchangedRowKeys collects unchanged row keys for pessimistic dagger.
 func (tc *TransactionContext) CollectUnchangedRowKeys(buf []ekv.Key) []ekv.Key {
 	for key := range tc.unchangedRowKeys {
 		buf = append(buf, ekv.Key(key))
@@ -200,7 +200,7 @@ func (tc *TransactionContext) UpdateDeltaForTable(physicalTableID int64, delta i
 	tc.TableDeltaMap[physicalTableID] = item
 }
 
-// GetKeyInPessimisticLockCache gets a key in pessimistic lock cache.
+// GetKeyInPessimisticLockCache gets a key in pessimistic dagger cache.
 func (tc *TransactionContext) GetKeyInPessimisticLockCache(key ekv.Key) (val []byte, ok bool) {
 	if tc.pessimisticLockCache == nil {
 		return nil, false
@@ -212,7 +212,7 @@ func (tc *TransactionContext) GetKeyInPessimisticLockCache(key ekv.Key) (val []b
 	return
 }
 
-// SetPessimisticLockCache sets a key value pair into pessimistic lock cache.
+// SetPessimisticLockCache sets a key value pair into pessimistic dagger cache.
 func (tc *TransactionContext) SetPessimisticLockCache(key ekv.Key, val []byte) {
 	if tc.pessimisticLockCache == nil {
 		tc.pessimisticLockCache = map[string][]byte{}
@@ -324,7 +324,7 @@ type CausetNetVars struct {
 	BatchSize
 	RetryLimit          int64
 	DisableTxnAutoRetry bool
-	// UsersLock is a lock for user defined variables.
+	// UsersLock is a dagger for user defined variables.
 	UsersLock sync.RWMutex
 	// Users are user defined variables.
 	Users map[string]types.Datum
@@ -420,9 +420,9 @@ type CausetNetVars struct {
 	// This variable is currently not recommended to be turned on.
 	AllowWriteRowID bool
 
-	// AllowBatchCop means if we should send batch coprocessor to Noether. Default value is 1, means to use batch cop in case of aggregation and join.
-	// If value is set to 2 , which means to force to send batch cop for any query. Value is set to 0 means never use batch cop.
-	AllowBatchCop int
+	// AllowBatchINTERLOCK means if we should send batch interlocking_directorate to Noether. Default value is 1, means to use batch INTERLOCK in case of aggregation and join.
+	// If value is set to 2 , which means to force to send batch INTERLOCK for any query. Value is set to 0 means never use batch INTERLOCK.
+	AllowBatchINTERLOCK int
 
 	// MilevaDBAllowAutoRandExplicitInsert indicates whether explicit insertion on auto_random column is allowed.
 	AllowAutoRandExplicitInsert bool
@@ -435,8 +435,8 @@ type CausetNetVars struct {
 
 	// CPUFactor is the CPU cost of processing one expression for one row.
 	CPUFactor float64
-	// CopCPUFactor is the CPU cost of processing one expression for one row in coprocessor.
-	CopCPUFactor float64
+	// INTERLOCKCPUFactor is the CPU cost of processing one expression for one row in interlocking_directorate.
+	INTERLOCKCPUFactor float64
 	// NetworkFactor is the network cost of transferring 1 byte data.
 	NetworkFactor float64
 	// ScanFactor is the IO cost of scanning 1 byte data on EinsteinDB and Noether.
@@ -485,7 +485,7 @@ type CausetNetVars struct {
 	BatchCommit bool
 
 	// IDAllocator is provided by kvEncoder, if it is provided, we will use it to alloc auto id instead of using
-	// Table.alloc.
+	// Block.alloc.
 	IDAllocator autoid.Allocator
 
 	// OptimizerSelectivityLevel defines the level of the selectivity estimation in plan.
@@ -512,11 +512,11 @@ type CausetNetVars struct {
 	// WaitSplitRegionTimeout defines the split region timeout.
 	WaitSplitRegionTimeout uint64
 
-	// EnableStreaming indicates whether the coprocessor request can use streaming API.
+	// EnableStreaming indicates whether the interlocking_directorate request can use streaming API.
 	// TODO: remove this after MilevaDB-server configuration "enable-streaming' removed.
 	EnableStreaming bool
 
-	// EnableChunkRPC indicates whether the coprocessor request can use chunk API.
+	// EnableChunkRPC indicates whether the interlocking_directorate request can use chunk API.
 	EnableChunkRPC bool
 
 	writeStmtBufs WriteStmtBufs
@@ -613,7 +613,7 @@ type CausetNetVars struct {
 
 	PlannerSelectBlockAsName []ast.HintTable
 
-	// LockWaitTimeout is the duration waiting for pessimistic lock in milliseconds
+	// LockWaitTimeout is the duration waiting for pessimistic dagger in milliseconds
 	// negative value means nowait, 0 means default behavior, others means actual wait time
 	LockWaitTimeout int64
 
@@ -622,16 +622,16 @@ type CausetNetVars struct {
 	// MetricSchemaRangeDuration indicates the step when query metric schema.
 	MetricSchemaRangeDuration int64
 
-	// Some data of cluster-level memory tables will be retrieved many times in different inspection rules,
+	// Some data of cluster-level memory blocks will be retrieved many times in different inspection rules,
 	// and the cost of retrieving some data is expensive. We use the `TableSnapshot` to cache those data
-	// and obtain them lazily, and provide a consistent view of inspection tables for each inspection rules.
+	// and obtain them lazily, and provide a consistent view of inspection blocks for each inspection rules.
 	// All cached snapshots will be released at the end of retrieving
 	InspectionTableCache map[string]TableSnapshot
 
 	// RowEncoder is reused in CausetNet for encode row data.
 	RowEncoder rowcodec.Encoder
 
-	// SequenceState cache all sequence's latest value accessed by lastval() builtins. It's a CausetNet scoped
+	// SequenceState cache all sequence's latest value accessed by lastval() builtins. It's a CausetNet sINTERLOCKed
 	// variable, and all public methods of SequenceState are currently-safe.
 	SequenceState *SequenceState
 

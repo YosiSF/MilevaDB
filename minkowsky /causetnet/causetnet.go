@@ -162,32 +162,32 @@ type causetnet struct {
 	// lockedTables use to record the table locks hold by the causetnet.
 	lockedTables map[int64]serial.TableLockTpInfo
 
-	// client shared coprocessor client per causetnet
+	// client shared interlocking_directorate client per causetnet
 	client ekv.Client
 }
 
-// AddTableLock adds table lock to the causetnet lock map.
+// AddTableLock adds table dagger to the causetnet dagger map.
 func (s *causetnet) AddTableLock(locks []serial.TableLockTpInfo) {
 	for _, l := range locks {
 		s.lockedTables[l.TableID] = l
 	}
 }
 
-// ReleaseTableLocks releases table lock in the causetnet lock map.
+// ReleaseTableLocks releases table dagger in the causetnet dagger map.
 func (s *causetnet) ReleaseTableLocks(locks []serial.TableLockTpInfo) {
 	for _, l := range locks {
 		delete(s.lockedTables, l.TableID)
 	}
 }
 
-// ReleaseTableLockByTableIDs releases table lock in the causetnet lock map by table ID.
+// ReleaseTableLockByTableIDs releases table dagger in the causetnet dagger map by table ID.
 func (s *causetnet) ReleaseTableLockByTableIDs(tableIDs []int64) {
 	for _, tblID := range tableIDs {
 		delete(s.lockedTables, tblID)
 	}
 }
 
-// CheckTableLocked checks the table lock.
+// CheckTableLocked checks the table dagger.
 func (s *causetnet) CheckTableLocked(tblID int64) (bool, serial.TableLockType) {
 	lt, ok := s.lockedTables[tblID]
 	if !ok {
@@ -205,7 +205,7 @@ func (s *causetnet) GetAllTableLocks() []serial.TableLockTpInfo {
 	return lockTpInfo
 }
 
-// HasLockedTables uses to check whether this causetnet locked any tables.
+// HasLockedTables uses to check whether this causetnet locked any blocks.
 // If so, the causetnet can only visit the table which locked by self.
 func (s *causetnet) HasLockedTables() bool {
 	b := len(s.lockedTables) > 0
@@ -353,7 +353,7 @@ func (s *causetnet) FieldList(tableName string) ([]*ast.ResultField, error) {
 			ColumnAsName: col.Name,
 			TableAsName:  tName,
 			DBName:       dbName,
-			Table:        table.Meta(),
+			Block:        table.Meta(),
 			Column:       col.ColumnInfo,
 		}
 		fields = append(fields, rf)
@@ -970,7 +970,7 @@ func (s *causetnet) SetGlobalSysVar(name, value string) error {
 	}
 	var sVal string
 	var err error
-	sVal, err = variable.ValidateSetSystemVar(s.causetnetVars, name, value, variable.ScopeGlobal)
+	sVal, err = variable.ValidateSetSystemVar(s.causetnetVars, name, value, variable.SINTERLOCKeGlobal)
 	if err != nil {
 		return err
 	}
@@ -1295,13 +1295,13 @@ func (s *causetnet) cachedPlanExec(ctx context.Context,
 
 	stmtCtx := s.GetCausetnetVars().StmtCtx
 	stmt := &Interlock.ExecStmt{
-		GoCtx:       ctx,
-		schemareplicant:  is,
-		Plan:        execPlan,
-		StmtNode:    execAst,
-		Ctx:         s,
-		OutputNames: execPlan.OutputNames(),
-		PsStmt:      prepareStmt,
+		GoCtx:           ctx,
+		schemareplicant: is,
+		Plan:            execPlan,
+		StmtNode:        execAst,
+		Ctx:             s,
+		OutputNames:     execPlan.OutputNames(),
+		PsStmt:          prepareStmt,
 	}
 	compileDuration := time.Since(s.causetnetVars.StartTime)
 	causetnetExecuteCompileDurationGeneral.Observe(compileDuration.Seconds())
@@ -1502,11 +1502,11 @@ func (s *causetnet) NewTxn(ctx context.Context) error {
 	s.txn.changeInvalidToValid(txn)
 	is := domain.GetDomain(s).schemareplicant()
 	s.causetnetVars.TxnCtx = &variable.TransactionContext{
-		schemareplicant:    is,
-		SchemaVersion: is.SchemaMetaVersion(),
-		CreateTime:    time.Now(),
-		StartTS:       txn.StartTS(),
-		ShardStep:     int(s.causetnetVars.ShardAllocateStep),
+		schemareplicant: is,
+		SchemaVersion:   is.SchemaMetaVersion(),
+		CreateTime:      time.Now(),
+		StartTS:         txn.StartTS(),
+		ShardStep:       int(s.causetnetVars.ShardAllocateStep),
 	}
 	return nil
 }
@@ -1544,7 +1544,7 @@ func (s *causetnet) Close() {
 		lockedTables := s.GetAllTableLocks()
 		err := domain.GetDomain(s).DDL().UnlockTables(s, lockedTables)
 		if err != nil {
-			logutil.BgLogger().Error("release table lock failed", zap.Uint64("conn", s.causetnetVars.ConnectionID))
+			logutil.BgLogger().Error("release table dagger failed", zap.Uint64("conn", s.causetnetVars.ConnectionID))
 		}
 	}
 	if s.statsCollector != nil {
@@ -1851,8 +1851,8 @@ func createCausetnetWithOpt(store ekv.Storage, opt *Opt) (*causetnet, error) {
 	}
 	s := &causetnet{
 		store:           store,
-		BerolinaSQL:          BerolinaSQL.New(),
-		causetnetVars:     variable.NewCausetnetVars(),
+		BerolinaSQL:     BerolinaSQL.New(),
+		causetnetVars:   variable.NewCausetnetVars(),
 		ddlOwnerChecker: dom.DDL().OwnerManager(),
 		client:          store.GetClient(),
 	}
@@ -1879,14 +1879,14 @@ func createCausetnetWithOpt(store ekv.Storage, opt *Opt) (*causetnet, error) {
 
 // CreateCausetnetWithDomain creates a new Causetnet and binds it with a Domain.
 // We need this because when we start DDL in Domain, the DDL need a causetnet
-// to change some system tables. But at that time, we have been already in
-// a lock context, which cause we can't call createSesion directly.
+// to change some system blocks. But at that time, we have been already in
+// a dagger context, which cause we can't call createSesion directly.
 func CreateCausetnetWithDomain(store ekv.Storage, dom *domain.Domain) (*causetnet, error) {
 	s := &causetnet{
-		store:       store,
-		BerolinaSQL:      BerolinaSQL.New(),
+		store:         store,
+		BerolinaSQL:   BerolinaSQL.New(),
 		causetnetVars: variable.NewCausetnetVars(),
-		client:      store.GetClient(),
+		client:        store.GetClient(),
 	}
 	if plannercore.PreparedPlanCacheEnabled() {
 		s.preparedPlanCache = kvcache.NewSimpleLRUCache(plannercore.PreparedPlanCacheCapacity,
@@ -2004,7 +2004,7 @@ var builtinGlobalVariable = []string{
 	variable.MilevaDBOptCorrelationThreshold,
 	variable.MilevaDBOptCorrelationExpFactor,
 	variable.MilevaDBOptCPUFactor,
-	variable.MilevaDBOptCopCPUFactor,
+	variable.MilevaDBOptINTERLOCKCPUFactor,
 	variable.MilevaDBOptNetworkFactor,
 	variable.MilevaDBOptScanFactor,
 	variable.MilevaDBOptDescScanFactor,
@@ -2025,7 +2025,7 @@ var builtinGlobalVariable = []string{
 	variable.MilevaDBEnableNoopFuncs,
 	variable.MilevaDBEnableIndexMerge,
 	variable.MilevaDBTxnMode,
-	variable.MilevaDBAllowBatchCop,
+	variable.MilevaDBAllowBatchINTERLOCK,
 	variable.MilevaDBRowFormatVersion,
 	variable.MilevaDBEnableStmtSummary,
 	variable.MilevaDBStmtSummaryInternalQuery,
@@ -2075,7 +2075,7 @@ func (s *causetnet) loadCommonGlobalVariablesIfNeeded() error {
 
 	var err error
 	// Use GlobalVariableCache if MilevaDB just loaded global variables within 2 second ago.
-	// When a lot of connections connect to MilevaDB simultaneously, it can protect TiKV meta region from overload.
+	// When a lot of connections connect to MilevaDB simultaneously, it can protect EinsteinDB meta region from overload.
 	gvc := domain.GetDomain(s).GetGlobalVarsCache()
 	loadFunc := func() ([]chunk.Row, []*ast.ResultField, error) {
 		return s.ExecRestrictedSQL(loadCommonGlobalVarsSQL)
@@ -2121,10 +2121,10 @@ func (s *causetnet) PrepareTxnCtx(ctx context.Context) {
 
 	is := domain.GetDomain(s).schemareplicant()
 	s.causetnetVars.TxnCtx = &variable.TransactionContext{
-		schemareplicant:    is,
-		SchemaVersion: is.SchemaMetaVersion(),
-		CreateTime:    time.Now(),
-		ShardStep:     int(s.causetnetVars.ShardAllocateStep),
+		schemareplicant: is,
+		SchemaVersion:   is.SchemaMetaVersion(),
+		CreateTime:      time.Now(),
+		ShardStep:       int(s.causetnetVars.ShardAllocateStep),
 	}
 	if !s.causetnetVars.IsAutocommit() {
 		pessTxnConf := config.GetGlobalConfig().PessimisticTxn

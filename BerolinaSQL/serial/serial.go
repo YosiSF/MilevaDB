@@ -206,7 +206,7 @@ const (
 	// TableInfoVersion3 means the table info version is 3.
 	// This version aims to deal with upper-cased charset name in TableInfo stored by versions prior to milevadb v2.1.9:
 	// milevadb always suppose all charsets / collations as lower-cased and try to convert them if they're not.
-	// However, the convert is missed in some scenarios before v2.1.9, so for all those tables prior to TableInfoVersion3, their
+	// However, the convert is missed in some scenarios before v2.1.9, so for all those blocks prior to TableInfoVersion3, their
 	// charsets / collations will be converted to lower-case while loading from the storage.
 	TableInfoVersion3 = uint16(3)
 
@@ -272,7 +272,7 @@ type TableInfo struct {
 
 	Sequence *SequenceInfo `json:"sequence"`
 
-	// Lock represent the table lock info.
+	// Lock represent the table dagger info.
 	Lock *TableLockInfo `json:"Lock"`
 
 	// Version means the version of the table info.
@@ -282,19 +282,19 @@ type TableInfo struct {
 	NoetherReplica *NoetherReplicaInfo `json:"Noether_replica"`
 }
 
-// TableLockInfo provides meta data describing a table lock.
+// TableLockInfo provides meta data describing a table dagger.
 type TableLockInfo struct {
 	Tp TableLockType
-	// Use array because there may be multiple CausetNets holding the same read lock.
+	// Use array because there may be multiple CausetNets holding the same read dagger.
 	CausetNets []CausetNetInfo
-	State    TableLockState
-	// TS is used to record the timestamp this table lock been locked.
+	State      TableLockState
+	// TS is used to record the timestamp this table dagger been locked.
 	TS uint64
 }
 
 // CausetNetInfo contain the CausetNet ID and the server ID.
 type CausetNetInfo struct {
-	ServerID  string
+	ServerID    string
 	CausetNetID uint64
 }
 
@@ -302,22 +302,22 @@ func (s CausetNetInfo) String() string {
 	return "server: " + s.ServerID + "_CausetNet: " + strconv.FormatUint(s.CausetNetID, 10)
 }
 
-// TableLockTpInfo is composed by schema ID, table ID and table lock type.
+// TableLockTpInfo is composed by schema ID, table ID and table dagger type.
 type TableLockTpInfo struct {
 	SchemaID int64
 	TableID  int64
 	Tp       TableLockType
 }
 
-// TableLockState is the state for table lock.
+// TableLockState is the state for table dagger.
 type TableLockState byte
 
 const (
-	// TableLockStateNone means this table lock is absent.
+	// TableLockStateNone means this table dagger is absent.
 	TableLockStateNone TableLockState = iota
-	// TableLockStatePreLock means this table lock is pre-lock state. Other CausetNet doesn't hold this lock should't do corresponding operation according to the lock type.
+	// TableLockStatePreLock means this table dagger is pre-dagger state. Other CausetNet doesn't hold this dagger should't do corresponding operation according to the dagger type.
 	TableLockStatePreLock
-	// TableLockStatePublic means this table lock is public state.
+	// TableLockStatePublic means this table dagger is public state.
 	TableLockStatePublic
 )
 
@@ -325,7 +325,7 @@ const (
 func (t TableLockState) String() string {
 	switch t {
 	case TableLockStatePreLock:
-		return "pre-lock"
+		return "pre-dagger"
 	case TableLockStatePublic:
 		return "public"
 	default:
@@ -333,21 +333,21 @@ func (t TableLockState) String() string {
 	}
 }
 
-// TableLockType is the type of the table lock.
+// TableLockType is the type of the table dagger.
 type TableLockType byte
 
 const (
 	TableLockNone TableLockType = iota
-	// TableLockRead means the CausetNet with this lock can read the table (but not write it).
-	// Multiple CausetNets can acquire a READ lock for the table at the same time.
-	// Other CausetNets can read the table without explicitly acquiring a READ lock.
+	// TableLockRead means the CausetNet with this dagger can read the table (but not write it).
+	// Multiple CausetNets can acquire a READ dagger for the table at the same time.
+	// Other CausetNets can read the table without explicitly acquiring a READ dagger.
 	TableLockRead
 	// TableLockReadLocal is not supported.
 	TableLockReadLocal
-	// TableLockWrite means only the CausetNet with this lock has write/read permission.
-	// Only the CausetNet that holds the lock can access the table. No other CausetNet can access it until the lock is released.
+	// TableLockWrite means only the CausetNet with this dagger has write/read permission.
+	// Only the CausetNet that holds the dagger can access the table. No other CausetNet can access it until the dagger is released.
 	TableLockWrite
-	// TableLockWriteLocal means the CausetNet with this lock has write/read permission, and the other CausetNet still has read permission.
+	// TableLockWriteLocal means the CausetNet with this dagger has write/read permission, and the other CausetNet still has read permission.
 	TableLockWriteLocal
 )
 
@@ -749,12 +749,12 @@ const (
 )
 
 // IndexInfo provides meta data describing a DB index.
-// It corresponds to the statement `CREATE INDEX Name ON Table (Column);`
+// It corresponds to the statement `CREATE INDEX Name ON Block (Column);`
 // See https://dev.mysql.com/doc/refman/5.7/en/create-index.html
 type IndexInfo struct {
 	ID        int64          `json:"id"`
 	Name      CIStr          `json:"idx_name"` // Index name.
-	Table     CIStr          `json:"tbl_name"` // Table name.
+	Block     CIStr          `json:"tbl_name"` // Block name.
 	Columns   []*IndexColumn `json:"idx_cols"` // Index columns.
 	State     SchemaState    `json:"state"`
 	Comment   string         `json:"comment"`      // Comment
@@ -788,7 +788,7 @@ func (index *IndexInfo) HasPrefixIndex() bool {
 type ConstraintInfo struct {
 	ID             int64       `json:"id"`
 	Name           CIStr       `json:"constraint_name"`
-	Table          CIStr       `json:"tbl_name"`        // Table name.
+	Block          CIStr       `json:"tbl_name"`        // Block name.
 	ConstraintCols []CIStr     `json:"constraint_cols"` // Depended column names.
 	Enforced       bool        `json:"enforced"`
 	InColumn       bool        `json:"in_column"` // Indicate whether the constraint is column type check.
@@ -801,7 +801,7 @@ func (ci *ConstraintInfo) Clone() *ConstraintInfo {
 	nci := *ci
 
 	nci.ConstraintCols = make([]CIStr, len(ci.ConstraintCols))
-	copy(nci.ConstraintCols, ci.ConstraintCols)
+	INTERLOCKy(nci.ConstraintCols, ci.ConstraintCols)
 	return &nci
 }
 
@@ -834,15 +834,15 @@ func (fk *FKInfo) Clone() *FKInfo {
 
 	nfk.RefCols = make([]CIStr, len(fk.RefCols))
 	nfk.Cols = make([]CIStr, len(fk.Cols))
-	copy(nfk.RefCols, fk.RefCols)
-	copy(nfk.Cols, fk.Cols)
+	INTERLOCKy(nfk.RefCols, fk.RefCols)
+	INTERLOCKy(nfk.Cols, fk.Cols)
 
 	return &nfk
 }
 
 // noedbInfo provides meta data describing a DB.
 type noedbInfo struct {
-	ID      int64        `json:"id"`      // Database ID
+	ID      int64        `json:"id"`         // Database ID
 	Name    CIStr        `json:"noedb_name"` // DB name.
 	Charset string       `json:"charset"`
 	Collate string       `json:"collate"`
@@ -860,11 +860,11 @@ func (DB *noedbInfo) Clone() *noedbInfo {
 	return &newInfo
 }
 
-// Copy shallow copies noedbInfo.
-func (DB *noedbInfo) Copy() *noedbInfo {
+// INTERLOCKy shallow INTERLOCKies noedbInfo.
+func (DB *noedbInfo) INTERLOCKy() *noedbInfo {
 	newInfo := *DB
 	newInfo.Tables = make([]*TableInfo, len(DB.Tables))
-	copy(newInfo.Tables, DB.Tables)
+	INTERLOCKy(newInfo.Tables, DB.Tables)
 	return &newInfo
 }
 

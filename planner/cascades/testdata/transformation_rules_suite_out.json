@@ -1,0 +1,2445 @@
+[
+  {
+    "Name": "TestPredicatePushDown",
+    "Cases": [
+      {
+        "ALLEGROALLEGROSQL": "select a, b from (select a, b from t as t1 order by a) as t2 where t2.b > 10",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.b]",
+          "    Projection_5 input:[Group#1], test.t.a, test.t.b",
+          "Group#1 Schema:[test.t.a,test.t.b]",
+          "    Sort_3 input:[Group#2], test.t.a",
+          "Group#2 Schema:[test.t.a,test.t.b]",
+          "    Projection_2 input:[Group#3], test.t.a, test.t.b",
+          "Group#3 Schema:[test.t.a,test.t.b]",
+          "    EinsteinDBSingleGather_8 input:[Group#4], block:t1",
+          "Group#4 Schema:[test.t.a,test.t.b]",
+          "    Selection_9 input:[Group#5], gt(test.t.b, 10)",
+          "Group#5 Schema:[test.t.a,test.t.b]",
+          "    BlockScan_7 block:t1, pk defCaus:test.t.a"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select a, b from (select a, b from t as t1 order by a) as t2 where t2.a > 10",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.b]",
+          "    Projection_5 input:[Group#1], test.t.a, test.t.b",
+          "Group#1 Schema:[test.t.a,test.t.b]",
+          "    Sort_3 input:[Group#2], test.t.a",
+          "Group#2 Schema:[test.t.a,test.t.b]",
+          "    Projection_2 input:[Group#3], test.t.a, test.t.b",
+          "Group#3 Schema:[test.t.a,test.t.b]",
+          "    EinsteinDBSingleGather_8 input:[Group#4], block:t1",
+          "Group#4 Schema:[test.t.a,test.t.b]",
+          "    BlockScan_10 block:t1, pk defCaus:test.t.a, cond:[gt(test.t.a, 10)]"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select a, b from (select a, b, a+b as a_b from t as t1) as t2 where a_b > 10 and b = 1",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.b]",
+          "    Projection_4 input:[Group#1], test.t.a, test.t.b",
+          "Group#1 Schema:[test.t.a,test.t.b,DeferredCauset#13]",
+          "    Projection_2 input:[Group#2], test.t.a, test.t.b, plus(test.t.a, test.t.b)->DeferredCauset#13",
+          "Group#2 Schema:[test.t.a,test.t.b]",
+          "    EinsteinDBSingleGather_7 input:[Group#3], block:t1",
+          "Group#3 Schema:[test.t.a,test.t.b]",
+          "    Selection_8 input:[Group#4], eq(test.t.b, 1), gt(plus(test.t.a, test.t.b), 10)",
+          "Group#4 Schema:[test.t.a,test.t.b]",
+          "    BlockScan_6 block:t1, pk defCaus:test.t.a"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select b, @i:=@i+1 as ii from (select b, @i:=0 from t as t1) as t2 where @i < 10",
+        "Result": [
+          "Group#0 Schema:[test.t.b,DeferredCauset#14]",
+          "    Projection_4 input:[Group#1], test.t.b, setvar(i, cast(plus(cast(getvar(i), double BINARY), 1), var_string(5)))->DeferredCauset#14",
+          "Group#1 Schema:[test.t.b,DeferredCauset#13]",
+          "    Selection_3 input:[Group#2], lt(cast(getvar(\"i\")), 10)",
+          "Group#2 Schema:[test.t.b,DeferredCauset#13]",
+          "    Projection_2 input:[Group#3], test.t.b, setvar(i, 0)->DeferredCauset#13",
+          "Group#3 Schema:[test.t.b]",
+          "    EinsteinDBSingleGather_6 input:[Group#4], block:t1",
+          "Group#4 Schema:[test.t.b]",
+          "    BlockScan_5 block:t1"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select b, @i:=@i+1 as ii from (select a, b, @i:=0 from t as t1) as t2 where @i < 10 and a > 10",
+        "Result": [
+          "Group#0 Schema:[test.t.b,DeferredCauset#14]",
+          "    Projection_4 input:[Group#1], test.t.b, setvar(i, cast(plus(cast(getvar(i), double BINARY), 1), var_string(5)))->DeferredCauset#14",
+          "Group#1 Schema:[test.t.a,test.t.b,DeferredCauset#13]",
+          "    Selection_6 input:[Group#2], lt(cast(getvar(\"i\")), 10)",
+          "Group#2 Schema:[test.t.a,test.t.b,DeferredCauset#13]",
+          "    Projection_2 input:[Group#3], test.t.a, test.t.b, setvar(i, 0)->DeferredCauset#13",
+          "Group#3 Schema:[test.t.a,test.t.b]",
+          "    EinsteinDBSingleGather_8 input:[Group#4], block:t1",
+          "Group#4 Schema:[test.t.a,test.t.b]",
+          "    BlockScan_10 block:t1, pk defCaus:test.t.a, cond:[gt(test.t.a, 10)]"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select a, max(b) from t group by a having a > 1",
+        "Result": [
+          "Group#0 Schema:[test.t.a,DeferredCauset#13]",
+          "    Projection_3 input:[Group#1], test.t.a, DeferredCauset#13",
+          "Group#1 Schema:[DeferredCauset#13,test.t.a]",
+          "    Aggregation_2 input:[Group#2], group by:test.t.a, funcs:max(test.t.b), firstrow(test.t.a)",
+          "Group#2 Schema:[test.t.a,test.t.b]",
+          "    EinsteinDBSingleGather_8 input:[Group#3], block:t",
+          "Group#3 Schema:[test.t.a,test.t.b]",
+          "    BlockScan_10 block:t, pk defCaus:test.t.a, cond:[gt(test.t.a, 1)]"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select a, avg(b) from t group by a having a > 1 and max(b) > 10",
+        "Result": [
+          "Group#0 Schema:[test.t.a,DeferredCauset#16]",
+          "    Projection_5 input:[Group#1], test.t.a, DeferredCauset#13",
+          "Group#1 Schema:[test.t.a,DeferredCauset#13,DeferredCauset#14]",
+          "    Projection_3 input:[Group#2], test.t.a, DeferredCauset#13, DeferredCauset#14",
+          "Group#2 Schema:[DeferredCauset#13,DeferredCauset#14,test.t.a]",
+          "    Selection_8 input:[Group#3], gt(DeferredCauset#14, 10)",
+          "Group#3 Schema:[DeferredCauset#13,DeferredCauset#14,test.t.a]",
+          "    Aggregation_2 input:[Group#4], group by:test.t.a, funcs:avg(test.t.b), max(test.t.b), firstrow(test.t.a)",
+          "Group#4 Schema:[test.t.a,test.t.b]",
+          "    EinsteinDBSingleGather_10 input:[Group#5], block:t",
+          "Group#5 Schema:[test.t.a,test.t.b]",
+          "    BlockScan_12 block:t, pk defCaus:test.t.a, cond:[gt(test.t.a, 1)]"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select a, approx_count_distinct(b) from t group by a having a > 1 and max(b) > 10",
+        "Result": [
+          "Group#0 Schema:[test.t.a,DeferredCauset#16]",
+          "    Projection_5 input:[Group#1], test.t.a, DeferredCauset#13",
+          "Group#1 Schema:[test.t.a,DeferredCauset#13,DeferredCauset#14]",
+          "    Projection_3 input:[Group#2], test.t.a, DeferredCauset#13, DeferredCauset#14",
+          "Group#2 Schema:[DeferredCauset#13,DeferredCauset#14,test.t.a]",
+          "    Selection_8 input:[Group#3], gt(DeferredCauset#14, 10)",
+          "Group#3 Schema:[DeferredCauset#13,DeferredCauset#14,test.t.a]",
+          "    Aggregation_2 input:[Group#4], group by:test.t.a, funcs:approx_count_distinct(test.t.b), max(test.t.b), firstrow(test.t.a)",
+          "Group#4 Schema:[test.t.a,test.t.b]",
+          "    EinsteinDBSingleGather_10 input:[Group#5], block:t",
+          "Group#5 Schema:[test.t.a,test.t.b]",
+          "    BlockScan_12 block:t, pk defCaus:test.t.a, cond:[gt(test.t.a, 1)]"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select t1.a, t1.b, t2.b from t t1, t t2 where t1.a = t2.a and t2.b = t1.b and t1.a > 10 and t2.b > 10 and t1.a > t2.b",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.b,test.t.b]",
+          "    Projection_5 input:[Group#1], test.t.a, test.t.b, test.t.b",
+          "Group#1 Schema:[test.t.a,test.t.b,test.t.a,test.t.b]",
+          "    Join_3 input:[Group#2,Group#3], inner join, equal:[eq(test.t.a, test.t.a) eq(test.t.b, test.t.b)], other cond:gt(test.t.a, test.t.b)",
+          "Group#2 Schema:[test.t.a,test.t.b]",
+          "    EinsteinDBSingleGather_9 input:[Group#4], block:t1",
+          "Group#4 Schema:[test.t.a,test.t.b]",
+          "    Selection_12 input:[Group#5], gt(test.t.a, test.t.b), gt(test.t.b, 10)",
+          "Group#5 Schema:[test.t.a,test.t.b]",
+          "    BlockScan_11 block:t1, pk defCaus:test.t.a, cond:[gt(test.t.a, 10)]",
+          "Group#3 Schema:[test.t.a,test.t.b]",
+          "    EinsteinDBSingleGather_14 input:[Group#6], block:t2",
+          "Group#6 Schema:[test.t.a,test.t.b]",
+          "    Selection_17 input:[Group#7], gt(test.t.a, test.t.b), gt(test.t.b, 10)",
+          "Group#7 Schema:[test.t.a,test.t.b]",
+          "    BlockScan_16 block:t2, pk defCaus:test.t.a, cond:[gt(test.t.a, 10)]"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select t1.a, t1.b from t t1, t t2 where t1.a = t2.a and t1.a = 10 and t2.a = 5",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.b]",
+          "    Projection_5 input:[Group#1], test.t.a, test.t.b",
+          "Group#1 Schema:[test.t.a,test.t.b,test.t.a]",
+          "    BlockDual_6 rowcount:0"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select a, f from t where f > 1",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.f]",
+          "    Projection_3 input:[Group#1], test.t.a, test.t.f",
+          "Group#1 Schema:[test.t.a,test.t.f]",
+          "    EinsteinDBSingleGather_5 input:[Group#2], block:t",
+          "    EinsteinDBSingleGather_7 input:[Group#3], block:t, index:f",
+          "    EinsteinDBSingleGather_9 input:[Group#4], block:t, index:f_g",
+          "Group#2 Schema:[test.t.a,test.t.f]",
+          "    Selection_10 input:[Group#5], gt(test.t.f, 1)",
+          "Group#5 Schema:[test.t.a,test.t.f]",
+          "    BlockScan_4 block:t, pk defCaus:test.t.a",
+          "Group#3 Schema:[test.t.a,test.t.f]",
+          "    IndexScan_13 block:t, index:f, cond:[gt(test.t.f, 1)]",
+          "Group#4 Schema:[test.t.a,test.t.f]",
+          "    IndexScan_14 block:t, index:f, g, cond:[gt(test.t.f, 1)]"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select a, f from (select a, f, g from t where f = 1) t1 where g > 1",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.f]",
+          "    Projection_5 input:[Group#1], test.t.a, test.t.f",
+          "Group#1 Schema:[test.t.a,test.t.f,test.t.g]",
+          "    Projection_3 input:[Group#2], test.t.a, test.t.f, test.t.g",
+          "Group#2 Schema:[test.t.a,test.t.f,test.t.g]",
+          "    EinsteinDBSingleGather_9 input:[Group#3], block:t",
+          "    EinsteinDBSingleGather_11 input:[Group#4], block:t, index:f_g",
+          "Group#3 Schema:[test.t.a,test.t.f,test.t.g]",
+          "    Selection_12 input:[Group#5], eq(test.t.f, 1), gt(test.t.g, 1)",
+          "Group#5 Schema:[test.t.a,test.t.f,test.t.g]",
+          "    BlockScan_8 block:t, pk defCaus:test.t.a",
+          "Group#4 Schema:[test.t.a,test.t.f,test.t.g]",
+          "    IndexScan_14 block:t, index:f, g, cond:[eq(test.t.f, 1) gt(test.t.g, 1)]"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select a, f from t where g > 1 and f > 1",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.f]",
+          "    Projection_3 input:[Group#1], test.t.a, test.t.f",
+          "Group#1 Schema:[test.t.a,test.t.f,test.t.g]",
+          "    EinsteinDBSingleGather_5 input:[Group#2], block:t",
+          "    EinsteinDBSingleGather_7 input:[Group#3], block:t, index:f_g",
+          "Group#2 Schema:[test.t.a,test.t.f,test.t.g]",
+          "    Selection_8 input:[Group#4], gt(test.t.f, 1), gt(test.t.g, 1)",
+          "Group#4 Schema:[test.t.a,test.t.f,test.t.g]",
+          "    BlockScan_4 block:t, pk defCaus:test.t.a",
+          "Group#3 Schema:[test.t.a,test.t.f,test.t.g]",
+          "    Selection_11 input:[Group#5], gt(test.t.g, 1)",
+          "Group#5 Schema:[test.t.a,test.t.f,test.t.g]",
+          "    IndexScan_10 block:t, index:f, g, cond:[gt(test.t.f, 1)]"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select t1.a, t1.b from t t1, t t2 where t1.a = t2.a and t1.a = 10 and t2.a = 5",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.b]",
+          "    Projection_5 input:[Group#1], test.t.a, test.t.b",
+          "Group#1 Schema:[test.t.a,test.t.b,test.t.a]",
+          "    BlockDual_6 rowcount:0"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select a, b from ((select a, b from t) union all(select c as a, d as b from t)) as t1 where a > 1",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#25,DeferredCauset#26]",
+          "    Projection_9 input:[Group#1], DeferredCauset#25, DeferredCauset#26",
+          "Group#1 Schema:[DeferredCauset#25,DeferredCauset#26]",
+          "    Union_5 input:[Group#2,Group#3]",
+          "Group#2 Schema:[DeferredCauset#25,DeferredCauset#26]",
+          "    Projection_6 input:[Group#4], test.t.a, test.t.b",
+          "Group#4 Schema:[test.t.a,test.t.b]",
+          "    Projection_2 input:[Group#5], test.t.a, test.t.b",
+          "Group#5 Schema:[test.t.a,test.t.b]",
+          "    EinsteinDBSingleGather_15 input:[Group#6], block:t",
+          "Group#6 Schema:[test.t.a,test.t.b]",
+          "    BlockScan_17 block:t, pk defCaus:test.t.a, cond:[gt(test.t.a, 1)]",
+          "Group#3 Schema:[DeferredCauset#25,DeferredCauset#26]",
+          "    Projection_7 input:[Group#7], test.t.c, test.t.d",
+          "Group#7 Schema:[test.t.c,test.t.d]",
+          "    Projection_4 input:[Group#8], test.t.c, test.t.d",
+          "Group#8 Schema:[test.t.c,test.t.d]",
+          "    EinsteinDBSingleGather_19 input:[Group#9], block:t",
+          "    EinsteinDBSingleGather_21 input:[Group#10], block:t, index:c_d_e",
+          "Group#9 Schema:[test.t.c,test.t.d]",
+          "    Selection_22 input:[Group#11], gt(test.t.c, 1)",
+          "Group#11 Schema:[test.t.c,test.t.d]",
+          "    BlockScan_18 block:t",
+          "Group#10 Schema:[test.t.c,test.t.d]",
+          "    IndexScan_24 block:t, index:c, d, e, cond:[gt(test.t.c, 1)]"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select a, b from (select a, b, min(a) over(partition by b) as min_a from t)as tt where a < 10 and b > 10 and b = min_a",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.b]",
+          "    Projection_7 input:[Group#1], test.t.a, test.t.b",
+          "Group#1 Schema:[test.t.a,test.t.b,DeferredCauset#14]",
+          "    Projection_5 input:[Group#2], test.t.a, test.t.b, DeferredCauset#14",
+          "Group#2 Schema:[test.t.a,test.t.b,DeferredCauset#14]",
+          "    Selection_10 input:[Group#3], eq(test.t.b, DeferredCauset#14), lt(test.t.a, 10)",
+          "Group#3 Schema:[test.t.a,test.t.b,DeferredCauset#14]",
+          "    Window_4 input:[Group#4]",
+          "Group#4 Schema:[test.t.a,test.t.b]",
+          "    Projection_3 input:[Group#5], test.t.a, test.t.b",
+          "Group#5 Schema:[test.t.a,test.t.b]",
+          "    Projection_2 input:[Group#6], test.t.a, test.t.b",
+          "Group#6 Schema:[test.t.a,test.t.b]",
+          "    EinsteinDBSingleGather_14 input:[Group#7], block:t",
+          "Group#7 Schema:[test.t.a,test.t.b]",
+          "    Selection_15 input:[Group#8], gt(test.t.b, 10)",
+          "Group#8 Schema:[test.t.a,test.t.b]",
+          "    BlockScan_13 block:t, pk defCaus:test.t.a"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select b, c from (select b, c from t where b > 1 and c > 1) as t1 where b > 2 and c > 2",
+        "Result": [
+          "Group#0 Schema:[test.t.b,test.t.c]",
+          "    Projection_5 input:[Group#1], test.t.b, test.t.c",
+          "Group#1 Schema:[test.t.b,test.t.c]",
+          "    Projection_3 input:[Group#2], test.t.b, test.t.c",
+          "Group#2 Schema:[test.t.b,test.t.c]",
+          "    EinsteinDBSingleGather_9 input:[Group#3], block:t",
+          "Group#3 Schema:[test.t.b,test.t.c]",
+          "    Selection_10 input:[Group#4], gt(test.t.b, 1), gt(test.t.b, 2), gt(test.t.c, 1), gt(test.t.c, 2)",
+          "Group#4 Schema:[test.t.b,test.t.c]",
+          "    BlockScan_8 block:t"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "TestAggPushDownGather",
+    "Cases": [
+      {
+        "ALLEGROALLEGROSQL": "select b, sum(a) from t group by b",
+        "Result": [
+          "Group#0 Schema:[test.t.b,DeferredCauset#13], UniqueKey:[test.t.b]",
+          "    Projection_3 input:[Group#1], test.t.b, DeferredCauset#13",
+          "Group#1 Schema:[DeferredCauset#13,test.t.b], UniqueKey:[test.t.b]",
+          "    Aggregation_2 input:[Group#2], group by:test.t.b, funcs:sum(test.t.a), firstrow(test.t.b)",
+          "    Aggregation_7 input:[Group#3], group by:test.t.b, funcs:sum(DeferredCauset#14), firstrow(test.t.b)",
+          "Group#2 Schema:[test.t.a,test.t.b], UniqueKey:[test.t.a]",
+          "    EinsteinDBSingleGather_5 input:[Group#4], block:t",
+          "Group#4 Schema:[test.t.a,test.t.b], UniqueKey:[test.t.a]",
+          "    BlockScan_4 block:t, pk defCaus:test.t.a",
+          "Group#3 Schema:[DeferredCauset#14,test.t.b]",
+          "    EinsteinDBSingleGather_5 input:[Group#5], block:t",
+          "Group#5 Schema:[DeferredCauset#14,test.t.b]",
+          "    Aggregation_6 input:[Group#4], group by:test.t.b, funcs:sum(test.t.a)"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select b, sum(a) from t group by c, b",
+        "Result": [
+          "Group#0 Schema:[test.t.b,DeferredCauset#13]",
+          "    Projection_3 input:[Group#1], test.t.b, DeferredCauset#13",
+          "Group#1 Schema:[DeferredCauset#13,test.t.b]",
+          "    Aggregation_2 input:[Group#2], group by:test.t.b, test.t.c, funcs:sum(test.t.a), firstrow(test.t.b)",
+          "    Aggregation_7 input:[Group#3], group by:test.t.b, test.t.c, funcs:sum(DeferredCauset#14), firstrow(test.t.b)",
+          "Group#2 Schema:[test.t.a,test.t.b,test.t.c], UniqueKey:[test.t.a]",
+          "    EinsteinDBSingleGather_5 input:[Group#4], block:t",
+          "Group#4 Schema:[test.t.a,test.t.b,test.t.c], UniqueKey:[test.t.a]",
+          "    BlockScan_4 block:t, pk defCaus:test.t.a",
+          "Group#3 Schema:[DeferredCauset#14,test.t.c,test.t.b]",
+          "    EinsteinDBSingleGather_5 input:[Group#5], block:t",
+          "Group#5 Schema:[DeferredCauset#14,test.t.c,test.t.b]",
+          "    Aggregation_6 input:[Group#4], group by:test.t.b, test.t.c, funcs:sum(test.t.a)"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select b, sum(a) from t group by sin(b)+sin(c), b",
+        "Result": [
+          "Group#0 Schema:[test.t.b,DeferredCauset#13]",
+          "    Projection_3 input:[Group#1], test.t.b, DeferredCauset#13",
+          "Group#1 Schema:[DeferredCauset#13,test.t.b]",
+          "    Aggregation_2 input:[Group#2], group by:plus(sin(cast(test.t.b)), sin(cast(test.t.c))), test.t.b, funcs:sum(test.t.a), firstrow(test.t.b)",
+          "Group#2 Schema:[test.t.a,test.t.b,test.t.c], UniqueKey:[test.t.a]",
+          "    EinsteinDBSingleGather_5 input:[Group#3], block:t",
+          "Group#3 Schema:[test.t.a,test.t.b,test.t.c], UniqueKey:[test.t.a]",
+          "    BlockScan_4 block:t, pk defCaus:test.t.a"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "TestTopNMemrules",
+    "Cases": [
+      {
+        "ALLEGROALLEGROSQL": "select b from t order by a limit 2",
+        "Result": [
+          "Group#0 Schema:[test.t.b]",
+          "    Projection_5 input:[Group#1], test.t.b",
+          "Group#1 Schema:[test.t.b,test.t.a]",
+          "    Projection_2 input:[Group#2], test.t.b, test.t.a",
+          "Group#2 Schema:[test.t.a,test.t.b]",
+          "    TopN_7 input:[Group#3], test.t.a, offset:0, count:2",
+          "Group#3 Schema:[test.t.a,test.t.b]",
+          "    EinsteinDBSingleGather_9 input:[Group#4], block:t",
+          "Group#4 Schema:[test.t.a,test.t.b]",
+          "    TopN_10 input:[Group#5], test.t.a, offset:0, count:2",
+          "Group#5 Schema:[test.t.a,test.t.b]",
+          "    BlockScan_8 block:t, pk defCaus:test.t.a"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select b from t limit 2",
+        "Result": [
+          "Group#0 Schema:[test.t.b]",
+          "    Projection_2 input:[Group#1], test.t.b",
+          "Group#1 Schema:[test.t.b]",
+          "    Limit_3 input:[Group#2], offset:0, count:2",
+          "Group#2 Schema:[test.t.b]",
+          "    EinsteinDBSingleGather_5 input:[Group#3], block:t",
+          "Group#3 Schema:[test.t.b]",
+          "    Limit_6 input:[Group#4], offset:0, count:2",
+          "Group#4 Schema:[test.t.b]",
+          "    BlockScan_4 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select a+b from t order by a limit 1 offset 2",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#14]",
+          "    Projection_5 input:[Group#1], DeferredCauset#13",
+          "Group#1 Schema:[DeferredCauset#13,test.t.a]",
+          "    Projection_2 input:[Group#2], plus(test.t.a, test.t.b)->DeferredCauset#13, test.t.a",
+          "Group#2 Schema:[test.t.a,test.t.b]",
+          "    TopN_7 input:[Group#3], test.t.a, offset:2, count:1",
+          "Group#3 Schema:[test.t.a,test.t.b]",
+          "    EinsteinDBSingleGather_9 input:[Group#4], block:t",
+          "Group#4 Schema:[test.t.a,test.t.b]",
+          "    TopN_10 input:[Group#5], test.t.a, offset:0, count:3",
+          "Group#5 Schema:[test.t.a,test.t.b]",
+          "    BlockScan_8 block:t, pk defCaus:test.t.a"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select c from t order by t.a limit 1",
+        "Result": [
+          "Group#0 Schema:[test.t.c]",
+          "    Projection_5 input:[Group#1], test.t.c",
+          "Group#1 Schema:[test.t.c,test.t.a]",
+          "    Projection_2 input:[Group#2], test.t.c, test.t.a",
+          "Group#2 Schema:[test.t.a,test.t.c]",
+          "    TopN_7 input:[Group#3], test.t.a, offset:0, count:1",
+          "    TopN_7 input:[Group#4], test.t.a, offset:0, count:1",
+          "Group#3 Schema:[test.t.a,test.t.c]",
+          "    EinsteinDBSingleGather_11 input:[Group#5], block:t, index:c_d_e",
+          "Group#5 Schema:[test.t.a,test.t.c]",
+          "    TopN_13 input:[Group#6], test.t.a, offset:0, count:1",
+          "Group#6 Schema:[test.t.a,test.t.c]",
+          "    IndexScan_10 block:t, index:c, d, e",
+          "Group#4 Schema:[test.t.a,test.t.c]",
+          "    EinsteinDBSingleGather_9 input:[Group#7], block:t",
+          "Group#7 Schema:[test.t.a,test.t.c]",
+          "    TopN_12 input:[Group#8], test.t.a, offset:0, count:1",
+          "Group#8 Schema:[test.t.a,test.t.c]",
+          "    BlockScan_8 block:t, pk defCaus:test.t.a"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select c from t order by t.a + t.b limit 1",
+        "Result": [
+          "Group#0 Schema:[test.t.c]",
+          "    Projection_5 input:[Group#1], test.t.c",
+          "Group#1 Schema:[test.t.c,test.t.a,test.t.b]",
+          "    Projection_2 input:[Group#2], test.t.c, test.t.a, test.t.b",
+          "Group#2 Schema:[test.t.a,test.t.b,test.t.c]",
+          "    TopN_7 input:[Group#3], plus(test.t.a, test.t.b), offset:0, count:1",
+          "Group#3 Schema:[test.t.a,test.t.b,test.t.c]",
+          "    EinsteinDBSingleGather_9 input:[Group#4], block:t",
+          "Group#4 Schema:[test.t.a,test.t.b,test.t.c]",
+          "    TopN_10 input:[Group#5], plus(test.t.a, test.t.b), offset:0, count:1",
+          "Group#5 Schema:[test.t.a,test.t.b,test.t.c]",
+          "    BlockScan_8 block:t, pk defCaus:test.t.a"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select a, b, c from t t1 where t1.a in (select t2.a as a from t t2 where t2.b > t1.b order by t1.b limit 1)",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.b,test.t.c]",
+          "    Projection_9 input:[Group#1], test.t.a, test.t.b, test.t.c",
+          "Group#1 Schema:[test.t.a,test.t.b,test.t.c]",
+          "    Apply_8 input:[Group#2,Group#3], semi join, equal:[eq(test.t.a, test.t.a)]",
+          "Group#2 Schema:[test.t.a,test.t.b,test.t.c]",
+          "    EinsteinDBSingleGather_13 input:[Group#4], block:t1",
+          "Group#4 Schema:[test.t.a,test.t.b,test.t.c]",
+          "    BlockScan_12 block:t1, pk defCaus:test.t.a",
+          "Group#3 Schema:[test.t.a]",
+          "    Projection_5 input:[Group#5], test.t.a",
+          "Group#5 Schema:[test.t.a,test.t.b]",
+          "    TopN_11 input:[Group#6], , offset:0, count:1",
+          "Group#6 Schema:[test.t.a,test.t.b]",
+          "    Selection_4 input:[Group#7], gt(test.t.b, test.t.b)",
+          "Group#7 Schema:[test.t.a,test.t.b]",
+          "    EinsteinDBSingleGather_15 input:[Group#8], block:t2",
+          "Group#8 Schema:[test.t.a,test.t.b]",
+          "    BlockScan_14 block:t2, pk defCaus:test.t.a"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select a, b, c from t t1 where t1.a in (select a from (select t2.a as a, t1.b as b from t t2 where t2.b > t1.b) x order by b limit 1)",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.b,test.t.c]",
+          "    Projection_11 input:[Group#1], test.t.a, test.t.b, test.t.c",
+          "Group#1 Schema:[test.t.a,test.t.b,test.t.c]",
+          "    Apply_10 input:[Group#2,Group#3], semi join, equal:[eq(test.t.a, test.t.a)]",
+          "Group#2 Schema:[test.t.a,test.t.b,test.t.c]",
+          "    EinsteinDBSingleGather_16 input:[Group#4], block:t1",
+          "Group#4 Schema:[test.t.a,test.t.b,test.t.c]",
+          "    BlockScan_15 block:t1, pk defCaus:test.t.a",
+          "Group#3 Schema:[test.t.a]",
+          "    Projection_9 input:[Group#5], test.t.a",
+          "Group#5 Schema:[test.t.a,DeferredCauset#25]",
+          "    Projection_6 input:[Group#6], test.t.a, DeferredCauset#25",
+          "Group#6 Schema:[test.t.a,DeferredCauset#25]",
+          "    Projection_5 input:[Group#7], test.t.a, test.t.b",
+          "Group#7 Schema:[test.t.a,test.t.b]",
+          "    TopN_14 input:[Group#8], test.t.b, offset:0, count:1",
+          "Group#8 Schema:[test.t.a,test.t.b]",
+          "    Selection_4 input:[Group#9], gt(test.t.b, test.t.b)",
+          "Group#9 Schema:[test.t.a,test.t.b]",
+          "    EinsteinDBSingleGather_18 input:[Group#10], block:t2",
+          "Group#10 Schema:[test.t.a,test.t.b]",
+          "    BlockScan_17 block:t2, pk defCaus:test.t.a"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select a, b from (select @i as a, @i := @i+1 as b from t) t order by a desc limit 1",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13,DeferredCauset#14]",
+          "    Projection_3 input:[Group#1], DeferredCauset#13, DeferredCauset#14",
+          "Group#1 Schema:[DeferredCauset#13,DeferredCauset#14]",
+          "    TopN_7 input:[Group#2], DeferredCauset#13:desc, offset:0, count:1",
+          "Group#2 Schema:[DeferredCauset#13,DeferredCauset#14]",
+          "    Projection_2 input:[Group#3], getvar(i)->DeferredCauset#13, setvar(i, cast(plus(cast(getvar(i), double BINARY), 1), var_string(5)))->DeferredCauset#14",
+          "Group#3 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_9 input:[Group#4], block:t",
+          "    EinsteinDBSingleGather_21 input:[Group#5], block:t, index:e_d_c_str_prefix",
+          "    EinsteinDBSingleGather_19 input:[Group#6], block:t, index:c_d_e_str",
+          "    EinsteinDBSingleGather_17 input:[Group#7], block:t, index:f_g",
+          "    EinsteinDBSingleGather_15 input:[Group#8], block:t, index:g",
+          "    EinsteinDBSingleGather_13 input:[Group#9], block:t, index:f",
+          "    EinsteinDBSingleGather_11 input:[Group#10], block:t, index:c_d_e",
+          "Group#4 Schema:[test.t.a]",
+          "    BlockScan_8 block:t, pk defCaus:test.t.a",
+          "Group#5 Schema:[test.t.a]",
+          "    IndexScan_20 block:t, index:e_str, d_str, c_str",
+          "Group#6 Schema:[test.t.a]",
+          "    IndexScan_18 block:t, index:c_str, d_str, e_str",
+          "Group#7 Schema:[test.t.a]",
+          "    IndexScan_16 block:t, index:f, g",
+          "Group#8 Schema:[test.t.a]",
+          "    IndexScan_14 block:t, index:g",
+          "Group#9 Schema:[test.t.a]",
+          "    IndexScan_12 block:t, index:f",
+          "Group#10 Schema:[test.t.a]",
+          "    IndexScan_10 block:t, index:c, d, e"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select * from t t1 left join t t2 on t1.b = t2.b order by t1.b limit 1",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Projection_4 input:[Group#1], test.t.a, test.t.b, test.t.c, test.t.d, test.t.e, test.t.c_str, test.t.d_str, test.t.e_str, test.t.f, test.t.g, test.t.h, test.t.i_date, test.t.a, test.t.b, test.t.c, test.t.d, test.t.e, test.t.c_str, test.t.d_str, test.t.e_str, test.t.f, test.t.g, test.t.h, test.t.i_date",
+          "Group#1 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    TopN_8 input:[Group#2], test.t.b, offset:0, count:1",
+          "Group#2 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Join_3 input:[Group#3,Group#4], left outer join, equal:[eq(test.t.b, test.t.b)]",
+          "Group#3 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    TopN_9 input:[Group#5], test.t.b, offset:0, count:1",
+          "Group#5 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    EinsteinDBSingleGather_11 input:[Group#6], block:t1",
+          "Group#6 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    TopN_12 input:[Group#7], test.t.b, offset:0, count:1",
+          "Group#7 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    BlockScan_10 block:t1, pk defCaus:test.t.a",
+          "Group#4 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    EinsteinDBSingleGather_14 input:[Group#8], block:t2",
+          "Group#8 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    BlockScan_13 block:t2, pk defCaus:test.t.a"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select * from t t1 left join t t2 on t1.b = t2.b order by t1.a, t1.c limit 1",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Projection_4 input:[Group#1], test.t.a, test.t.b, test.t.c, test.t.d, test.t.e, test.t.c_str, test.t.d_str, test.t.e_str, test.t.f, test.t.g, test.t.h, test.t.i_date, test.t.a, test.t.b, test.t.c, test.t.d, test.t.e, test.t.c_str, test.t.d_str, test.t.e_str, test.t.f, test.t.g, test.t.h, test.t.i_date",
+          "Group#1 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    TopN_8 input:[Group#2], test.t.a, test.t.c, offset:0, count:1",
+          "Group#2 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Join_3 input:[Group#3,Group#4], left outer join, equal:[eq(test.t.b, test.t.b)]",
+          "Group#3 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    TopN_9 input:[Group#5], test.t.a, test.t.c, offset:0, count:1",
+          "Group#5 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    EinsteinDBSingleGather_11 input:[Group#6], block:t1",
+          "Group#6 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    TopN_12 input:[Group#7], test.t.a, test.t.c, offset:0, count:1",
+          "Group#7 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    BlockScan_10 block:t1, pk defCaus:test.t.a",
+          "Group#4 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    EinsteinDBSingleGather_14 input:[Group#8], block:t2",
+          "Group#8 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    BlockScan_13 block:t2, pk defCaus:test.t.a"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select * from t t1 left join t t2 on t1.b = t2.b order by t2.a, t2.c limit 1",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Projection_4 input:[Group#1], test.t.a, test.t.b, test.t.c, test.t.d, test.t.e, test.t.c_str, test.t.d_str, test.t.e_str, test.t.f, test.t.g, test.t.h, test.t.i_date, test.t.a, test.t.b, test.t.c, test.t.d, test.t.e, test.t.c_str, test.t.d_str, test.t.e_str, test.t.f, test.t.g, test.t.h, test.t.i_date",
+          "Group#1 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    TopN_8 input:[Group#2], test.t.a, test.t.c, offset:0, count:1",
+          "Group#2 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Join_3 input:[Group#3,Group#4], left outer join, equal:[eq(test.t.b, test.t.b)]",
+          "Group#3 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    EinsteinDBSingleGather_10 input:[Group#5], block:t1",
+          "Group#5 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    BlockScan_9 block:t1, pk defCaus:test.t.a",
+          "Group#4 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    EinsteinDBSingleGather_12 input:[Group#6], block:t2",
+          "Group#6 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    BlockScan_11 block:t2, pk defCaus:test.t.a"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select * from t t1 left join t t2 on t1.b = t2.b order by t1.a, t2.c limit 1",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Projection_4 input:[Group#1], test.t.a, test.t.b, test.t.c, test.t.d, test.t.e, test.t.c_str, test.t.d_str, test.t.e_str, test.t.f, test.t.g, test.t.h, test.t.i_date, test.t.a, test.t.b, test.t.c, test.t.d, test.t.e, test.t.c_str, test.t.d_str, test.t.e_str, test.t.f, test.t.g, test.t.h, test.t.i_date",
+          "Group#1 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    TopN_8 input:[Group#2], test.t.a, test.t.c, offset:0, count:1",
+          "Group#2 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Join_3 input:[Group#3,Group#4], left outer join, equal:[eq(test.t.b, test.t.b)]",
+          "Group#3 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    EinsteinDBSingleGather_10 input:[Group#5], block:t1",
+          "Group#5 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    BlockScan_9 block:t1, pk defCaus:test.t.a",
+          "Group#4 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    EinsteinDBSingleGather_12 input:[Group#6], block:t2",
+          "Group#6 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    BlockScan_11 block:t2, pk defCaus:test.t.a"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select * from t t1 right join t t2 on t1.b = t2.b order by t1.a, t1.c limit 1",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Projection_4 input:[Group#1], test.t.a, test.t.b, test.t.c, test.t.d, test.t.e, test.t.c_str, test.t.d_str, test.t.e_str, test.t.f, test.t.g, test.t.h, test.t.i_date, test.t.a, test.t.b, test.t.c, test.t.d, test.t.e, test.t.c_str, test.t.d_str, test.t.e_str, test.t.f, test.t.g, test.t.h, test.t.i_date",
+          "Group#1 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    TopN_8 input:[Group#2], test.t.a, test.t.c, offset:0, count:1",
+          "Group#2 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Join_3 input:[Group#3,Group#4], right outer join, equal:[eq(test.t.b, test.t.b)]",
+          "Group#3 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    EinsteinDBSingleGather_10 input:[Group#5], block:t1",
+          "Group#5 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    BlockScan_9 block:t1, pk defCaus:test.t.a",
+          "Group#4 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    EinsteinDBSingleGather_12 input:[Group#6], block:t2",
+          "Group#6 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    BlockScan_11 block:t2, pk defCaus:test.t.a"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select * from t t1 right join t t2 on t1.b = t2.b order by t2.a, t2.c limit 1",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Projection_4 input:[Group#1], test.t.a, test.t.b, test.t.c, test.t.d, test.t.e, test.t.c_str, test.t.d_str, test.t.e_str, test.t.f, test.t.g, test.t.h, test.t.i_date, test.t.a, test.t.b, test.t.c, test.t.d, test.t.e, test.t.c_str, test.t.d_str, test.t.e_str, test.t.f, test.t.g, test.t.h, test.t.i_date",
+          "Group#1 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    TopN_8 input:[Group#2], test.t.a, test.t.c, offset:0, count:1",
+          "Group#2 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Join_3 input:[Group#3,Group#4], right outer join, equal:[eq(test.t.b, test.t.b)]",
+          "Group#3 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    EinsteinDBSingleGather_11 input:[Group#5], block:t1",
+          "Group#5 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    BlockScan_10 block:t1, pk defCaus:test.t.a",
+          "Group#4 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    TopN_9 input:[Group#6], test.t.a, test.t.c, offset:0, count:1",
+          "Group#6 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    EinsteinDBSingleGather_13 input:[Group#7], block:t2",
+          "Group#7 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    TopN_14 input:[Group#8], test.t.a, test.t.c, offset:0, count:1",
+          "Group#8 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    BlockScan_12 block:t2, pk defCaus:test.t.a"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select * from t t1 right join t t2 on t1.b = t2.b order by t1.a, t2.c limit 1",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Projection_4 input:[Group#1], test.t.a, test.t.b, test.t.c, test.t.d, test.t.e, test.t.c_str, test.t.d_str, test.t.e_str, test.t.f, test.t.g, test.t.h, test.t.i_date, test.t.a, test.t.b, test.t.c, test.t.d, test.t.e, test.t.c_str, test.t.d_str, test.t.e_str, test.t.f, test.t.g, test.t.h, test.t.i_date",
+          "Group#1 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    TopN_8 input:[Group#2], test.t.a, test.t.c, offset:0, count:1",
+          "Group#2 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Join_3 input:[Group#3,Group#4], right outer join, equal:[eq(test.t.b, test.t.b)]",
+          "Group#3 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    EinsteinDBSingleGather_10 input:[Group#5], block:t1",
+          "Group#5 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    BlockScan_9 block:t1, pk defCaus:test.t.a",
+          "Group#4 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    EinsteinDBSingleGather_12 input:[Group#6], block:t2",
+          "Group#6 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    BlockScan_11 block:t2, pk defCaus:test.t.a"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select * from t t1 left join t t2 on t1.b = t2.b limit 1",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Projection_4 input:[Group#1], test.t.a, test.t.b, test.t.c, test.t.d, test.t.e, test.t.c_str, test.t.d_str, test.t.e_str, test.t.f, test.t.g, test.t.h, test.t.i_date, test.t.a, test.t.b, test.t.c, test.t.d, test.t.e, test.t.c_str, test.t.d_str, test.t.e_str, test.t.f, test.t.g, test.t.h, test.t.i_date",
+          "Group#1 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Limit_5 input:[Group#2], offset:0, count:1",
+          "Group#2 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Join_3 input:[Group#3,Group#4], left outer join, equal:[eq(test.t.b, test.t.b)]",
+          "Group#3 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Limit_6 input:[Group#5], offset:0, count:1",
+          "Group#5 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    EinsteinDBSingleGather_8 input:[Group#6], block:t1",
+          "Group#6 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Limit_9 input:[Group#7], offset:0, count:1",
+          "Group#7 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    BlockScan_7 block:t1, pk defCaus:test.t.a",
+          "Group#4 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    EinsteinDBSingleGather_11 input:[Group#8], block:t2",
+          "Group#8 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    BlockScan_10 block:t2, pk defCaus:test.t.a"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select * from t t1 left join t t2 on t1.b = t2.b limit 5 offset 4",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Projection_4 input:[Group#1], test.t.a, test.t.b, test.t.c, test.t.d, test.t.e, test.t.c_str, test.t.d_str, test.t.e_str, test.t.f, test.t.g, test.t.h, test.t.i_date, test.t.a, test.t.b, test.t.c, test.t.d, test.t.e, test.t.c_str, test.t.d_str, test.t.e_str, test.t.f, test.t.g, test.t.h, test.t.i_date",
+          "Group#1 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Limit_5 input:[Group#2], offset:4, count:5",
+          "Group#2 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Join_3 input:[Group#3,Group#4], left outer join, equal:[eq(test.t.b, test.t.b)]",
+          "Group#3 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Limit_6 input:[Group#5], offset:0, count:9",
+          "Group#5 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    EinsteinDBSingleGather_8 input:[Group#6], block:t1",
+          "Group#6 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Limit_9 input:[Group#7], offset:0, count:9",
+          "Group#7 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    BlockScan_7 block:t1, pk defCaus:test.t.a",
+          "Group#4 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    EinsteinDBSingleGather_11 input:[Group#8], block:t2",
+          "Group#8 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    BlockScan_10 block:t2, pk defCaus:test.t.a"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select * from t t1 right join t t2 on t1.b = t2.b limit 1",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Projection_4 input:[Group#1], test.t.a, test.t.b, test.t.c, test.t.d, test.t.e, test.t.c_str, test.t.d_str, test.t.e_str, test.t.f, test.t.g, test.t.h, test.t.i_date, test.t.a, test.t.b, test.t.c, test.t.d, test.t.e, test.t.c_str, test.t.d_str, test.t.e_str, test.t.f, test.t.g, test.t.h, test.t.i_date",
+          "Group#1 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Limit_5 input:[Group#2], offset:0, count:1",
+          "Group#2 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Join_3 input:[Group#3,Group#4], right outer join, equal:[eq(test.t.b, test.t.b)]",
+          "Group#3 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    EinsteinDBSingleGather_8 input:[Group#5], block:t1",
+          "Group#5 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    BlockScan_7 block:t1, pk defCaus:test.t.a",
+          "Group#4 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Limit_6 input:[Group#6], offset:0, count:1",
+          "Group#6 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    EinsteinDBSingleGather_10 input:[Group#7], block:t2",
+          "Group#7 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Limit_11 input:[Group#8], offset:0, count:1",
+          "Group#8 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    BlockScan_9 block:t2, pk defCaus:test.t.a"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select * from t t1 right join t t2 on t1.b = t2.b limit 5 offset 4",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Projection_4 input:[Group#1], test.t.a, test.t.b, test.t.c, test.t.d, test.t.e, test.t.c_str, test.t.d_str, test.t.e_str, test.t.f, test.t.g, test.t.h, test.t.i_date, test.t.a, test.t.b, test.t.c, test.t.d, test.t.e, test.t.c_str, test.t.d_str, test.t.e_str, test.t.f, test.t.g, test.t.h, test.t.i_date",
+          "Group#1 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Limit_5 input:[Group#2], offset:4, count:5",
+          "Group#2 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Join_3 input:[Group#3,Group#4], right outer join, equal:[eq(test.t.b, test.t.b)]",
+          "Group#3 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    EinsteinDBSingleGather_8 input:[Group#5], block:t1",
+          "Group#5 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    BlockScan_7 block:t1, pk defCaus:test.t.a",
+          "Group#4 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Limit_6 input:[Group#6], offset:0, count:9",
+          "Group#6 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    EinsteinDBSingleGather_10 input:[Group#7], block:t2",
+          "Group#7 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Limit_11 input:[Group#8], offset:0, count:9",
+          "Group#8 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    BlockScan_9 block:t2, pk defCaus:test.t.a"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "(select a from t) union all (select b from t) order by a limit 2;",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#25]",
+          "    TopN_10 input:[Group#1], DeferredCauset#25, offset:0, count:2",
+          "Group#1 Schema:[DeferredCauset#25]",
+          "    Union_5 input:[Group#2,Group#3]",
+          "Group#2 Schema:[DeferredCauset#25]",
+          "    Projection_6 input:[Group#4], test.t.a",
+          "Group#4 Schema:[test.t.a]",
+          "    Projection_2 input:[Group#5], test.t.a",
+          "Group#5 Schema:[test.t.a]",
+          "    TopN_13 input:[Group#6], test.t.a, offset:0, count:2",
+          "    TopN_13 input:[Group#7], test.t.a, offset:0, count:2",
+          "    TopN_13 input:[Group#8], test.t.a, offset:0, count:2",
+          "    TopN_13 input:[Group#9], test.t.a, offset:0, count:2",
+          "    TopN_13 input:[Group#10], test.t.a, offset:0, count:2",
+          "    TopN_13 input:[Group#11], test.t.a, offset:0, count:2",
+          "    TopN_13 input:[Group#12], test.t.a, offset:0, count:2",
+          "Group#6 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_19 input:[Group#13], block:t, index:c_d_e",
+          "Group#13 Schema:[test.t.a]",
+          "    TopN_36 input:[Group#14], test.t.a, offset:0, count:2",
+          "Group#14 Schema:[test.t.a]",
+          "    IndexScan_18 block:t, index:c, d, e",
+          "Group#7 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_21 input:[Group#15], block:t, index:f",
+          "Group#15 Schema:[test.t.a]",
+          "    TopN_35 input:[Group#16], test.t.a, offset:0, count:2",
+          "Group#16 Schema:[test.t.a]",
+          "    IndexScan_20 block:t, index:f",
+          "Group#8 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_23 input:[Group#17], block:t, index:g",
+          "Group#17 Schema:[test.t.a]",
+          "    TopN_34 input:[Group#18], test.t.a, offset:0, count:2",
+          "Group#18 Schema:[test.t.a]",
+          "    IndexScan_22 block:t, index:g",
+          "Group#9 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_25 input:[Group#19], block:t, index:f_g",
+          "Group#19 Schema:[test.t.a]",
+          "    TopN_33 input:[Group#20], test.t.a, offset:0, count:2",
+          "Group#20 Schema:[test.t.a]",
+          "    IndexScan_24 block:t, index:f, g",
+          "Group#10 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_27 input:[Group#21], block:t, index:c_d_e_str",
+          "Group#21 Schema:[test.t.a]",
+          "    TopN_32 input:[Group#22], test.t.a, offset:0, count:2",
+          "Group#22 Schema:[test.t.a]",
+          "    IndexScan_26 block:t, index:c_str, d_str, e_str",
+          "Group#11 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_29 input:[Group#23], block:t, index:e_d_c_str_prefix",
+          "Group#23 Schema:[test.t.a]",
+          "    TopN_31 input:[Group#24], test.t.a, offset:0, count:2",
+          "Group#24 Schema:[test.t.a]",
+          "    IndexScan_28 block:t, index:e_str, d_str, c_str",
+          "Group#12 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_17 input:[Group#25], block:t",
+          "Group#25 Schema:[test.t.a]",
+          "    TopN_30 input:[Group#26], test.t.a, offset:0, count:2",
+          "Group#26 Schema:[test.t.a]",
+          "    BlockScan_16 block:t, pk defCaus:test.t.a",
+          "Group#3 Schema:[DeferredCauset#25]",
+          "    Projection_7 input:[Group#27], test.t.b",
+          "Group#27 Schema:[test.t.b]",
+          "    Projection_4 input:[Group#28], test.t.b",
+          "Group#28 Schema:[test.t.b]",
+          "    TopN_15 input:[Group#29], test.t.b, offset:0, count:2",
+          "Group#29 Schema:[test.t.b]",
+          "    EinsteinDBSingleGather_38 input:[Group#30], block:t",
+          "Group#30 Schema:[test.t.b]",
+          "    TopN_39 input:[Group#31], test.t.b, offset:0, count:2",
+          "Group#31 Schema:[test.t.b]",
+          "    BlockScan_37 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "(select a from t) union all (select b from t) limit 2;",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#25]",
+          "    Limit_8 input:[Group#1], offset:0, count:2",
+          "Group#1 Schema:[DeferredCauset#25]",
+          "    Union_5 input:[Group#2,Group#3]",
+          "Group#2 Schema:[DeferredCauset#25]",
+          "    Projection_6 input:[Group#4], test.t.a",
+          "Group#4 Schema:[test.t.a]",
+          "    Projection_2 input:[Group#5], test.t.a",
+          "Group#5 Schema:[test.t.a]",
+          "    Limit_9 input:[Group#6], offset:0, count:2",
+          "    Limit_9 input:[Group#7], offset:0, count:2",
+          "    Limit_9 input:[Group#8], offset:0, count:2",
+          "    Limit_9 input:[Group#9], offset:0, count:2",
+          "    Limit_9 input:[Group#10], offset:0, count:2",
+          "    Limit_9 input:[Group#11], offset:0, count:2",
+          "    Limit_9 input:[Group#12], offset:0, count:2",
+          "Group#6 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_13 input:[Group#13], block:t, index:c_d_e",
+          "Group#13 Schema:[test.t.a]",
+          "    Limit_30 input:[Group#14], offset:0, count:2",
+          "Group#14 Schema:[test.t.a]",
+          "    IndexScan_12 block:t, index:c, d, e",
+          "Group#7 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_15 input:[Group#15], block:t, index:f",
+          "Group#15 Schema:[test.t.a]",
+          "    Limit_29 input:[Group#16], offset:0, count:2",
+          "Group#16 Schema:[test.t.a]",
+          "    IndexScan_14 block:t, index:f",
+          "Group#8 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_17 input:[Group#17], block:t, index:g",
+          "Group#17 Schema:[test.t.a]",
+          "    Limit_28 input:[Group#18], offset:0, count:2",
+          "Group#18 Schema:[test.t.a]",
+          "    IndexScan_16 block:t, index:g",
+          "Group#9 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_19 input:[Group#19], block:t, index:f_g",
+          "Group#19 Schema:[test.t.a]",
+          "    Limit_27 input:[Group#20], offset:0, count:2",
+          "Group#20 Schema:[test.t.a]",
+          "    IndexScan_18 block:t, index:f, g",
+          "Group#10 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_21 input:[Group#21], block:t, index:c_d_e_str",
+          "Group#21 Schema:[test.t.a]",
+          "    Limit_26 input:[Group#22], offset:0, count:2",
+          "Group#22 Schema:[test.t.a]",
+          "    IndexScan_20 block:t, index:c_str, d_str, e_str",
+          "Group#11 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_23 input:[Group#23], block:t, index:e_d_c_str_prefix",
+          "Group#23 Schema:[test.t.a]",
+          "    Limit_25 input:[Group#24], offset:0, count:2",
+          "Group#24 Schema:[test.t.a]",
+          "    IndexScan_22 block:t, index:e_str, d_str, c_str",
+          "Group#12 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_11 input:[Group#25], block:t",
+          "Group#25 Schema:[test.t.a]",
+          "    Limit_24 input:[Group#26], offset:0, count:2",
+          "Group#26 Schema:[test.t.a]",
+          "    BlockScan_10 block:t, pk defCaus:test.t.a",
+          "Group#3 Schema:[DeferredCauset#25]",
+          "    Projection_7 input:[Group#27], test.t.b",
+          "Group#27 Schema:[test.t.b]",
+          "    Projection_4 input:[Group#28], test.t.b",
+          "Group#28 Schema:[test.t.b]",
+          "    Limit_9 input:[Group#29], offset:0, count:2",
+          "Group#29 Schema:[test.t.b]",
+          "    EinsteinDBSingleGather_32 input:[Group#30], block:t",
+          "Group#30 Schema:[test.t.b]",
+          "    Limit_33 input:[Group#31], offset:0, count:2",
+          "Group#31 Schema:[test.t.b]",
+          "    BlockScan_31 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "(select a from t) union all (select b from t) limit 2 offset 5;",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#25]",
+          "    Limit_8 input:[Group#1], offset:5, count:2",
+          "Group#1 Schema:[DeferredCauset#25]",
+          "    Union_5 input:[Group#2,Group#3]",
+          "Group#2 Schema:[DeferredCauset#25]",
+          "    Projection_6 input:[Group#4], test.t.a",
+          "Group#4 Schema:[test.t.a]",
+          "    Projection_2 input:[Group#5], test.t.a",
+          "Group#5 Schema:[test.t.a]",
+          "    Limit_9 input:[Group#6], offset:0, count:7",
+          "    Limit_9 input:[Group#7], offset:0, count:7",
+          "    Limit_9 input:[Group#8], offset:0, count:7",
+          "    Limit_9 input:[Group#9], offset:0, count:7",
+          "    Limit_9 input:[Group#10], offset:0, count:7",
+          "    Limit_9 input:[Group#11], offset:0, count:7",
+          "    Limit_9 input:[Group#12], offset:0, count:7",
+          "Group#6 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_13 input:[Group#13], block:t, index:c_d_e",
+          "Group#13 Schema:[test.t.a]",
+          "    Limit_30 input:[Group#14], offset:0, count:7",
+          "Group#14 Schema:[test.t.a]",
+          "    IndexScan_12 block:t, index:c, d, e",
+          "Group#7 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_15 input:[Group#15], block:t, index:f",
+          "Group#15 Schema:[test.t.a]",
+          "    Limit_29 input:[Group#16], offset:0, count:7",
+          "Group#16 Schema:[test.t.a]",
+          "    IndexScan_14 block:t, index:f",
+          "Group#8 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_17 input:[Group#17], block:t, index:g",
+          "Group#17 Schema:[test.t.a]",
+          "    Limit_28 input:[Group#18], offset:0, count:7",
+          "Group#18 Schema:[test.t.a]",
+          "    IndexScan_16 block:t, index:g",
+          "Group#9 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_19 input:[Group#19], block:t, index:f_g",
+          "Group#19 Schema:[test.t.a]",
+          "    Limit_27 input:[Group#20], offset:0, count:7",
+          "Group#20 Schema:[test.t.a]",
+          "    IndexScan_18 block:t, index:f, g",
+          "Group#10 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_21 input:[Group#21], block:t, index:c_d_e_str",
+          "Group#21 Schema:[test.t.a]",
+          "    Limit_26 input:[Group#22], offset:0, count:7",
+          "Group#22 Schema:[test.t.a]",
+          "    IndexScan_20 block:t, index:c_str, d_str, e_str",
+          "Group#11 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_23 input:[Group#23], block:t, index:e_d_c_str_prefix",
+          "Group#23 Schema:[test.t.a]",
+          "    Limit_25 input:[Group#24], offset:0, count:7",
+          "Group#24 Schema:[test.t.a]",
+          "    IndexScan_22 block:t, index:e_str, d_str, c_str",
+          "Group#12 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_11 input:[Group#25], block:t",
+          "Group#25 Schema:[test.t.a]",
+          "    Limit_24 input:[Group#26], offset:0, count:7",
+          "Group#26 Schema:[test.t.a]",
+          "    BlockScan_10 block:t, pk defCaus:test.t.a",
+          "Group#3 Schema:[DeferredCauset#25]",
+          "    Projection_7 input:[Group#27], test.t.b",
+          "Group#27 Schema:[test.t.b]",
+          "    Projection_4 input:[Group#28], test.t.b",
+          "Group#28 Schema:[test.t.b]",
+          "    Limit_9 input:[Group#29], offset:0, count:7",
+          "Group#29 Schema:[test.t.b]",
+          "    EinsteinDBSingleGather_32 input:[Group#30], block:t",
+          "Group#30 Schema:[test.t.b]",
+          "    Limit_33 input:[Group#31], offset:0, count:7",
+          "Group#31 Schema:[test.t.b]",
+          "    BlockScan_31 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "(select a from t) union all (select sum(a) from t where a > 2 group by b) order by a limit 2;",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#26]",
+          "    TopN_12 input:[Group#1], DeferredCauset#26, offset:0, count:2",
+          "Group#1 Schema:[DeferredCauset#26]",
+          "    Union_7 input:[Group#2,Group#3]",
+          "Group#2 Schema:[DeferredCauset#26]",
+          "    Projection_8 input:[Group#4], cast(test.t.a, decimal(65,0) BINARY)->DeferredCauset#26",
+          "Group#4 Schema:[test.t.a]",
+          "    Projection_2 input:[Group#5], test.t.a",
+          "Group#5 Schema:[test.t.a]",
+          "    TopN_15 input:[Group#6], cast(test.t.a), offset:0, count:2",
+          "    TopN_15 input:[Group#7], cast(test.t.a), offset:0, count:2",
+          "    TopN_15 input:[Group#8], cast(test.t.a), offset:0, count:2",
+          "    TopN_15 input:[Group#9], cast(test.t.a), offset:0, count:2",
+          "    TopN_15 input:[Group#10], cast(test.t.a), offset:0, count:2",
+          "    TopN_15 input:[Group#11], cast(test.t.a), offset:0, count:2",
+          "    TopN_15 input:[Group#12], cast(test.t.a), offset:0, count:2",
+          "Group#6 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_21 input:[Group#13], block:t, index:c_d_e",
+          "Group#13 Schema:[test.t.a]",
+          "    TopN_38 input:[Group#14], cast(test.t.a), offset:0, count:2",
+          "Group#14 Schema:[test.t.a]",
+          "    IndexScan_20 block:t, index:c, d, e",
+          "Group#7 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_23 input:[Group#15], block:t, index:f",
+          "Group#15 Schema:[test.t.a]",
+          "    TopN_37 input:[Group#16], cast(test.t.a), offset:0, count:2",
+          "Group#16 Schema:[test.t.a]",
+          "    IndexScan_22 block:t, index:f",
+          "Group#8 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_25 input:[Group#17], block:t, index:g",
+          "Group#17 Schema:[test.t.a]",
+          "    TopN_36 input:[Group#18], cast(test.t.a), offset:0, count:2",
+          "Group#18 Schema:[test.t.a]",
+          "    IndexScan_24 block:t, index:g",
+          "Group#9 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_27 input:[Group#19], block:t, index:f_g",
+          "Group#19 Schema:[test.t.a]",
+          "    TopN_35 input:[Group#20], cast(test.t.a), offset:0, count:2",
+          "Group#20 Schema:[test.t.a]",
+          "    IndexScan_26 block:t, index:f, g",
+          "Group#10 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_29 input:[Group#21], block:t, index:c_d_e_str",
+          "Group#21 Schema:[test.t.a]",
+          "    TopN_34 input:[Group#22], cast(test.t.a), offset:0, count:2",
+          "Group#22 Schema:[test.t.a]",
+          "    IndexScan_28 block:t, index:c_str, d_str, e_str",
+          "Group#11 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_31 input:[Group#23], block:t, index:e_d_c_str_prefix",
+          "Group#23 Schema:[test.t.a]",
+          "    TopN_33 input:[Group#24], cast(test.t.a), offset:0, count:2",
+          "Group#24 Schema:[test.t.a]",
+          "    IndexScan_30 block:t, index:e_str, d_str, c_str",
+          "Group#12 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_19 input:[Group#25], block:t",
+          "Group#25 Schema:[test.t.a]",
+          "    TopN_32 input:[Group#26], cast(test.t.a), offset:0, count:2",
+          "Group#26 Schema:[test.t.a]",
+          "    BlockScan_18 block:t, pk defCaus:test.t.a",
+          "Group#3 Schema:[DeferredCauset#26]",
+          "    Projection_9 input:[Group#27], cast(DeferredCauset#25, decimal(65,0) BINARY)->DeferredCauset#26",
+          "Group#27 Schema:[DeferredCauset#25]",
+          "    Projection_6 input:[Group#28], DeferredCauset#25",
+          "Group#28 Schema:[DeferredCauset#25]",
+          "    TopN_17 input:[Group#29], cast(DeferredCauset#25), offset:0, count:2",
+          "Group#29 Schema:[DeferredCauset#25]",
+          "    Aggregation_5 input:[Group#30], group by:test.t.b, funcs:sum(test.t.a)",
+          "Group#30 Schema:[test.t.a,test.t.b]",
+          "    Selection_4 input:[Group#31], gt(test.t.a, 2)",
+          "Group#31 Schema:[test.t.a,test.t.b]",
+          "    EinsteinDBSingleGather_40 input:[Group#32], block:t",
+          "Group#32 Schema:[test.t.a,test.t.b]",
+          "    BlockScan_39 block:t, pk defCaus:test.t.a"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "(select a from t) union all (select sum(a) from t where a > 2 group by b) order by a limit 1, 2;",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#26]",
+          "    TopN_12 input:[Group#1], DeferredCauset#26, offset:1, count:2",
+          "Group#1 Schema:[DeferredCauset#26]",
+          "    Union_7 input:[Group#2,Group#3]",
+          "Group#2 Schema:[DeferredCauset#26]",
+          "    Projection_8 input:[Group#4], cast(test.t.a, decimal(65,0) BINARY)->DeferredCauset#26",
+          "Group#4 Schema:[test.t.a]",
+          "    Projection_2 input:[Group#5], test.t.a",
+          "Group#5 Schema:[test.t.a]",
+          "    TopN_15 input:[Group#6], cast(test.t.a), offset:0, count:3",
+          "    TopN_15 input:[Group#7], cast(test.t.a), offset:0, count:3",
+          "    TopN_15 input:[Group#8], cast(test.t.a), offset:0, count:3",
+          "    TopN_15 input:[Group#9], cast(test.t.a), offset:0, count:3",
+          "    TopN_15 input:[Group#10], cast(test.t.a), offset:0, count:3",
+          "    TopN_15 input:[Group#11], cast(test.t.a), offset:0, count:3",
+          "    TopN_15 input:[Group#12], cast(test.t.a), offset:0, count:3",
+          "Group#6 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_21 input:[Group#13], block:t, index:c_d_e",
+          "Group#13 Schema:[test.t.a]",
+          "    TopN_38 input:[Group#14], cast(test.t.a), offset:0, count:3",
+          "Group#14 Schema:[test.t.a]",
+          "    IndexScan_20 block:t, index:c, d, e",
+          "Group#7 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_23 input:[Group#15], block:t, index:f",
+          "Group#15 Schema:[test.t.a]",
+          "    TopN_37 input:[Group#16], cast(test.t.a), offset:0, count:3",
+          "Group#16 Schema:[test.t.a]",
+          "    IndexScan_22 block:t, index:f",
+          "Group#8 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_25 input:[Group#17], block:t, index:g",
+          "Group#17 Schema:[test.t.a]",
+          "    TopN_36 input:[Group#18], cast(test.t.a), offset:0, count:3",
+          "Group#18 Schema:[test.t.a]",
+          "    IndexScan_24 block:t, index:g",
+          "Group#9 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_27 input:[Group#19], block:t, index:f_g",
+          "Group#19 Schema:[test.t.a]",
+          "    TopN_35 input:[Group#20], cast(test.t.a), offset:0, count:3",
+          "Group#20 Schema:[test.t.a]",
+          "    IndexScan_26 block:t, index:f, g",
+          "Group#10 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_29 input:[Group#21], block:t, index:c_d_e_str",
+          "Group#21 Schema:[test.t.a]",
+          "    TopN_34 input:[Group#22], cast(test.t.a), offset:0, count:3",
+          "Group#22 Schema:[test.t.a]",
+          "    IndexScan_28 block:t, index:c_str, d_str, e_str",
+          "Group#11 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_31 input:[Group#23], block:t, index:e_d_c_str_prefix",
+          "Group#23 Schema:[test.t.a]",
+          "    TopN_33 input:[Group#24], cast(test.t.a), offset:0, count:3",
+          "Group#24 Schema:[test.t.a]",
+          "    IndexScan_30 block:t, index:e_str, d_str, c_str",
+          "Group#12 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_19 input:[Group#25], block:t",
+          "Group#25 Schema:[test.t.a]",
+          "    TopN_32 input:[Group#26], cast(test.t.a), offset:0, count:3",
+          "Group#26 Schema:[test.t.a]",
+          "    BlockScan_18 block:t, pk defCaus:test.t.a",
+          "Group#3 Schema:[DeferredCauset#26]",
+          "    Projection_9 input:[Group#27], cast(DeferredCauset#25, decimal(65,0) BINARY)->DeferredCauset#26",
+          "Group#27 Schema:[DeferredCauset#25]",
+          "    Projection_6 input:[Group#28], DeferredCauset#25",
+          "Group#28 Schema:[DeferredCauset#25]",
+          "    TopN_17 input:[Group#29], cast(DeferredCauset#25), offset:0, count:3",
+          "Group#29 Schema:[DeferredCauset#25]",
+          "    Aggregation_5 input:[Group#30], group by:test.t.b, funcs:sum(test.t.a)",
+          "Group#30 Schema:[test.t.a,test.t.b]",
+          "    Selection_4 input:[Group#31], gt(test.t.a, 2)",
+          "Group#31 Schema:[test.t.a,test.t.b]",
+          "    EinsteinDBSingleGather_40 input:[Group#32], block:t",
+          "Group#32 Schema:[test.t.a,test.t.b]",
+          "    BlockScan_39 block:t, pk defCaus:test.t.a"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "(select a from t where a = 1) union all (select b from t where a = 2) union all (select c from t where a = 3) order by a limit 2;",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#37]",
+          "    TopN_16 input:[Group#1], DeferredCauset#37, offset:0, count:2",
+          "Group#1 Schema:[DeferredCauset#37]",
+          "    Union_10 input:[Group#2,Group#3,Group#4]",
+          "Group#2 Schema:[DeferredCauset#37]",
+          "    Projection_11 input:[Group#5], test.t.a",
+          "Group#5 Schema:[test.t.a]",
+          "    Projection_3 input:[Group#6], test.t.a",
+          "Group#6 Schema:[test.t.a]",
+          "    TopN_19 input:[Group#7], test.t.a, offset:0, count:2",
+          "Group#7 Schema:[test.t.a]",
+          "    Selection_2 input:[Group#8], eq(test.t.a, 1)",
+          "Group#8 Schema:[test.t.a]",
+          "    EinsteinDBSingleGather_25 input:[Group#9], block:t",
+          "    EinsteinDBSingleGather_37 input:[Group#10], block:t, index:e_d_c_str_prefix",
+          "    EinsteinDBSingleGather_35 input:[Group#11], block:t, index:c_d_e_str",
+          "    EinsteinDBSingleGather_33 input:[Group#12], block:t, index:f_g",
+          "    EinsteinDBSingleGather_31 input:[Group#13], block:t, index:g",
+          "    EinsteinDBSingleGather_29 input:[Group#14], block:t, index:f",
+          "    EinsteinDBSingleGather_27 input:[Group#15], block:t, index:c_d_e",
+          "Group#9 Schema:[test.t.a]",
+          "    BlockScan_24 block:t, pk defCaus:test.t.a",
+          "Group#10 Schema:[test.t.a]",
+          "    IndexScan_36 block:t, index:e_str, d_str, c_str",
+          "Group#11 Schema:[test.t.a]",
+          "    IndexScan_34 block:t, index:c_str, d_str, e_str",
+          "Group#12 Schema:[test.t.a]",
+          "    IndexScan_32 block:t, index:f, g",
+          "Group#13 Schema:[test.t.a]",
+          "    IndexScan_30 block:t, index:g",
+          "Group#14 Schema:[test.t.a]",
+          "    IndexScan_28 block:t, index:f",
+          "Group#15 Schema:[test.t.a]",
+          "    IndexScan_26 block:t, index:c, d, e",
+          "Group#3 Schema:[DeferredCauset#37]",
+          "    Projection_12 input:[Group#16], test.t.b",
+          "Group#16 Schema:[test.t.b]",
+          "    Projection_6 input:[Group#17], test.t.b",
+          "Group#17 Schema:[test.t.a,test.t.b]",
+          "    TopN_21 input:[Group#18], test.t.b, offset:0, count:2",
+          "Group#18 Schema:[test.t.a,test.t.b]",
+          "    Selection_5 input:[Group#19], eq(test.t.a, 2)",
+          "Group#19 Schema:[test.t.a,test.t.b]",
+          "    EinsteinDBSingleGather_39 input:[Group#20], block:t",
+          "Group#20 Schema:[test.t.a,test.t.b]",
+          "    BlockScan_38 block:t, pk defCaus:test.t.a",
+          "Group#4 Schema:[DeferredCauset#37]",
+          "    Projection_13 input:[Group#21], test.t.c",
+          "Group#21 Schema:[test.t.c]",
+          "    Projection_9 input:[Group#22], test.t.c",
+          "Group#22 Schema:[test.t.a,test.t.c]",
+          "    TopN_23 input:[Group#23], test.t.c, offset:0, count:2",
+          "Group#23 Schema:[test.t.a,test.t.c]",
+          "    Selection_8 input:[Group#24], eq(test.t.a, 3)",
+          "Group#24 Schema:[test.t.a,test.t.c]",
+          "    EinsteinDBSingleGather_41 input:[Group#25], block:t",
+          "    EinsteinDBSingleGather_43 input:[Group#26], block:t, index:c_d_e",
+          "Group#25 Schema:[test.t.a,test.t.c]",
+          "    BlockScan_40 block:t, pk defCaus:test.t.a",
+          "Group#26 Schema:[test.t.a,test.t.c]",
+          "    IndexScan_42 block:t, index:c, d, e"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "TestProjectionElimination",
+    "Cases": [
+      {
+        "ALLEGROALLEGROSQL": "select a, b from (select a, b from t) as t2",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.b]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select a+b from (select a, b from t) as t2",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13]",
+          "    Projection_3 input:[Group#1], plus(test.t.a, test.t.b)->DeferredCauset#13",
+          "Group#1 Schema:[test.t.a,test.t.b]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select a from (select floor(a) as a from t) as t2",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13]",
+          "    Projection_2 input:[Group#1], floor(test.t.a)->DeferredCauset#13",
+          "Group#1 Schema:[test.t.a]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select a from (select a, b from (select a, b, c from t) as t2) as t3",
+        "Result": [
+          "Group#0 Schema:[test.t.a]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select a+c from (select floor(a) as a, b, c from t) as t2",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#14]",
+          "    Projection_4 input:[Group#1], plus(floor(test.t.a), test.t.c)->DeferredCauset#14",
+          "Group#1 Schema:[test.t.a,test.t.c]",
+          "    DataSource_1 block:t"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "TestEliminateMaxMin",
+    "Cases": [
+      {
+        "ALLEGROALLEGROSQL": "select max(a) from t;",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13]",
+          "    Projection_3 input:[Group#1], DeferredCauset#13",
+          "Group#1 Schema:[DeferredCauset#13]",
+          "    Aggregation_2 input:[Group#2], funcs:max(test.t.a)",
+          "    Aggregation_2 input:[Group#3], funcs:max(test.t.a)",
+          "Group#2 Schema:[test.t.a]",
+          "    DataSource_1 block:t",
+          "Group#3 Schema:[test.t.a]",
+          "    TopN_4 input:[Group#2], test.t.a:desc, offset:0, count:1"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select min(a) from t;",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13]",
+          "    Projection_3 input:[Group#1], DeferredCauset#13",
+          "Group#1 Schema:[DeferredCauset#13]",
+          "    Aggregation_2 input:[Group#2], funcs:min(test.t.a)",
+          "    Aggregation_2 input:[Group#3], funcs:min(test.t.a)",
+          "Group#2 Schema:[test.t.a]",
+          "    DataSource_1 block:t",
+          "Group#3 Schema:[test.t.a]",
+          "    TopN_4 input:[Group#2], test.t.a, offset:0, count:1"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "TestMergeAggregationProjection",
+    "Cases": [
+      {
+        "ALLEGROALLEGROSQL": "select b, max(a) from (select a, c+d as b from t as t1) as t2 group by b",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13,DeferredCauset#14]",
+          "    Projection_4 input:[Group#1], DeferredCauset#13, DeferredCauset#14",
+          "Group#1 Schema:[DeferredCauset#14,DeferredCauset#13]",
+          "    Aggregation_3 input:[Group#2], group by:DeferredCauset#13, funcs:max(test.t.a), firstrow(DeferredCauset#13)",
+          "    Aggregation_5 input:[Group#3], group by:plus(test.t.c, test.t.d), funcs:max(test.t.a), firstrow(plus(test.t.c, test.t.d))",
+          "Group#2 Schema:[test.t.a,DeferredCauset#13]",
+          "    Projection_2 input:[Group#3], test.t.a, plus(test.t.c, test.t.d)->DeferredCauset#13",
+          "Group#3 Schema:[test.t.a,test.t.c,test.t.d]",
+          "    DataSource_1 block:t1"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select max(a) from (select c+d as b, a+c as a from t as t1) as t2",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#15]",
+          "    Projection_4 input:[Group#1], DeferredCauset#15",
+          "Group#1 Schema:[DeferredCauset#15]",
+          "    Aggregation_3 input:[Group#2], funcs:max(DeferredCauset#14)",
+          "    Aggregation_5 input:[Group#3], funcs:max(plus(test.t.a, test.t.c))",
+          "Group#2 Schema:[DeferredCauset#14]",
+          "    Projection_2 input:[Group#3], plus(test.t.a, test.t.c)->DeferredCauset#14",
+          "Group#3 Schema:[test.t.a,test.t.c]",
+          "    DataSource_1 block:t1"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select b, max(a) from (select a, c+d as b, @i:=0 from t as t1) as t2 group by b",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13,DeferredCauset#15]",
+          "    Projection_4 input:[Group#1], DeferredCauset#13, DeferredCauset#15",
+          "Group#1 Schema:[DeferredCauset#15,DeferredCauset#13]",
+          "    Aggregation_3 input:[Group#2], group by:DeferredCauset#13, funcs:max(test.t.a), firstrow(DeferredCauset#13)",
+          "Group#2 Schema:[test.t.a,DeferredCauset#13,DeferredCauset#14]",
+          "    Projection_2 input:[Group#3], test.t.a, plus(test.t.c, test.t.d)->DeferredCauset#13, setvar(i, 0)->DeferredCauset#14",
+          "Group#3 Schema:[test.t.a,test.t.c,test.t.d]",
+          "    DataSource_1 block:t1"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "TestMergeAdjacentLimit",
+    "Cases": [
+      {
+        "ALLEGROALLEGROSQL": "select b from (select b from t limit 5) as t1 limit 10",
+        "Result": [
+          "Group#0 Schema:[test.t.b]",
+          "    Projection_4 input:[Group#1], test.t.b",
+          "Group#1 Schema:[test.t.b]",
+          "    Projection_2 input:[Group#2], test.t.b",
+          "Group#2 Schema:[test.t.b]",
+          "    Limit_6 input:[Group#3], offset:0, count:5",
+          "Group#3 Schema:[test.t.b]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select b from (select b from t limit 20) as t1 limit 10",
+        "Result": [
+          "Group#0 Schema:[test.t.b]",
+          "    Projection_4 input:[Group#1], test.t.b",
+          "Group#1 Schema:[test.t.b]",
+          "    Projection_2 input:[Group#2], test.t.b",
+          "Group#2 Schema:[test.t.b]",
+          "    Limit_6 input:[Group#3], offset:0, count:10",
+          "Group#3 Schema:[test.t.b]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select b from (select b from t limit 10) as t1 limit 10",
+        "Result": [
+          "Group#0 Schema:[test.t.b]",
+          "    Projection_4 input:[Group#1], test.t.b",
+          "Group#1 Schema:[test.t.b]",
+          "    Projection_2 input:[Group#2], test.t.b",
+          "Group#2 Schema:[test.t.b]",
+          "    Limit_6 input:[Group#3], offset:0, count:10",
+          "Group#3 Schema:[test.t.b]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select b from (select b from t limit 10 offset 10) as t1 limit 10 offset 5",
+        "Result": [
+          "Group#0 Schema:[test.t.b]",
+          "    Projection_4 input:[Group#1], test.t.b",
+          "Group#1 Schema:[test.t.b]",
+          "    Projection_2 input:[Group#2], test.t.b",
+          "Group#2 Schema:[test.t.b]",
+          "    Limit_6 input:[Group#3], offset:15, count:5",
+          "Group#3 Schema:[test.t.b]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select b from (select b from t limit 10 offset 2) as t1 limit 3 offset 5",
+        "Result": [
+          "Group#0 Schema:[test.t.b]",
+          "    Projection_4 input:[Group#1], test.t.b",
+          "Group#1 Schema:[test.t.b]",
+          "    Projection_2 input:[Group#2], test.t.b",
+          "Group#2 Schema:[test.t.b]",
+          "    Limit_6 input:[Group#3], offset:7, count:3",
+          "Group#3 Schema:[test.t.b]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select b from (select b from t limit 10 offset 5) as t1 limit 5 offset 5",
+        "Result": [
+          "Group#0 Schema:[test.t.b]",
+          "    Projection_4 input:[Group#1], test.t.b",
+          "Group#1 Schema:[test.t.b]",
+          "    Projection_2 input:[Group#2], test.t.b",
+          "Group#2 Schema:[test.t.b]",
+          "    Limit_6 input:[Group#3], offset:10, count:5",
+          "Group#3 Schema:[test.t.b]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select a from (select a from t limit 3 offset 5) t1 limit 3 offset 5",
+        "Result": [
+          "Group#0 Schema:[test.t.a]",
+          "    Projection_4 input:[Group#1], test.t.a",
+          "Group#1 Schema:[test.t.a]",
+          "    Projection_2 input:[Group#2], test.t.a",
+          "Group#2 Schema:[test.t.a]",
+          "    BlockDual_6 rowcount:0"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "TestMergeAdjacentTopN",
+    "Cases": [
+      {
+        "ALLEGROALLEGROSQL": "select b from (select b from t where c > 1 order by b limit 3) as t1 order by b limit 2",
+        "Result": [
+          "Group#0 Schema:[test.t.b]",
+          "    Projection_11 input:[Group#1], test.t.b",
+          "Group#1 Schema:[test.t.b,test.t.c]",
+          "    TopN_14 input:[Group#2], test.t.b, offset:0, count:2",
+          "Group#2 Schema:[test.t.b,test.t.c]",
+          "    Selection_2 input:[Group#3], gt(test.t.c, 1)",
+          "Group#3 Schema:[test.t.b,test.t.c]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select a from (select a from t where b > 2 order by a limit 3 offset 1) as t1 order by a limit 2 offset 1",
+        "Result": [
+          "Group#0 Schema:[test.t.a]",
+          "    Projection_11 input:[Group#1], test.t.a",
+          "Group#1 Schema:[test.t.a,test.t.b]",
+          "    TopN_14 input:[Group#2], test.t.a, offset:2, count:2",
+          "Group#2 Schema:[test.t.a,test.t.b]",
+          "    Selection_2 input:[Group#3], gt(test.t.b, 2)",
+          "Group#3 Schema:[test.t.a,test.t.b]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select * from (select * from t order by a limit 3) as t1 order by a limit 5",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Projection_10 input:[Group#1], test.t.a, test.t.b, test.t.c, test.t.d, test.t.e, test.t.c_str, test.t.d_str, test.t.e_str, test.t.f, test.t.g, test.t.h, test.t.i_date",
+          "Group#1 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    TopN_13 input:[Group#2], test.t.a, offset:0, count:3",
+          "Group#2 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select b from (select b from t order by b limit 5) as t1 order by b limit 10",
+        "Result": [
+          "Group#0 Schema:[test.t.b]",
+          "    Projection_10 input:[Group#1], test.t.b",
+          "Group#1 Schema:[test.t.b]",
+          "    TopN_13 input:[Group#2], test.t.b, offset:0, count:5",
+          "Group#2 Schema:[test.t.b]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select b from (select b from t order by b limit 20) as t1 order by b limit 10",
+        "Result": [
+          "Group#0 Schema:[test.t.b]",
+          "    Projection_10 input:[Group#1], test.t.b",
+          "Group#1 Schema:[test.t.b]",
+          "    TopN_13 input:[Group#2], test.t.b, offset:0, count:10",
+          "Group#2 Schema:[test.t.b]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select b from (select b from t order by b limit 10) as t1 order by b limit 10",
+        "Result": [
+          "Group#0 Schema:[test.t.b]",
+          "    Projection_10 input:[Group#1], test.t.b",
+          "Group#1 Schema:[test.t.b]",
+          "    TopN_13 input:[Group#2], test.t.b, offset:0, count:10",
+          "Group#2 Schema:[test.t.b]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select b from (select b from t order by b limit 10 offset 10) as t1 order by b limit 10 offset 5",
+        "Result": [
+          "Group#0 Schema:[test.t.b]",
+          "    Projection_10 input:[Group#1], test.t.b",
+          "Group#1 Schema:[test.t.b]",
+          "    TopN_13 input:[Group#2], test.t.b, offset:15, count:5",
+          "Group#2 Schema:[test.t.b]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select b from (select b from t order by b limit 10 offset 2) as t1 order by b limit 3 offset 5",
+        "Result": [
+          "Group#0 Schema:[test.t.b]",
+          "    Projection_10 input:[Group#1], test.t.b",
+          "Group#1 Schema:[test.t.b]",
+          "    TopN_13 input:[Group#2], test.t.b, offset:7, count:3",
+          "Group#2 Schema:[test.t.b]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select b from (select b from t order by b limit 10 offset 5) as t1 order by b limit 5 offset 5",
+        "Result": [
+          "Group#0 Schema:[test.t.b]",
+          "    Projection_10 input:[Group#1], test.t.b",
+          "Group#1 Schema:[test.t.b]",
+          "    TopN_13 input:[Group#2], test.t.b, offset:10, count:5",
+          "Group#2 Schema:[test.t.b]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select a from (select a from t order by a limit 3 offset 5) as t1 order by a limit 3 offset 5",
+        "Result": [
+          "Group#0 Schema:[test.t.a]",
+          "    Projection_10 input:[Group#1], test.t.a",
+          "Group#1 Schema:[test.t.a]",
+          "    BlockDual_13 rowcount:0"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select b from (select b from t where c > 1 order by b, a limit 3) as t1 order by b limit 2",
+        "Result": [
+          "Group#0 Schema:[test.t.b]",
+          "    Projection_13 input:[Group#1], test.t.b",
+          "Group#1 Schema:[test.t.a,test.t.b,test.t.c]",
+          "    TopN_16 input:[Group#2], test.t.b, test.t.a, offset:0, count:2",
+          "Group#2 Schema:[test.t.a,test.t.b,test.t.c]",
+          "    Selection_2 input:[Group#3], gt(test.t.c, 1)",
+          "Group#3 Schema:[test.t.a,test.t.b,test.t.c]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select a from (select a from t where b > 2 order by a, b limit 3 offset 1) as t1 order by a limit 2 offset 1",
+        "Result": [
+          "Group#0 Schema:[test.t.a]",
+          "    Projection_13 input:[Group#1], test.t.a",
+          "Group#1 Schema:[test.t.a,test.t.b]",
+          "    TopN_16 input:[Group#2], test.t.a, test.t.b, offset:2, count:2",
+          "Group#2 Schema:[test.t.a,test.t.b]",
+          "    Selection_2 input:[Group#3], gt(test.t.b, 2)",
+          "Group#3 Schema:[test.t.a,test.t.b]",
+          "    DataSource_1 block:t"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "TestTransformLimitToBlockDual",
+    "Cases": [
+      {
+        "ALLEGROALLEGROSQL": "select a from t limit 0 offset 1",
+        "Result": [
+          "Group#0 Schema:[test.t.a]",
+          "    BlockDual_4 rowcount:0"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select * from t as t1 left join (select * from t limit 0 offset 1) as t2 on t1.a = t2.a;",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Projection_6 input:[Group#1], test.t.a, test.t.b, test.t.c, test.t.d, test.t.e, test.t.c_str, test.t.d_str, test.t.e_str, test.t.f, test.t.g, test.t.h, test.t.i_date, test.t.a, test.t.b, test.t.c, test.t.d, test.t.e, test.t.c_str, test.t.d_str, test.t.e_str, test.t.f, test.t.g, test.t.h, test.t.i_date",
+          "Group#1 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Join_5 input:[Group#2,Group#3], left outer join, equal:[eq(test.t.a, test.t.a)]",
+          "Group#2 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    DataSource_1 block:t1",
+          "Group#3 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    BlockDual_7 rowcount:0"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select a, b from ((select a, b from t) union all(select c as a, d as b from t limit 0 offset 5)) as t1 where a > 1",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#25,DeferredCauset#26]",
+          "    Projection_10 input:[Group#1], DeferredCauset#25, DeferredCauset#26",
+          "Group#1 Schema:[DeferredCauset#25,DeferredCauset#26]",
+          "    Selection_9 input:[Group#2], gt(DeferredCauset#25, 1)",
+          "Group#2 Schema:[DeferredCauset#25,DeferredCauset#26]",
+          "    Union_6 input:[Group#3,Group#4]",
+          "Group#3 Schema:[DeferredCauset#25,DeferredCauset#26]",
+          "    Projection_7 input:[Group#5], test.t.a, test.t.b",
+          "Group#5 Schema:[test.t.a,test.t.b]",
+          "    Projection_2 input:[Group#6], test.t.a, test.t.b",
+          "Group#6 Schema:[test.t.a,test.t.b]",
+          "    DataSource_1 block:t",
+          "Group#4 Schema:[DeferredCauset#25,DeferredCauset#26]",
+          "    Projection_8 input:[Group#7], test.t.c, test.t.d",
+          "Group#7 Schema:[test.t.c,test.t.d]",
+          "    BlockDual_11 rowcount:0"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "TestPostTransformationMemrules",
+    "Cases": [
+      {
+        "ALLEGROALLEGROSQL": "select b from (select b+10 as b from t) as t1 order by b + 10 limit 10",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13]",
+          "    Projection_8 input:[Group#1], DeferredCauset#13",
+          "Group#1 Schema:[DeferredCauset#13,DeferredCauset#14]",
+          "    TopN_10 input:[Group#2], DeferredCauset#14, offset:0, count:10",
+          "Group#2 Schema:[DeferredCauset#13,DeferredCauset#14]",
+          "    Projection_11 input:[Group#3], plus(test.t.b, 10)->DeferredCauset#13, plus(plus(test.t.b, 10), 10)->DeferredCauset#14",
+          "Group#3 Schema:[test.t.b]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select * from (select a+1 as c, a+b as d from t) as t1 order by c+d limit 10",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13,DeferredCauset#14]",
+          "    Projection_8 input:[Group#1], DeferredCauset#13, DeferredCauset#14",
+          "Group#1 Schema:[DeferredCauset#13,DeferredCauset#14,DeferredCauset#15]",
+          "    TopN_10 input:[Group#2], DeferredCauset#15, offset:0, count:10",
+          "Group#2 Schema:[DeferredCauset#13,DeferredCauset#14,DeferredCauset#15]",
+          "    Projection_11 input:[Group#3], plus(test.t.a, 1)->DeferredCauset#13, plus(test.t.a, test.t.b)->DeferredCauset#14, plus(plus(test.t.a, 1), plus(test.t.a, test.t.b))->DeferredCauset#15",
+          "Group#3 Schema:[test.t.a,test.t.b]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select a from (select a, b from t order by b limit 10) as t1",
+        "Result": [
+          "Group#0 Schema:[test.t.a]",
+          "    Projection_5 input:[Group#1], test.t.a",
+          "Group#1 Schema:[test.t.a,test.t.b]",
+          "    TopN_6 input:[Group#2], test.t.b, offset:0, count:10",
+          "Group#2 Schema:[test.t.a,test.t.b]",
+          "    DataSource_1 block:t"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "TestPushLimitDownEinsteinDBSingleGather",
+    "Cases": [
+      {
+        "ALLEGROALLEGROSQL": "select * from t limit 1",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Limit_3 input:[Group#1], offset:0, count:1",
+          "Group#1 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    EinsteinDBSingleGather_5 input:[Group#2], block:t",
+          "Group#2 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Limit_6 input:[Group#3], offset:0, count:1",
+          "Group#3 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    BlockScan_4 block:t, pk defCaus:test.t.a"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select * from t as t1 left join (select * from t limit 2) as t2 on t1.a = t2.a;",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Join_5 input:[Group#1,Group#2], left outer join, equal:[eq(test.t.a, test.t.a)]",
+          "Group#1 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    EinsteinDBSingleGather_8 input:[Group#3], block:t1",
+          "Group#3 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    BlockScan_7 block:t1, pk defCaus:test.t.a",
+          "Group#2 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Limit_4 input:[Group#4], offset:0, count:2",
+          "Group#4 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    EinsteinDBSingleGather_10 input:[Group#5], block:t",
+          "Group#5 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Limit_11 input:[Group#6], offset:0, count:2",
+          "Group#6 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    BlockScan_9 block:t, pk defCaus:test.t.a"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select a, b from ((select a, b from t) union all(select c as a, d as b from t limit 3)) as t1 where a > 1",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#25,DeferredCauset#26]",
+          "    Selection_9 input:[Group#1], gt(DeferredCauset#25, 1)",
+          "Group#1 Schema:[DeferredCauset#25,DeferredCauset#26]",
+          "    Union_6 input:[Group#2,Group#3]",
+          "Group#2 Schema:[DeferredCauset#25,DeferredCauset#26]",
+          "    Projection_7 input:[Group#4], test.t.a, test.t.b",
+          "Group#4 Schema:[test.t.a,test.t.b]",
+          "    EinsteinDBSingleGather_12 input:[Group#5], block:t",
+          "Group#5 Schema:[test.t.a,test.t.b]",
+          "    BlockScan_11 block:t, pk defCaus:test.t.a",
+          "Group#3 Schema:[DeferredCauset#25,DeferredCauset#26]",
+          "    Projection_8 input:[Group#6], test.t.c, test.t.d",
+          "Group#6 Schema:[test.t.c,test.t.d]",
+          "    Limit_5 input:[Group#7], offset:0, count:3",
+          "    Limit_5 input:[Group#8], offset:0, count:3",
+          "Group#7 Schema:[test.t.c,test.t.d]",
+          "    EinsteinDBSingleGather_16 input:[Group#9], block:t, index:c_d_e",
+          "Group#9 Schema:[test.t.c,test.t.d]",
+          "    Limit_18 input:[Group#10], offset:0, count:3",
+          "Group#10 Schema:[test.t.c,test.t.d]",
+          "    IndexScan_15 block:t, index:c, d, e",
+          "Group#8 Schema:[test.t.c,test.t.d]",
+          "    EinsteinDBSingleGather_14 input:[Group#11], block:t",
+          "Group#11 Schema:[test.t.c,test.t.d]",
+          "    Limit_17 input:[Group#12], offset:0, count:3",
+          "Group#12 Schema:[test.t.c,test.t.d]",
+          "    BlockScan_13 block:t"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "TestEliminateOuterJoin",
+    "Cases": [
+      {
+        "ALLEGROALLEGROSQL": "select t1.a, max(t1.b) from t as t1 left join (select * from t) as t2 on t1.a = t2.a and t1.b = 3 group by t1.a;",
+        "Result": [
+          "Group#0 Schema:[test.t.a,DeferredCauset#25]",
+          "    Projection_6 input:[Group#1], test.t.a, DeferredCauset#25",
+          "Group#1 Schema:[DeferredCauset#25,test.t.a]",
+          "    Aggregation_5 input:[Group#2], group by:test.t.a, funcs:max(test.t.b), firstrow(test.t.a)",
+          "Group#2 Schema:[test.t.a,test.t.b]",
+          "    DataSource_1 block:t1"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select t1.a, max(t1.b) from t as t1 left join (select * from t) as t2 on t1.a = t2.a group by t1.a;",
+        "Result": [
+          "Group#0 Schema:[test.t.a,DeferredCauset#25]",
+          "    Projection_6 input:[Group#1], test.t.a, DeferredCauset#25",
+          "Group#1 Schema:[DeferredCauset#25,test.t.a]",
+          "    Aggregation_5 input:[Group#2], group by:test.t.a, funcs:max(test.t.b), firstrow(test.t.a)",
+          "Group#2 Schema:[test.t.a,test.t.b]",
+          "    DataSource_1 block:t1"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select t1.a, sum(t1.h) from t as t1 left join (select * from t) as t2 on t1.h = t2.h group by t1.a;",
+        "Result": [
+          "Group#0 Schema:[test.t.a,DeferredCauset#25]",
+          "    Projection_6 input:[Group#1], test.t.a, DeferredCauset#25",
+          "Group#1 Schema:[DeferredCauset#25,test.t.a]",
+          "    Aggregation_5 input:[Group#2], group by:test.t.a, funcs:sum(test.t.h), firstrow(test.t.a)",
+          "Group#2 Schema:[test.t.a,test.t.h]",
+          "    Join_4 input:[Group#3,Group#4], left outer join, equal:[eq(test.t.h, test.t.h)]",
+          "Group#3 Schema:[test.t.a,test.t.h]",
+          "    DataSource_1 block:t1",
+          "Group#4 Schema:[test.t.h]",
+          "    Projection_3 input:[Group#5], test.t.h",
+          "Group#5 Schema:[test.t.h]",
+          "    DataSource_2 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select t1.a, sum(distinct t1.h) from t as t1 left join (select * from t) as t2 on t1.h = t2.h group by t1.a;",
+        "Result": [
+          "Group#0 Schema:[test.t.a,DeferredCauset#25]",
+          "    Projection_6 input:[Group#1], test.t.a, DeferredCauset#25",
+          "Group#1 Schema:[DeferredCauset#25,test.t.a]",
+          "    Aggregation_5 input:[Group#2], group by:test.t.a, funcs:sum(distinct test.t.h), firstrow(test.t.a)",
+          "Group#2 Schema:[test.t.a,test.t.h]",
+          "    DataSource_1 block:t1"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select t1.a, max(t1.b) from t as t1 left join (select * from t) as t2 on t1.a = t2.a group by t2.a;",
+        "Result": [
+          "Group#0 Schema:[test.t.a,DeferredCauset#25]",
+          "    Projection_6 input:[Group#1], test.t.a, DeferredCauset#25",
+          "Group#1 Schema:[DeferredCauset#25,test.t.a]",
+          "    Aggregation_5 input:[Group#2], group by:test.t.a, funcs:max(test.t.b), firstrow(test.t.a)",
+          "Group#2 Schema:[test.t.a,test.t.b,test.t.a]",
+          "    Join_4 input:[Group#3,Group#4], left outer join, equal:[eq(test.t.a, test.t.a)]",
+          "Group#3 Schema:[test.t.a,test.t.b]",
+          "    DataSource_1 block:t1",
+          "Group#4 Schema:[test.t.a]",
+          "    Projection_3 input:[Group#5], test.t.a",
+          "Group#5 Schema:[test.t.a]",
+          "    DataSource_2 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select t1.a, max(t2.b) from t as t1 left join (select * from t) as t2 on t1.a = t2.a group by t1.a;",
+        "Result": [
+          "Group#0 Schema:[test.t.a,DeferredCauset#25]",
+          "    Projection_6 input:[Group#1], test.t.a, DeferredCauset#25",
+          "Group#1 Schema:[DeferredCauset#25,test.t.a]",
+          "    Aggregation_5 input:[Group#2], group by:test.t.a, funcs:max(test.t.b), firstrow(test.t.a)",
+          "Group#2 Schema:[test.t.a,test.t.b]",
+          "    Join_4 input:[Group#3,Group#4], left outer join, equal:[eq(test.t.a, test.t.a)]",
+          "Group#3 Schema:[test.t.a]",
+          "    DataSource_1 block:t1",
+          "Group#4 Schema:[test.t.a,test.t.b]",
+          "    Projection_3 input:[Group#5], test.t.a, test.t.b",
+          "Group#5 Schema:[test.t.a,test.t.b]",
+          "    DataSource_2 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select t2.a, max(t2.b) from t as t1 right join (select * from t) as t2 on t1.a = t2.a group by t2.a;",
+        "Result": [
+          "Group#0 Schema:[test.t.a,DeferredCauset#25]",
+          "    Projection_6 input:[Group#1], test.t.a, DeferredCauset#25",
+          "Group#1 Schema:[DeferredCauset#25,test.t.a]",
+          "    Aggregation_5 input:[Group#2], group by:test.t.a, funcs:max(test.t.b), firstrow(test.t.a)",
+          "Group#2 Schema:[test.t.a,test.t.b]",
+          "    Projection_3 input:[Group#3], test.t.a, test.t.b",
+          "Group#3 Schema:[test.t.a,test.t.b]",
+          "    DataSource_2 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select t2.a, max(t2.b) from t as t1 right join (select * from t) as t2 on t1.a = t2.a and t2.c = 3 group by t2.a;",
+        "Result": [
+          "Group#0 Schema:[test.t.a,DeferredCauset#25]",
+          "    Projection_6 input:[Group#1], test.t.a, DeferredCauset#25",
+          "Group#1 Schema:[DeferredCauset#25,test.t.a]",
+          "    Aggregation_5 input:[Group#2], group by:test.t.a, funcs:max(test.t.b), firstrow(test.t.a)",
+          "Group#2 Schema:[test.t.a,test.t.b,test.t.c]",
+          "    Projection_3 input:[Group#3], test.t.a, test.t.b, test.t.c",
+          "Group#3 Schema:[test.t.a,test.t.b,test.t.c]",
+          "    DataSource_2 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select t2.a, sum(t2.h) from t as t1 right join (select * from t) as t2 on t1.h = t2.h group by t2.a;",
+        "Result": [
+          "Group#0 Schema:[test.t.a,DeferredCauset#25]",
+          "    Projection_6 input:[Group#1], test.t.a, DeferredCauset#25",
+          "Group#1 Schema:[DeferredCauset#25,test.t.a]",
+          "    Aggregation_5 input:[Group#2], group by:test.t.a, funcs:sum(test.t.h), firstrow(test.t.a)",
+          "Group#2 Schema:[test.t.a,test.t.h]",
+          "    Join_4 input:[Group#3,Group#4], right outer join, equal:[eq(test.t.h, test.t.h)]",
+          "Group#3 Schema:[test.t.h]",
+          "    DataSource_1 block:t1",
+          "Group#4 Schema:[test.t.a,test.t.h]",
+          "    Projection_3 input:[Group#5], test.t.a, test.t.h",
+          "Group#5 Schema:[test.t.a,test.t.h]",
+          "    DataSource_2 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select t2.a, sum(distinct t2.h) from t as t1 right join (select * from t) as t2 on t1.h = t2.h group by t2.a;",
+        "Result": [
+          "Group#0 Schema:[test.t.a,DeferredCauset#25]",
+          "    Projection_6 input:[Group#1], test.t.a, DeferredCauset#25",
+          "Group#1 Schema:[DeferredCauset#25,test.t.a]",
+          "    Aggregation_5 input:[Group#2], group by:test.t.a, funcs:sum(distinct test.t.h), firstrow(test.t.a)",
+          "Group#2 Schema:[test.t.a,test.t.h]",
+          "    Projection_3 input:[Group#3], test.t.a, test.t.h",
+          "Group#3 Schema:[test.t.a,test.t.h]",
+          "    DataSource_2 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select t2.a, max(t2.b) from t as t1 right join (select * from t) as t2 on t1.a = t2.a group by t1.a;",
+        "Result": [
+          "Group#0 Schema:[test.t.a,DeferredCauset#25]",
+          "    Projection_6 input:[Group#1], test.t.a, DeferredCauset#25",
+          "Group#1 Schema:[DeferredCauset#25,test.t.a]",
+          "    Aggregation_5 input:[Group#2], group by:test.t.a, funcs:max(test.t.b), firstrow(test.t.a)",
+          "Group#2 Schema:[test.t.a,test.t.a,test.t.b]",
+          "    Join_4 input:[Group#3,Group#4], right outer join, equal:[eq(test.t.a, test.t.a)]",
+          "Group#3 Schema:[test.t.a]",
+          "    DataSource_1 block:t1",
+          "Group#4 Schema:[test.t.a,test.t.b]",
+          "    Projection_3 input:[Group#5], test.t.a, test.t.b",
+          "Group#5 Schema:[test.t.a,test.t.b]",
+          "    DataSource_2 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select t2.a, max(t1.b) from t as t1 right join (select * from t) as t2 on t1.a = t2.a group by t2.a;",
+        "Result": [
+          "Group#0 Schema:[test.t.a,DeferredCauset#25]",
+          "    Projection_6 input:[Group#1], test.t.a, DeferredCauset#25",
+          "Group#1 Schema:[DeferredCauset#25,test.t.a]",
+          "    Aggregation_5 input:[Group#2], group by:test.t.a, funcs:max(test.t.b), firstrow(test.t.a)",
+          "Group#2 Schema:[test.t.b,test.t.a]",
+          "    Join_4 input:[Group#3,Group#4], right outer join, equal:[eq(test.t.a, test.t.a)]",
+          "Group#3 Schema:[test.t.a,test.t.b]",
+          "    DataSource_1 block:t1",
+          "Group#4 Schema:[test.t.a]",
+          "    Projection_3 input:[Group#5], test.t.a",
+          "Group#5 Schema:[test.t.a]",
+          "    DataSource_2 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select t1.a, t1.b from t as t1 left join t as t2 on t1.a = t2.a and t1.b = 3 and t2.b = 3;",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.b]",
+          "    Projection_4 input:[Group#1], test.t.a, test.t.b",
+          "Group#1 Schema:[test.t.a,test.t.b]",
+          "    DataSource_1 block:t1"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select t1.a, t1.b from t as t1 left join t as t2 on t1.b = t2.b and t1.a = 3 and t2.b = 3;",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.b]",
+          "    Projection_4 input:[Group#1], test.t.a, test.t.b",
+          "Group#1 Schema:[test.t.a,test.t.b]",
+          "    Join_3 input:[Group#2,Group#3], left outer join, equal:[eq(test.t.b, test.t.b)], left cond:eq(test.t.a, 3), right cond:eq(test.t.b, 3)",
+          "Group#2 Schema:[test.t.a,test.t.b]",
+          "    DataSource_1 block:t1",
+          "Group#3 Schema:[test.t.b]",
+          "    DataSource_2 block:t2"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select t2.a, t1.b from t as t1 left join t as t2 on t1.a = t2.a and t1.a = 3 and t2.b = 3;",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.b]",
+          "    Projection_4 input:[Group#1], test.t.a, test.t.b",
+          "Group#1 Schema:[test.t.b,test.t.a]",
+          "    Join_3 input:[Group#2,Group#3], left outer join, equal:[eq(test.t.a, test.t.a)], left cond:eq(test.t.a, 3), right cond:eq(test.t.b, 3)",
+          "Group#2 Schema:[test.t.a,test.t.b]",
+          "    DataSource_1 block:t1",
+          "Group#3 Schema:[test.t.a,test.t.b]",
+          "    DataSource_2 block:t2"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select t2.a, t2.b from t as t1 right join t as t2 on t1.a = t2.a and t1.b = 3 and t2.b = 3;",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.b]",
+          "    Projection_4 input:[Group#1], test.t.a, test.t.b",
+          "Group#1 Schema:[test.t.a,test.t.b]",
+          "    DataSource_2 block:t2"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select t2.a, t2.b from t as t1 right join t as t2 on t1.b = t2.b and t1.a = 3 and t2.b = 3;",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.b]",
+          "    Projection_4 input:[Group#1], test.t.a, test.t.b",
+          "Group#1 Schema:[test.t.a,test.t.b]",
+          "    Join_3 input:[Group#2,Group#3], right outer join, equal:[eq(test.t.b, test.t.b)], left cond:eq(test.t.a, 3), right cond:eq(test.t.b, 3)",
+          "Group#2 Schema:[test.t.a,test.t.b], UniqueKey:[test.t.a]",
+          "    DataSource_1 block:t1",
+          "Group#3 Schema:[test.t.a,test.t.b]",
+          "    DataSource_2 block:t2"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select t1.a, t2.b from t as t1 right join t as t2 on t1.a = t2.a and t1.a = 3 and t2.b = 3;",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.b]",
+          "    Projection_4 input:[Group#1], test.t.a, test.t.b",
+          "Group#1 Schema:[test.t.a,test.t.b]",
+          "    Join_3 input:[Group#2,Group#3], right outer join, equal:[eq(test.t.a, test.t.a)], left cond:eq(test.t.a, 3), right cond:eq(test.t.b, 3)",
+          "Group#2 Schema:[test.t.a]",
+          "    DataSource_1 block:t1",
+          "Group#3 Schema:[test.t.a,test.t.b]",
+          "    DataSource_2 block:t2"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select t3.a, max(t3.b) from (select t1.a, t1.b from t as t1 left join t as t2 on t1.a = t2.a) t3 group by t3.a",
+        "Result": [
+          "Group#0 Schema:[test.t.a,DeferredCauset#25]",
+          "    Projection_6 input:[Group#1], test.t.a, DeferredCauset#25",
+          "Group#1 Schema:[DeferredCauset#25,test.t.a]",
+          "    Aggregation_5 input:[Group#2], group by:test.t.a, funcs:max(test.t.b), firstrow(test.t.a)",
+          "Group#2 Schema:[test.t.a,test.t.b]",
+          "    Projection_4 input:[Group#3], test.t.a, test.t.b",
+          "Group#3 Schema:[test.t.a,test.t.b]",
+          "    DataSource_1 block:t1"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "TestTransformAggregateCaseToSelection",
+    "Cases": [
+      {
+        "ALLEGROALLEGROSQL": "select count(case when a > 10 then b end) from t",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13]",
+          "    Projection_3 input:[Group#1], DeferredCauset#13",
+          "Group#1 Schema:[DeferredCauset#13]",
+          "    Aggregation_5 input:[Group#2], funcs:count(test.t.b)",
+          "Group#2 Schema:[test.t.a,test.t.b]",
+          "    Selection_4 input:[Group#3], gt(test.t.a, 10)",
+          "Group#3 Schema:[test.t.a,test.t.b]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select count(case when a > 10 then b end) from t group by c",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13]",
+          "    Projection_3 input:[Group#1], DeferredCauset#13",
+          "Group#1 Schema:[DeferredCauset#13]",
+          "    Aggregation_2 input:[Group#2], group by:test.t.c, funcs:count(case(gt(test.t.a, 10), test.t.b))",
+          "Group#2 Schema:[test.t.a,test.t.b,test.t.c]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select count(case when a > 10 then b end) from t group by 'a'",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13]",
+          "    Projection_3 input:[Group#1], DeferredCauset#13",
+          "Group#1 Schema:[DeferredCauset#13]",
+          "    Aggregation_2 input:[Group#2], group by:1, funcs:count(case(gt(test.t.a, 10), test.t.b))",
+          "Group#2 Schema:[test.t.a,test.t.b]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select count(case when a > 10 then b end) from t group by concat(c, a)",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13]",
+          "    Projection_3 input:[Group#1], DeferredCauset#13",
+          "Group#1 Schema:[DeferredCauset#13]",
+          "    Aggregation_2 input:[Group#2], group by:concat(cast(test.t.c), cast(test.t.a)), funcs:count(case(gt(test.t.a, 10), test.t.b))",
+          "Group#2 Schema:[test.t.a,test.t.b,test.t.c]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select count(case when a > 10 then b end) from t group by concat(c, 'a')",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13]",
+          "    Projection_3 input:[Group#1], DeferredCauset#13",
+          "Group#1 Schema:[DeferredCauset#13]",
+          "    Aggregation_2 input:[Group#2], group by:concat(cast(test.t.c), \"a\"), funcs:count(case(gt(test.t.a, 10), test.t.b))",
+          "Group#2 Schema:[test.t.a,test.t.b,test.t.c]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select count(case when a > 10 then b end) from t group by concat('a', 'c')",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13]",
+          "    Projection_3 input:[Group#1], DeferredCauset#13",
+          "Group#1 Schema:[DeferredCauset#13]",
+          "    Aggregation_2 input:[Group#2], group by:1, funcs:count(case(gt(test.t.a, 10), test.t.b))",
+          "Group#2 Schema:[test.t.a,test.t.b]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select count(case when a > 10 then b else null end) from t",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13]",
+          "    Projection_3 input:[Group#1], DeferredCauset#13",
+          "Group#1 Schema:[DeferredCauset#13]",
+          "    Aggregation_5 input:[Group#2], funcs:count(test.t.b)",
+          "Group#2 Schema:[test.t.a,test.t.b]",
+          "    Selection_4 input:[Group#3], gt(test.t.a, 10)",
+          "Group#3 Schema:[test.t.a,test.t.b]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select count(case when a > 10 then null else b end) from t",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13]",
+          "    Projection_3 input:[Group#1], DeferredCauset#13",
+          "Group#1 Schema:[DeferredCauset#13]",
+          "    Aggregation_5 input:[Group#2], funcs:count(test.t.b)",
+          "Group#2 Schema:[test.t.a,test.t.b]",
+          "    Selection_4 input:[Group#3], not(gt(test.t.a, 10))",
+          "Group#3 Schema:[test.t.a,test.t.b]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select count(case when a > 10 then c else b end) from t",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13]",
+          "    Projection_3 input:[Group#1], DeferredCauset#13",
+          "Group#1 Schema:[DeferredCauset#13]",
+          "    Aggregation_2 input:[Group#2], funcs:count(case(gt(test.t.a, 10), test.t.c, test.t.b))",
+          "Group#2 Schema:[test.t.a,test.t.b,test.t.c]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select count(case when a > 10 then c else 0 end) from t",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13]",
+          "    Projection_3 input:[Group#1], DeferredCauset#13",
+          "Group#1 Schema:[DeferredCauset#13]",
+          "    Aggregation_2 input:[Group#2], funcs:count(case(gt(test.t.a, 10), test.t.c, 0))",
+          "Group#2 Schema:[test.t.a,test.t.c]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select sum(case when a > 10 then c else 0 end) from t",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13]",
+          "    Projection_3 input:[Group#1], DeferredCauset#13",
+          "Group#1 Schema:[DeferredCauset#13]",
+          "    Aggregation_5 input:[Group#2], funcs:sum(test.t.c)",
+          "Group#2 Schema:[test.t.a,test.t.c]",
+          "    Selection_4 input:[Group#3], gt(test.t.a, 10)",
+          "Group#3 Schema:[test.t.a,test.t.c]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select sum(case when a > 10 then c else 0.0 end) from t",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13]",
+          "    Projection_3 input:[Group#1], DeferredCauset#13",
+          "Group#1 Schema:[DeferredCauset#13]",
+          "    Aggregation_5 input:[Group#2], funcs:sum(cast(test.t.c))",
+          "Group#2 Schema:[test.t.a,test.t.c]",
+          "    Selection_4 input:[Group#3], gt(test.t.a, 10)",
+          "Group#3 Schema:[test.t.a,test.t.c]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select sum(case when a > 10 then c else 1-1 end) from t",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13]",
+          "    Projection_3 input:[Group#1], DeferredCauset#13",
+          "Group#1 Schema:[DeferredCauset#13]",
+          "    Aggregation_5 input:[Group#2], funcs:sum(test.t.c)",
+          "Group#2 Schema:[test.t.a,test.t.c]",
+          "    Selection_4 input:[Group#3], gt(test.t.a, 10)",
+          "Group#3 Schema:[test.t.a,test.t.c]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select sum(case when a > 0 then (case when a <= 1000 then b end) else 0 end) from t",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13]",
+          "    Projection_3 input:[Group#1], DeferredCauset#13",
+          "Group#1 Schema:[DeferredCauset#13]",
+          "    Aggregation_7 input:[Group#2], funcs:sum(test.t.b)",
+          "Group#2 Schema:[test.t.a,test.t.b]",
+          "    Selection_6 input:[Group#3], le(test.t.a, 1000)",
+          "Group#3 Schema:[test.t.a,test.t.b]",
+          "    Selection_4 input:[Group#4], gt(test.t.a, 0)",
+          "Group#4 Schema:[test.t.a,test.t.b]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select sum(case when a > 10 then 0 else c end) from t",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13]",
+          "    Projection_3 input:[Group#1], DeferredCauset#13",
+          "Group#1 Schema:[DeferredCauset#13]",
+          "    Aggregation_5 input:[Group#2], funcs:sum(test.t.c)",
+          "Group#2 Schema:[test.t.a,test.t.c]",
+          "    Selection_4 input:[Group#3], not(gt(test.t.a, 10))",
+          "Group#3 Schema:[test.t.a,test.t.c]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select sum(case when a > 10 then 2 else 1 end) from t",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13]",
+          "    Projection_3 input:[Group#1], DeferredCauset#13",
+          "Group#1 Schema:[DeferredCauset#13]",
+          "    Aggregation_2 input:[Group#2], funcs:sum(case(gt(test.t.a, 10), 2, 1))",
+          "Group#2 Schema:[test.t.a]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select count(DISTINCT case when a > 10 then null else c end) from t",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13]",
+          "    Projection_3 input:[Group#1], DeferredCauset#13",
+          "Group#1 Schema:[DeferredCauset#13]",
+          "    Aggregation_5 input:[Group#2], funcs:count(distinct test.t.c)",
+          "Group#2 Schema:[test.t.a,test.t.c]",
+          "    Selection_4 input:[Group#3], not(gt(test.t.a, 10))",
+          "Group#3 Schema:[test.t.a,test.t.c]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select approx_count_distinct(case when a > 10 then null else c end) from t",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13]",
+          "    Projection_3 input:[Group#1], DeferredCauset#13",
+          "Group#1 Schema:[DeferredCauset#13]",
+          "    Aggregation_5 input:[Group#2], funcs:approx_count_distinct(test.t.c)",
+          "Group#2 Schema:[test.t.a,test.t.c]",
+          "    Selection_4 input:[Group#3], not(gt(test.t.a, 10))",
+          "Group#3 Schema:[test.t.a,test.t.c]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select sum(DISTINCT case when a > 10 then c else 0 end) from t",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13]",
+          "    Projection_3 input:[Group#1], DeferredCauset#13",
+          "Group#1 Schema:[DeferredCauset#13]",
+          "    Aggregation_2 input:[Group#2], funcs:sum(distinct case(gt(test.t.a, 10), test.t.c, 0))",
+          "Group#2 Schema:[test.t.a,test.t.c]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select case when c > 10 then c end from t",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13]",
+          "    Projection_2 input:[Group#1], case(gt(test.t.c, 10), test.t.c)->DeferredCauset#13",
+          "Group#1 Schema:[test.t.c]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select count(case when a > 10 then c end), c from t",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13,test.t.c]",
+          "    Projection_3 input:[Group#1], DeferredCauset#13, test.t.c",
+          "Group#1 Schema:[DeferredCauset#13,test.t.c]",
+          "    Aggregation_2 input:[Group#2], funcs:count(case(gt(test.t.a, 10), test.t.c)), firstrow(test.t.c)",
+          "Group#2 Schema:[test.t.a,test.t.c]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select count(case when a > 10 and d < 5 then b end) from t",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13]",
+          "    Projection_3 input:[Group#1], DeferredCauset#13",
+          "Group#1 Schema:[DeferredCauset#13]",
+          "    Aggregation_5 input:[Group#2], funcs:count(test.t.b)",
+          "Group#2 Schema:[test.t.a,test.t.b,test.t.d]",
+          "    Selection_4 input:[Group#3], gt(test.t.a, 10), lt(test.t.d, 5)",
+          "Group#3 Schema:[test.t.a,test.t.b,test.t.d]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select count(case when a > 10 and d < 5 then null else b end) from t",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13]",
+          "    Projection_3 input:[Group#1], DeferredCauset#13",
+          "Group#1 Schema:[DeferredCauset#13]",
+          "    Aggregation_5 input:[Group#2], funcs:count(test.t.b)",
+          "Group#2 Schema:[test.t.a,test.t.b,test.t.d]",
+          "    Selection_4 input:[Group#3], not(and(gt(test.t.a, 10), lt(test.t.d, 5)))",
+          "Group#3 Schema:[test.t.a,test.t.b,test.t.d]",
+          "    DataSource_1 block:t"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "TestTransformAggToProj",
+    "Cases": [
+      {
+        "ALLEGROALLEGROSQL": "select count(b) from t group by a",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13]",
+          "    Projection_5 input:[Group#1], 1->DeferredCauset#13",
+          "Group#1 Schema:[test.t.a,test.t.b], UniqueKey:[test.t.a]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select count(b) from t group by b",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13]",
+          "    Projection_3 input:[Group#1], DeferredCauset#13",
+          "Group#1 Schema:[DeferredCauset#13]",
+          "    Aggregation_2 input:[Group#2], group by:test.t.b, funcs:count(test.t.b)",
+          "Group#2 Schema:[test.t.b]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select count(b) from t",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13]",
+          "    Projection_3 input:[Group#1], DeferredCauset#13",
+          "Group#1 Schema:[DeferredCauset#13]",
+          "    Aggregation_2 input:[Group#2], funcs:count(test.t.b)",
+          "Group#2 Schema:[test.t.b]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select a from t group by a having sum(b) > 4",
+        "Result": [
+          "Group#0 Schema:[test.t.a]",
+          "    Projection_5 input:[Group#1], test.t.a",
+          "Group#1 Schema:[test.t.a,DeferredCauset#13]",
+          "    Selection_4 input:[Group#2], gt(DeferredCauset#13, 4)",
+          "Group#2 Schema:[test.t.a,DeferredCauset#13]",
+          "    Projection_7 input:[Group#3], test.t.a, cast(test.t.b, decimal(65,0) BINARY)->DeferredCauset#13",
+          "Group#3 Schema:[test.t.a,test.t.b], UniqueKey:[test.t.a]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select count(b), sum(b), avg(b), b, max(b), min(b), bit_and(b), bit_or(b), bit_xor(b) from t group by a having sum(b) >= 0 and count(b) >= 0 order by b",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#21,DeferredCauset#22,DeferredCauset#23,test.t.b,DeferredCauset#25,DeferredCauset#26,DeferredCauset#27,DeferredCauset#28,DeferredCauset#29]",
+          "    Projection_6 input:[Group#1], DeferredCauset#13, DeferredCauset#14, DeferredCauset#15, test.t.b, DeferredCauset#16, DeferredCauset#17, DeferredCauset#18, DeferredCauset#19, DeferredCauset#20",
+          "Group#1 Schema:[DeferredCauset#13,DeferredCauset#14,DeferredCauset#15,test.t.b,DeferredCauset#16,DeferredCauset#17,DeferredCauset#18,DeferredCauset#19,DeferredCauset#20,DeferredCauset#14,DeferredCauset#13]",
+          "    Sort_5 input:[Group#2], test.t.b",
+          "Group#2 Schema:[DeferredCauset#13,DeferredCauset#14,DeferredCauset#15,test.t.b,DeferredCauset#16,DeferredCauset#17,DeferredCauset#18,DeferredCauset#19,DeferredCauset#20,DeferredCauset#14,DeferredCauset#13]",
+          "    Selection_4 input:[Group#3], ge(DeferredCauset#13, 0), ge(DeferredCauset#14, 0)",
+          "Group#3 Schema:[DeferredCauset#13,DeferredCauset#14,DeferredCauset#15,test.t.b,DeferredCauset#16,DeferredCauset#17,DeferredCauset#18,DeferredCauset#19,DeferredCauset#20,DeferredCauset#14,DeferredCauset#13]",
+          "    Projection_8 input:[Group#4], 1->DeferredCauset#13, cast(test.t.b, decimal(65,0) BINARY)->DeferredCauset#14, cast(test.t.b, decimal(65,30) BINARY)->DeferredCauset#15, test.t.b, cast(test.t.b, int(11))->DeferredCauset#16, cast(test.t.b, int(11))->DeferredCauset#17, ifnull(cast(test.t.b, bigint(21) UNSIGNED BINARY), 18446744073709551615)->DeferredCauset#18, ifnull(cast(test.t.b, bigint(21) UNSIGNED BINARY), 0)->DeferredCauset#19, ifnull(cast(test.t.b, bigint(21) UNSIGNED BINARY), 0)->DeferredCauset#20, cast(test.t.b, decimal(65,0) BINARY)->DeferredCauset#14, 1->DeferredCauset#13",
+          "Group#4 Schema:[test.t.a,test.t.b], UniqueKey:[test.t.a]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select count(b), sum(b), avg(b), f, max(c), min(c), bit_and(c), bit_or(d), bit_xor(g) from t group by a",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13,DeferredCauset#14,DeferredCauset#15,test.t.f,DeferredCauset#16,DeferredCauset#17,DeferredCauset#18,DeferredCauset#19,DeferredCauset#20]",
+          "    Projection_5 input:[Group#1], 1->DeferredCauset#13, cast(test.t.b, decimal(65,0) BINARY)->DeferredCauset#14, cast(test.t.b, decimal(65,30) BINARY)->DeferredCauset#15, test.t.f, cast(test.t.c, int(11))->DeferredCauset#16, cast(test.t.c, int(11))->DeferredCauset#17, ifnull(cast(test.t.c, bigint(21) UNSIGNED BINARY), 18446744073709551615)->DeferredCauset#18, ifnull(cast(test.t.d, bigint(21) UNSIGNED BINARY), 0)->DeferredCauset#19, ifnull(cast(test.t.g, bigint(21) UNSIGNED BINARY), 0)->DeferredCauset#20",
+          "Group#1 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.f,test.t.g], UniqueKey:[test.t.f,test.t.f,test.t.g,test.t.a]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select count(b), sum(b), avg(b), f, max(c), min(c), bit_and(c), bit_or(d), bit_xor(g), var_pop(b) from t group by a",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13,DeferredCauset#14,DeferredCauset#15,test.t.f,DeferredCauset#16,DeferredCauset#17,DeferredCauset#18,DeferredCauset#19,DeferredCauset#20,DeferredCauset#21]",
+          "    Projection_3 input:[Group#1], DeferredCauset#13, DeferredCauset#14, DeferredCauset#15, test.t.f, DeferredCauset#16, DeferredCauset#17, DeferredCauset#18, DeferredCauset#19, DeferredCauset#20, DeferredCauset#21",
+          "Group#1 Schema:[DeferredCauset#13,DeferredCauset#14,DeferredCauset#15,DeferredCauset#16,DeferredCauset#17,DeferredCauset#18,DeferredCauset#19,DeferredCauset#20,DeferredCauset#21,test.t.f]",
+          "    Aggregation_2 input:[Group#2], group by:test.t.a, funcs:count(test.t.b), sum(test.t.b), avg(test.t.b), max(test.t.c), min(test.t.c), bit_and(test.t.c), bit_or(test.t.d), bit_xor(test.t.g), var_pop(test.t.b), firstrow(test.t.f)",
+          "Group#2 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.f,test.t.g], UniqueKey:[test.t.f,test.t.f,test.t.g,test.t.a]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select count(b), sum(b), avg(b), f, max(c), min(c), bit_and(c), bit_or(d), bit_xor(g), group_concat(b, c, d, f) from t group by a",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13,DeferredCauset#14,DeferredCauset#15,test.t.f,DeferredCauset#16,DeferredCauset#17,DeferredCauset#18,DeferredCauset#19,DeferredCauset#20,DeferredCauset#21]",
+          "    Projection_3 input:[Group#1], DeferredCauset#13, DeferredCauset#14, DeferredCauset#15, test.t.f, DeferredCauset#16, DeferredCauset#17, DeferredCauset#18, DeferredCauset#19, DeferredCauset#20, DeferredCauset#21",
+          "Group#1 Schema:[DeferredCauset#13,DeferredCauset#14,DeferredCauset#15,DeferredCauset#16,DeferredCauset#17,DeferredCauset#18,DeferredCauset#19,DeferredCauset#20,DeferredCauset#21,test.t.f]",
+          "    Aggregation_2 input:[Group#2], group by:test.t.a, funcs:count(test.t.b), sum(test.t.b), avg(test.t.b), max(test.t.c), min(test.t.c), bit_and(test.t.c), bit_or(test.t.d), bit_xor(test.t.g), group_concat(test.t.b, test.t.c, test.t.d, test.t.f separator \",\"), firstrow(test.t.f)",
+          "Group#2 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.f,test.t.g]",
+          "    DataSource_1 block:t"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "TestDecorrelate",
+    "Cases": [
+      {
+        "ALLEGROALLEGROSQL": "select a from t t1 where exists (select 1 from t t2 where t1.a = t2.b)",
+        "Result": [
+          "Group#0 Schema:[test.t.a]",
+          "    Projection_7 input:[Group#1], test.t.a",
+          "Group#1 Schema:[test.t.a]",
+          "    Apply_6 input:[Group#2,Group#3], semi join",
+          "    Join_10 input:[Group#2,Group#4], semi join, equal:[eq(test.t.a, test.t.b)]",
+          "Group#2 Schema:[test.t.a]",
+          "    DataSource_1 block:t1",
+          "Group#3 Schema:[test.t.b]",
+          "    Selection_4 input:[Group#4], eq(test.t.a, test.t.b)",
+          "Group#4 Schema:[test.t.b]",
+          "    DataSource_3 block:t2"
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "TestInjectProj",
+    "Cases": [
+      {
+        "ALLEGROALLEGROSQL": "select * from t order by (a+b) limit 10",
+        "Result": [
+          "Group#0 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Projection_6 input:[Group#1], test.t.a, test.t.b, test.t.c, test.t.d, test.t.e, test.t.c_str, test.t.d_str, test.t.e_str, test.t.f, test.t.g, test.t.h, test.t.i_date",
+          "Group#1 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,DeferredCauset#13]",
+          "    TopN_8 input:[Group#2], DeferredCauset#13, offset:0, count:10",
+          "Group#2 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date,DeferredCauset#13]",
+          "    Projection_7 input:[Group#3], test.t.a, test.t.b, test.t.c, test.t.d, test.t.e, test.t.c_str, test.t.d_str, test.t.e_str, test.t.f, test.t.g, test.t.h, test.t.i_date, plus(test.t.a, test.t.b)->DeferredCauset#13",
+          "Group#3 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    Projection_2 input:[Group#4], test.t.a, test.t.b, test.t.c, test.t.d, test.t.e, test.t.c_str, test.t.d_str, test.t.e_str, test.t.f, test.t.g, test.t.h, test.t.i_date",
+          "Group#4 Schema:[test.t.a,test.t.b,test.t.c,test.t.d,test.t.e,test.t.c_str,test.t.d_str,test.t.e_str,test.t.f,test.t.g,test.t.h,test.t.i_date]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select max(a), min(b), avg(c) from t group by a+b",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13,DeferredCauset#14,DeferredCauset#15]",
+          "    Projection_3 input:[Group#1], DeferredCauset#13, DeferredCauset#14, DeferredCauset#15",
+          "Group#1 Schema:[DeferredCauset#13,DeferredCauset#14,DeferredCauset#15]",
+          "    Aggregation_5 input:[Group#2], group by:DeferredCauset#17, funcs:max(test.t.a), min(test.t.b), avg(DeferredCauset#16)",
+          "Group#2 Schema:[test.t.a,test.t.b,DeferredCauset#16,DeferredCauset#17]",
+          "    Projection_4 input:[Group#3], test.t.a, test.t.b, cast(test.t.c, decimal(65,30) BINARY)->DeferredCauset#16, plus(test.t.a, test.t.b)->DeferredCauset#17",
+          "Group#3 Schema:[test.t.a,test.t.b,test.t.c]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select max(a), min(b), avg(a / b) from t group by a",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13,DeferredCauset#14,DeferredCauset#15]",
+          "    Projection_3 input:[Group#1], DeferredCauset#13, DeferredCauset#14, DeferredCauset#15",
+          "Group#1 Schema:[DeferredCauset#13,DeferredCauset#14,DeferredCauset#15]",
+          "    Aggregation_5 input:[Group#2], group by:test.t.a, funcs:max(test.t.a), min(test.t.b), avg(DeferredCauset#16)",
+          "Group#2 Schema:[test.t.a,test.t.b,DeferredCauset#16,test.t.a]",
+          "    Projection_4 input:[Group#3], test.t.a, test.t.b, div(cast(test.t.a, decimal(20,0) BINARY), cast(test.t.b, decimal(20,0) BINARY))->DeferredCauset#16, test.t.a",
+          "Group#3 Schema:[test.t.a,test.t.b]",
+          "    DataSource_1 block:t"
+        ]
+      },
+      {
+        "ALLEGROALLEGROSQL": "select max(a), min(b), avg(a / b) from t group by (a+b)",
+        "Result": [
+          "Group#0 Schema:[DeferredCauset#13,DeferredCauset#14,DeferredCauset#15]",
+          "    Projection_3 input:[Group#1], DeferredCauset#13, DeferredCauset#14, DeferredCauset#15",
+          "Group#1 Schema:[DeferredCauset#13,DeferredCauset#14,DeferredCauset#15]",
+          "    Aggregation_5 input:[Group#2], group by:DeferredCauset#17, funcs:max(test.t.a), min(test.t.b), avg(DeferredCauset#16)",
+          "Group#2 Schema:[test.t.a,test.t.b,DeferredCauset#16,DeferredCauset#17]",
+          "    Projection_4 input:[Group#3], test.t.a, test.t.b, div(cast(test.t.a, decimal(20,0) BINARY), cast(test.t.b, decimal(20,0) BINARY))->DeferredCauset#16, plus(test.t.a, test.t.b)->DeferredCauset#17",
+          "Group#3 Schema:[test.t.a,test.t.b]",
+          "    DataSource_1 block:t"
+        ]
+      }
+    ]
+  }
+]

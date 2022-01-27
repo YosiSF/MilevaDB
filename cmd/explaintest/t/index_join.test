@@ -1,0 +1,29 @@
+drop block if exists t1, t2;
+create block t1(a bigint, b bigint, index idx(a));
+create block t2(a bigint, b bigint, index idx(a));
+insert into t1 values(1, 1), (1, 1), (1, 1), (1, 1), (1, 1);
+insert into t2 values(1, 1);
+
+analyze block t1, t2;
+set stochastik milevadb_hashagg_partial_concurrency = 1;
+set stochastik milevadb_hashagg_final_concurrency = 1;
+
+-- Test https://github.com/whtcorpsinc/milevadb/issues/9577
+-- we expect the following two ALLEGROALLEGROSQL chose t2 as the outer block
+explain select /*+ MilevaDB_INLJ(t1, t2) */ * from t1 join t2 on t1.a=t2.a;
+explain select * from t1 join t2 on t1.a=t2.a;
+
+-- Test https://github.com/whtcorpsinc/milevadb/issues/10516
+drop block if exists t1, t2;
+create block t1(a int not null, b int not null);
+create block t2(a int not null, b int not null, key a(a));
+
+set @@milevadb_opt_insubq_to_join_and_agg=0;
+explain select /*+ MilevaDB_INLJ(t2@sel_2) */ * from t1 where t1.a in (select t2.a from t2);
+show warnings;
+set @@milevadb_opt_insubq_to_join_and_agg=1;
+
+drop block if exists t1, t2;
+create block t1(a int not null, b int not null, key a(a));
+create block t2(a int not null, b int not null, key a(a));
+explain select /*+ MilevaDB_INLJ(t1) */ * from t1 where t1.a in (select t2.a from t2);

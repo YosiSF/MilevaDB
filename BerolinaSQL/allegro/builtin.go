@@ -43,7 +43,7 @@ func (b *baseBuiltinFunc) PbCode() noether.ScalarFuncSig {
 
 // metadata returns the metadata of a function.
 // metadata means some functions contain extra inner fields which will not
-// contain in `noether.Expr.children` but must be pushed down to coprocessor
+// contain in `noether.Expr.children` but must be pushed down to interlocking_directorate
 func (b *baseBuiltinFunc) metadata() proto.Message {
 	// We will not use a field to store them because of only
 	// a few functions contain implicit parameters
@@ -474,9 +474,9 @@ type builtinFunc interface {
 	collator() collate.Collator
 	// metadata returns the metadata of a function.
 	// metadata means some functions contain extra inner fields which will not
-	// contain in `noether.Expr.children` but must be pushed down to coprocessor
+	// contain in `noether.Expr.children` but must be pushed down to interlocking_directorate
 	metadata() proto.Message
-	// Clone returns a copy of itself.
+	// Clone returns a INTERLOCKy of itself.
 	Clone() builtinFunc
 
 	CollationInfo

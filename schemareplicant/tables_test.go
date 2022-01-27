@@ -1,8 +1,8 @@
-// Copyright 2020 WHTCORPS INC, Inc.
+// INTERLOCKyright 2020 WHTCORPS INC, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// You may obtain a INTERLOCKy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -554,15 +554,15 @@ func prepareSlowLogfile(c *C, slowLogFileName string) {
 # Optimize_time: 0.00000001
 # Wait_TS: 0.000000003
 # LockKeys_time: 1.71 Request_count: 1 Prewrite_time: 0.19 Wait_prewrite_binlog_time: 0.21 Commit_time: 0.01 Commit_backoff_time: 0.18 Backoff_types: [txnLock] Resolve_lock_time: 0.03 Write_keys: 15 Write_size: 480 Prewrite_region: 1 Txn_retry: 8
-# Cop_time: 0.3824278 Process_time: 0.161 Request_count: 1 Total_keys: 100001 Process_keys: 100000
+# INTERLOCK_time: 0.3824278 Process_time: 0.161 Request_count: 1 Total_keys: 100001 Process_keys: 100000
 # Wait_time: 0.101
 # Backoff_time: 0.092
 # EDB: test
 # Is_internal: false
 # Digest: 42a1c8aae6f133e934d4bf0147491709a8812ea05ff8819ec522780fe657b772
 # Stats: t1:1,t2:2
-# Cop_proc_avg: 0.1 Cop_proc_p90: 0.2 Cop_proc_max: 0.03 Cop_proc_addr: 127.0.0.1:20160
-# Cop_wait_avg: 0.05 Cop_wait_p90: 0.6 Cop_wait_max: 0.8 Cop_wait_addr: 0.0.0.0:20160
+# INTERLOCK_proc_avg: 0.1 INTERLOCK_proc_p90: 0.2 INTERLOCK_proc_max: 0.03 INTERLOCK_proc_addr: 127.0.0.1:20160
+# INTERLOCK_wait_avg: 0.05 INTERLOCK_wait_p90: 0.6 INTERLOCK_wait_max: 0.8 INTERLOCK_wait_addr: 0.0.0.0:20160
 # Mem_max: 70724
 # Disk_max: 65536
 # Causet_from_cache: true
@@ -946,7 +946,7 @@ func (s *testBlockSuite) TestStmtSummaryBlock(c *C) {
 	tk.MustInterDirc("insert into t    values(2, 'b')")
 	tk.MustInterDirc("insert into t VALUES(3, 'c')")
 	tk.MustInterDirc("/**/insert into t values(4, 'd')")
-	tk.MustQuery(`select stmt_type, schema_name, block_names, index_names, exec_count, sum_cop_task_num, avg_total_keys,
+	tk.MustQuery(`select stmt_type, schema_name, block_names, index_names, exec_count, sum_INTERLOCK_task_num, avg_total_keys,
 		max_total_keys, avg_processed_keys, max_processed_keys, avg_write_keys, max_write_keys, avg_prewrite_regions,
 		max_prewrite_regions, avg_affected_rows, query_sample_text
 		from information_schema.memexs_summary
@@ -985,18 +985,18 @@ func (s *testBlockSuite) TestStmtSummaryBlock(c *C) {
 	c.Assert(failpoint.Enable(failpointName, "return(100)"), IsNil)
 	defer func() { c.Assert(failpoint.Disable(failpointName), IsNil) }()
 	tk.MustQuery("select * from t where a=2")
-	tk.MustQuery(`select stmt_type, schema_name, block_names, index_names, exec_count, sum_cop_task_num, avg_total_keys,
+	tk.MustQuery(`select stmt_type, schema_name, block_names, index_names, exec_count, sum_INTERLOCK_task_num, avg_total_keys,
 		max_total_keys, avg_processed_keys, max_processed_keys, avg_write_keys, max_write_keys, avg_prewrite_regions,
 		max_prewrite_regions, avg_affected_rows, query_sample_text, plan
 		from information_schema.memexs_summary
 		where digest_text like 'select * from t%'`,
 	).Check(testkit.Rows("Select test test.t t:k 1 2 0 0 0 0 0 0 0 0 0 select * from t where a=2 \tid            \ttask     \testRows\toperator info\n" +
 		"\tIndexLookUp_10\troot     \t100    \t\n" +
-		"\t├─IndexScan_8 \tcop[einsteindb]\t100    \tcauset:t, index:k(a), range:[2,2], keep order:false, stats:pseudo\n" +
-		"\t└─BlockScan_9 \tcop[einsteindb]\t100    \tcauset:t, keep order:false, stats:pseudo"))
+		"\t├─IndexScan_8 \tINTERLOCK[einsteindb]\t100    \tcauset:t, index:k(a), range:[2,2], keep order:false, stats:pseudo\n" +
+		"\t└─BlockScan_9 \tINTERLOCK[einsteindb]\t100    \tcauset:t, keep order:false, stats:pseudo"))
 
 	// select ... order by
-	tk.MustQuery(`select stmt_type, schema_name, block_names, index_names, exec_count, sum_cop_task_num, avg_total_keys,
+	tk.MustQuery(`select stmt_type, schema_name, block_names, index_names, exec_count, sum_INTERLOCK_task_num, avg_total_keys,
 		max_total_keys, avg_processed_keys, max_processed_keys, avg_write_keys, max_write_keys, avg_prewrite_regions,
 		max_prewrite_regions, avg_affected_rows, query_sample_text
 		from information_schema.memexs_summary
@@ -1006,15 +1006,15 @@ func (s *testBlockSuite) TestStmtSummaryBlock(c *C) {
 	// Test different plans with same digest.
 	c.Assert(failpoint.Enable(failpointName, "return(1000)"), IsNil)
 	tk.MustQuery("select * from t where a=3")
-	tk.MustQuery(`select stmt_type, schema_name, block_names, index_names, exec_count, sum_cop_task_num, avg_total_keys,
+	tk.MustQuery(`select stmt_type, schema_name, block_names, index_names, exec_count, sum_INTERLOCK_task_num, avg_total_keys,
 		max_total_keys, avg_processed_keys, max_processed_keys, avg_write_keys, max_write_keys, avg_prewrite_regions,
 		max_prewrite_regions, avg_affected_rows, query_sample_text, plan
 		from information_schema.memexs_summary
 		where digest_text like 'select * from t%'`,
 	).Check(testkit.Rows("Select test test.t t:k 2 4 0 0 0 0 0 0 0 0 0 select * from t where a=2 \tid            \ttask     \testRows\toperator info\n" +
 		"\tIndexLookUp_10\troot     \t100    \t\n" +
-		"\t├─IndexScan_8 \tcop[einsteindb]\t100    \tcauset:t, index:k(a), range:[2,2], keep order:false, stats:pseudo\n" +
-		"\t└─BlockScan_9 \tcop[einsteindb]\t100    \tcauset:t, keep order:false, stats:pseudo"))
+		"\t├─IndexScan_8 \tINTERLOCK[einsteindb]\t100    \tcauset:t, index:k(a), range:[2,2], keep order:false, stats:pseudo\n" +
+		"\t└─BlockScan_9 \tINTERLOCK[einsteindb]\t100    \tcauset:t, keep order:false, stats:pseudo"))
 
 	// Disable it again.
 	tk.MustInterDirc("set global milevadb_enable_stmt_summary = false")
@@ -1030,25 +1030,25 @@ func (s *testBlockSuite) TestStmtSummaryBlock(c *C) {
 	tk.MustQuery("select * from t where a=2")
 
 	// The causet should be cleared.
-	tk.MustQuery(`select stmt_type, schema_name, block_names, index_names, exec_count, sum_cop_task_num, avg_total_keys,
+	tk.MustQuery(`select stmt_type, schema_name, block_names, index_names, exec_count, sum_INTERLOCK_task_num, avg_total_keys,
 		max_total_keys, avg_processed_keys, max_processed_keys, avg_write_keys, max_write_keys, avg_prewrite_regions,
 		max_prewrite_regions, avg_affected_rows, query_sample_text, plan
 		from information_schema.memexs_summary`,
 	).Check(testkit.Rows())
 
-	// Enable it in stochastik scope.
+	// Enable it in stochastik sINTERLOCKe.
 	tk.MustInterDirc("set stochastik milevadb_enable_stmt_summary = on")
 	// It should work immediately.
 	tk.MustInterDirc("begin")
 	tk.MustInterDirc("insert into t values(1, 'a')")
 	tk.MustInterDirc("commit")
-	tk.MustQuery(`select stmt_type, schema_name, block_names, index_names, exec_count, sum_cop_task_num, avg_total_keys,
+	tk.MustQuery(`select stmt_type, schema_name, block_names, index_names, exec_count, sum_INTERLOCK_task_num, avg_total_keys,
 		max_total_keys, avg_processed_keys, max_processed_keys, avg_write_keys, max_write_keys, avg_prewrite_regions,
 		max_prewrite_regions, avg_affected_rows, query_sample_text, prev_sample_text
 		from information_schema.memexs_summary
 		where digest_text like 'insert into t%'`,
 	).Check(testkit.Rows("Insert test test.t <nil> 1 0 0 0 0 0 0 0 0 0 1 insert into t values(1, 'a') "))
-	tk.MustQuery(`select stmt_type, schema_name, block_names, index_names, exec_count, sum_cop_task_num, avg_total_keys,
+	tk.MustQuery(`select stmt_type, schema_name, block_names, index_names, exec_count, sum_INTERLOCK_task_num, avg_total_keys,
 		max_total_keys, avg_processed_keys, max_processed_keys, avg_write_keys, max_write_keys, avg_prewrite_regions,
 		max_prewrite_regions, avg_affected_rows, query_sample_text, prev_sample_text
 		from information_schema.memexs_summary
@@ -1056,17 +1056,17 @@ func (s *testBlockSuite) TestStmtSummaryBlock(c *C) {
 	).Check(testkit.Rows("Commit test <nil> <nil> 1 0 0 0 0 0 2 2 1 1 0 commit insert into t values(1, 'a')"))
 
 	tk.MustQuery("select * from t where a=2")
-	tk.MustQuery(`select stmt_type, schema_name, block_names, index_names, exec_count, sum_cop_task_num, avg_total_keys,
+	tk.MustQuery(`select stmt_type, schema_name, block_names, index_names, exec_count, sum_INTERLOCK_task_num, avg_total_keys,
 		max_total_keys, avg_processed_keys, max_processed_keys, avg_write_keys, max_write_keys, avg_prewrite_regions,
 		max_prewrite_regions, avg_affected_rows, query_sample_text, plan
 		from information_schema.memexs_summary
 		where digest_text like 'select * from t%'`,
 	).Check(testkit.Rows("Select test test.t t:k 1 2 0 0 0 0 0 0 0 0 0 select * from t where a=2 \tid            \ttask     \testRows\toperator info\n" +
 		"\tIndexLookUp_10\troot     \t1000   \t\n" +
-		"\t├─IndexScan_8 \tcop[einsteindb]\t1000   \tcauset:t, index:k(a), range:[2,2], keep order:false, stats:pseudo\n" +
-		"\t└─BlockScan_9 \tcop[einsteindb]\t1000   \tcauset:t, keep order:false, stats:pseudo"))
+		"\t├─IndexScan_8 \tINTERLOCK[einsteindb]\t1000   \tcauset:t, index:k(a), range:[2,2], keep order:false, stats:pseudo\n" +
+		"\t└─BlockScan_9 \tINTERLOCK[einsteindb]\t1000   \tcauset:t, keep order:false, stats:pseudo"))
 
-	// Disable it in global scope.
+	// Disable it in global sINTERLOCKe.
 	tk.MustInterDirc("set global milevadb_enable_stmt_summary = false")
 
 	// Create a new stochastik to test.
@@ -1075,22 +1075,22 @@ func (s *testBlockSuite) TestStmtSummaryBlock(c *C) {
 	tk.MustQuery("select * from t where a=2")
 
 	// Statement summary is still enabled.
-	tk.MustQuery(`select stmt_type, schema_name, block_names, index_names, exec_count, sum_cop_task_num, avg_total_keys,
+	tk.MustQuery(`select stmt_type, schema_name, block_names, index_names, exec_count, sum_INTERLOCK_task_num, avg_total_keys,
 		max_total_keys, avg_processed_keys, max_processed_keys, avg_write_keys, max_write_keys, avg_prewrite_regions,
 		max_prewrite_regions, avg_affected_rows, query_sample_text, plan
 		from information_schema.memexs_summary
 		where digest_text like 'select * from t%'`,
 	).Check(testkit.Rows("Select test test.t t:k 2 4 0 0 0 0 0 0 0 0 0 select * from t where a=2 \tid            \ttask     \testRows\toperator info\n" +
 		"\tIndexLookUp_10\troot     \t1000   \t\n" +
-		"\t├─IndexScan_8 \tcop[einsteindb]\t1000   \tcauset:t, index:k(a), range:[2,2], keep order:false, stats:pseudo\n" +
-		"\t└─BlockScan_9 \tcop[einsteindb]\t1000   \tcauset:t, keep order:false, stats:pseudo"))
+		"\t├─IndexScan_8 \tINTERLOCK[einsteindb]\t1000   \tcauset:t, index:k(a), range:[2,2], keep order:false, stats:pseudo\n" +
+		"\t└─BlockScan_9 \tINTERLOCK[einsteindb]\t1000   \tcauset:t, keep order:false, stats:pseudo"))
 
 	// Unset stochastik variable.
 	tk.MustInterDirc("set stochastik milevadb_enable_stmt_summary = ''")
 	tk.MustQuery("select * from t where a=2")
 
 	// Statement summary is disabled.
-	tk.MustQuery(`select stmt_type, schema_name, block_names, index_names, exec_count, sum_cop_task_num, avg_total_keys,
+	tk.MustQuery(`select stmt_type, schema_name, block_names, index_names, exec_count, sum_INTERLOCK_task_num, avg_total_keys,
 		max_total_keys, avg_processed_keys, max_processed_keys, avg_write_keys, max_write_keys, avg_prewrite_regions,
 		max_prewrite_regions, avg_affected_rows, query_sample_text, plan
 		from information_schema.memexs_summary`,
@@ -1196,7 +1196,7 @@ func (s *testBlockSuite) TestStmtSummaryHistoryBlock(c *C) {
 	tk.MustInterDirc("insert into test_summary    values(2, 'b')")
 	tk.MustInterDirc("insert into TEST_SUMMARY VALUES(3, 'c')")
 	tk.MustInterDirc("/**/insert into test_summary values(4, 'd')")
-	tk.MustQuery(`select stmt_type, schema_name, block_names, index_names, exec_count, sum_cop_task_num, avg_total_keys,
+	tk.MustQuery(`select stmt_type, schema_name, block_names, index_names, exec_count, sum_INTERLOCK_task_num, avg_total_keys,
 		max_total_keys, avg_processed_keys, max_processed_keys, avg_write_keys, max_write_keys, avg_prewrite_regions,
 		max_prewrite_regions, avg_affected_rows, query_sample_text
 		from information_schema.memexs_summary_history
@@ -1204,7 +1204,7 @@ func (s *testBlockSuite) TestStmtSummaryHistoryBlock(c *C) {
 	).Check(testkit.Rows("Insert test test.test_summary <nil> 4 0 0 0 0 0 2 2 1 1 1 insert into test_summary values(1, 'a')"))
 
 	tk.MustInterDirc("set global milevadb_stmt_summary_history_size = 0")
-	tk.MustQuery(`select stmt_type, schema_name, block_names, index_names, exec_count, sum_cop_task_num, avg_total_keys,
+	tk.MustQuery(`select stmt_type, schema_name, block_names, index_names, exec_count, sum_INTERLOCK_task_num, avg_total_keys,
 		max_total_keys, avg_processed_keys, max_processed_keys, avg_write_keys, max_write_keys, avg_prewrite_regions,
 		max_prewrite_regions, avg_affected_rows, query_sample_text, plan
 		from information_schema.memexs_summary_history`,

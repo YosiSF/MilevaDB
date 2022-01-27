@@ -1,8 +1,8 @@
-//Copyright 2020 WHTCORPS INC ALL RIGHTS RESERVED
+//INTERLOCKyright 2020 WHTCORPS INC ALL RIGHTS RESERVED
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// You may obtain a INTERLOCKy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -44,7 +44,7 @@ import (
 	"github.com/whtcorpsinc/MilevaDB/privilege"
 	plannercore "github.com/whtcorpsinc/MilevaDB/rel-planner/core"
 	"github.com/whtcorpsinc/MilevaDB/table"
-	"github.com/whtcorpsinc/MilevaDB/table/tables"
+	"github.com/whtcorpsinc/MilevaDB/table/blocks"
 	"github.com/whtcorpsinc/MilevaDB/tablecodec"
 	"github.com/whtcorpsinc/MilevaDB/types"
 	"github.com/whtcorpsinc/MilevaDB/util"
@@ -637,7 +637,7 @@ type CheckTableExec struct {
 	baseInterlock
 
 	dbName     string
-	table      table.Table
+	table      table.Block
 	indexInfos []*serial.IndexInfo
 	srcs       []*IndexLookUpInterlock
 	done       bool
@@ -792,7 +792,7 @@ func (e *CheckTableExec) checkTableRecord(idxOffset int) error {
 		return err
 	}
 	if e.table.Meta().GetPartitionInfo() == nil {
-		idx := tables.NewIndex(e.table.Meta().ID, e.table.Meta(), idxInfo)
+		idx := blocks.NewIndex(e.table.Meta().ID, e.table.Meta(), idxInfo)
 		return admin.CheckRecordAndIndex(e.ctx, txn, e.table, idx, genExprs)
 	}
 
@@ -800,7 +800,7 @@ func (e *CheckTableExec) checkTableRecord(idxOffset int) error {
 	for _, def := range info.Definitions {
 		pid := def.ID
 		partition := e.table.(table.PartitionedTable).GetPartition(pid)
-		idx := tables.NewIndex(def.ID, e.table.Meta(), idxInfo)
+		idx := blocks.NewIndex(def.ID, e.table.Meta(), idxInfo)
 		if err := admin.CheckRecordAndIndex(e.ctx, txn, partition, idx, genExprs); err != nil {
 			return errors.Trace(err)
 		}
@@ -866,7 +866,7 @@ func (e *ShowSlowExec) Next(ctx context.Context, req *chunk.Chunk) error {
 	return nil
 }
 
-// SelectLockExec represents a select lock Interlock.
+// SelectLockExec represents a select dagger Interlock.
 // It is built from the "SELECT .. FOR UPDATE" or the "SELECT .. LOCK IN SHARE MODE" statement.
 // For "SELECT .. FOR UPDATE" statement, it locks every row key from source Interlock.
 // After the execution, the keys are buffered in transaction, and will be sent to KV
@@ -923,7 +923,7 @@ func (e *SelectLockExec) Next(ctx context.Context, req *chunk.Chunk) error {
 			for id, cols := range e.tblID2Handle {
 				physicalID := id
 				if pt, ok := e.tblID2Table[id]; ok {
-					// On a partitioned table, we have to use physical ID to encode the lock key!
+					// On a partitioned table, we have to use physical ID to encode the dagger key!
 					p, err := pt.GetPartitionByRow(e.ctx, row.GetDatumRow(e.base().retFieldTypes))
 					if err != nil {
 						return err
@@ -970,8 +970,8 @@ func newLockCtx(seVars *variable.CausetNetVars, lockWaitTime int64) *ekv.LockCtx
 	}
 }
 
-// doLockKeys is the main entry for pessimistic lock keys
-// waitTime means the lock operation will wait in milliseconds if target key is already
+// doLockKeys is the main entry for pessimistic dagger keys
+// waitTime means the dagger operation will wait in milliseconds if target key is already
 // locked by others. used for (select for update nowait) situation
 // except 0 means alwaysWait 1 means nowait
 func doLockKeys(ctx context.Context, se causetnetctx.Context, lockCtx *ekv.LockCtx, keys ...ekv.Key) error {
@@ -1276,7 +1276,7 @@ func (e *SelectionExec) unBatchedNext(ctx context.Context, chk *chunk.Chunk) err
 type TableScanExec struct {
 	baseInterlock
 
-	t                     table.Table
+	t                     table.Block
 	columns               []*serial.ColumnInfo
 	virtualTableChunkList *chunk.List
 	virtualTableChunkIdx  int

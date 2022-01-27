@@ -2,7 +2,7 @@
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// You may obtain a INTERLOCKy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -865,7 +865,7 @@ const (
 	ErrBinlogStmtModeAndNoReplTables                                = 1844
 	ErrAlterOperationNotSupported                                   = 1845
 	ErrAlterOperationNotSupportedReason                             = 1846
-	ErrAlterOperationNotSupportedReasonCopy                         = 1847
+	ErrAlterOperationNotSupportedReasonINTERLOCKy                         = 1847
 	ErrAlterOperationNotSupportedReasonPartition                    = 1848
 	ErrAlterOperationNotSupportedReasonFkRename                     = 1849
 	ErrAlterOperationNotSupportedReasonColumnType                   = 1850

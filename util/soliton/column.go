@@ -18,7 +18,7 @@ func (c *Column) AppendMyDecimal(dec *types.MyDecimal) {
 
 func (c *Column) appendNameValue(name string, val uint64) {
 	var buf [8]byte
-	copy(buf[:], (*[8]byte)(unsafe.Pointer(&val))[:])
+	INTERLOCKy(buf[:], (*[8]byte)(unsafe.Pointer(&val))[:])
 	c.data = append(c.data, buf[:]...)
 	c.data = append(c.data, name...)
 	c.finishAppendVar()
@@ -112,9 +112,9 @@ func (c *Column) IsNull(rowIdx int) bool {
 	return nullByte&(1<<(uint(rowIdx)&7)) == 0
 }
 
-// CopyConstruct copies this Column to dst.
+// INTERLOCKyConstruct INTERLOCKies this Column to dst.
 // If dst is nil, it creates a new Column and returns it.
-func (c *Column) CopyConstruct(dst *Column) *Column {
+func (c *Column) INTERLOCKyConstruct(dst *Column) *Column {
 	if dst != nil {
 		dst.length = c.length
 		dst.nullBitmap = append(dst.nullBitmap[:0], c.nullBitmap...)

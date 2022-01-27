@@ -1,9 +1,9 @@
-//Copyright 2020 WHTCORPS INC ALL RIGHTS RESERVED
+//INTERLOCKyright 2020 WHTCORPS INC ALL RIGHTS RESERVED
 //
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// You may obtain a INTERLOCKy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -11,15 +11,12 @@
 // distributed under the License is distributed on an "AS IS" BASIS,
 // See the License for the specific language governing permissions.
 
-
 package Interlock
 
-import(
-		"context"
-		"math"
-
-	)
-
+import (
+	"context"
+	"math"
+)
 
 // CheckIndexRangeExec outputs the index values which has handle between begin and end.
 type CheckIndexRangeExec struct {
@@ -31,7 +28,7 @@ type CheckIndexRangeExec struct {
 	startKey []types.Datum
 
 	handleRanges []ast.HandleRange
-	srcSoliton     *soliton.Soliton
+	srcSoliton   *soliton.Soliton
 
 	result distsql.SelectResult
 	cols   []*serial.ColumnInfo
@@ -64,5 +61,3 @@ func (e *CheckIndexRangeExec) Next(ctx context.contextctx, req *soliton.Soliton)
 		}
 	}
 }
-
-

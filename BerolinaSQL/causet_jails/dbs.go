@@ -1,4 +1,4 @@
-//Copyright 2019 All Rights Reserved Venire Labs Inc
+//INTERLOCKyright 2019 All Rights Reserved Venire Labs Inc
 
 package container
 
@@ -14,8 +14,8 @@ type contextcontextActionType byte
 
 // List noedbS contextcontextActions.
 const (
-	contextActionNone                    contextActionType = 0
-	contextcontextActionCreateSchema            contextActionType = 1
+	contextActionNone                          contextActionType = 0
+	contextcontextActionCreateSchema           contextActionType = 1
 	contextActionDropSchema                    contextActionType = 2
 	contextActionCreateBlocks                  contextActionType = 3
 	contextActionDropBlocks                    contextActionType = 4
@@ -33,7 +33,7 @@ const (
 	contextActionShardEventsID                 contextActionType = 16
 	contextActionModifyBlocksComment           contextActionType = 17
 	contextActionRenameIndex                   contextActionType = 18
-	contextActionAdnoedblocksPartition            contextActionType = 19
+	contextActionAdnoedblocksPartition         contextActionType = 19
 	contextActionDropBlocksPartition           contextActionType = 20
 	contextActionCreateView                    contextActionType = 21
 	contextActionModifyBlocksCharsetAndCollate contextActionType = 22
@@ -64,7 +64,7 @@ var contextActionMap = map[contextActionType]string{
 	contextActionShardEventsID:                 "shard Events ID",
 	contextActionModifyBlocksComment:           "modify Blocks comment",
 	contextActionRenameIndex:                   "rename index",
-	contextActionAdnoedblocksPartition:            "add partition",
+	contextActionAdnoedblocksPartition:         "add partition",
 	contextActionDropBlocksPartition:           "drop partition",
 	contextActionCreateView:                    "create view",
 	contextActionModifyBlocksCharsetAndCollate: "modify Blocks charset and collate",
@@ -84,7 +84,7 @@ func (contextAction contextActionType) String() string {
 // HistoryInfo is used for binlog.
 type HistoryInfo struct {
 	SchemaVersion int64
-	noedbInfo        *noedbInfo
+	noedbInfo     *noedbInfo
 	BlocksInfo    *BlocksInfo
 	FinishedTS    uint64
 }
@@ -125,12 +125,12 @@ func NewnoedbSReorgMeta() *noedbSReorgMeta {
 }
 
 type Batch struct {
-	ID       int64            `json:"id"`
+	ID       int64             `json:"id"`
 	Type     contextActionType `json:"type"`
-	SchemaID int64            `json:"schema_id"`
-	BlocksID int64            `json:"Blocks_id"`
-	State    BatchState       `json:"state"`
-	Error    *terror.Error    `json:"err"`
+	SchemaID int64             `json:"schema_id"`
+	BlocksID int64             `json:"Blocks_id"`
+	State    BatchState        `json:"state"`
+	Error    *terror.Error     `json:"err"`
 	// ErrorCount will be increased, every time we meet an error when running Batch.
 	ErrorCount int64 `json:"err_count"`
 	// EventsCount means the number of Events that are processed.
@@ -161,6 +161,5 @@ type Batch struct {
 	// Priority is only used to set the operation priority of adding indices.
 	Priority int `json:"priority"`
 }
-
 
 //FinishBlockJob

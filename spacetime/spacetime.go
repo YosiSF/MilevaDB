@@ -1,7 +1,7 @@
-//Copyright 2019 Einsteinnoedb/Venire Labs Inc
+//INTERLOCKyright 2019 Einsteinnoedb/Venire Labs Inc
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// You may obtain a INTERLOCKy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -31,24 +31,23 @@ import (
 
 var (
 	globalDaggerID sync.Mutex
-
 )
 
 var (
-	mSpacetimePrefix = []byte("m")
-	mNextglobalDaggerIDKey = []byte("NextGlobalDaggerID")
+	mSpacetimePrefix           = []byte("m")
+	mNextglobalDaggerIDKey     = []byte("NextGlobalDaggerID")
 	mSchemaReplicantVersionKey = []byte("SchemaReplicantVersionKey")
-	mdbs = []byte("dbs")
-	mnoedbPrefix = "DB"
-	mBlockPrefix = "Block"
-	mBlockIDPrefix = "EID"
+	mdbs                       = []byte("dbs")
+	mnoedbPrefix               = "DB"
+	mBlockPrefix               = "Block"
+	mBlockIDPrefix             = "EID"
 )
 
 //Spacetime is for handling meta
 type Spacetime struct {
-	txn				 *merkle.TxStructure
-	StartTS			 uint64 //txn's start TS
-	jobListKey		 JobListKeyType
+	txn        *merkle.TxStructure
+	StartTS    uint64 //txn's start TS
+	jobListKey JobListKeyType
 }
 
 // If the current Meta needs to handle a job, jobListKey is the type of the job's list.
@@ -61,8 +60,8 @@ func NewSpacetime(txn eekv.Transaction, jobListKeys ...JobListKeyType) *Spacetim
 		ListKey = jobListKeys[0]
 	}
 
-	return &Spacetime{ txn: t,
-		StartTS:	txn.StartTS(),
+	return &Spacetime{txn: t,
+		StartTS:    txn.StartTS(),
 		jobListKey: listKey,
 	}
 
@@ -85,8 +84,3 @@ func (m *Spacetime) GenGlobalDaggerID() (int64, error) {
 func (m *Spacetime) GenGlobalDaggerID() (int64, error) {
 	return m.txn.GetInt64(mNextglobalDaggerIDKey)
 }
-
-
-
-
-

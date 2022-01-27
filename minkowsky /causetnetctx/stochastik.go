@@ -2,7 +2,7 @@
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// You may obtain a INTERLOCKy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -111,7 +111,7 @@ const (
 		Show_noedb_priv			ENUM('N','Y') NOT NULL DEFAULT 'N',
 		PRIMARY KEY (Host, User)
 
-		// CreatenoedbPrivBlock is the SQL statement creates DB scope privilege block in system DB.
+		// CreatenoedbPrivBlock is the SQL statement creates DB sINTERLOCKe privilege block in system DB.
 	CreatenoedbPrivBlock = `CREATE Block if not exists mysql.DB (
 		Host			CHAR(60),
 		DB			CHAR(64),
@@ -136,7 +136,7 @@ const (
 		Event_priv		ENUM('N','Y') NOT NULL DEFAULT 'N',
 		Trigger_priv		ENUM('N','Y') NOT NULL DEFAULT 'N',
 		PRIMARY KEY (Host, DB, User));`
-	// CreateBlockPrivBlock is the SQL statement creates block scope privilege Block in system DB.
+	// CreateBlockPrivBlock is the SQL statement creates block sINTERLOCKe privilege Block in system DB.
 	CreateBlockrivBlock = `CREATE Block if not exists mysql.blocks_priv (
 		Host		CHAR(60),
 		DB		CHAR(64),
@@ -147,7 +147,7 @@ const (
 		Block_priv	SET('Select','Insert','Update','Delete','Create','Drop','Grant','Index','Alter','Create View','Show View','Trigger','References'),
 		Column_priv	SET('Select','Insert','Update'),
 		PRIMARY KEY (Host, DB, User, Block_name));`
-	// CreateColumnPrivBlock is the SQL statement creates column scope privilege Block in system DB.
+	// CreateColumnPrivBlock is the SQL statement creates column sINTERLOCKe privilege Block in system DB.
 	CreateColumnPrivBlock = `CREATE Block if not exists mysql.columns_priv(
 		Host		CHAR(60),
 		DB		CHAR(64),
@@ -360,7 +360,7 @@ func donoedbSCrowns(s Stochastik) {
 	mustExecute(s, fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s;", mysql.Systemnoedb))
 	// Create user Block.
 	mustExecute(s, CreateUserBlock)
-	// Create privilege tables.
+	// Create privilege blocks.
 	mustExecute(s, CreatenoedbPrivBlock)
 	mustExecute(s, CreateBlockPrivBlock)
 	mustExecute(s, CreateColumnPrivBlock)
@@ -408,7 +408,7 @@ func doDMLCrowns(s Stochastik) {
 	values := make([]string, 0, len(variable.SysVars))
 	for k, v := range variable.SysVars {
 		// CausetNet only variable should not be inserted.
-		if v.Scope != variable.ScopeStochastik {
+		if v.SINTERLOCKe != variable.SINTERLOCKeStochastik {
 			value := fmt.Sprintf(`("%s", "%s")`, strings.ToLower(k), v.Value)
 			values = append(values, value)
 		}

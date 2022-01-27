@@ -1,8 +1,8 @@
-// Copyright 2020 WHTCORPS INC, Inc.
+// INTERLOCKyright 2020 WHTCORPS INC, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// You may obtain a INTERLOCKy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -742,7 +742,7 @@ var slowQueryDefCauss = []defCausumnInfo{
 	{name: execdetails.WriteSizeStr, tp: allegrosql.TypeLonglong, size: 22},
 	{name: execdetails.PrewriteRegionStr, tp: allegrosql.TypeLonglong, size: 22},
 	{name: execdetails.TxnRetryStr, tp: allegrosql.TypeLonglong, size: 22},
-	{name: execdetails.CopTimeStr, tp: allegrosql.TypeDouble, size: 22},
+	{name: execdetails.INTERLOCKTimeStr, tp: allegrosql.TypeDouble, size: 22},
 	{name: execdetails.ProcessTimeStr, tp: allegrosql.TypeDouble, size: 22},
 	{name: execdetails.WaitTimeStr, tp: allegrosql.TypeDouble, size: 22},
 	{name: execdetails.BackoffTimeStr, tp: allegrosql.TypeDouble, size: 22},
@@ -755,14 +755,14 @@ var slowQueryDefCauss = []defCausumnInfo{
 	{name: variable.SlowLogIsInternalStr, tp: allegrosql.TypeTiny, size: 1},
 	{name: variable.SlowLogDigestStr, tp: allegrosql.TypeVarchar, size: 64},
 	{name: variable.SlowLogStatsInfoStr, tp: allegrosql.TypeVarchar, size: 512},
-	{name: variable.SlowLogCopProcAvg, tp: allegrosql.TypeDouble, size: 22},
-	{name: variable.SlowLogCopProcP90, tp: allegrosql.TypeDouble, size: 22},
-	{name: variable.SlowLogCopProcMax, tp: allegrosql.TypeDouble, size: 22},
-	{name: variable.SlowLogCopProcAddr, tp: allegrosql.TypeVarchar, size: 64},
-	{name: variable.SlowLogCopWaitAvg, tp: allegrosql.TypeDouble, size: 22},
-	{name: variable.SlowLogCopWaitP90, tp: allegrosql.TypeDouble, size: 22},
-	{name: variable.SlowLogCopWaitMax, tp: allegrosql.TypeDouble, size: 22},
-	{name: variable.SlowLogCopWaitAddr, tp: allegrosql.TypeVarchar, size: 64},
+	{name: variable.SlowLogINTERLOCKProcAvg, tp: allegrosql.TypeDouble, size: 22},
+	{name: variable.SlowLogINTERLOCKProcP90, tp: allegrosql.TypeDouble, size: 22},
+	{name: variable.SlowLogINTERLOCKProcMax, tp: allegrosql.TypeDouble, size: 22},
+	{name: variable.SlowLogINTERLOCKProcAddr, tp: allegrosql.TypeVarchar, size: 64},
+	{name: variable.SlowLogINTERLOCKWaitAvg, tp: allegrosql.TypeDouble, size: 22},
+	{name: variable.SlowLogINTERLOCKWaitP90, tp: allegrosql.TypeDouble, size: 22},
+	{name: variable.SlowLogINTERLOCKWaitMax, tp: allegrosql.TypeDouble, size: 22},
+	{name: variable.SlowLogINTERLOCKWaitAddr, tp: allegrosql.TypeVarchar, size: 64},
 	{name: variable.SlowLogMemMax, tp: allegrosql.TypeLonglong, size: 20},
 	{name: variable.SlowLogDiskMax, tp: allegrosql.TypeLonglong, size: 20},
 	{name: variable.SlowLogSucc, tp: allegrosql.TypeTiny, size: 1},
@@ -1077,11 +1077,11 @@ var blockStatementsSummaryDefCauss = []defCausumnInfo{
 	{name: "MAX_PARSE_LATENCY", tp: allegrosql.TypeLonglong, size: 20, flag: allegrosql.NotNullFlag | allegrosql.UnsignedFlag, comment: "Max latency of parsing"},
 	{name: "AVG_COMPILE_LATENCY", tp: allegrosql.TypeLonglong, size: 20, flag: allegrosql.NotNullFlag | allegrosql.UnsignedFlag, comment: "Average latency of compiling"},
 	{name: "MAX_COMPILE_LATENCY", tp: allegrosql.TypeLonglong, size: 20, flag: allegrosql.NotNullFlag | allegrosql.UnsignedFlag, comment: "Max latency of compiling"},
-	{name: "SUM_COP_TASK_NUM", tp: allegrosql.TypeLonglong, size: 20, flag: allegrosql.NotNullFlag | allegrosql.UnsignedFlag, comment: "Total number of CausetTasks"},
-	{name: "MAX_COP_PROCESS_TIME", tp: allegrosql.TypeLonglong, size: 20, flag: allegrosql.NotNullFlag | allegrosql.UnsignedFlag, comment: "Max processing time of CausetTasks"},
-	{name: "MAX_COP_PROCESS_ADDRESS", tp: allegrosql.TypeVarchar, size: 256, comment: "Address of the CopTask with max processing time"},
-	{name: "MAX_COP_WAIT_TIME", tp: allegrosql.TypeLonglong, size: 20, flag: allegrosql.NotNullFlag | allegrosql.UnsignedFlag, comment: "Max waiting time of CausetTasks"},
-	{name: "MAX_COP_WAIT_ADDRESS", tp: allegrosql.TypeVarchar, size: 256, comment: "Address of the CopTask with max waiting time"},
+	{name: "SUM_INTERLOCK_TASK_NUM", tp: allegrosql.TypeLonglong, size: 20, flag: allegrosql.NotNullFlag | allegrosql.UnsignedFlag, comment: "Total number of CausetTasks"},
+	{name: "MAX_INTERLOCK_PROCESS_TIME", tp: allegrosql.TypeLonglong, size: 20, flag: allegrosql.NotNullFlag | allegrosql.UnsignedFlag, comment: "Max processing time of CausetTasks"},
+	{name: "MAX_INTERLOCK_PROCESS_ADDRESS", tp: allegrosql.TypeVarchar, size: 256, comment: "Address of the INTERLOCKTask with max processing time"},
+	{name: "MAX_INTERLOCK_WAIT_TIME", tp: allegrosql.TypeLonglong, size: 20, flag: allegrosql.NotNullFlag | allegrosql.UnsignedFlag, comment: "Max waiting time of CausetTasks"},
+	{name: "MAX_INTERLOCK_WAIT_ADDRESS", tp: allegrosql.TypeVarchar, size: 256, comment: "Address of the INTERLOCKTask with max waiting time"},
 	{name: "AVG_PROCESS_TIME", tp: allegrosql.TypeLonglong, size: 20, flag: allegrosql.NotNullFlag | allegrosql.UnsignedFlag, comment: "Average processing time in EinsteinDB"},
 	{name: "MAX_PROCESS_TIME", tp: allegrosql.TypeLonglong, size: 20, flag: allegrosql.NotNullFlag | allegrosql.UnsignedFlag, comment: "Max processing time in EinsteinDB"},
 	{name: "AVG_WAIT_TIME", tp: allegrosql.TypeLonglong, size: 20, flag: allegrosql.NotNullFlag | allegrosql.UnsignedFlag, comment: "Average waiting time in EinsteinDB"},

@@ -2,7 +2,7 @@
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// You may obtain a INTERLOCKy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -62,7 +62,7 @@ func (n *IndexAdviseStmt) Accept(v Visitor) (Node, bool) {
 // MaxIndexNumClause represents 'maximum number of indexes' clause in index advise statement.
 type MaxIndexNumClause struct {
 	PerTable uint64
-	Pernoedb    uint64
+	Pernoedb uint64
 }
 
 // Restore for max index num clause

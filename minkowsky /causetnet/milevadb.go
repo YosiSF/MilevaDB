@@ -1,9 +1,9 @@
-//Copyright 2020 WHTCORPS INC ALL RIGHTS RESERVED
+//INTERLOCKyright 2020 WHTCORPS INC ALL RIGHTS RESERVED
 //
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// You may obtain a INTERLOCKy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -283,7 +283,7 @@ func GetRows4Test(ctx context.Context, sctx causetnetctx.Context, rs sqlexec.Rec
 			break
 		}
 
-		iteron := chunk.NewIterator4Chunk(req.CopyConstruct())
+		iteron := chunk.NewIterator4Chunk(req.INTERLOCKyConstruct())
 		for row := iteron.Begin(); row != iteron.End(); row = iteron.Next() {
 			rows = append(rows, row)
 		}

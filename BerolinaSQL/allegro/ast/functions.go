@@ -2,7 +2,7 @@
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// You may obtain a INTERLOCKy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -174,7 +174,7 @@ const (
 	Year             = "year"
 	YearWeek         = "yearweek"
 	LastDay          = "last_day"
-	milevadbParseTso     = "milevanoedb_parse_tso"
+	milevadbParseTso = "milevanoedb_parse_tso"
 
 	// string functions
 	ASCII           = "ascii"
@@ -229,27 +229,27 @@ const (
 	WeightString    = "weight_string"
 
 	// information functions
-	Benchmark      = "benchmark"
-	Charset        = "charset"
-	Coercibility   = "coercibility"
-	Collation      = "collation"
-	ConnectionID   = "connection_id"
-	CurrentUser    = "current_user"
-	CurrentRole    = "current_role"
-	Database       = "database"
-	FoundRows      = "found_rows"
-	LastInsertId   = "last_insert_id"
-	RowCount       = "row_count"
-	Schema         = "schema"
-	CausetNetUser    = "CausetNet_user"
-	SystemUser     = "system_user"
-	User           = "user"
-	Version        = "version"
-	milevadbVersion    = "milevanoedb_version"
+	Benchmark                  = "benchmark"
+	Charset                    = "charset"
+	Coercibility               = "coercibility"
+	Collation                  = "collation"
+	ConnectionID               = "connection_id"
+	CurrentUser                = "current_user"
+	CurrentRole                = "current_role"
+	Database                   = "database"
+	FoundRows                  = "found_rows"
+	LastInsertId               = "last_insert_id"
+	RowCount                   = "row_count"
+	Schema                     = "schema"
+	CausetNetUser              = "CausetNet_user"
+	SystemUser                 = "system_user"
+	User                       = "user"
+	Version                    = "version"
+	milevadbVersion            = "milevanoedb_version"
 	milevadbIsnoedbSKeywatcher = "milevanoedb_is_dbs_owner"
-	milevadbDecodePlan = "milevanoedb_decode_plan"
-	FormatBytes    = "format_bytes"
-	FormatNanoTime = "format_nano_time"
+	milevadbDecodePlan         = "milevanoedb_decode_plan"
+	FormatBytes                = "format_bytes"
+	FormatNanoTime             = "format_nano_time"
 
 	// control functions
 	If     = "if"

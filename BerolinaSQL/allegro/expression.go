@@ -107,7 +107,7 @@ type Expression interface {
 	// GetType gets the type that the expression returns.
 	GetType() *types.FieldType
 
-	// Clone copies an expression totally.
+	// Clone INTERLOCKies an expression totally.
 	Clone() Expression
 
 	// Equal checks whether two expressions are equal.
@@ -118,9 +118,9 @@ type Expression interface {
 
 	// ConstItem checks if this expression is constant item, regardless of query evaluation state.
 	// An expression is constant item if it:
-	// refers no tables.
+	// refers no blocks.
 	// refers no correlated column.
-	// refers no subqueries that refers any tables.
+	// refers no subqueries that refers any blocks.
 	// refers no non-deterministic functions.
 	// refers no statement parameters.
 	// refers no param markers when prepare plan cache is enabled.
@@ -129,7 +129,7 @@ type Expression interface {
 	// Decorrelate try to decorrelate the expression by schema.
 	Decorrelate(schema *Schema) Expression
 
-	// ResolveIndices resolves indices by the given schema. It will copy the original expression and return the copied one.
+	// ResolveIndices resolves indices by the given schema. It will INTERLOCKy the original expression and return the INTERLOCKied one.
 	ResolveIndices(schema *Schema) (Expression, error)
 
 	// resolveIndices is called inside the `ResolveIndices` It will perform on the expression itself.
@@ -161,7 +161,7 @@ func (e CNFExprs) Clone() CNFExprs {
 	return cnf
 }
 
-// Shallow makes a shallow copy of itself.
+// Shallow makes a shallow INTERLOCKy of itself.
 func (e CNFExprs) Shallow() CNFExprs {
 	cnf := make(CNFExprs, 0, len(e))
 	cnf = append(cnf, e...)
@@ -856,7 +856,7 @@ func canFuncBePushed(sf *ScalarFunction, storeType ekv.StoreType) bool {
 		ast.Exp,
 		ast.Pow,
 		// Rust use the llvm math functions, which have different precision with Golang/MySQL(cmath)
-		// open the following switchers if we implement them in coprocessor via `cmath`
+		// open the following switchers if we implement them in interlocking_directorate via `cmath`
 		// ast.Sin,
 		// ast.Asin,
 		// ast.Cos,
@@ -897,7 +897,7 @@ func canFuncBePushed(sf *ScalarFunction, storeType ekv.StoreType) bool {
 		// json functions.
 		ast.JSONType,
 		ast.JSONExtract,
-		// FIXME: JSONUnquote is incompatible with Coprocessor
+		// FIXME: JSONUnquote is incompatible with interlocking_directorate
 		// ast.JSONUnquote,
 		ast.JSONObject,
 		ast.JSONArray,
@@ -916,7 +916,7 @@ func canFuncBePushed(sf *ScalarFunction, storeType ekv.StoreType) bool {
 		ast.DayOfMonth,
 		ast.Year,
 		ast.Month,
-		// FIXME: the coprocessor cannot keep the same behavior with MilevaDB in current compute framework
+		// FIXME: the interlocking_directorate cannot keep the same behavior with MilevaDB in current compute framework
 		// ast.Hour,
 		// ast.Minute,
 		// ast.Second,
@@ -1162,4 +1162,3 @@ func wrapWithIsTrue(ctx causetnetctx.Context, keepNull bool, arg Expression, wra
 	}
 	return FoldConstant(sf), nil
 }
-

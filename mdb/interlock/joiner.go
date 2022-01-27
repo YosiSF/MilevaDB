@@ -1,8 +1,8 @@
-//Copyright 2020 WHTCORPS INC ALL RIGHTS RESERVED
+//INTERLOCKyright 2020 WHTCORPS INC ALL RIGHTS RESERVED
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// You may obtain a INTERLOCKy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -68,7 +68,7 @@ type joiner interface {
 	// parameter passed to `onMissMatch`.
 	onMissMatch(hasNull bool, outer chunk.Row, chk *chunk.Chunk)
 
-	// Clone deep copies a joiner.
+	// Clone deep INTERLOCKies a joiner.
 	Clone() joiner
 }
 
@@ -201,15 +201,15 @@ func (j *baseJoiner) makeJoinRowToChunk(chk *chunk.Chunk, lhs, rhs chunk.Row, lU
 	chk.AppendPartialRowByColIdxs(lWide, rhs, rUsed)
 }
 
-// makeShallowJoinRow shallow copies `inner` and `outer` into `shallowRow`.
+// makeShallowJoinRow shallow INTERLOCKies `inner` and `outer` into `shallowRow`.
 // It should not consider `j.lUsed` and `j.rUsed`, because the columns which
 // need to be used in `j.conditions` may not exist in outputs.
 func (j *baseJoiner) makeShallowJoinRow(isRightJoin bool, inner, outer chunk.Row) {
 	if !isRightJoin {
 		inner, outer = outer, inner
 	}
-	j.shallowRow.ShallowCopyPartialRow(0, inner)
-	j.shallowRow.ShallowCopyPartialRow(inner.Len(), outer)
+	j.shallowRow.ShallowINTERLOCKyPartialRow(0, inner)
+	j.shallowRow.ShallowINTERLOCKyPartialRow(inner.Len(), outer)
 }
 
 // filter is used to filter the result constructed by tryToMatchInners, the result is
@@ -224,7 +224,7 @@ func (j *baseJoiner) filter(
 	if err != nil {
 		return false, err
 	}
-	// Batch copies selected rows to output chunk.
+	// Batch INTERLOCKies selected rows to output chunk.
 	innerColOffset, outerColOffset := 0, input.NumCols()-outerColLen
 	innerColLen := input.NumCols() - outerColLen
 	if !j.outerIsRight {
@@ -236,7 +236,7 @@ func (j *baseJoiner) filter(
 			lSize = innerColOffset
 		}
 		used := make([]int, len(lUsed)+len(rUsed))
-		copy(used, lUsed)
+		INTERLOCKy(used, lUsed)
 		for i := range rUsed {
 			used[i+len(lUsed)] = rUsed[i] + lSize
 		}
@@ -250,7 +250,7 @@ func (j *baseJoiner) filter(
 		}
 
 	}
-	return chunk.CopySelectedJoinRowsWithSameOuterRows(input, innerColOffset, innerColLen, outerColOffset, outerColLen, j.selected, output)
+	return chunk.INTERLOCKySelectedJoinRowsWithSameOuterRows(input, innerColOffset, innerColLen, outerColOffset, outerColLen, j.selected, output)
 }
 
 // filterAndCheckOuterRowStatus is used to filter the result constructed by
@@ -280,14 +280,14 @@ func (j *baseJoiner) filterAndCheckOuterRowStatus(
 			lSize = input.NumCols() - innerColsLen
 		}
 		used := make([]int, len(lUsed)+len(rUsed))
-		copy(used, lUsed)
+		INTERLOCKy(used, lUsed)
 		for i := range rUsed {
 			used[i+len(lUsed)] = rUsed[i] + lSize
 		}
 		input = input.Prune(used)
 	}
-	// Batch copies selected rows to output chunk.
-	_, err = chunk.CopySelectedJoinRowsDirect(input, j.selected, output)
+	// Batch INTERLOCKies selected rows to output chunk.
+	_, err = chunk.INTERLOCKySelectedJoinRowsDirect(input, j.selected, output)
 	return outerRowStatus, err
 }
 
@@ -304,20 +304,20 @@ func (j *baseJoiner) Clone() baseJoiner {
 		base.conditions = append(base.conditions, con.Clone())
 	}
 	if j.chk != nil {
-		base.chk = j.chk.CopyConstruct()
+		base.chk = j.chk.INTERLOCKyConstruct()
 	} else {
 		base.shallowRow = j.shallowRow.Clone()
 	}
 	if !j.defaultInner.IsEmpty() {
-		base.defaultInner = j.defaultInner.CopyConstruct()
+		base.defaultInner = j.defaultInner.INTERLOCKyConstruct()
 	}
 	if j.lUsed != nil {
 		base.lUsed = make([]int, len(j.lUsed))
-		copy(base.lUsed, j.lUsed)
+		INTERLOCKy(base.lUsed, j.lUsed)
 	}
 	if j.rUsed != nil {
 		base.rUsed = make([]int, len(j.rUsed))
-		copy(base.rUsed, j.rUsed)
+		INTERLOCKy(base.rUsed, j.rUsed)
 	}
 	return base
 }

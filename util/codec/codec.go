@@ -1,8 +1,8 @@
-// WHTCORPS INC COPYRIGHT 2020 ALL RIGHTS RESERVED
+// WHTCORPS INC INTERLOCKYRIGHT 2020 ALL RIGHTS RESERVED
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// You may obtain a INTERLOCKy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -178,7 +178,7 @@ func EstimateValueSize(sc *stmtctx.StatementContext, val types.Datum) (int, erro
 // EncodeMySQLTime encodes datum of `KindMysqlTime` to []byte.
 func EncodeMySQLTime(sc *stmtctx.StatementContext, t types.Time, tp byte, b []byte) (_ []byte, err error) {
 	// Encoding timestamp need to consider timezone. If it's not in UTC, transform to UTC first.
-	// This is compatible with `PBToExpr > convertTime`, and coprocessor assumes the passed timestamp is in UTC as well.
+	// This is compatible with `PBToExpr > convertTime`, and interlocking_directorate assumes the passed timestamp is in UTC as well.
 	if tp == mysql.TypeUnspecified {
 		tp = t.Type()
 	}

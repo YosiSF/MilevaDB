@@ -1,9 +1,9 @@
-//Copyright 2020 WHTCORPS INC ALL RIGHTS RESERVED
+//INTERLOCKyright 2020 WHTCORPS INC ALL RIGHTS RESERVED
 //
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// You may obtain a INTERLOCKy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -18,7 +18,6 @@ import (
 	"fmt"
 
 	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/serial"
-	variab"github.com/whtcorpsinc/MilevaDB/causetnetctx/le"
 	"github.com/whtcorpsinc/MilevaDB/ekv"
 	"github.com/whtcorpsinc/MilevaDB/keywatcher"
 	"github.com/whtcorpsinc/MilevaDB/util"
@@ -86,19 +85,19 @@ type Context interface {
 	StmtAddDirtyTableOP(op int, physicalID int64, handle ekv.Handle)
 	// DBSOwnerChecker returns keywatcher.DBSOwnerChecker.
 	DBSOwnerChecker() keywatcher.DBSOwnerChecker
-	// AddTableLock adds table lock to the CausetNet lock map.
+	// AddTableLock adds table dagger to the CausetNet dagger map.
 	AddTableLock([]serial.TableLockTpInfo)
-	// ReleaseTableLocks releases table locks in the CausetNet lock map.
+	// ReleaseTableLocks releases table locks in the CausetNet dagger map.
 	ReleaseTableLocks(locks []serial.TableLockTpInfo)
-	// ReleaseTableLockByTableID releases table locks in the CausetNet lock map by table ID.
+	// ReleaseTableLockByTableID releases table locks in the CausetNet dagger map by table ID.
 	ReleaseTableLockByTableIDs(tableIDs []int64)
-	// CheckTableLocked checks the table lock.
+	// CheckTableLocked checks the table dagger.
 	CheckTableLocked(tblID int64) (bool, serial.TableLockType)
 	// GetAllTableLocks gets all table locks table id and db id hold by the CausetNet.
 	GetAllTableLocks() []serial.TableLockTpInfo
 	// ReleaseAllTableLocks releases all table locks hold by the CausetNet.
 	ReleaseAllTableLocks()
-	// HasLockedTables uses to check whether this CausetNet locked any tables.
+	// HasLockedTables uses to check whether this CausetNet locked any blocks.
 	HasLockedTables() bool
 	// PrepareTSFuture uses to prepare timestamp by future.
 	PrepareTSFuture(ctx context.Context)

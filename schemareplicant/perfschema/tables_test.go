@@ -1,8 +1,8 @@
-// Copyright 2020 WHTCORPS INC, Inc.
+// INTERLOCKyright 2020 WHTCORPS INC, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// You may obtain a INTERLOCKy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -92,7 +92,7 @@ func (s *testBlockSuite) TestEinsteinDBProfileCPU(c *C) {
 	mockAddr := strings.TrimPrefix(mockServer.URL, "http://")
 	defer mockServer.Close()
 
-	copyHandler := func(filename string) http.HandlerFunc {
+	INTERLOCKyHandler := func(filename string) http.HandlerFunc {
 		return func(w http.ResponseWriter, _ *http.Request) {
 			file, err := os.Open(filepath.Join(currentSourceDir(), filename))
 			if err != nil {
@@ -100,12 +100,12 @@ func (s *testBlockSuite) TestEinsteinDBProfileCPU(c *C) {
 				return
 			}
 			defer func() { terror.Log(file.Close()) }()
-			_, err = io.Copy(w, file)
+			_, err = io.INTERLOCKy(w, file)
 			terror.Log(err)
 		}
 	}
 	// mock einsteindb profile
-	router.HandleFunc("/debug/pprof/profile", copyHandler("testdata/einsteindb.cpu.profile"))
+	router.HandleFunc("/debug/pprof/profile", INTERLOCKyHandler("testdata/einsteindb.cpu.profile"))
 
 	// failpoint setting
 	servers := []string{
@@ -176,7 +176,7 @@ func (s *testBlockSuite) TestEinsteinDBProfileCPU(c *C) {
 	}
 
 	// mock FIDel profile
-	router.HandleFunc("/fidel/api/v1/debug/pprof/profile", copyHandler("../../soliton/profile/testdata/test.pprof"))
+	router.HandleFunc("/fidel/api/v1/debug/pprof/profile", INTERLOCKyHandler("../../soliton/profile/testdata/test.pprof"))
 	router.HandleFunc("/fidel/api/v1/debug/pprof/heap", handlerFactory("heap"))
 	router.HandleFunc("/fidel/api/v1/debug/pprof/mutex", handlerFactory("mutex"))
 	router.HandleFunc("/fidel/api/v1/debug/pprof/allocs", handlerFactory("allocs"))

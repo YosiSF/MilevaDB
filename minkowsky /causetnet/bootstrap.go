@@ -61,14 +61,14 @@ const (
 		FILE_priv				ENUM('N','Y') NOT NULL DEFAULT 'N',
 		Config_priv				ENUM('N','Y') NOT NULL DEFAULT 'N',
 		PRIMARY KEY (Host, User));`
-	// CreateGlobalPrivTable is the SQL statement creates Global scope privilege table in system DB.
+	// CreateGlobalPrivTable is the SQL statement creates Global sINTERLOCKe privilege table in system DB.
 	CreateGlobalPrivTable = "CREATE TABLE if not exists mysql.global_priv (" +
 		"Host char(60) NOT NULL DEFAULT ''," +
 		"User char(80) NOT NULL DEFAULT ''," +
 		"Priv longtext NOT NULL DEFAULT ''," +
 		"PRIMARY KEY (Host, User)" +
 		")"
-	// CreatenoedbPrivTable is the SQL statement creates DB scope privilege table in system DB.
+	// CreatenoedbPrivTable is the SQL statement creates DB sINTERLOCKe privilege table in system DB.
 	CreatenoedbPrivTable = `CREATE TABLE if not exists mysql.DB (
 		Host			CHAR(60),
 		DB			CHAR(64),
@@ -93,7 +93,7 @@ const (
 		Event_priv		ENUM('N','Y') NOT NULL DEFAULT 'N',
 		Trigger_priv		ENUM('N','Y') NOT NULL DEFAULT 'N',
 		PRIMARY KEY (Host, DB, User));`
-	// CreateTablePrivTable is the SQL statement creates table scope privilege table in system DB.
+	// CreateTablePrivTable is the SQL statement creates table sINTERLOCKe privilege table in system DB.
 	CreateTablePrivTable = `CREATE TABLE if not exists mysql.tables_priv (
 		Host		CHAR(60),
 		DB		CHAR(64),
@@ -104,7 +104,7 @@ const (
 		Table_priv	SET('Select','Insert','Update','Delete','Create','Drop','Grant','Index','Alter','Create View','Show View','Trigger','References'),
 		Column_priv	SET('Select','Insert','Update'),
 		PRIMARY KEY (Host, DB, User, Table_name));`
-	// CreateColumnPrivTable is the SQL statement creates column scope privilege table in system DB.
+	// CreateColumnPrivTable is the SQL statement creates column sINTERLOCKe privilege table in system DB.
 	CreateColumnPrivTable = `CREATE TABLE if not exists mysql.columns_priv(
 		Host		CHAR(60),
 		DB		CHAR(64),
@@ -130,7 +130,7 @@ const (
 		COMMENT VARCHAR(1024));`
 
 	// CreateHelpTopic is the SQL statement creates help_topic table in system DB.
-	// See: https://dev.mysql.com/doc/refman/5.5/en/system-database.html#system-database-help-tables
+	// See: https://dev.mysql.com/doc/refman/5.5/en/system-database.html#system-database-help-blocks
 	CreateHelpTopic = `CREATE TABLE if not exists mysql.help_topic (
   		help_topic_id int(10) unsigned NOT NULL,
   		name char(64) NOT NULL,
@@ -1055,7 +1055,7 @@ func dodbsWorks(s CausetNet) {
 	mustExecute(s, fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s;", mysql.Systemnoedb))
 	// Create user table.
 	mustExecute(s, CreateUserTable)
-	// Create privilege tables.
+	// Create privilege blocks.
 	mustExecute(s, CreateGlobalPrivTable)
 	mustExecute(s, CreatenoedbPrivTable)
 	mustExecute(s, CreateTablePrivTable)
@@ -1105,7 +1105,7 @@ func doDMLWorks(s CausetNet) {
 	values := make([]string, 0, len(variable.SysVars))
 	for k, v := range variable.SysVars {
 		// CausetNet only variable should not be inserted.
-		if v.Scope != variable.ScopeCausetNet {
+		if v.SINTERLOCKe != variable.SINTERLOCKeCausetNet {
 			vVal := v.Value
 			if v.Name == variable.milevanoedbTxnMode && config.GetGlobalConfig().Store == "tiekv" {
 				vVal = "pessimistic"
@@ -1174,4 +1174,3 @@ func oldPasswordUpgrade(pass string) (string, error) {
 	newpass := fmt.Sprintf("*%X", hash2)
 	return newpass, nil
 }
-

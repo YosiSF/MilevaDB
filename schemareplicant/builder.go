@@ -1,8 +1,8 @@
-// Copyright 2020 WHTCORPS INC, Inc.
+// INTERLOCKyright 2020 WHTCORPS INC, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// You may obtain a INTERLOCKy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -18,16 +18,16 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/failpoint"
 	"github.com/whtcorpsinc/BerolinaSQL/charset"
 	"github.com/whtcorpsinc/BerolinaSQL/perceptron"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/spacetime"
-	"github.com/whtcorpsinc/milevadb/spacetime/autoid"
+	"github.com/whtcorpsinc/errors"
+	"github.com/whtcorpsinc/failpoint"
 	"github.com/whtcorpsinc/milevadb/causet"
 	"github.com/whtcorpsinc/milevadb/causet/blocks"
+	"github.com/whtcorpsinc/milevadb/config"
 	"github.com/whtcorpsinc/milevadb/soliton/petriutil"
+	"github.com/whtcorpsinc/milevadb/spacetime"
+	"github.com/whtcorpsinc/milevadb/spacetime/autoid"
 )
 
 // Builder builds a new SchemaReplicant.
@@ -67,8 +67,8 @@ func (b *Builder) ApplyDiff(m *spacetime.Meta, diff *perceptron.SchemaDiff) ([]i
 		oldBlockID = diff.BlockID
 		newBlockID = diff.BlockID
 	}
-	dbInfo := b.copySchemaBlocks(roDBInfo.Name.L)
-	b.copySortedBlocks(oldBlockID, newBlockID)
+	dbInfo := b.INTERLOCKySchemaBlocks(roDBInfo.Name.L)
+	b.INTERLOCKySortedBlocks(oldBlockID, newBlockID)
 
 	tblIDs := make([]int64, 0, 2)
 	// We try to reuse the old allocator, so the cached auto ID can be reused.
@@ -93,7 +93,7 @@ func (b *Builder) ApplyDiff(m *spacetime.Meta, diff *perceptron.SchemaDiff) ([]i
 					fmt.Sprintf("(Schema ID %d)", diff.OldSchemaID),
 				)
 			}
-			oldDBInfo := b.copySchemaBlocks(oldRoDBInfo.Name.L)
+			oldDBInfo := b.INTERLOCKySchemaBlocks(oldRoDBInfo.Name.L)
 			tmpIDs = b.applyDropBlock(oldDBInfo, oldBlockID, tmpIDs)
 		} else {
 			tmpIDs = b.applyDropBlock(dbInfo, oldBlockID, tmpIDs)
@@ -169,13 +169,13 @@ func appendAffectedIDs(affected []int64, tblInfo *perceptron.BlockInfo) []int64 
 	return affected
 }
 
-// copySortedBlocks copies sortedBlocks for old causet and new causet for later modification.
-func (b *Builder) copySortedBlocks(oldBlockID, newBlockID int64) {
+// INTERLOCKySortedBlocks INTERLOCKies sortedBlocks for old causet and new causet for later modification.
+func (b *Builder) INTERLOCKySortedBlocks(oldBlockID, newBlockID int64) {
 	if blockIDIsValid(oldBlockID) {
-		b.copySortedBlocksBucket(blockBucketIdx(oldBlockID))
+		b.INTERLOCKySortedBlocksBucket(blockBucketIdx(oldBlockID))
 	}
 	if blockIDIsValid(newBlockID) && newBlockID != oldBlockID {
-		b.copySortedBlocksBucket(blockBucketIdx(newBlockID))
+		b.INTERLOCKySortedBlocksBucket(blockBucketIdx(newBlockID))
 	}
 }
 
@@ -206,7 +206,7 @@ func (b *Builder) applyModifySchemaCharsetAndDefCauslate(m *spacetime.Meta, diff
 			fmt.Sprintf("(Schema ID %d)", diff.SchemaID),
 		)
 	}
-	newDbInfo := b.copySchemaBlocks(di.Name.L)
+	newDbInfo := b.INTERLOCKySchemaBlocks(di.Name.L)
 	newDbInfo.Charset = di.Charset
 	newDbInfo.DefCauslate = di.DefCauslate
 	return nil
@@ -219,7 +219,7 @@ func (b *Builder) applyDropSchema(schemaID int64) []int64 {
 	}
 	delete(b.is.schemaMap, di.Name.L)
 
-	// Copy the sortedBlocks that contain the causet we are going to drop.
+	// INTERLOCKy the sortedBlocks that contain the causet we are going to drop.
 	blockIDs := make([]int64, 0, len(di.Blocks))
 	bucketIdxMap := make(map[int]struct{}, len(di.Blocks))
 	for _, tbl := range di.Blocks {
@@ -228,7 +228,7 @@ func (b *Builder) applyDropSchema(schemaID int64) []int64 {
 		blockIDs = appendAffectedIDs(blockIDs, tbl)
 	}
 	for bucketIdx := range bucketIdxMap {
-		b.copySortedBlocksBucket(bucketIdx)
+		b.INTERLOCKySortedBlocksBucket(bucketIdx)
 	}
 
 	di = di.Clone()
@@ -238,10 +238,10 @@ func (b *Builder) applyDropSchema(schemaID int64) []int64 {
 	return blockIDs
 }
 
-func (b *Builder) copySortedBlocksBucket(bucketIdx int) {
+func (b *Builder) INTERLOCKySortedBlocksBucket(bucketIdx int) {
 	oldSortedBlocks := b.is.sortedBlocksBuckets[bucketIdx]
 	newSortedBlocks := make(sortedBlocks, len(oldSortedBlocks))
-	copy(newSortedBlocks, oldSortedBlocks)
+	INTERLOCKy(newSortedBlocks, oldSortedBlocks)
 	b.is.sortedBlocksBuckets[bucketIdx] = newSortedBlocks
 }
 
@@ -364,28 +364,28 @@ func (b *Builder) applyDropBlock(dbInfo *perceptron.DBInfo, blockID int64, affec
 	return affected
 }
 
-// InitWithOldSchemaReplicant initializes an empty new SchemaReplicant by copies all the data from old SchemaReplicant.
+// InitWithOldSchemaReplicant initializes an empty new SchemaReplicant by INTERLOCKies all the data from old SchemaReplicant.
 func (b *Builder) InitWithOldSchemaReplicant() *Builder {
 	oldIS := b.handle.Get().(*schemaReplicant)
 	b.is.schemaMetaVersion = oldIS.schemaMetaVersion
-	b.copySchemasMap(oldIS)
-	copy(b.is.sortedBlocksBuckets, oldIS.sortedBlocksBuckets)
+	b.INTERLOCKySchemasMap(oldIS)
+	INTERLOCKy(b.is.sortedBlocksBuckets, oldIS.sortedBlocksBuckets)
 	return b
 }
 
-func (b *Builder) copySchemasMap(oldIS *schemaReplicant) {
+func (b *Builder) INTERLOCKySchemasMap(oldIS *schemaReplicant) {
 	for k, v := range oldIS.schemaMap {
 		b.is.schemaMap[k] = v
 	}
 }
 
-// copySchemaBlocks creates a new schemaBlocks instance when a causet in the database has changed.
+// INTERLOCKySchemaBlocks creates a new schemaBlocks instance when a causet in the database has changed.
 // It also does modifications on the new one because old schemaBlocks must be read-only.
 // Note: please make sure the dbName is in lowercase.
-func (b *Builder) copySchemaBlocks(dbName string) *perceptron.DBInfo {
+func (b *Builder) INTERLOCKySchemaBlocks(dbName string) *perceptron.DBInfo {
 	oldSchemaBlocks := b.is.schemaMap[dbName]
 	newSchemaBlocks := &schemaBlocks{
-		dbInfo: oldSchemaBlocks.dbInfo.Copy(),
+		dbInfo: oldSchemaBlocks.dbInfo.INTERLOCKy(),
 		blocks: make(map[string]causet.Block, len(oldSchemaBlocks.blocks)),
 	}
 	for k, v := range oldSchemaBlocks.blocks {

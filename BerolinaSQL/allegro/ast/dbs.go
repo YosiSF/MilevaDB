@@ -2,7 +2,7 @@
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// You may obtain a INTERLOCKy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -13,7 +13,11 @@
 
 package ast
 
-import "errors"
+import (
+	"errors"
+
+	"github.com/whtcorpsinc/milevadb/BerolinaSQL/format"
+)
 
 var (
 	_ noedbSNode = &AlterTableStmt{}
@@ -157,7 +161,7 @@ func (n *AlterDatabaseStmt) Accept(v Visitor) (Node, bool) {
 	return v.Leave(n)
 }
 
-// DropDatabaseStmt is a statement to drop a database and all tables in the database.
+// DropDatabaseStmt is a statement to drop a database and all blocks in the database.
 // See https://dev.mysql.com/doc/refman/5.7/en/drop-database.html
 type DropDatabaseStmt struct {
 	dbsNode
@@ -253,7 +257,7 @@ const (
 type ReferenceDef struct {
 	node
 
-	Table                   *TableName
+	Block                   *TableName
 	IndexPartSpecifications []*IndexPartSpecification
 	OnDelete                *OnDeleteOpt
 	OnUpdate                *OnUpdateOpt
@@ -262,9 +266,9 @@ type ReferenceDef struct {
 
 // Restore implements Node interface.
 func (n *ReferenceDef) Restore(ctx *format.RestoreCtx) error {
-	if n.Table != nil {
+	if n.Block != nil {
 		ctx.WriteKeyWord("REFERENCES ")
-		if err := n.Table.Restore(ctx); err != nil {
+		if err := n.Block.Restore(ctx); err != nil {
 			return errors.Annotate(err, "An error occurred while splicing ReferenceDef")
 		}
 	}
@@ -315,11 +319,11 @@ func (n *ReferenceDef) Accept(v Visitor) (Node, bool) {
 		return v.Leave(newNode)
 	}
 	n = newNode.(*ReferenceDef)
-	node, ok := n.Table.Accept(v)
+	node, ok := n.Block.Accept(v)
 	if !ok {
 		return n, false
 	}
-	n.Table = node.(*TableName)
+	n.Block = node.(*TableName)
 	for i, val := range n.IndexPartSpecifications {
 		node, ok = val.Accept(v)
 		if !ok {
@@ -901,7 +905,7 @@ type CreateTableStmt struct {
 
 	IfNotExists bool
 	IsTemporary bool
-	Table       *TableName
+	Block       *TableName
 	ReferTable  *TableName
 	Cols        []*ColumnDef
 	Constraints []*Constraint
@@ -922,8 +926,8 @@ func (n *CreateTableStmt) Restore(ctx *format.RestoreCtx) error {
 		ctx.WriteKeyWord("IF NOT EXISTS ")
 	}
 
-	if err := n.Table.Restore(ctx); err != nil {
-		return errors.Annotate(err, "An error occurred while splicing CreateTableStmt Table")
+	if err := n.Block.Restore(ctx); err != nil {
+		return errors.Annotate(err, "An error occurred while splicing CreateTableStmt Block")
 	}
 	ctx.WritePlain(" ")
 	if n.ReferTable != nil {
@@ -994,11 +998,11 @@ func (n *CreateTableStmt) Accept(v Visitor) (Node, bool) {
 		return v.Leave(newNode)
 	}
 	n = newNode.(*CreateTableStmt)
-	node, ok := n.Table.Accept(v)
+	node, ok := n.Block.Accept(v)
 	if !ok {
 		return n, false
 	}
-	n.Table = node.(*TableName)
+	n.Block = node.(*TableName)
 	if n.ReferTable != nil {
 		node, ok = n.ReferTable.Accept(v)
 		if !ok {
@@ -1038,7 +1042,7 @@ func (n *CreateTableStmt) Accept(v Visitor) (Node, bool) {
 	return v.Leave(n)
 }
 
-// DropTableStmt is a statement to drop one or more tables.
+// DropTableStmt is a statement to drop one or more blocks.
 // See https://dev.mysql.com/doc/refman/5.7/en/drop-table.html
 type DropTableStmt struct {
 	dbsNode
@@ -1375,7 +1379,7 @@ func (n *CreateSequenceStmt) Accept(v Visitor) (Node, bool) {
 	return v.Leave(n)
 }
 
-// IndexLockAndAlgorithm stores the algorithm option and the lock option.
+// IndexLockAndAlgorithm stores the algorithm option and the dagger option.
 type IndexLockAndAlgorithm struct {
 	node
 
@@ -1435,7 +1439,7 @@ type CreateIndexStmt struct {
 	IfNotExists bool
 
 	IndexName               string
-	Table                   *TableName
+	Block                   *TableName
 	IndexPartSpecifications []*IndexPartSpecification
 	IndexOption             *IndexOption
 	KeyType                 IndexKeyType
@@ -1459,8 +1463,8 @@ func (n *CreateIndexStmt) Restore(ctx *format.RestoreCtx) error {
 	}
 	ctx.WriteName(n.IndexName)
 	ctx.WriteKeyWord(" ON ")
-	if err := n.Table.Restore(ctx); err != nil {
-		return errors.Annotate(err, "An error occurred while restore CreateIndexStmt.Table")
+	if err := n.Block.Restore(ctx); err != nil {
+		return errors.Annotate(err, "An error occurred while restore CreateIndexStmt.Block")
 	}
 
 	ctx.WritePlain(" (")
@@ -1498,11 +1502,11 @@ func (n *CreateIndexStmt) Accept(v Visitor) (Node, bool) {
 		return v.Leave(newNode)
 	}
 	n = newNode.(*CreateIndexStmt)
-	node, ok := n.Table.Accept(v)
+	node, ok := n.Block.Accept(v)
 	if !ok {
 		return n, false
 	}
-	n.Table = node.(*TableName)
+	n.Block = node.(*TableName)
 	for i, val := range n.IndexPartSpecifications {
 		node, ok = val.Accept(v)
 		if !ok {
@@ -1534,7 +1538,7 @@ type DropIndexStmt struct {
 
 	IfExists  bool
 	IndexName string
-	Table     *TableName
+	Block     *TableName
 	LockAlg   *IndexLockAndAlgorithm
 }
 
@@ -1547,7 +1551,7 @@ func (n *DropIndexStmt) Restore(ctx *format.RestoreCtx) error {
 	ctx.WriteName(n.IndexName)
 	ctx.WriteKeyWord(" ON ")
 
-	if err := n.Table.Restore(ctx); err != nil {
+	if err := n.Block.Restore(ctx); err != nil {
 		return errors.Annotate(err, "An error occurred while add index")
 	}
 
@@ -1568,11 +1572,11 @@ func (n *DropIndexStmt) Accept(v Visitor) (Node, bool) {
 		return v.Leave(newNode)
 	}
 	n = newNode.(*DropIndexStmt)
-	node, ok := n.Table.Accept(v)
+	node, ok := n.Block.Accept(v)
 	if !ok {
 		return n, false
 	}
-	n.Table = node.(*TableName)
+	n.Block = node.(*TableName)
 	if n.LockAlg != nil {
 		node, ok := n.LockAlg.Accept(v)
 		if !ok {
@@ -1583,16 +1587,16 @@ func (n *DropIndexStmt) Accept(v Visitor) (Node, bool) {
 	return v.Leave(n)
 }
 
-// LockTablesStmt is a statement to lock tables.
+// LockTablesStmt is a statement to dagger blocks.
 type LockTablesStmt struct {
 	dbsNode
 
 	TableLocks []TableLock
 }
 
-// TableLock contains the table name and lock type.
+// TableLock contains the table name and dagger type.
 type TableLock struct {
-	Table *TableName
+	Block *TableName
 	Type  serial.TableLockType
 }
 
@@ -1604,11 +1608,11 @@ func (n *LockTablesStmt) Accept(v Visitor) (Node, bool) {
 	}
 	n = newNode.(*LockTablesStmt)
 	for i := range n.TableLocks {
-		node, ok := n.TableLocks[i].Table.Accept(v)
+		node, ok := n.TableLocks[i].Block.Accept(v)
 		if !ok {
 			return n, false
 		}
-		n.TableLocks[i].Table = node.(*TableName)
+		n.TableLocks[i].Block = node.(*TableName)
 	}
 	return v.Leave(n)
 }
@@ -1620,7 +1624,7 @@ func (n *LockTablesStmt) Restore(ctx *format.RestoreCtx) error {
 		if i != 0 {
 			ctx.WritePlain(", ")
 		}
-		if err := tl.Table.Restore(ctx); err != nil {
+		if err := tl.Block.Restore(ctx); err != nil {
 			return errors.Annotate(err, "An error occurred while add index")
 		}
 		ctx.WriteKeyWord(" " + tl.Type.String())
@@ -1628,7 +1632,7 @@ func (n *LockTablesStmt) Restore(ctx *format.RestoreCtx) error {
 	return nil
 }
 
-// UnlockTablesStmt is a statement to unlock tables.
+// UnlockTablesStmt is a statement to unlock blocks.
 type UnlockTablesStmt struct {
 	dbsNode
 }
@@ -1645,7 +1649,7 @@ func (n *UnlockTablesStmt) Restore(ctx *format.RestoreCtx) error {
 	return nil
 }
 
-// CleanupTableLockStmt is a statement to cleanup table lock.
+// CleanupTableLockStmt is a statement to cleanup table dagger.
 type CleanupTableLockStmt struct {
 	dbsNode
 
@@ -1686,7 +1690,7 @@ func (n *CleanupTableLockStmt) Restore(ctx *format.RestoreCtx) error {
 // RepairTableStmt is a statement to repair tableInfo.
 type RepairTableStmt struct {
 	dbsNode
-	Table      *TableName
+	Block      *TableName
 	CreateStmt *CreateTableStmt
 }
 
@@ -1697,11 +1701,11 @@ func (n *RepairTableStmt) Accept(v Visitor) (Node, bool) {
 		return v.Leave(newNode)
 	}
 	n = newNode.(*RepairTableStmt)
-	node, ok := n.Table.Accept(v)
+	node, ok := n.Block.Accept(v)
 	if !ok {
 		return n, false
 	}
-	n.Table = node.(*TableName)
+	n.Block = node.(*TableName)
 	node, ok = n.CreateStmt.Accept(v)
 	if !ok {
 		return n, false
@@ -1713,8 +1717,8 @@ func (n *RepairTableStmt) Accept(v Visitor) (Node, bool) {
 // Restore implements Node interface.
 func (n *RepairTableStmt) Restore(ctx *format.RestoreCtx) error {
 	ctx.WriteKeyWord("ADMIN REPAIR TABLE ")
-	if err := n.Table.Restore(ctx); err != nil {
-		return errors.Annotatef(err, "An error occurred while restore RepairTableStmt.table : [%v]", n.Table)
+	if err := n.Block.Restore(ctx); err != nil {
+		return errors.Annotatef(err, "An error occurred while restore RepairTableStmt.table : [%v]", n.Block)
 	}
 	ctx.WritePlain(" ")
 	if err := n.CreateStmt.Restore(ctx); err != nil {
@@ -2207,11 +2211,11 @@ const (
 type AlgorithmType byte
 
 // noedbS algorithms.
-// For now, Tinoedb only supported inplace and instance algorithms. If the user specify `copy`,
+// For now, Tinoedb only supported inplace and instance algorithms. If the user specify `INTERLOCKy`,
 // will get an error.
 const (
 	AlgorithmTypeDefault AlgorithmType = iota
-	AlgorithmTypeCopy
+	AlgorithmTypeINTERLOCKy
 	AlgorithmTypeInplace
 	AlgorithmTypeInstant
 )
@@ -2220,8 +2224,8 @@ func (a AlgorithmType) String() string {
 	switch a {
 	case AlgorithmTypeDefault:
 		return "DEFAULT"
-	case AlgorithmTypeCopy:
-		return "COPY"
+	case AlgorithmTypeINTERLOCKy:
+		return "INTERLOCKY"
 	case AlgorithmTypeInplace:
 		return "INPLACE"
 	case AlgorithmTypeInstant:
@@ -2776,15 +2780,15 @@ func (n *AlterTableSpec) Accept(v Visitor) (Node, bool) {
 type AlterTableStmt struct {
 	dbsNode
 
-	Table *TableName
+	Block *TableName
 	Specs []*AlterTableSpec
 }
 
 // Restore implements Node interface.
 func (n *AlterTableStmt) Restore(ctx *format.RestoreCtx) error {
 	ctx.WriteKeyWord("ALTER TABLE ")
-	if err := n.Table.Restore(ctx); err != nil {
-		return errors.Annotate(err, "An error occurred while restore AlterTableStmt.Table")
+	if err := n.Block.Restore(ctx); err != nil {
+		return errors.Annotate(err, "An error occurred while restore AlterTableStmt.Block")
 	}
 	for i, spec := range n.Specs {
 		if i == 0 || spec.Tp == AlterTablePartition || spec.Tp == AlterTableRemovePartitioning || spec.Tp == AlterTableImportTablespace || spec.Tp == AlterTableDiscardTablespace {
@@ -2806,11 +2810,11 @@ func (n *AlterTableStmt) Accept(v Visitor) (Node, bool) {
 		return v.Leave(newNode)
 	}
 	n = newNode.(*AlterTableStmt)
-	node, ok := n.Table.Accept(v)
+	node, ok := n.Block.Accept(v)
 	if !ok {
 		return n, false
 	}
-	n.Table = node.(*TableName)
+	n.Block = node.(*TableName)
 	for i, val := range n.Specs {
 		node, ok = val.Accept(v)
 		if !ok {
@@ -2826,14 +2830,14 @@ func (n *AlterTableStmt) Accept(v Visitor) (Node, bool) {
 type TruncateTableStmt struct {
 	dbsNode
 
-	Table *TableName
+	Block *TableName
 }
 
 // Restore implements Node interface.
 func (n *TruncateTableStmt) Restore(ctx *format.RestoreCtx) error {
 	ctx.WriteKeyWord("TRUNCATE TABLE ")
-	if err := n.Table.Restore(ctx); err != nil {
-		return errors.Annotate(err, "An error occurred while restore TruncateTableStmt.Table")
+	if err := n.Block.Restore(ctx); err != nil {
+		return errors.Annotate(err, "An error occurred while restore TruncateTableStmt.Block")
 	}
 	return nil
 }
@@ -2845,11 +2849,11 @@ func (n *TruncateTableStmt) Accept(v Visitor) (Node, bool) {
 		return v.Leave(newNode)
 	}
 	n = newNode.(*TruncateTableStmt)
-	node, ok := n.Table.Accept(v)
+	node, ok := n.Block.Accept(v)
 	if !ok {
 		return n, false
 	}
-	n.Table = node.(*TableName)
+	n.Block = node.(*TableName)
 	return v.Leave(n)
 }
 
@@ -3341,7 +3345,7 @@ type RecoverTableStmt struct {
 	dbsNode
 
 	JobID  int64
-	Table  *TableName
+	Block  *TableName
 	JobNum int64
 }
 
@@ -3352,8 +3356,8 @@ func (n *RecoverTableStmt) Restore(ctx *format.RestoreCtx) error {
 		ctx.WriteKeyWord("BY JOB ")
 		ctx.WritePlainf("%d", n.JobID)
 	} else {
-		if err := n.Table.Restore(ctx); err != nil {
-			return errors.Annotate(err, "An error occurred while splicing RecoverTableStmt Table")
+		if err := n.Block.Restore(ctx); err != nil {
+			return errors.Annotate(err, "An error occurred while splicing RecoverTableStmt Block")
 		}
 		if n.JobNum > 0 {
 			ctx.WritePlainf(" %d", n.JobNum)
@@ -3370,12 +3374,12 @@ func (n *RecoverTableStmt) Accept(v Visitor) (Node, bool) {
 	}
 
 	n = newNode.(*RecoverTableStmt)
-	if n.Table != nil {
-		node, ok := n.Table.Accept(v)
+	if n.Block != nil {
+		node, ok := n.Block.Accept(v)
 		if !ok {
 			return n, false
 		}
-		n.Table = node.(*TableName)
+		n.Block = node.(*TableName)
 	}
 	return v.Leave(n)
 }
@@ -3384,15 +3388,15 @@ func (n *RecoverTableStmt) Accept(v Visitor) (Node, bool) {
 type FlashBackTableStmt struct {
 	dbsNode
 
-	Table   *TableName
+	Block   *TableName
 	NewName string
 }
 
 // Restore implements Node interface.
 func (n *FlashBackTableStmt) Restore(ctx *format.RestoreCtx) error {
 	ctx.WriteKeyWord("FLASHBACK TABLE ")
-	if err := n.Table.Restore(ctx); err != nil {
-		return errors.Annotate(err, "An error occurred while splicing RecoverTableStmt Table")
+	if err := n.Block.Restore(ctx); err != nil {
+		return errors.Annotate(err, "An error occurred while splicing RecoverTableStmt Block")
 	}
 	if len(n.NewName) > 0 {
 		ctx.WriteKeyWord(" TO ")
@@ -3409,13 +3413,12 @@ func (n *FlashBackTableStmt) Accept(v Visitor) (Node, bool) {
 	}
 
 	n = newNode.(*FlashBackTableStmt)
-	if n.Table != nil {
-		node, ok := n.Table.Accept(v)
+	if n.Block != nil {
+		node, ok := n.Block.Accept(v)
 		if !ok {
 			return n, false
 		}
-		n.Table = node.(*TableName)
+		n.Block = node.(*TableName)
 	}
 	return v.Leave(n)
 }
-

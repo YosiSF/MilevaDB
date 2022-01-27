@@ -21,7 +21,7 @@ import (
 	"golang.org/x/tools/container/intsets"
 )
 
-// cowExprRef is a copy-on-write slice ref util using in `ColumnSubstitute`
+// cowExprRef is a INTERLOCKy-on-write slice ref util using in `ColumnSubstitute`
 // to reduce unnecessary allocation for Expression arguments array
 type cowExprRef struct {
 	ref []Expression
@@ -38,7 +38,7 @@ func (c *cowExprRef) Set(i int, changed bool, val Expression) {
 		return
 	}
 	c.new = make([]Expression, len(c.ref))
-	copy(c.new, c.ref[:i])
+	INTERLOCKy(c.new, c.ref[:i])
 	c.new[i] = val
 }
 
@@ -210,7 +210,7 @@ func ColumnSubstituteImpl(expr Expression, schema *Schema, newExprs []Expression
 			_, newFunc.GetArgs()[0] = ColumnSubstituteImpl(newFunc.GetArgs()[0], schema, newExprs)
 			return true, newFunc
 		}
-		// cowExprRef is a copy-on-write util, args array allocation happens only
+		// cowExprRef is a INTERLOCKy-on-write util, args array allocation happens only
 		// when expr in args is changed
 		refExprArr := cowExprRef{v.GetArgs(), nil}
 		substituted := false
@@ -370,8 +370,8 @@ var oppositeOp = map[string]string{
 	ast.LogicAnd: ast.LogicOr,
 }
 
-// a op b is equal to b symmetricOp a
-var symmetricOp = map[opcode.Op]opcode.Op{
+// a op b is equal to b symmetriINTERLOCK a
+var symmetriINTERLOCK = map[opcode.Op]opcode.Op{
 	opcode.LT:     opcode.GT,
 	opcode.GE:     opcode.LE,
 	opcode.GT:     opcode.LT,

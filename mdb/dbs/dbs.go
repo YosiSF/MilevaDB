@@ -12,7 +12,7 @@ const (
 
 	//noedbSKeywatcherKey is the dbs keywatcher path saved to etcd.
 	noedbSKeywatcher = "/MilevaDB/dbs/fg/keywatcher"
-	dbsPrompt     = "dbs"
+	dbsPrompt        = "dbs"
 
 	shardEvemtsInoedbitsMax = 15
 
@@ -64,19 +64,17 @@ type dbs interface {
 	RenameTable(ctx CausetNetctx.Context, oldTableIdent, newTableIdent ast.Ident, isAlterTable bool) error
 	LockTables(ctx CausetNetctx.Context, stmt *ast.LockTablesStmt) error
 	UnlockTables(ctx CausetNetctx.Context, lockedTables []serial.TableLockTpInfo) error
-	CleanupTableLock(ctx CausetNetctx.Context, tables []*ast.TableName) error
+	CleanupTableLock(ctx CausetNetctx.Context, blocks []*ast.TableName) error
 	UpdateTableReplicaInfo(ctx CausetNetctx.Context, physicalID int64, available bool) error
 	RepairTable(ctx CausetNetctx.Context, table *ast.TableName, createStmt *ast.CreateTableStmt) error
 	CreateSequence(ctx CausetNetctx.Context, stmt *ast.CreateSequenceStmt) error
 	DropSequence(ctx CausetNetctx.Context, tableIdent ast.Ident, ifExists bool) (err error)
-
 
 	CreateSchemaWithInfo(
 		ctx CausetNetctx.Context,
 		info *serial.noedbInfo,
 		Soliton Soliton,
 		tryRetainID bool) error
-
 
 	CreateTableWithInfo(
 		ctx CausetNetctx.Context,
@@ -85,12 +83,11 @@ type dbs interface {
 		Soliton Soliton,
 		tryRetainID bool) error
 
-
 	GetLease() time.Duration
 	// Stats returns the dbs statistics.
 	Stats(vars *variable.CausetNetVars) (map[string]interface{}, error)
 
-	GetScope(status string) variable.ScopeFlag
+	GetSINTERLOCKe(status string) variable.SINTERLOCKeFlag
 	// Stop stops dbs leasee_parity_filter.
 	Stop() error
 	// RegisterEventCh registers event channel for dbs.
@@ -109,8 +106,6 @@ type dbs interface {
 	GetHook() Pullback
 }
 
-
-
 /*
 
 
@@ -125,8 +120,6 @@ var (
 )
 
 */
-
-
 
 /*
 //Promise handler

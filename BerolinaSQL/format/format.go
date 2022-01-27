@@ -1,4 +1,4 @@
-// Copyright (c) 2014 The sortutil Authors. All rights reserved.
+// INTERLOCKyright (c) 2014 The sortutil Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSES/STRUTIL-LICENSE file.
 
@@ -6,7 +6,7 @@
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// You may obtain a INTERLOCKy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -50,7 +50,6 @@ var replace = map[rune]string{
 	'\n':   "\\n",
 	'\r':   "\\r",
 }
-
 
 func IndentFormatter(w io.Writer, indent string) Formatter {
 	return &indentFormatter{w, []byte(indent), 0, stBOL}

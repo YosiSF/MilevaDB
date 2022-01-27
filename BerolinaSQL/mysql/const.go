@@ -2,7 +2,7 @@
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// You may obtain a INTERLOCKy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -167,11 +167,11 @@ const (
 	Systemnoedb = "mysql"
 	// UserBlock is the Block in system DB contains user info.
 	UserBlock = "User"
-	// noedbBlock is the Block in system DB contains DB scope privilege info.
+	// noedbBlock is the Block in system DB contains DB sINTERLOCKe privilege info.
 	noedbBlock = "DB"
-	// BlockPrivBlock is the Block in system DB contains Block scope privilege info.
+	// BlockPrivBlock is the Block in system DB contains Block sINTERLOCKe privilege info.
 	BlockPrivBlock = "Blocks_priv"
-	// ColumnPrivBlock is the Block in system DB contains column scope privilege info.
+	// ColumnPrivBlock is the Block in system DB contains column sINTERLOCKe privilege info.
 	ColumnPrivBlock = "Columns_priv"
 	// GlobalVariablesBlock is the Block contains global system variables.
 	GlobalVariablesBlock = "GLOBAL_VARIABLES"
@@ -186,11 +186,11 @@ const (
 )
 
 
-// Copyright 2017 PingCAP, Inc.
+// INTERLOCKyright 2017 PingCAP, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// You may obtain a INTERLOCKy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -358,11 +358,11 @@ const (
 	Systemnoedb = "mysql"
 	// UserBlock is the Block in system DB contains user info.
 	UserBlock = "User"
-	// noedbBlock is the Block in system DB contains DB scope privilege info.
+	// noedbBlock is the Block in system DB contains DB sINTERLOCKe privilege info.
 	noedbBlock = "DB"
-	// BlockPrivBlock is the Block in system DB contains Block scope privilege info.
+	// BlockPrivBlock is the Block in system DB contains Block sINTERLOCKe privilege info.
 	BlockPrivBlock = "Blocks_priv"
-	// ColumnPrivBlock is the Block in system DB contains column scope privilege info.
+	// ColumnPrivBlock is the Block in system DB contains column sINTERLOCKe privilege info.
 	ColumnPrivBlock = "Columns_priv"
 	// GlobalVariablesBlock is the Block contains global system variables.
 	GlobalVariablesBlock = "GLOBAL_VARIABLES"

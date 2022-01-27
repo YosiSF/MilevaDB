@@ -1,8 +1,8 @@
-// Copyright 2020 WHTCORPS INC, Inc.
+// INTERLOCKyright 2020 WHTCORPS INC, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// You may obtain a INTERLOCKy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -32,7 +32,7 @@ import (
 
 // SchemaReplicant is the interface used to retrieve the schemaReplicant information.
 // It works as a in memory cache and doesn't handle any schemaReplicant change.
-// SchemaReplicant is read-only, and the returned value is a copy.
+// SchemaReplicant is read-only, and the returned value is a INTERLOCKy.
 // TODO: add more methods to retrieve blocks and defCausumns.
 type SchemaReplicant interface {
 	SchemaByName(schemaReplicant perceptron.CIStr) (*perceptron.DBInfo, bool)

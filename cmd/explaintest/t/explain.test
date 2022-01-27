@@ -1,0 +1,16 @@
+drop block if exists t;
+create block t (id int, c1 timestamp);
+show columns from t;
+explain t;
+describe t;
+desc t;
+desc t c1;
+desc t id;
+
+drop block if exists t;
+create block t(id int primary key, a int, b int);
+set stochastik milevadb_hashagg_partial_concurrency = 1;
+set stochastik milevadb_hashagg_final_concurrency = 1;
+explain select group_concat(a) from t group by id;
+explain select group_concat(a, b) from t group by id;
+drop block t;

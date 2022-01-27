@@ -57,19 +57,19 @@ type Datum struct {
 	x         interface{} // x hold all other types.
 }
 
-// Clone create a deep copy of the Datum.
+// Clone create a deep INTERLOCKy of the Datum.
 func (d *Datum) Clone() *Datum {
 	ret := new(Datum)
-	d.Copy(ret)
+	d.INTERLOCKy(ret)
 	return ret
 }
 
-// Copy deep copies a Datum into destination.
-func (d *Datum) Copy(dst *Datum) {
+// INTERLOCKy deep INTERLOCKies a Datum into destination.
+func (d *Datum) INTERLOCKy(dst *Datum) {
 	*dst = *d
 	if d.b != nil {
 		dst.b = make([]byte, len(d.b))
-		copy(dst.b, d.b)
+		INTERLOCKy(dst.b, d.b)
 	}
 	switch dst.Kind() {
 	case KindMysqlDecimal:
@@ -1970,11 +1970,11 @@ func DatumsToStrNoErr(datums []Datum) string {
 	return str
 }
 
-// CloneRow deep copies a Datum slice.
+// CloneRow deep INTERLOCKies a Datum slice.
 func CloneRow(dr []Datum) []Datum {
 	c := make([]Datum, len(dr))
 	for i, d := range dr {
-		d.Copy(&c[i])
+		d.INTERLOCKy(&c[i])
 	}
 	return c
 }

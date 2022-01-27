@@ -1,8 +1,8 @@
-//Copyright 2020 WHTCORPS INC ALL RIGHTS RESERVED
+//INTERLOCKyright 2020 WHTCORPS INC ALL RIGHTS RESERVED
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// You may obtain a INTERLOCKy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -32,23 +32,23 @@ import (
 type DirtyDB struct {
 	sync.Mutex
 
-	// tables is a map whose key is tableID.
-	tables map[int64]*DirtyTable
+	// blocks is a map whose key is tableID.
+	blocks map[int64]*DirtyTable
 }
 
 // GetDirtyTable gets the DirtyTable by id from the DirtyDB.
 func (udb *DirtyDB) GetDirtyTable(tid int64) *DirtyTable {
-	// The index join access the tables map parallelly.
+	// The index join access the blocks map parallelly.
 	// But the map throws panic in this case. So it's locked.
 	udb.Lock()
-	dt, ok := udb.tables[tid]
+	dt, ok := udb.blocks[tid]
 	if !ok {
 		dt = &DirtyTable{
 			tid:         tid,
 			addedRows:   ekv.NewHandleMap(),
 			deletedRows: ekv.NewHandleMap(),
 		}
-		udb.tables[tid] = dt
+		udb.blocks[tid] = dt
 	}
 	udb.Unlock()
 	return dt
@@ -84,7 +84,7 @@ func GetDirtyDB(ctx causetnetctx.Context) *DirtyDB {
 	var udb *DirtyDB
 	x := ctx.GetCausetNetVars().TxnCtx.DirtyDB
 	if x == nil {
-		udb = &DirtyDB{tables: make(map[int64]*DirtyTable)}
+		udb = &DirtyDB{blocks: make(map[int64]*DirtyTable)}
 		ctx.GetCausetNetVars().TxnCtx.DirtyDB = udb
 	} else {
 		udb = x.(*DirtyDB)
@@ -103,7 +103,7 @@ type UnionScanExec struct {
 	conditions           []expression.Expression
 	conditionsWithVirCol []expression.Expression
 	columns              []*serial.ColumnInfo
-	table                table.Table
+	table                table.Block
 	// belowHandleCols is the handle's position of the below scan plan.
 	belowHandleCols plannercore.HandleCols
 

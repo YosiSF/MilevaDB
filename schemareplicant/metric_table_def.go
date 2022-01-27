@@ -1,8 +1,8 @@
-// Copyright 2020 WHTCORPS INC, Inc.
+// INTERLOCKyright 2020 WHTCORPS INC, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// You may obtain a INTERLOCKy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -46,17 +46,17 @@ var MetricBlockMap = map[string]MetricBlockDef{
 		Quantile: 0.90,
 		Comment:  "The quantile of MilevaDB slow query statistics with slow query time(second)",
 	},
-	"milevadb_slow_query_cop_process_duration": {
-		PromQL:   "histogram_quantile($QUANTILE, sum(rate(milevadb_server_slow_query_cop_duration_seconds_bucket{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (le,instance))",
+	"milevadb_slow_query_INTERLOCK_process_duration": {
+		PromQL:   "histogram_quantile($QUANTILE, sum(rate(milevadb_server_slow_query_INTERLOCK_duration_seconds_bucket{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (le,instance))",
 		Labels:   []string{"instance"},
 		Quantile: 0.90,
-		Comment:  "The quantile of MilevaDB slow query statistics with slow query total cop process time(second)",
+		Comment:  "The quantile of MilevaDB slow query statistics with slow query total INTERLOCK process time(second)",
 	},
-	"milevadb_slow_query_cop_wait_duration": {
+	"milevadb_slow_query_INTERLOCK_wait_duration": {
 		PromQL:   "histogram_quantile($QUANTILE, sum(rate(milevadb_server_slow_query_wait_duration_seconds_bucket{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (le,instance))",
 		Labels:   []string{"instance"},
 		Quantile: 0.90,
-		Comment:  "The quantile of MilevaDB slow query statistics with slow query total cop wait time(second)",
+		Comment:  "The quantile of MilevaDB slow query statistics with slow query total INTERLOCK wait time(second)",
 	},
 	"milevadb_ops_internal": {
 		PromQL:  "sum(rate(milevadb_stochastik_restricted_sql_total{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance)",
@@ -270,8 +270,8 @@ var MetricBlockMap = map[string]MetricBlockDef{
 		Quantile: 0.95,
 		Comment:  "The quantile of allegrosql partial numbers per query",
 	},
-	"milevadb_cop_duration": {
-		PromQL:   "histogram_quantile($QUANTILE, sum(rate(milevadb_einsteindbclient_cop_duration_seconds_bucket{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (le, instance))",
+	"milevadb_INTERLOCK_duration": {
+		PromQL:   "histogram_quantile($QUANTILE, sum(rate(milevadb_einsteindbclient_INTERLOCK_duration_seconds_bucket{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (le, instance))",
 		Labels:   []string{"instance"},
 		Quantile: 0.95,
 		Comment:  "The quantile of ekv storage interlock processing durations",
@@ -799,8 +799,8 @@ var MetricBlockMap = map[string]MetricBlockDef{
 		Comment: "The replica/region checker's status",
 	},
 	"FIDel_schedule_filter": {
-		PromQL: `sum(delta(FIDel_schedule_filter{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (causetstore, type, scope, instance)`,
-		Labels: []string{"instance", "scope", "causetstore", "type"},
+		PromQL: `sum(delta(FIDel_schedule_filter{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (causetstore, type, sINTERLOCKe, instance)`,
+		Labels: []string{"instance", "sINTERLOCKe", "causetstore", "type"},
 	},
 	"FIDel_scheduler_balance_direction": {
 		PromQL: `sum(delta(FIDel_scheduler_balance_direction{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (type,source,target,instance)`,
@@ -958,15 +958,15 @@ var MetricBlockMap = map[string]MetricBlockDef{
 		Labels:  []string{"instance", "EDB", "type"},
 		Comment: "The total number of channel full errors on each EinsteinDB instance, it will make the EinsteinDB instance unavailable temporarily",
 	},
-	"einsteindb_coprocessor_is_busy": {
-		PromQL:  `sum(rate(einsteindb_coprocessor_request_error{type='full'}[$RANGE_DURATION])) by (instance,EDB,type)`,
+	"einsteindb_interlocking_directorate_is_busy": {
+		PromQL:  `sum(rate(einsteindb_interlocking_directorate_request_error{type='full'}[$RANGE_DURATION])) by (instance,EDB,type)`,
 		Labels:  []string{"instance", "EDB"},
-		Comment: "The ops of Coprocessor Full events that make the EinsteinDB instance unavailable temporarily",
+		Comment: "The ops of interlocking_directorate Full events that make the EinsteinDB instance unavailable temporarily",
 	},
-	"einsteindb_coprocessor_is_busy_total_count": {
-		PromQL:  `sum(increase(einsteindb_coprocessor_request_error{type='full'}[$RANGE_DURATION])) by (instance,EDB,type)`,
+	"einsteindb_interlocking_directorate_is_busy_total_count": {
+		PromQL:  `sum(increase(einsteindb_interlocking_directorate_request_error{type='full'}[$RANGE_DURATION])) by (instance,EDB,type)`,
 		Labels:  []string{"instance", "EDB"},
-		Comment: "The total count of Coprocessor Full events that make the EinsteinDB instance unavailable temporarily",
+		Comment: "The total count of interlocking_directorate Full events that make the EinsteinDB instance unavailable temporarily",
 	},
 	"einsteindb_engine_write_stall": {
 		PromQL:  `avg(einsteindb_engine_write_stall{type="write_stall_percentile99"}) by (instance, EDB)`,
@@ -1004,13 +1004,13 @@ var MetricBlockMap = map[string]MetricBlockDef{
 		Comment: "The total number of scheduler state on each EinsteinDB instance",
 	},
 
-	"einsteindb_coprocessor_request_error": {
-		PromQL:  `sum(rate(einsteindb_coprocessor_request_error{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance, reason)`,
+	"einsteindb_interlocking_directorate_request_error": {
+		PromQL:  `sum(rate(einsteindb_interlocking_directorate_request_error{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance, reason)`,
 		Labels:  []string{"instance", "reason"},
 		Comment: "The number of different interlock errors on each EinsteinDB instance",
 	},
-	"einsteindb_coprocessor_request_error_total_count": {
-		PromQL:  `sum(increase(einsteindb_coprocessor_request_error{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance, reason)`,
+	"einsteindb_interlocking_directorate_request_error_total_count": {
+		PromQL:  `sum(increase(einsteindb_interlocking_directorate_request_error{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance, reason)`,
 		Labels:  []string{"instance", "reason"},
 		Comment: "The total number of different interlock errors on each EinsteinDB instance",
 	},
@@ -1566,65 +1566,65 @@ var MetricBlockMap = map[string]MetricBlockDef{
 		Labels:  []string{"instance", "name"},
 		Comment: "Total pending and running tasks of future_pool",
 	},
-	"einsteindb_cop_request_durations": {
-		PromQL:  `sum(rate(einsteindb_coprocessor_request_duration_seconds_bucket{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (le,instance,req)`,
+	"einsteindb_INTERLOCK_request_durations": {
+		PromQL:  `sum(rate(einsteindb_interlocking_directorate_request_duration_seconds_bucket{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (le,instance,req)`,
 		Labels:  []string{"instance", "req"},
 		Comment: "The time consumed to handle interlock read requests",
 	},
-	"einsteindb_cop_request_duration": {
-		PromQL:   `histogram_quantile($QUANTILE, sum(rate(einsteindb_coprocessor_request_duration_seconds_bucket{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (le,req,instance))`,
+	"einsteindb_INTERLOCK_request_duration": {
+		PromQL:   `histogram_quantile($QUANTILE, sum(rate(einsteindb_interlocking_directorate_request_duration_seconds_bucket{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (le,req,instance))`,
 		Labels:   []string{"instance", "req"},
 		Quantile: 1,
 		Comment:  "The quantile of time consumed to handle interlock read requests",
 	},
-	"einsteindb_cop_requests_ops": {
-		PromQL: `sum(rate(einsteindb_coprocessor_request_duration_seconds_count{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (req,instance)`,
+	"einsteindb_INTERLOCK_requests_ops": {
+		PromQL: `sum(rate(einsteindb_interlocking_directorate_request_duration_seconds_count{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (req,instance)`,
 		Labels: []string{"instance", "req"},
 	},
-	"einsteindb_cop_scan_keys_num": {
-		PromQL: `sum(rate(einsteindb_coprocessor_scan_keys_sum{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (req,instance)`,
+	"einsteindb_INTERLOCK_scan_keys_num": {
+		PromQL: `sum(rate(einsteindb_interlocking_directorate_scan_keys_sum{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (req,instance)`,
 		Labels: []string{"instance", "req"},
 	},
-	"einsteindb_cop_ekv_cursor_operations": {
-		PromQL:   `histogram_quantile($QUANTILE, avg(rate(einsteindb_coprocessor_scan_keys_bucket{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (le,req,instance)) `,
+	"einsteindb_INTERLOCK_ekv_cursor_operations": {
+		PromQL:   `histogram_quantile($QUANTILE, avg(rate(einsteindb_interlocking_directorate_scan_keys_bucket{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (le,req,instance)) `,
 		Labels:   []string{"instance", "req"},
 		Quantile: 1,
 	},
-	"einsteindb_cop_total_lmdb_perf_statistics": {
-		PromQL: `sum(rate(einsteindb_coprocessor_lmdb_perf{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (req,metric,instance)`,
+	"einsteindb_INTERLOCK_total_lmdb_perf_statistics": {
+		PromQL: `sum(rate(einsteindb_interlocking_directorate_lmdb_perf{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (req,metric,instance)`,
 		Labels: []string{"instance", "req", "metric"},
 	},
-	"einsteindb_cop_total_response_size_per_seconds": {
-		PromQL: `sum(rate(einsteindb_coprocessor_response_bytes{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance)`,
+	"einsteindb_INTERLOCK_total_response_size_per_seconds": {
+		PromQL: `sum(rate(einsteindb_interlocking_directorate_response_bytes{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance)`,
 		Labels: []string{"instance"},
 	},
-	"einsteindb_cop_handle_duration": {
-		PromQL:   `histogram_quantile($QUANTILE, sum(rate(einsteindb_coprocessor_request_handle_seconds_bucket{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (le,req,instance))`,
+	"einsteindb_INTERLOCK_handle_duration": {
+		PromQL:   `histogram_quantile($QUANTILE, sum(rate(einsteindb_interlocking_directorate_request_handle_seconds_bucket{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (le,req,instance))`,
 		Labels:   []string{"instance", "req"},
 		Quantile: 1,
 		Comment:  "The quantile of time consumed when handling interlock requests",
 	},
-	"einsteindb_cop_wait_duration": {
-		PromQL:   `histogram_quantile($QUANTILE, sum(rate(einsteindb_coprocessor_request_wait_seconds_bucket{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (le,req,type,instance))`,
+	"einsteindb_INTERLOCK_wait_duration": {
+		PromQL:   `histogram_quantile($QUANTILE, sum(rate(einsteindb_interlocking_directorate_request_wait_seconds_bucket{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (le,req,type,instance))`,
 		Labels:   []string{"instance", "req", "type"},
 		Quantile: 1,
 		Comment:  "The quantile of time consumed when interlock requests are wait for being handled",
 	},
-	"einsteindb_cop_posetPosetDag_requests_ops": {
-		PromQL: `sum(rate(einsteindb_coprocessor_posetPosetDag_request_count{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (vec_type,instance)`,
+	"einsteindb_INTERLOCK_posetPosetDag_requests_ops": {
+		PromQL: `sum(rate(einsteindb_interlocking_directorate_posetPosetDag_request_count{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (vec_type,instance)`,
 		Labels: []string{"instance", "vec_type"},
 	},
-	"einsteindb_cop_posetPosetDag_interlocks_ops": {
-		PromQL:  `sum(rate(einsteindb_coprocessor_interlock_count{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (type,instance)`,
+	"einsteindb_INTERLOCK_posetPosetDag_interlocks_ops": {
+		PromQL:  `sum(rate(einsteindb_interlocking_directorate_interlock_count{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (type,instance)`,
 		Labels:  []string{"instance", "type"},
 		Comment: "The number of PosetDag interlocks per seconds",
 	},
-	"einsteindb_cop_scan_details": {
-		PromQL: `sum(rate(einsteindb_coprocessor_scan_details{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (tag,req,cf,instance)`,
+	"einsteindb_INTERLOCK_scan_details": {
+		PromQL: `sum(rate(einsteindb_interlocking_directorate_scan_details{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (tag,req,cf,instance)`,
 		Labels: []string{"instance", "tag", "req", "cf"},
 	},
-	"einsteindb_cop_scan_details_total": {
-		PromQL: `sum(increase(einsteindb_coprocessor_scan_details{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (tag,req,cf,instance)`,
+	"einsteindb_INTERLOCK_scan_details_total": {
+		PromQL: `sum(increase(einsteindb_interlocking_directorate_scan_details{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (tag,req,cf,instance)`,
 		Labels: []string{"instance", "tag", "req", "cf"},
 	},
 
@@ -2425,13 +2425,13 @@ var MetricBlockMap = map[string]MetricBlockDef{
 		Labels:  []string{"instance", "sql_type"},
 		Comment: "The total time of cost of building the query plan(second)",
 	},
-	"milevadb_cop_total_count": {
-		PromQL:  "sum(increase(milevadb_einsteindbclient_cop_duration_seconds_count{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance)",
+	"milevadb_INTERLOCK_total_count": {
+		PromQL:  "sum(increase(milevadb_einsteindbclient_INTERLOCK_duration_seconds_count{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance)",
 		Labels:  []string{"instance"},
 		Comment: "The total count of ekv storage interlock processing durations",
 	},
-	"milevadb_cop_total_time": {
-		PromQL:  "sum(increase(milevadb_einsteindbclient_cop_duration_seconds_sum{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance)",
+	"milevadb_INTERLOCK_total_time": {
+		PromQL:  "sum(increase(milevadb_einsteindbclient_INTERLOCK_duration_seconds_sum{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance)",
 		Labels:  []string{"instance"},
 		Comment: "The total time of ekv storage interlock processing durations",
 	},
@@ -2631,25 +2631,25 @@ var MetricBlockMap = map[string]MetricBlockDef{
 		Labels:  []string{"instance", "type"},
 		Comment: "The total time of MilevaDB transaction command",
 	},
-	"milevadb_slow_query_cop_process_total_count": {
-		PromQL:  "sum(increase(milevadb_server_slow_query_cop_duration_seconds_count{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance)",
+	"milevadb_slow_query_INTERLOCK_process_total_count": {
+		PromQL:  "sum(increase(milevadb_server_slow_query_INTERLOCK_duration_seconds_count{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance)",
 		Labels:  []string{"instance"},
-		Comment: "The total count of MilevaDB slow query cop process",
+		Comment: "The total count of MilevaDB slow query INTERLOCK process",
 	},
-	"milevadb_slow_query_cop_process_total_time": {
-		PromQL:  "sum(increase(milevadb_server_slow_query_cop_duration_seconds_sum{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance)",
+	"milevadb_slow_query_INTERLOCK_process_total_time": {
+		PromQL:  "sum(increase(milevadb_server_slow_query_INTERLOCK_duration_seconds_sum{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance)",
 		Labels:  []string{"instance"},
-		Comment: "The total time of MilevaDB slow query statistics with slow query total cop process time(second)",
+		Comment: "The total time of MilevaDB slow query statistics with slow query total INTERLOCK process time(second)",
 	},
-	"milevadb_slow_query_cop_wait_total_count": {
+	"milevadb_slow_query_INTERLOCK_wait_total_count": {
 		PromQL:  "sum(increase(milevadb_server_slow_query_wait_duration_seconds_count{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance)",
 		Labels:  []string{"instance"},
-		Comment: "The total count of MilevaDB slow query cop wait",
+		Comment: "The total count of MilevaDB slow query INTERLOCK wait",
 	},
-	"milevadb_slow_query_cop_wait_total_time": {
+	"milevadb_slow_query_INTERLOCK_wait_total_time": {
 		PromQL:  "sum(increase(milevadb_server_slow_query_wait_duration_seconds_sum{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance)",
 		Labels:  []string{"instance"},
-		Comment: "The total time of MilevaDB slow query statistics with slow query total cop wait time(second)",
+		Comment: "The total time of MilevaDB slow query statistics with slow query total INTERLOCK wait time(second)",
 	},
 	"milevadb_slow_query_total_count": {
 		PromQL:  "sum(increase(milevadb_server_slow_query_process_duration_seconds_count{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance)",
@@ -2755,33 +2755,33 @@ var MetricBlockMap = map[string]MetricBlockDef{
 		Labels:  []string{"instance"},
 		Comment: "The total time of Raft commits log",
 	},
-	"einsteindb_cop_handle_total_count": {
-		PromQL:  "sum(increase(einsteindb_coprocessor_request_handle_seconds_count{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance,req)",
+	"einsteindb_INTERLOCK_handle_total_count": {
+		PromQL:  "sum(increase(einsteindb_interlocking_directorate_request_handle_seconds_count{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance,req)",
 		Labels:  []string{"instance", "req"},
 		Comment: "The total count of einsteindb interlock handling interlock requests",
 	},
-	"einsteindb_cop_handle_total_time": {
-		PromQL:  "sum(increase(einsteindb_coprocessor_request_handle_seconds_sum{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance,req)",
+	"einsteindb_INTERLOCK_handle_total_time": {
+		PromQL:  "sum(increase(einsteindb_interlocking_directorate_request_handle_seconds_sum{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance,req)",
 		Labels:  []string{"instance", "req"},
 		Comment: "The total time of time consumed when handling interlock requests",
 	},
-	"einsteindb_cop_request_total_count": {
-		PromQL:  "sum(increase(einsteindb_coprocessor_request_duration_seconds_count{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance,req)",
+	"einsteindb_INTERLOCK_request_total_count": {
+		PromQL:  "sum(increase(einsteindb_interlocking_directorate_request_duration_seconds_count{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance,req)",
 		Labels:  []string{"instance", "req"},
 		Comment: "The total count of einsteindb handle interlock read requests",
 	},
-	"einsteindb_cop_request_total_time": {
-		PromQL:  "sum(increase(einsteindb_coprocessor_request_duration_seconds_sum{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance,req)",
+	"einsteindb_INTERLOCK_request_total_time": {
+		PromQL:  "sum(increase(einsteindb_interlocking_directorate_request_duration_seconds_sum{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance,req)",
 		Labels:  []string{"instance", "req"},
 		Comment: "The total time of time consumed to handle interlock read requests",
 	},
-	"einsteindb_cop_wait_total_count": {
-		PromQL:  "sum(increase(einsteindb_coprocessor_request_wait_seconds_count{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance,req,type)",
+	"einsteindb_INTERLOCK_wait_total_count": {
+		PromQL:  "sum(increase(einsteindb_interlocking_directorate_request_wait_seconds_count{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance,req,type)",
 		Labels:  []string{"instance", "req", "type"},
 		Comment: "The total count of interlock requests that wait for being handled",
 	},
-	"einsteindb_cop_wait_total_time": {
-		PromQL:  "sum(increase(einsteindb_coprocessor_request_wait_seconds_sum{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance,req,type)",
+	"einsteindb_INTERLOCK_wait_total_time": {
+		PromQL:  "sum(increase(einsteindb_interlocking_directorate_request_wait_seconds_sum{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance,req,type)",
 		Labels:  []string{"instance", "req", "type"},
 		Comment: "The total time of time consumed when interlock requests are wait for being handled",
 	},
@@ -3030,16 +3030,16 @@ var MetricBlockMap = map[string]MetricBlockDef{
 		PromQL: "sum(increase(einsteindb_backup_range_size_bytes_sum{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance,cf)",
 		Labels: []string{"instance", "cf"},
 	},
-	"einsteindb_cop_ekv_cursor_operations_total_count": {
-		PromQL: "sum(increase(einsteindb_coprocessor_scan_keys_count{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance,req)",
+	"einsteindb_INTERLOCK_ekv_cursor_operations_total_count": {
+		PromQL: "sum(increase(einsteindb_interlocking_directorate_scan_keys_count{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance,req)",
 		Labels: []string{"instance", "req"},
 	},
-	"einsteindb_cop_scan_keys_total_num": {
-		PromQL: "sum(increase(einsteindb_coprocessor_scan_keys_sum{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance,req)",
+	"einsteindb_INTERLOCK_scan_keys_total_num": {
+		PromQL: "sum(increase(einsteindb_interlocking_directorate_scan_keys_sum{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance,req)",
 		Labels: []string{"instance", "req"},
 	},
-	"einsteindb_cop_total_response_total_size": {
-		PromQL: `sum(increase(einsteindb_coprocessor_response_bytes{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance)`,
+	"einsteindb_INTERLOCK_total_response_total_size": {
+		PromQL: `sum(increase(einsteindb_interlocking_directorate_response_bytes{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance)`,
 		Labels: []string{"instance"},
 	},
 	"einsteindb_grpc_req_batch_size_total_count": {

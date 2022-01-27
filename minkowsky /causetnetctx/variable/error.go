@@ -1,9 +1,9 @@
-//Copyright 2020 WHTCORPS INC ALL RIGHTS RESERVED
+//INTERLOCKyright 2020 WHTCORPS INC ALL RIGHTS RESERVED
 //
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// You may obtain a INTERLOCKy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -26,7 +26,7 @@ var (
 	ErrSnapshotTooOld              = terror.ClassVariable.New(mysql.ErrSnapshotTooOld, mysql.MySQLErrName[mysql.ErrSnapshotTooOld])
 	ErrUnsupportedValueForVar      = terror.ClassVariable.New(mysql.ErrUnsupportedValueForVar, mysql.MySQLErrName[mysql.ErrUnsupportedValueForVar])
 	ErrUnknownSystemVar            = terror.ClassVariable.New(mysql.ErrUnknownSystemVariable, mysql.MySQLErrName[mysql.ErrUnknownSystemVariable])
-	ErrIncorrectScope              = terror.ClassVariable.New(mysql.ErrIncorrectGlobalLocalVar, mysql.MySQLErrName[mysql.ErrIncorrectGlobalLocalVar])
+	ErrIncorrectSINTERLOCKe        = terror.ClassVariable.New(mysql.ErrIncorrectGlobalLocalVar, mysql.MySQLErrName[mysql.ErrIncorrectGlobalLocalVar])
 	ErrUnknownTimeZone             = terror.ClassVariable.New(mysql.ErrUnknownTimeZone, mysql.MySQLErrName[mysql.ErrUnknownTimeZone])
 	ErrReadOnly                    = terror.ClassVariable.New(mysql.ErrVariableIsReadonly, mysql.MySQLErrName[mysql.ErrVariableIsReadonly])
 	ErrWrongValueForVar            = terror.ClassVariable.New(mysql.ErrWrongValueForVar, mysql.MySQLErrName[mysql.ErrWrongValueForVar])

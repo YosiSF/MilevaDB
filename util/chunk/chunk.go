@@ -1,8 +1,8 @@
-//Copyright 2020 WHTCORPS INC ALL RIGHTS RESERVED
+//INTERLOCKyright 2020 WHTCORPS INC ALL RIGHTS RESERVED
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// You may obtain a INTERLOCKy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -148,15 +148,15 @@ type HashAggExec struct {
 	GroupByItems     []expression.Expression
 	groupKeyBuffer   [][]byte
 
-	finishCh         chan struct{}
-	finalOutputCh    chan *AfFinalResult
-	partialOutputChs []chan *HashAggIntermData
-	inputCh          chan *HashAggInput
-	partialInputChs  []chan *chunk.Chunk
-	partialleasee_parity_filters   []HashAggPartialleasee_parity_filter
-	finalleasee_parity_filters     []HashAggFinalleasee_parity_filter
-	defaultVal       *chunk.Chunk
-	childResult      *chunk.Chunk
+	finishCh                     chan struct{}
+	finalOutputCh                chan *AfFinalResult
+	partialOutputChs             []chan *HashAggIntermData
+	inputCh                      chan *HashAggInput
+	partialInputChs              []chan *chunk.Chunk
+	partialleasee_parity_filters []HashAggPartialleasee_parity_filter
+	finalleasee_parity_filters   []HashAggFinalleasee_parity_filter
+	defaultVal                   *chunk.Chunk
+	childResult                  *chunk.Chunk
 
 	// isChildReturnEmpty indicates whether the child Interlock only returns an empty input.
 	isChildReturnEmpty bool
@@ -298,15 +298,15 @@ func (e *HashAggExec) initForParallelExec(ctx causetnetctx.Context) {
 	for i := 0; i < partialConcurrency; i++ {
 		w := HashAggPartialleasee_parity_filter{
 			baseHashAggleasee_parity_filter: newBaseHashAggleasee_parity_filter(e.ctx, e.finishCh, e.PartialAggFuncs, e.maxChunkSize),
-			inputCh:           e.partialInputChs[i],
-			outputChs:         e.partialOutputChs,
-			giveBackCh:        e.inputCh,
-			globalOutputCh:    e.finalOutputCh,
-			partialResultsMap: make(aggPartialResultMapper),
-			groupByItems:      e.GroupByItems,
-			chk:               newFirstChunk(e.children[0]),
-			groupKey:          make([][]byte, 0, 8),
-			memTracker:        e.memTracker,
+			inputCh:                         e.partialInputChs[i],
+			outputChs:                       e.partialOutputChs,
+			giveBackCh:                      e.inputCh,
+			globalOutputCh:                  e.finalOutputCh,
+			partialResultsMap:               make(aggPartialResultMapper),
+			groupByItems:                    e.GroupByItems,
+			chk:                             newFirstChunk(e.children[0]),
+			groupKey:                        make([][]byte, 0, 8),
+			memTracker:                      e.memTracker,
 		}
 		e.memTracker.Consume(w.chk.MemoryUsage())
 		e.partialleasee_parity_filters[i] = w
@@ -322,15 +322,15 @@ func (e *HashAggExec) initForParallelExec(ctx causetnetctx.Context) {
 	// Init final leasee_parity_filters.
 	for i := 0; i < finalConcurrency; i++ {
 		e.finalleasee_parity_filters[i] = HashAggFinalleasee_parity_filter{
-			baseHashAggleasee_parity_filter:   newBaseHashAggleasee_parity_filter(e.ctx, e.finishCh, e.FinalAggFuncs, e.maxChunkSize),
-			partialResultMap:    make(aggPartialResultMapper),
-			groupSet:            set.NewStringSet(),
-			inputCh:             e.partialOutputChs[i],
-			outputCh:            e.finalOutputCh,
-			finalResultHolderCh: make(chan *chunk.Chunk, 1),
-			rowBuffer:           make([]types.Datum, 0, e.Schema().Len()),
-			mutableRow:          chunk.MutRowFromTypes(retTypes(e)),
-			groupKeys:           make([][]byte, 0, 8),
+			baseHashAggleasee_parity_filter: newBaseHashAggleasee_parity_filter(e.ctx, e.finishCh, e.FinalAggFuncs, e.maxChunkSize),
+			partialResultMap:                make(aggPartialResultMapper),
+			groupSet:                        set.NewStringSet(),
+			inputCh:                         e.partialOutputChs[i],
+			outputCh:                        e.finalOutputCh,
+			finalResultHolderCh:             make(chan *chunk.Chunk, 1),
+			rowBuffer:                       make([]types.Datum, 0, e.Schema().Len()),
+			mutableRow:                      chunk.MutRowFromTypes(retTypes(e)),
+			groupKeys:                       make([][]byte, 0, 8),
 		}
 		e.finalleasee_parity_filters[i].finalResultHolderCh <- newFirstChunk(e)
 	}

@@ -1,0 +1,158 @@
+groups:
+- name: alert.rules
+  rules:
+  - alert: MilevaDB_schema_error
+    expr: increase(milevadb_stochastik_schema_lease_error_total{type="outdated"}[15m]) > 0
+    for: 1m
+    labels:
+      env: ENV_LABELS_ENV
+      level: emergency
+      expr:  increase(milevadb_stochastik_schema_lease_error_total{type="outdated"}[15m]) > 0
+    annotations:
+      description: 'cluster: ENV_LABELS_ENV, instance: {{ $labels.instance }}, values:{{ $value }}'
+      value: '{{ $value }}'
+      summary: MilevaDB schemaReplicant error
+
+  - alert: MilevaDB_einsteindbclient_region_err_total
+    expr: increase( milevadb_einsteindbclient_region_err_total[10m] )  > 6000
+    for: 1m
+    labels:
+      env: ENV_LABELS_ENV
+      level: emergency
+      expr:  increase( milevadb_einsteindbclient_region_err_total[10m] )  > 6000
+    annotations:
+      description: 'cluster: ENV_LABELS_ENV, instance: {{ $labels.instance }}, values:{{ $value }}'
+      value: '{{ $value }}'
+      summary: MilevaDB einsteindbclient_backoff_count error
+
+  - alert: MilevaDB_binlog_error_total
+    expr: increase( milevadb_server_critical_error_total[5m] )  > 0
+    for: 1m
+    labels:
+      env: ENV_LABELS_ENV
+      level: emergency
+      expr:  increase( milevadb_server_critical_error_total[5m] )  > 0
+    annotations:
+      description: 'cluster: ENV_LABELS_ENV, instance: {{ $labels.instance }}, values:{{ $value }}'
+      value: '{{ $value }}'
+      summary: MilevaDB milevadb binlog error total
+
+  - alert: MilevaDB_petri_load_schema_total
+    expr: increase( milevadb_petri_load_schema_total{type="failed"}[10m] )  > 10
+    for: 1m
+    labels:
+      env: ENV_LABELS_ENV
+      level: emergency
+      expr:  increase( milevadb_petri_load_schema_total{type="failed"}[10m] )  > 10
+    annotations:
+      description: 'cluster: ENV_LABELS_ENV, instance: {{ $labels.instance }}, values:{{ $value }}'
+      value: '{{ $value }}'
+      summary: MilevaDB petri_load_schema_total error
+
+  - alert: MilevaDB_monitor_keep_alive
+    expr: increase(milevadb_monitor_keep_alive_total{job="milevadb"}[10m]) < 100
+    for: 1m
+    labels:
+      env: ENV_LABELS_ENV
+      level: emergency
+      expr: increase(milevadb_monitor_keep_alive_total{job="milevadb"}[10m]) < 100
+    annotations:
+      description: 'cluster: ENV_LABELS_ENV, instance: {{ $labels.instance }}, values:{{ $value }}'
+      value: '{{ $value }}'
+      summary: MilevaDB monitor_keep_alive error
+
+  - alert: MilevaDB_server_panic_total
+    expr: increase(milevadb_server_panic_total[10m]) > 0
+    for: 1m
+    labels:
+      env: ENV_LABELS_ENV
+      level: critical
+      expr:  increase(milevadb_server_panic_total[10m]) > 0
+    annotations:
+      description: 'cluster: ENV_LABELS_ENV, instance: {{ $labels.instance }}, values:{{ $value }}'
+      value: '{{ $value }}'
+      summary: MilevaDB server panic total
+
+  - alert: MilevaDB_memory_abnormal
+    expr: go_memstats_heap_inuse_bytes{job="milevadb"} > 1e+10
+    for: 1m
+    labels:
+      env: ENV_LABELS_ENV
+      level: warning
+      expr: go_memstats_heap_inuse_bytes{job="milevadb"} > 1e+10
+    annotations:
+      description: 'cluster: ENV_LABELS_ENV, instance: {{ $labels.instance }}, values:{{ $value }}'
+      value: '{{ $value }}'
+      summary: MilevaDB heap memory usage is over 10 GB
+
+  - alert: MilevaDB_query_duration
+    expr: histogram_quantile(0.99, sum(rate(milevadb_server_handle_query_duration_seconds_bucket[1m])) BY (le, instance)) > 1
+    for: 1m
+    labels:
+      env: ENV_LABELS_ENV
+      level: warning
+      expr:  histogram_quantile(0.99, sum(rate(milevadb_server_handle_query_duration_seconds_bucket[1m])) BY (le, instance)) > 1
+    annotations:
+      description: 'cluster: ENV_LABELS_ENV, instance: {{ $labels.instance }}, values:{{ $value }}'
+      value: '{{ $value }}'
+      summary: MilevaDB query duration 99th percentile is above 1s
+
+  - alert: MilevaDB_server_event_error
+    expr: increase(milevadb_server_event_total{type=~"server_start|server_hang"}[15m])  > 0
+    for: 1m
+    labels:
+      env: ENV_LABELS_ENV
+      level: warning
+      expr:  increase(milevadb_server_event_total{type=~"server_start|server_hang"}[15m])  > 0
+    annotations:
+      description: 'cluster: ENV_LABELS_ENV, instance: {{ $labels.instance }}, values:{{ $value }}'
+      value: '{{ $value }}'
+      summary: MilevaDB server event error
+
+  - alert: milevadb_einsteindbclient_backoff_seconds_count
+    expr: increase( milevadb_einsteindbclient_backoff_seconds_count[10m] )  > 10
+    for: 1m
+    labels:
+      env: ENV_LABELS_ENV
+      level: warning
+      expr:  increase( milevadb_einsteindbclient_backoff_seconds_count[10m] )  > 10
+    annotations:
+      description: 'cluster: ENV_LABELS_ENV, instance: {{ $labels.instance }}, values:{{ $value }}'
+      value: '{{ $value }}'
+      summary: MilevaDB einsteindbclient_backoff_count error
+
+  - alert: MilevaDB_monitor_time_jump_back_error
+    expr: increase(milevadb_monitor_time_jump_back_total[10m])  > 0
+    for: 1m
+    labels:
+      env: ENV_LABELS_ENV
+      level: warning
+      expr:  increase(milevadb_monitor_time_jump_back_total[10m])  > 0
+    annotations:
+      description: 'cluster: ENV_LABELS_ENV, instance: {{ $labels.instance }}, values:{{ $value }}'
+      value: '{{ $value }}'
+      summary: MilevaDB monitor time_jump_back error
+
+  - alert: MilevaDB_dbs_waiting_jobs
+    expr: sum(milevadb_dbs_waiting_jobs) > 5
+    for: 1m
+    labels:
+      env: ENV_LABELS_ENV
+      level: warning
+      expr:  sum(milevadb_dbs_waiting_jobs) > 5
+    annotations:
+      description: 'cluster: ENV_LABELS_ENV, instance: {{ $labels.instance }}, values:{{ $value }}'
+      value: '{{ $value }}'
+      summary: MilevaDB dbs waiting_jobs too much
+
+  - alert: MilevaDB_node_restart
+    expr: changes(process_start_time_seconds{job="milevadb"}[5m]) > 0
+    for: 1m
+    labels:
+      env: ENV_LABELS_ENV
+      level: warning
+      expr:  changes(process_start_time_seconds{job="milevadb"}[5m]) > 0
+    annotations:
+      description: 'cluster: ENV_LABELS_ENV, instance: {{ $labels.instance }}, values:{{ $value }}'
+      value: '{{ $value }}'
+      summary: MilevaDB server has been restarted

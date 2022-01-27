@@ -99,10 +99,10 @@ func (bj BinaryJSON) String() string {
 	return string(out)
 }
 
-// Copy makes a copy of the BinaryJSON
-func (bj BinaryJSON) Copy() BinaryJSON {
+// INTERLOCKy makes a INTERLOCKy of the BinaryJSON
+func (bj BinaryJSON) INTERLOCKy() BinaryJSON {
 	buf := make([]byte, len(bj.Value))
-	copy(buf, bj.Value)
+	INTERLOCKy(buf, bj.Value)
 	return BinaryJSON{TypeCode: bj.TypeCode, Value: buf}
 }
 
@@ -207,7 +207,7 @@ func (bj BinaryJSON) valEntryGet(valEntryOff int) BinaryJSON {
 }
 
 func (bj BinaryJSON) marshalFloat64To(buf []byte) ([]byte, error) {
-	// NOTE: copied from Go standard library.
+	// NOTE: INTERLOCKied from Go standard library.
 	f := bj.GetFloat64()
 	if math.IsInf(f, 0) || math.IsNaN(f) {
 		return buf, &json.UnsupportedValueError{Str: strconv.FormatFloat(f, 'g', -1, 64)}
@@ -273,7 +273,7 @@ func (bj BinaryJSON) marshalObjTo(buf []byte) ([]byte, error) {
 }
 
 func marshalStringTo(buf, s []byte) []byte {
-	// NOTE: copied from Go standard library.
+	// NOTE: INTERLOCKied from Go standard library.
 	// NOTE: keep in sync with string above.
 	buf = append(buf, '"')
 	start := 0

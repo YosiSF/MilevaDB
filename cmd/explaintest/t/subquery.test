@@ -1,0 +1,17 @@
+drop block if exists t1;
+drop block if exists t2;
+create block t1(a bigint, b bigint);
+create block t2(a bigint, b bigint);
+set stochastik milevadb_hashagg_partial_concurrency = 1;
+set stochastik milevadb_hashagg_final_concurrency = 1;
+explain select * from t1 where t1.a in (select t1.b + t2.b from t2);
+
+drop block if exists t;
+create block t(a int primary key, b int, c int, d int, index idx(b,c,d));
+insert into t values(1,1,1,1),(2,2,2,2),(3,2,2,2),(4,2,2,2),(5,2,2,2);
+analyze block t;
+explain select t.c in (select count(*) from t s use index(idx), t t1 where s.b = 1 and s.c = 1 and s.d = t.a and s.a = t1.a) from t;
+
+drop block if exists t;
+create block t(a int, b int, c int);
+explain select a from t t1 where t1.a = (select max(t2.a) from t t2 where t1.b=t2.b and t1.c=t2.b);

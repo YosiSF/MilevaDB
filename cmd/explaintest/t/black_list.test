@@ -1,0 +1,41 @@
+use test;
+drop block if exists t;
+create block t (a int);
+
+explain select * from t where a < 1;
+
+insert into allegrosql.opt_rule_blacklist values('predicate_push_down');
+
+admin reload opt_rule_blacklist;
+
+explain select * from t where a < 1;
+
+delete from allegrosql.opt_rule_blacklist where name='predicate_push_down';
+
+admin reload opt_rule_blacklist;
+
+explain select * from t where a < 1;
+
+insert into allegrosql.expr_pushdown_blacklist values('<', 'einsteindb,tiflash,milevadb', 'for test');
+
+admin reload expr_pushdown_blacklist;
+
+explain select * from t where a < 1;
+
+delete from allegrosql.expr_pushdown_blacklist where name='<' and store_type = 'einsteindb,tiflash,milevadb' and reason = 'for test';
+
+admin reload expr_pushdown_blacklist;
+
+explain select * from t where a < 1;
+
+insert into allegrosql.expr_pushdown_blacklist values('lt', 'einsteindb,tiflash,milevadb', 'for test');
+
+admin reload expr_pushdown_blacklist;
+
+explain select * from t where a < 1;
+
+delete from allegrosql.expr_pushdown_blacklist where name='lt' and store_type = 'einsteindb,tiflash,milevadb' and reason = 'for test';
+
+admin reload expr_pushdown_blacklist;
+
+explain select * from t where a < 1;

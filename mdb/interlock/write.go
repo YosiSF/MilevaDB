@@ -12,7 +12,7 @@ import (
 	"github.com/whtcorpsinc/MilevaDB/expression"
 	"github.com/whtcorpsinc/MilevaDB/meta/autoid"
 	"github.com/whtcorpsinc/MilevaDB/table"
-	"github.com/whtcorpsinc/MilevaDB/table/tables"
+	"github.com/whtcorpsinc/MilevaDB/table/blocks"
 	"github.com/whtcorpsinc/MilevaDB/tablecodec"
 	"github.com/whtcorpsinc/MilevaDB/types"
 	"github.com/whtcorpsinc/MilevaDB/util/codec"
@@ -33,7 +33,7 @@ var (
 // The return values:
 //     1. changed (bool) : does the update really change the row values. e.g. update set i = 1 where i = 1;
 //     2. err (error) : error in the update.
-func updateRecord(ctx context.Context, sctx causetnetctx.Context, h ekv.Handle, oldData, newData []types.Datum, modified []bool, t table.Table,
+func updateRecord(ctx context.Context, sctx causetnetctx.Context, h ekv.Handle, oldData, newData []types.Datum, modified []bool, t table.Block,
 	onDup bool, memTracker *memory.Tracker) (bool, error) {
 	if span := opentracing.SpanFromContext(ctx); span != nil && span.Tracer() != nil {
 		span1 := span.Tracer().StartSpan("Interlock.updateRecord", opentracing.ChildOf(span.Context()))
@@ -104,7 +104,7 @@ func updateRecord(ctx context.Context, sctx causetnetctx.Context, h ekv.Handle, 
 				}
 			}
 			if col.IsCommonHandleColumn(t.Meta()) {
-				pkIdx := tables.FindPrimaryIndex(t.Meta())
+				pkIdx := blocks.FindPrimaryIndex(t.Meta())
 				handleChanged = true
 				pkDts := make([]types.Datum, 0, len(pkIdx.Columns))
 				for _, idxCol := range pkIdx.Columns {
@@ -170,7 +170,7 @@ func updateRecord(ctx context.Context, sctx causetnetctx.Context, h ekv.Handle, 
 		if sc.DupKeyAsWarning {
 			// For `UPDATE IGNORE`/`INSERT IGNORE ON DUPLICATE KEY UPDATE`
 			// If the new handle exists, this will avoid to remove the record.
-			err = tables.CheckHandleExists(ctx, sctx, t, newHandle, newData)
+			err = blocks.CheckHandleExists(ctx, sctx, t, newHandle, newData)
 			if err != nil {
 				return false, err
 			}
@@ -203,12 +203,12 @@ func updateRecord(ctx context.Context, sctx causetnetctx.Context, h ekv.Handle, 
 		}
 	}
 	sc.AddUpdatedRows(1)
-	sc.AddCopiedRows(1)
+	sc.AddINTERLOCKiedRows(1)
 
 	return true, nil
 }
 
-func rebaseAutoRandomValue(sctx causetnetctx.Context, t table.Table, newData *types.Datum, col *table.Column) error {
+func rebaseAutoRandomValue(sctx causetnetctx.Context, t table.Block, newData *types.Datum, col *table.Column) error {
 	tableInfo := t.Meta()
 	if !tableInfo.ContainsAutoRandomBits() {
 		return nil

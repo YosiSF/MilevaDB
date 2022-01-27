@@ -33,7 +33,7 @@ const (
 	SyncLog
 	// KeyOnly retrieve only keys, it can be used in scan now.
 	KeyOnly
-	// Pessimistic is defined for pessimistic lock
+	// Pessimistic is defined for pessimistic dagger
 	Pessimistic
 	// SnapshotTS is defined to set snapshot ts.
 	SnapshotTS
@@ -169,7 +169,7 @@ type Transaction interface {
 	Rollback() error
 	// String implements fmt.Stringer interface.
 	String() string
-	// LockKeys tries to lock the entries with the keys in KV store.
+	// LockKeys tries to dagger the entries with the keys in KV store.
 	LockKeys(ctx context.Context, lockCtx *LockCtx, keys ...Key) error
 	// SetOption sets an option with a value, when val is nil, uses the default
 	// value of this option.
@@ -308,8 +308,8 @@ type Request struct {
 	Cacheable bool
 	// SchemaVer is for any schema-ful storage to validate schema correctness if necessary.
 	SchemaVar int64
-	// BatchCop indicates whether send batch coprocessor request to Noether.
-	BatchCop bool
+	// BatchINTERLOCK indicates whether send batch interlocking_directorate request to Noether.
+	BatchINTERLOCK bool
 	// TaskID is an unique ID for an execution of a statement
 	TaskID uint64
 }
@@ -412,9 +412,9 @@ type SplittableStore interface {
 	CheckRegionInScattering(regionID uint64) (bool, error)
 }
 
-// Used for pessimistic lock wait time
-// these two constants are special for lock protocol with einsteindb
-// 0 means always wait, -1 means nowait, others meaning lock wait in milliseconds
+// Used for pessimistic dagger wait time
+// these two constants are special for dagger protocol with einsteindb
+// 0 means always wait, -1 means nowait, others meaning dagger wait in milliseconds
 var (
 	LockAlwaysWait = int64(0)
 	LockNoWait     = int64(-1)

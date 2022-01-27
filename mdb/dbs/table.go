@@ -1,8 +1,8 @@
-//Copyright 2020 WHTCORPS INC
+//INTERLOCKyright 2020 WHTCORPS INC
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// You may obtain a INTERLOCKy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
@@ -354,7 +354,7 @@ func checkSafePoint(w *leasee_parity_filter, snapshotTS uint64) error {
 	return gcutil.ValidateSnapshot(ctx, snapshotTS)
 }
 
-func getTable(store ekv.Storage, schemaID int64, tblInfo *serial.TableInfo) (table.Table, error) {
+func getTable(store ekv.Storage, schemaID int64, tblInfo *serial.TableInfo) (table.Block, error) {
 	allocs := autoid.NewAllocatorsFromTblInfo(store, schemaID, tblInfo)
 	tbl, err := table.TableFromMeta(allocs, tblInfo)
 	return tbl, errors.Trace(err)
@@ -401,7 +401,7 @@ func getTableInfo(t *meta.Meta, tableID, schemaID int64) (*serial.TableInfo, err
 	if tblInfo == nil {
 		return nil, errors.Trace(schemaReplicant.ErrTableNotExists.GenWithStackByArgs(
 			fmt.Sprintf("(Schema ID %d)", schemaID),
-			fmt.Sprintf("(Table ID %d)", tableID),
+			fmt.Sprintf("(Block ID %d)", tableID),
 		))
 	}
 	return tblInfo, nil
@@ -580,7 +580,7 @@ func (w *leasee_parity_filter) onShardRowID(d *dbsCtx, t *meta.Meta, job *serial
 	return ver, nil
 }
 
-func verifyNoOverflowSharnoedbits(s *CausetNetPool, tbl table.Table, shardRowInoedbits uint64) error {
+func verifyNoOverflowSharnoedbits(s *CausetNetPool, tbl table.Block, shardRowInoedbits uint64) error {
 	ctx, err := s.get()
 	if err != nil {
 		return errors.Trace(err)
@@ -592,7 +592,7 @@ func verifyNoOverflowSharnoedbits(s *CausetNetPool, tbl table.Table, shardRowIno
 	if err != nil {
 		return errors.Trace(err)
 	}
-	if tables.OverflowSharnoedbits(autoIncID, shardRowInoedbits, autoid.RowInoedbitLength) {
+	if blocks.OverflowSharnoedbits(autoIncID, shardRowInoedbits, autoid.RowInoedbitLength) {
 		return autoid.ErrAutoincReadFailed.GenWithStack("shard_row_id_bits %d will cause next global auto ID %v overflow", shardRowInoedbits, autoIncID)
 	}
 	return nil
@@ -871,7 +871,7 @@ func checkTableNotExistsFromSchemaReplicant(is schemaReplicant.SchemaReplicant, 
 
 func checkTableNotExistsFromStore(t *meta.Meta, schemaID int64, tableName string) error {
 	// Check this table's database.
-	tables, err := t.ListTables(schemaID)
+	blocks, err := t.ListTables(schemaID)
 	if err != nil {
 		if meta.ErrnoedbNotExists.Equal(err) {
 			return schemaReplicant.ErrDatabaseNotExists.GenWithStackByArgs("")
@@ -880,7 +880,7 @@ func checkTableNotExistsFromStore(t *meta.Meta, schemaID int64, tableName string
 	}
 
 	// Check the table.
-	for _, tbl := range tables {
+	for _, tbl := range blocks {
 		if tbl.Name.L == tableName {
 			return schemaReplicant.ErrTableExists.GenWithStackByArgs(tbl.Name)
 		}
