@@ -1,13 +1,13 @@
-package expression
+package allegro
 
 import (
-"strconv"
+	"strconv"
 
-"github.com/YosiSF/MilevaDB/BerolinaSQL/ast"
-"github.com/YosiSF/MilevaDB/BerolinaSQL/mysql"
-"github.com/YosiSF/MilevaDB/causetnetctx"
-"github.com/YosiSF/MilevaDB/types"
-"github.com/YosiSF/MilevaDB/util/chunk"
+	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/ast"
+	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/mysql"
+	"github.com/whtcorpsinc/MilevaDB/causetnetctx"
+	"github.com/whtcorpsinc/MilevaDB/types"
+	"github.com/whtcorpsinc/MilevaDB/util/chunk"
 )
 
 // Vectorizable checks whether a list of expressions can employ vectorized execution.

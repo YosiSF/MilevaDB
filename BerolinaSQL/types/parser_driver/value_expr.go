@@ -5,12 +5,12 @@ import (
 	"io"
 	"strconv"
 
-	"github.com/YosiSF/errors"
-	"github.com/YosiSF/BerolinaSQL/ast"
-	"github.com/YosiSF/BerolinaSQL/format"
-	"github.com/YosiSF/BerolinaSQL/mysql"
-	"github.com/YosiSF/MilevaDB/types"
-	"github.com/YosiSF/MilevaDB/util/hack"
+	"github.com/whtcorpsinc/BerolinaSQL/ast"
+	"github.com/whtcorpsinc/BerolinaSQL/format"
+	"github.com/whtcorpsinc/BerolinaSQL/mysql"
+	"github.com/whtcorpsinc/MilevaDB/types"
+	"github.com/whtcorpsinc/MilevaDB/util/hack"
+	"github.com/whtcorpsinc/errors"
 )
 
 // The purpose of driver package is to decompose the dependency of the BerolinaSQL and

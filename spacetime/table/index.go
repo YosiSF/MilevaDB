@@ -11,17 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 package table
 
 import (
-	"context"
-
-	"github.com/YosiSF/milevadb/BerolinaSQL/serial"
-	"github.com/YosiSF/milevadb/eekv"
-	"github.com/YosiSF/milevadb/causetnetctx"
-	"github.com/YosiSF/milevadb/causetnetctx/stmtctx"
-	"github.com/YosiSF/milevadb/types"
+	"github.com/whtcorpsinc/milevadb/BerolinaSQL/serial"
+	"github.com/whtcorpsinc/milevadb/causetnetctx/stmtctx"
+	"github.com/whtcorpsinc/milevadb/types"
 )
 
 // IndexIterator is the interface for iterator of index data on Einstein's ekv store.

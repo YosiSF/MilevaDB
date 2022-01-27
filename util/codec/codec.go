@@ -24,15 +24,15 @@ import (
 	"io"
 	"time"
 
-	"github.com/YosiSF/errors"
-	"github.com/YosiSF/BerolinaSQL/mysql"
-	"github.com/YosiSF/BerolinaSQL/terror"
-	"github.com/YosiSF/MilevaDB/causetnetctx/stmtctx"
-	"github.com/YosiSF/MilevaDB/types"
-	"github.com/YosiSF/MilevaDB/types/json"
-	"github.com/YosiSF/MilevaDB/util/chunk"
-	"github.com/YosiSF/MilevaDB/util/collate"
-	"github.com/YosiSF/MilevaDB/util/hack"
+	"github.com/whtcorpsinc/errors"
+	"github.com/whtcorpsinc/BerolinaSQL/mysql"
+	"github.com/whtcorpsinc/BerolinaSQL/terror"
+	"github.com/whtcorpsinc/MilevaDB/causetnetctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB/types"
+	"github.com/whtcorpsinc/MilevaDB/types/json"
+	"github.com/whtcorpsinc/MilevaDB/util/chunk"
+	"github.com/whtcorpsinc/MilevaDB/util/collate"
+	"github.com/whtcorpsinc/MilevaDB/util/hack"
 )
 
 / First byte in the encoded value which specifies the encoding type.

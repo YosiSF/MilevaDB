@@ -13,10 +13,6 @@
 
 package fidel
 
-import ("fmt"
-		"github.com/YosiSF/BerolinaSQL/container"
-)
-
 type tetrad struct {
 	Tp	 container.contextActionType
 }

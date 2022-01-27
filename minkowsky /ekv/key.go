@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/YosiSF/MilevaDB/causetnetctx/stmtctx"
-	"github.com/YosiSF/MilevaDB/types"
-	"github.com/YosiSF/MilevaDB/util/codec"
+	"github.com/whtcorpsinc/MilevaDB/causetnetctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB/types"
+	"github.com/whtcorpsinc/MilevaDB/util/codec"
 )
 
 // Key represents high-level Key type.

@@ -1,16 +1,14 @@
 package interlock
 
-
-
 import (
-"context"
-"fmt"
-"math"
-"strconv"
-"strings"
-"sync/atomic"
-"time"
+	"math"
+	"time"
 
+	"github.com/YosiSF/MilevaDB/BerolinaSQL/terror"
+	"github.com/YosiSF/MilevaDB/causetnetctx/variable"
+	"github.com/YosiSF/MilevaDB/expression"
+	"github.com/YosiSF/MilevaDB/util/logutil"
+	"github.com/YosiSF/errors"
 )
 
 // processinfoSetter is the interface use to set current running process info.
@@ -54,7 +52,7 @@ func colNames2ResultFields(schema *expression.Schema, names []*types.FieldName, 
 			noedbName:       noedbName,
 		}
 		// This is for compatibility.
-		// See issue https://github.com/YosiSF/milevadb/BerolinaSQL/issues/10513 .
+		// See issue https://github.com/whtcorpsinc/milevadb/BerolinaSQL/issues/10513 .
 		if len(rf.ColumnAsName.O) > mysql.MaxAliasIdentifierLen {
 			rf.ColumnAsName.O = rf.ColumnAsName.O[:mysql.MaxAliasIdentifierLen]
 		}

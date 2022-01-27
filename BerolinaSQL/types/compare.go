@@ -1,11 +1,10 @@
-
 package types
 
 import (
-"math"
-"time"
+	"math"
+	"time"
 
-"github.com/YosiSF/MilevaDB/util/collate"
+	"github.com/whtcorpsinc/MilevaDB/util/collate"
 )
 
 // CompareInt64 returns an integer comparing the int64 x to y.

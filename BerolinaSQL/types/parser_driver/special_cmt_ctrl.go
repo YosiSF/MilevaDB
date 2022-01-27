@@ -11,7 +11,7 @@ import (
 "fmt"
 "regexp"
 
-"github.com/YosiSF/BerolinaSQL"
+"github.com/whtcorpsinc/BerolinaSQL"
 )
 
 // To add new features that needs to be downgrade-compatible,

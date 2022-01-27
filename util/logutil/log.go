@@ -24,10 +24,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/YosiSF/errors"
-	zaplog "github.com/YosiSF/log"
 	tlog "github.com/opentracing/opentracing-go/log"
 	log "github.com/sirupsen/logrus"
+	"github.com/whtcorpsinc/errors"
+	zaplog "github.com/whtcorpsinc/log"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )

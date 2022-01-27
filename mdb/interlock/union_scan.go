@@ -17,14 +17,14 @@ import (
 	"context"
 	"sync"
 
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/serial"
-	"github.com/YosiSF/MilevaDB/expression"
-	"github.com/YosiSF/MilevaDB/ekv"
-	plannercore "github.com/YosiSF/MilevaDB/rel-planner/core"
-	"github.com/YosiSF/MilevaDB/causetnetctx"
-	"github.com/YosiSF/MilevaDB/table"
-	"github.com/YosiSF/MilevaDB/types"
-	"github.com/YosiSF/MilevaDB/util/chunk"
+	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/serial"
+	"github.com/whtcorpsinc/MilevaDB/causetnetctx"
+	"github.com/whtcorpsinc/MilevaDB/ekv"
+	"github.com/whtcorpsinc/MilevaDB/expression"
+	plannercore "github.com/whtcorpsinc/MilevaDB/rel-planner/core"
+	"github.com/whtcorpsinc/MilevaDB/table"
+	"github.com/whtcorpsinc/MilevaDB/types"
+	"github.com/whtcorpsinc/MilevaDB/util/chunk"
 )
 
 // DirtyDB stores uncommitted write operations for a transaction.

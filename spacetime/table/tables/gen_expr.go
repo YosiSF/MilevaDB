@@ -1,12 +1,12 @@
 import (
 	"fmt"
 
-	"github.com/YosiSF/errors"
-	"github.com/YosiSF/parser"
-	"github.com/YosiSF/milevadb/BerolinaSQL/ast"
-	"github.com/YosiSF/milevadb/BerolinaSQL/charset"
-	"github.com/YosiSF/milevadb/BerolinaSQL/serial"
-	"github.com/YosiSF/milevadb/util"
+	"github.com/whtcorpsinc/errors"
+	"github.com/whtcorpsinc/parser"
+	"github.com/whtcorpsinc/milevadb/BerolinaSQL/ast"
+	"github.com/whtcorpsinc/milevadb/BerolinaSQL/charset"
+	"github.com/whtcorpsinc/milevadb/BerolinaSQL/serial"
+	"github.com/whtcorpsinc/milevadb/util"
 )
 
 // nameResolver is the visitor to resolve table name and column name.

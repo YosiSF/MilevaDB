@@ -10,15 +10,15 @@ import (
 	"unicode/utf8"
 	"unsafe"
 
-	"github.com/YosiSF/errors"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/charset"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/mysql"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/terror"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/types"
-	"github.com/YosiSF/MilevaDB/causetnetctx/stmtctx"
-	"github.com/YosiSF/MilevaDB/types/json"
-	"github.com/YosiSF/MilevaDB/util/hack"
-	"github.com/YosiSF/MilevaDB/util/logutil"
+	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/charset"
+	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/mysql"
+	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/terror"
+	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/types"
+	"github.com/whtcorpsinc/MilevaDB/causetnetctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB/types/json"
+	"github.com/whtcorpsinc/MilevaDB/util/hack"
+	"github.com/whtcorpsinc/MilevaDB/util/logutil"
+	"github.com/whtcorpsinc/errors"
 	"go.uber.org/zap"
 )
 
@@ -1270,8 +1270,8 @@ func ProduceDecWithSpecifiedTp(dec *MyDecimal, tp *FieldType, sc *stmtctx.Statem
 			}
 			if !dec.IsZero() && frac > decimal && dec.Compare(&old) != 0 {
 				if sc.InInsertStmt || sc.InUpdateStmt || sc.InDeleteStmt {
-					// fix https://github.com/YosiSF/MilevaDB/issues/3895
-					// fix https://github.com/YosiSF/MilevaDB/issues/5532
+					// fix https://github.com/whtcorpsinc/MilevaDB/issues/3895
+					// fix https://github.com/whtcorpsinc/MilevaDB/issues/5532
 					sc.AppendWarning(ErrTruncatedWrongVal.GenWithStackByArgs("DECIMAL", &old))
 					err = nil
 				} else {

@@ -16,9 +16,9 @@ package aggfuncs
 import (
 	"unsafe"
 
-	"github.com/YosiSF/MilevaDB/expression"
-	"github.com/YosiSF/MilevaDB/causetnetctx"
-	"github.com/YosiSF/MilevaDB/util/chunk"
+	"github.com/whtcorpsinc/MilevaDB/causetnetctx"
+	"github.com/whtcorpsinc/MilevaDB/expression"
+	"github.com/whtcorpsinc/MilevaDB/util/chunk"
 )
 
 // All the AggFunc implementations are listed here for navigation.

@@ -28,7 +28,7 @@ import(
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/CavHack/errors"
-	"github.com/YosiSF/hyperlog"
+	"github.com/whtcorpsinc/hyperlog"
 	fd "github.com/CavHack/fidel/client"
 
 

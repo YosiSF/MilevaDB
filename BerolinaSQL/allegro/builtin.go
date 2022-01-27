@@ -1,22 +1,22 @@
-package expression
+package allegro
 
 import (
 	"sort"
 	"strings"
 	"sync"
 
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/ast"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/charset"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/mysql"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/opcode"
-	"github.com/YosiSF/MilevaDB/causetnetctx"
-	"github.com/YosiSF/MilevaDB/causetnetctx/stmtctx"
-	"github.com/YosiSF/MilevaDB/types"
-	"github.com/YosiSF/MilevaDB/types/json"
-	"github.com/YosiSF/MilevaDB/util/chunk"
-	"github.com/YosiSF/MilevaDB/util/collate"
-	"github.com/YosiSF/errors"
 	"github.com/gogo/protobuf/proto"
+	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/ast"
+	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/charset"
+	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/mysql"
+	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/opcode"
+	"github.com/whtcorpsinc/MilevaDB/causetnetctx"
+	"github.com/whtcorpsinc/MilevaDB/causetnetctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB/types"
+	"github.com/whtcorpsinc/MilevaDB/types/json"
+	"github.com/whtcorpsinc/MilevaDB/util/chunk"
+	"github.com/whtcorpsinc/MilevaDB/util/collate"
+	"github.com/whtcorpsinc/errors"
 )
 
 // baseBuiltinFunc will be contained in every struct that implement builtinFunc interface.
@@ -673,18 +673,18 @@ var funcs = map[string]functionClass{
 	ast.Database:     &databaseFunctionClass{baseFunctionClass{ast.Database, 0, 0}},
 	// This function is a synonym for DATABASE().
 	// See http://dev.mysql.com/doc/refman/5.7/en/information-functions.html#function_schema
-	ast.Schema:       &databaseFunctionClass{baseFunctionClass{ast.Schema, 0, 0}},
-	ast.FoundRows:    &foundRowsFunctionClass{baseFunctionClass{ast.FoundRows, 0, 0}},
-	ast.LastInsertId: &lastInsertIDFunctionClass{baseFunctionClass{ast.LastInsertId, 0, 1}},
-	ast.User:         &userFunctionClass{baseFunctionClass{ast.User, 0, 0}},
-	ast.Version:      &versionFunctionClass{baseFunctionClass{ast.Version, 0, 0}},
-	ast.Benchmark:    &benchmarkFunctionClass{baseFunctionClass{ast.Benchmark, 2, 2}},
-	ast.Charset:      &charsetFunctionClass{baseFunctionClass{ast.Charset, 1, 1}},
-	ast.Coercibility: &coercibilityFunctionClass{baseFunctionClass{ast.Coercibility, 1, 1}},
-	ast.Collation:    &collationFunctionClass{baseFunctionClass{ast.Collation, 1, 1}},
-	ast.RowCount:     &rowCountFunctionClass{baseFunctionClass{ast.RowCount, 0, 0}},
-	ast.CausetNetUser:  &userFunctionClass{baseFunctionClass{ast.CausetNetUser, 0, 0}},
-	ast.SystemUser:   &userFunctionClass{baseFunctionClass{ast.SystemUser, 0, 0}},
+	ast.Schema:        &databaseFunctionClass{baseFunctionClass{ast.Schema, 0, 0}},
+	ast.FoundRows:     &foundRowsFunctionClass{baseFunctionClass{ast.FoundRows, 0, 0}},
+	ast.LastInsertId:  &lastInsertIDFunctionClass{baseFunctionClass{ast.LastInsertId, 0, 1}},
+	ast.User:          &userFunctionClass{baseFunctionClass{ast.User, 0, 0}},
+	ast.Version:       &versionFunctionClass{baseFunctionClass{ast.Version, 0, 0}},
+	ast.Benchmark:     &benchmarkFunctionClass{baseFunctionClass{ast.Benchmark, 2, 2}},
+	ast.Charset:       &charsetFunctionClass{baseFunctionClass{ast.Charset, 1, 1}},
+	ast.Coercibility:  &coercibilityFunctionClass{baseFunctionClass{ast.Coercibility, 1, 1}},
+	ast.Collation:     &collationFunctionClass{baseFunctionClass{ast.Collation, 1, 1}},
+	ast.RowCount:      &rowCountFunctionClass{baseFunctionClass{ast.RowCount, 0, 0}},
+	ast.CausetNetUser: &userFunctionClass{baseFunctionClass{ast.CausetNetUser, 0, 0}},
+	ast.SystemUser:    &userFunctionClass{baseFunctionClass{ast.SystemUser, 0, 0}},
 
 	// See https://dev.mysql.com/doc/refman/8.0/en/performance-schema-functions.html
 	ast.FormatBytes:    &formatBytesFunctionClass{baseFunctionClass{ast.FormatBytes, 1, 1}},

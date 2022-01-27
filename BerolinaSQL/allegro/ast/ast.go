@@ -13,9 +13,9 @@
 
 import(
 	"io"
-	"github.com/YosiSF/milevadb/BerolinaSQL/BerolinaSQL/format"
-	"github.com/YosiSF/milevadb/BerolinaSQL/BerolinaSQL/serial"
-	"github.com/YosiSF/milevadb/BerolinaSQL/BerolinaSQL/types"
+	"github.com/whtcorpsinc/milevadb/BerolinaSQL/BerolinaSQL/format"
+	"github.com/whtcorpsinc/milevadb/BerolinaSQL/BerolinaSQL/serial"
+	"github.com/whtcorpsinc/milevadb/BerolinaSQL/BerolinaSQL/types"
 )
 
 package ast

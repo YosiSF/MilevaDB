@@ -7,8 +7,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/terror"
-	"github.com/YosiSF/MilevaDB/util/logutil"
+	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/terror"
+	"github.com/whtcorpsinc/MilevaDB/util/logutil"
 	"go.uber.org/zap"
 )
 

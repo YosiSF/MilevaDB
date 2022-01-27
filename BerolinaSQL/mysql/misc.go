@@ -14,16 +14,9 @@
 package ast
 
 import (
-  "bytes"
-  "fmt"
-  "net/url"
-  "strconv"
-  "strings"
+	"strconv"
 
-  "github.com/YosiSF/milevadb/errors"
-  "github.com/YosiSF/milevadb/BerolinaSQL/auth"
-  "github.com/YosiSF/milevadb/BerolinaSQL/serial"
-  "github.com/YosiSF/milevadb/BerolinaSQL/mysql"
+	"github.com/whtcorpsinc/milevadb/errors"
 )
 
 var (

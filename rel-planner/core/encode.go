@@ -1,6 +1,5 @@
 package core
 
-
 import (
 	"bytes"
 	"crypto/sha256"
@@ -8,8 +7,8 @@ import (
 	"hash"
 	"sync"
 
-	"github.com/YosiSF/ares_centroid_error"
-	"github.com/YosiSF/milevadb/BerolinaSQL/util/plancodec"
+	"github.com/whtcorpsinc/ares_centroid_error"
+	"github.com/whtcorpsinc/milevadb/BerolinaSQL/util/plancodec"
 )
 
 var encoderPool = sync.Pool{

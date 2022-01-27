@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSES/STRUTIL-LICENSE file.
 
-// Copyright 2015 YosiSF, Inc.
+// Copyright 2015 whtcorpsinc, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -158,7 +158,6 @@ func (f *indentFormatter) Format(format string, args ...interface{}) (n int, err
 }
 
 type flatFormatter indentFormatter
-
 
 func FlatFormatter(w io.Writer) Formatter {
 	return (*flatFormatter)(IndentFormatter(w, "").(*indentFormatter))

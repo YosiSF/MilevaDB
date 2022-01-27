@@ -1,10 +1,10 @@
 package charset
 
-import(
+import (
+	"strings"
 
-      "strings"
-      "github.com/YosiSF/milevadb/BerolinaSQL/mysql"
-      "github.com/YosiSF/milevadb/BerolinaSQL/terror"
+	"github.com/whtcorpsinc/milevadb/BerolinaSQL/mysql"
+	"github.com/whtcorpsinc/milevadb/BerolinaSQL/terror"
 )
 
 var (

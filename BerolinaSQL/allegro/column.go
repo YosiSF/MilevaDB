@@ -1,18 +1,18 @@
-package expression
+package allegro
 
 import (
 	"fmt"
 	"strings"
 
-	"github.com/YosiSF/errors"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/serial"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/mysql"
-	"github.com/YosiSF/MilevaDB/causetnetctx"
-	"github.com/YosiSF/MilevaDB/causetnetctx/stmtctx"
-	"github.com/YosiSF/MilevaDB/types"
-	"github.com/YosiSF/MilevaDB/types/json"
-	"github.com/YosiSF/MilevaDB/util/chunk"
-	"github.com/YosiSF/MilevaDB/util/codec"
+	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/mysql"
+	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/serial"
+	"github.com/whtcorpsinc/MilevaDB/causetnetctx"
+	"github.com/whtcorpsinc/MilevaDB/causetnetctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB/types"
+	"github.com/whtcorpsinc/MilevaDB/types/json"
+	"github.com/whtcorpsinc/MilevaDB/util/chunk"
+	"github.com/whtcorpsinc/MilevaDB/util/codec"
+	"github.com/whtcorpsinc/errors"
 )
 
 // CorrelatedColumn stands for a column in a correlated sub query.

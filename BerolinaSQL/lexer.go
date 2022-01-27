@@ -2,8 +2,8 @@ package types
 
 import (
 	"strings"
-	"github.com/YosiSF/milevadb/BerolinaSQL/mysql"
-	"github.com/YosiSF/milevadb/BerolinaSQL/terror"
+	"github.com/whtcorpsinc/milevadb/BerolinaSQL/mysql"
+	"github.com/whtcorpsinc/milevadb/BerolinaSQL/terror"
 )
 
 / IsTypeBlob returns a boolean indicating whether the tp is a blob type.

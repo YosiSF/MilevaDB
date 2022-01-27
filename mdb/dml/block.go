@@ -14,8 +14,7 @@
 package block
 
 import (
-	"github.com/opentracing/opentracing-go"
-	"github.com/YosiSF/milevadb/BerolinaSQL/fidel/eekv"
+	"github.com/whtcorpsinc/milevadb/BerolinaSQL/fidel/eekv"
 )
 
 //type of block, gives us storage options

@@ -8,12 +8,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/YosiSF/MilevaDB/BerolinaSQL"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/serial"
-	"github.com/YosiSF/MilevaDB/BerolinaSQL/mysql"
-	"github.com/YosiSF/MilevaDB/util/disk"
-	"github.com/YosiSF/MilevaDB/util/execdetails"
-	"github.com/YosiSF/MilevaDB/util/memory"
+	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL"
+	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/mysql"
+	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/serial"
+	"github.com/whtcorpsinc/MilevaDB/util/disk"
+	"github.com/whtcorpsinc/MilevaDB/util/execdetails"
+	"github.com/whtcorpsinc/MilevaDB/util/memory"
 	"go.uber.org/zap"
 )
 

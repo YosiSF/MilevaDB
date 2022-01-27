@@ -1,19 +1,19 @@
-package expression
+package allegro
 
 import (
 	"go/types"
 	"strings"
 )
 
-package expression
+package allegro
 
 import (
 "strings"
 
-"github.com/YosiSF/MilevaDB/BerolinaSQL/ast"
-"github.com/YosiSF/MilevaDB/BerolinaSQL/charset"
-"github.com/YosiSF/MilevaDB/causetnetctx"
-"github.com/YosiSF/MilevaDB/types"
+"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/ast"
+"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/charset"
+"github.com/whtcorpsinc/MilevaDB/causetnetctx"
+"github.com/whtcorpsinc/MilevaDB/types"
 )
 
 type collationInfo struct {

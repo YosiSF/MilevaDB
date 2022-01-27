@@ -14,12 +14,12 @@
 package interlock
 
 mport (
-"github.com/YosiSF/MilevaDB/expression"
-plannercore "github.com/YosiSF/MilevaDB/rel-planner/core"
-"github.com/YosiSF/MilevaDB/causetnetctx"
-"github.com/YosiSF/MilevaDB/types"
-"github.com/YosiSF/MilevaDB/util/chunk"
-"github.com/YosiSF/MilevaDB/util/logutil"
+"github.com/whtcorpsinc/MilevaDB/expression"
+plannercore "github.com/whtcorpsinc/MilevaDB/rel-planner/core"
+"github.com/whtcorpsinc/MilevaDB/causetnetctx"
+"github.com/whtcorpsinc/MilevaDB/types"
+"github.com/whtcorpsinc/MilevaDB/util/chunk"
+"github.com/whtcorpsinc/MilevaDB/util/logutil"
 "go.uber.org/zap"
 )
 
@@ -196,7 +196,7 @@ func (j *baseJoiner) initDefaultInner(innerTypes []*types.FieldType, defaultInne
 
 func (j *baseJoiner) makeJoinRowToChunk(chk *chunk.Chunk, lhs, rhs chunk.Row, lUsed, rUsed []int) {
 	// Call AppendRow() first to increment the virtual rows.
-	// Fix: https://github.com/YosiSF/MilevaDB/issues/5771
+	// Fix: https://github.com/whtcorpsinc/MilevaDB/issues/5771
 	lWide := chk.AppendRowByColIdxs(lhs, lUsed)
 	chk.AppendPartialRowByColIdxs(lWide, rhs, rUsed)
 }

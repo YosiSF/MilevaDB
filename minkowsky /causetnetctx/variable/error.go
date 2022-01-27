@@ -11,12 +11,11 @@
 // distributed under the License is distributed on an "AS IS" BASIS,
 // See the License for the specific language governing permissions.
 
-
 package variable
 
 import (
-"github.com/YosiSF/MilevaDB/BerolinaSQL/terror"
-mysql "github.com/YosiSF/MilevaDB/errno"
+	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/terror"
+	mysql "github.com/whtcorpsinc/MilevaDB/errno"
 )
 
 // Error instances.

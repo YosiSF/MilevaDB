@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/YosiSF/errors"
+	"github.com/whtcorpsinc/errors"
 )
 
 /*

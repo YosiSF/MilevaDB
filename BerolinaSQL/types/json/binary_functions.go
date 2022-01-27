@@ -20,9 +20,9 @@ import (
 "sort"
 "unicode/utf8"
 
-"github.com/YosiSF/errors"
-"github.com/YosiSF/MilevaDB/util/hack"
-"github.com/YosiSF/MilevaDB/util/stringutil"
+"github.com/whtcorpsinc/errors"
+"github.com/whtcorpsinc/MilevaDB/util/hack"
+"github.com/whtcorpsinc/MilevaDB/util/stringutil"
 )
 
 // Type returns type of BinaryJSON as string.
