@@ -33,13 +33,13 @@ import (
 	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/helper"
 	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore"
 	"github.com/whtcorpsinc/MilevaDB-Prod/config"
-	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/solomonkey"
 	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
 	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
 	"github.com/whtcorpsinc/MilevaDB-Prod/server"
 	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
 	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/FIDelapi"
-	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/ekvcache"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/solomonkeycache"
 	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/set"
 	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
 	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
@@ -60,7 +60,7 @@ type testBlockSuite struct {
 }
 
 type testBlockSuiteBase struct {
-	causetstore ekv.CausetStorage
+	causetstore solomonkey.CausetStorage
 	dom         *petri.Petri
 }
 
@@ -91,7 +91,7 @@ func (s *testBlockSuiteBase) newTestKitWithCausetCache(c *C) *testkit.TestKit {
 	tk := testkit.NewTestKit(c, s.causetstore)
 	var err error
 	tk.Se, err = stochastik.CreateStochastik4TestWithOpt(s.causetstore, &stochastik.Opt{
-		PreparedCausetCache: ekvcache.NewSimpleLRUCache(100, 0.1, math.MaxUint64),
+		PreparedCausetCache: solomonkeycache.NewSimpleLRUCache(100, 0.1, math.MaxUint64),
 	})
 	c.Assert(err, IsNil)
 	tk.GetConnectionID()

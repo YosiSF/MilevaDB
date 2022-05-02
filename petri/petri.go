@@ -26,7 +26,7 @@ import (
 	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb"
 	"github.com/whtcorpsinc/MilevaDB-Prod/config"
 	"github.com/whtcorpsinc/MilevaDB-Prod/dbs"
-	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/solomonkey"
 	"github.com/whtcorpsinc/MilevaDB-Prod/errno"
 	"github.com/whtcorpsinc/MilevaDB-Prod/meta"
 	"github.com/whtcorpsinc/MilevaDB-Prod/metrics"
@@ -58,7 +58,7 @@ import (
 // Petri represents a storage space. Different petris can use the same database name.
 // Multiple petris can be used in parallel without synchronization.
 type Petri struct {
-	causetstore          ekv.CausetStorage
+	causetstore          solomonkey.CausetStorage
 	infoHandle           *schemareplicant.Handle
 	privHandle           *privileges.Handle
 	bindHandle           *bindinfo.BindHandle
@@ -85,7 +85,7 @@ type Petri struct {
 // It returns the latest schemaReplicant version, the changed block IDs, whether it's a full load and an error.
 func (do *Petri) loadSchemaReplicant(handle *schemareplicant.Handle, usedSchemaVersion int64,
 	startTS uint64) (neededSchemaVersion int64, change *einsteindb.RelatedSchemaChange, fullLoad bool, err error) {
-	snapshot, err := do.causetstore.GetSnapshot(ekv.NewVersion(startTS))
+	snapshot, err := do.causetstore.GetSnapshot(solomonkey.NewVersion(startTS))
 	if err != nil {
 		return 0, nil, fullLoad, err
 	}
@@ -308,7 +308,7 @@ func (do *Petri) GetSnapshotSchemaReplicant(snapshotTS uint64) (schemareplicant.
 
 // GetSnapshotMeta gets a new snapshot meta at startTS.
 func (do *Petri) GetSnapshotMeta(startTS uint64) (*meta.Meta, error) {
-	snapshot, err := do.causetstore.GetSnapshot(ekv.NewVersion(startTS))
+	snapshot, err := do.causetstore.GetSnapshot(solomonkey.NewVersion(startTS))
 	if err != nil {
 		return nil, err
 	}
@@ -326,7 +326,7 @@ func (do *Petri) InfoSyncer() *infosync.InfoSyncer {
 }
 
 // CausetStore gets KV causetstore from petri.
-func (do *Petri) CausetStore() ekv.CausetStorage {
+func (do *Petri) CausetStore() solomonkey.CausetStorage {
 	return do.causetstore
 }
 
@@ -659,7 +659,7 @@ func (c *dbsCallback) OnChanged(err error) error {
 const resourceIdleTimeout = 3 * time.Minute // resources in the ResourcePool will be recycled after idleTimeout
 
 // NewPetri creates a new petri. Should not create multiple petris for the same causetstore.
-func NewPetri(causetstore ekv.CausetStorage, dbsLease time.Duration, statsLease time.Duration, idxUsageSyncLease time.Duration, factory pools.Factory) *Petri {
+func NewPetri(causetstore solomonkey.CausetStorage, dbsLease time.Duration, statsLease time.Duration, idxUsageSyncLease time.Duration, factory pools.Factory) *Petri {
 	capacity := 200 // capacity of the sysStochastikPool size
 	do := &Petri{
 		causetstore:         causetstore,
@@ -1238,5 +1238,5 @@ var (
 	ErrSchemaReplicantExpired = terror.ClassPetri.New(errno.ErrSchemaReplicantExpired, errno.MyALLEGROSQLErrName[errno.ErrSchemaReplicantExpired])
 	// ErrSchemaReplicantChanged returns the error that information schemaReplicant is changed.
 	ErrSchemaReplicantChanged = terror.ClassPetri.New(errno.ErrSchemaReplicantChanged,
-		errno.MyALLEGROSQLErrName[errno.ErrSchemaReplicantChanged]+". "+ekv.TxnRetryableMark)
+		errno.MyALLEGROSQLErrName[errno.ErrSchemaReplicantChanged]+". "+solomonkey.TxnRetryableMark)
 )

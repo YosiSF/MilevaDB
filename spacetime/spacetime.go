@@ -10,12 +10,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package spacetime
+package MilevaDB
 
 import (
 	"sync"
 
-	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/core/eekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/core/esolomonkey"
 	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/core/merkle"
 	//Spacetime is the metadata structure set
 	// NextGlobalDaggerID -> int64
@@ -51,9 +51,9 @@ type Spacetime struct {
 }
 
 // If the current Meta needs to handle a job, jobListKey is the type of the job's list.
-func NewSpacetime(txn eekv.Transaction, jobListKeys ...JobListKeyType) *Spacetime {
-	txn.SetOption(eekv.Priority, eekv.PriorityHigh)
-	txn.SetOption(eekv.SyncLog, true)
+func NewSpacetime(txn esolomonkey.Transaction, jobListKeys ...JobListKeyType) *Spacetime {
+	txn.SetOption(esolomonkey.Priority, esolomonkey.PriorityHigh)
+	txn.SetOption(esolomonkey.SyncLog, true)
 	t := merkle.NewMerkle(txn, txn, mSpacetimePrefix)
 	listKey := DefaultJobListKey
 	if len(jobListKeys) != 0 {
@@ -68,7 +68,7 @@ func NewSpacetime(txn eekv.Transaction, jobListKeys ...JobListKeyType) *Spacetim
 }
 
 //Meta with snapshot
-func NewSnapshotSpacetime(snapshot eekv.Snapshot) *Spacetime {
+func NewSnapshotSpacetime(snapshot esolomonkey.Snapshot) *Spacetime {
 	t := merkle.NewMerkle(snapshot, nil, mSpacetimePrefix)
 	return &Spacetime{txn: t}
 }

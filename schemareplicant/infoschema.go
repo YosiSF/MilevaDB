@@ -21,7 +21,7 @@ import (
 	"github.com/whtcorpsinc/BerolinaSQL/allegrosql"
 	"github.com/whtcorpsinc/BerolinaSQL/perceptron"
 	"github.com/whtcorpsinc/MilevaDB-Prod/causet"
-	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/solomonkey"
 	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
 	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
 	"github.com/whtcorpsinc/MilevaDB-Prod/spacetime/autoid"
@@ -305,11 +305,11 @@ func (is *schemaReplicant) SequenceByName(schemaReplicant, sequence perceptron.C
 // Handle handles information schemaReplicant, including getting and setting.
 type Handle struct {
 	value       atomic.Value
-	causetstore ekv.CausetStorage
+	causetstore solomonkey.CausetStorage
 }
 
 // NewHandle creates a new Handle.
-func NewHandle(causetstore ekv.CausetStorage) *Handle {
+func NewHandle(causetstore solomonkey.CausetStorage) *Handle {
 	h := &Handle{
 		causetstore: causetstore,
 	}

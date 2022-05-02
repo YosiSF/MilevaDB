@@ -27,7 +27,7 @@ import (
 	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb/oracle"
 	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore"
 	"github.com/whtcorpsinc/MilevaDB-Prod/dbs"
-	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/solomonkey"
 	"github.com/whtcorpsinc/MilevaDB-Prod/errno"
 	"github.com/whtcorpsinc/MilevaDB-Prod/meta"
 	"github.com/whtcorpsinc/MilevaDB-Prod/metrics"
@@ -64,7 +64,7 @@ func sysMockFactory(dom *Petri) (pools.Resource, error) {
 }
 
 type mockEtcdBackend struct {
-	ekv.CausetStorage
+	solomonkey.CausetStorage
 	FIDelAddrs []string
 }
 
@@ -415,7 +415,7 @@ func (*testSuite) TestT(c *C) {
 	infoSyncer.ReportMinStartTS(dom.CausetStore())
 	afterTS := variable.GoTimeToTS(time.Now())
 	c.Assert(infoSyncer.GetMinStartTS() > beforeTS && infoSyncer.GetMinStartTS() < afterTS, IsFalse)
-	lowerLimit := time.Now().Add(-time.Duration(ekv.MaxTxnTimeUse) * time.Millisecond)
+	lowerLimit := time.Now().Add(-time.Duration(solomonkey.MaxTxnTimeUse) * time.Millisecond)
 	validTS := variable.GoTimeToTS(lowerLimit.Add(time.Minute))
 	sm.PS = []*soliton.ProcessInfo{
 		{CurTxnStartTS: 0},

@@ -30,7 +30,7 @@ import (
 	"github.com/whtcorpsinc/MilevaDB-Prod/causet"
 	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb"
 	"github.com/whtcorpsinc/MilevaDB-Prod/config"
-	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/solomonkey"
 	"github.com/whtcorpsinc/MilevaDB-Prod/petri/infosync"
 	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
 	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/FIDelapi"
@@ -39,7 +39,7 @@ import (
 	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
 	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
 	"github.com/whtcorpsinc/MilevaDB-Prod/types"
-	"github.com/whtcorpsinc/ekvproto/pkg/spacetimepb"
+	"github.com/whtcorpsinc/solomonkeyproto/pkg/spacetimepb"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/failpoint"
 )
@@ -787,7 +787,7 @@ var BlockMilevaDBHotRegionsDefCauss = []defCausumnInfo{
 	{name: "FLOW_BYTES", tp: allegrosql.TypeLonglong, size: 21},
 }
 
-// BlockEinsteinDBStoreStatusDefCauss is MilevaDB ekv causetstore status defCausumns.
+// BlockEinsteinDBStoreStatusDefCauss is MilevaDB solomonkey causetstore status defCausumns.
 var BlockEinsteinDBStoreStatusDefCauss = []defCausumnInfo{
 	{name: "STORE_ID", tp: allegrosql.TypeLonglong, size: 21},
 	{name: "ADDRESS", tp: allegrosql.TypeVarchar, size: 64},
@@ -1624,7 +1624,7 @@ func (it *schemareplicantBlock) getEvents(ctx stochastikctx.Context, defcaus []*
 }
 
 // IterRecords implements causet.Block IterRecords interface.
-func (it *schemareplicantBlock) IterRecords(ctx stochastikctx.Context, startKey ekv.Key, defcaus []*causet.DeferredCauset,
+func (it *schemareplicantBlock) IterRecords(ctx stochastikctx.Context, startKey solomonkey.Key, defcaus []*causet.DeferredCauset,
 	fn causet.RecordIterFunc) error {
 	if len(startKey) != 0 {
 		return causet.ErrUnsupportedOp
@@ -1634,7 +1634,7 @@ func (it *schemareplicantBlock) IterRecords(ctx stochastikctx.Context, startKey 
 		return err
 	}
 	for i, event := range rows {
-		more, err := fn(ekv.IntHandle(i), event, defcaus)
+		more, err := fn(solomonkey.IntHandle(i), event, defcaus)
 		if err != nil {
 			return err
 		}
@@ -1646,12 +1646,12 @@ func (it *schemareplicantBlock) IterRecords(ctx stochastikctx.Context, startKey 
 }
 
 // EventWithDefCauss implements causet.Block EventWithDefCauss interface.
-func (it *schemareplicantBlock) EventWithDefCauss(ctx stochastikctx.Context, h ekv.Handle, defcaus []*causet.DeferredCauset) ([]types.Causet, error) {
+func (it *schemareplicantBlock) EventWithDefCauss(ctx stochastikctx.Context, h solomonkey.Handle, defcaus []*causet.DeferredCauset) ([]types.Causet, error) {
 	return nil, causet.ErrUnsupportedOp
 }
 
 // Event implements causet.Block Event interface.
-func (it *schemareplicantBlock) Event(ctx stochastikctx.Context, h ekv.Handle) ([]types.Causet, error) {
+func (it *schemareplicantBlock) Event(ctx stochastikctx.Context, h solomonkey.Handle) ([]types.Causet, error) {
 	return nil, causet.ErrUnsupportedOp
 }
 
@@ -1696,37 +1696,37 @@ func (it *schemareplicantBlock) DeleblockIndices() []causet.Index {
 }
 
 // RecordPrefix implements causet.Block RecordPrefix interface.
-func (it *schemareplicantBlock) RecordPrefix() ekv.Key {
+func (it *schemareplicantBlock) RecordPrefix() solomonkey.Key {
 	return nil
 }
 
 // IndexPrefix implements causet.Block IndexPrefix interface.
-func (it *schemareplicantBlock) IndexPrefix() ekv.Key {
+func (it *schemareplicantBlock) IndexPrefix() solomonkey.Key {
 	return nil
 }
 
 // FirstKey implements causet.Block FirstKey interface.
-func (it *schemareplicantBlock) FirstKey() ekv.Key {
+func (it *schemareplicantBlock) FirstKey() solomonkey.Key {
 	return nil
 }
 
 // RecordKey implements causet.Block RecordKey interface.
-func (it *schemareplicantBlock) RecordKey(h ekv.Handle) ekv.Key {
+func (it *schemareplicantBlock) RecordKey(h solomonkey.Handle) solomonkey.Key {
 	return nil
 }
 
 // AddRecord implements causet.Block AddRecord interface.
-func (it *schemareplicantBlock) AddRecord(ctx stochastikctx.Context, r []types.Causet, opts ...causet.AddRecordOption) (recordID ekv.Handle, err error) {
+func (it *schemareplicantBlock) AddRecord(ctx stochastikctx.Context, r []types.Causet, opts ...causet.AddRecordOption) (recordID solomonkey.Handle, err error) {
 	return nil, causet.ErrUnsupportedOp
 }
 
 // RemoveRecord implements causet.Block RemoveRecord interface.
-func (it *schemareplicantBlock) RemoveRecord(ctx stochastikctx.Context, h ekv.Handle, r []types.Causet) error {
+func (it *schemareplicantBlock) RemoveRecord(ctx stochastikctx.Context, h solomonkey.Handle, r []types.Causet) error {
 	return causet.ErrUnsupportedOp
 }
 
 // UFIDelateRecord implements causet.Block UFIDelateRecord interface.
-func (it *schemareplicantBlock) UFIDelateRecord(gctx context.Context, ctx stochastikctx.Context, h ekv.Handle, oldData, newData []types.Causet, touched []bool) error {
+func (it *schemareplicantBlock) UFIDelateRecord(gctx context.Context, ctx stochastikctx.Context, h solomonkey.Handle, oldData, newData []types.Causet, touched []bool) error {
 	return causet.ErrUnsupportedOp
 }
 
@@ -1751,7 +1751,7 @@ func (it *schemareplicantBlock) GetPhysicalID() int64 {
 }
 
 // Seek implements causet.Block Seek interface.
-func (it *schemareplicantBlock) Seek(ctx stochastikctx.Context, h ekv.Handle) (ekv.Handle, bool, error) {
+func (it *schemareplicantBlock) Seek(ctx stochastikctx.Context, h solomonkey.Handle) (solomonkey.Handle, bool, error) {
 	return nil, false, causet.ErrUnsupportedOp
 }
 
@@ -1764,7 +1764,7 @@ func (it *schemareplicantBlock) Type() causet.Type {
 type VirtualBlock struct{}
 
 // IterRecords implements causet.Block IterRecords interface.
-func (vt *VirtualBlock) IterRecords(ctx stochastikctx.Context, startKey ekv.Key, defcaus []*causet.DeferredCauset,
+func (vt *VirtualBlock) IterRecords(ctx stochastikctx.Context, startKey solomonkey.Key, defcaus []*causet.DeferredCauset,
 	_ causet.RecordIterFunc) error {
 	if len(startKey) != 0 {
 		return causet.ErrUnsupportedOp
@@ -1773,12 +1773,12 @@ func (vt *VirtualBlock) IterRecords(ctx stochastikctx.Context, startKey ekv.Key,
 }
 
 // EventWithDefCauss implements causet.Block EventWithDefCauss interface.
-func (vt *VirtualBlock) EventWithDefCauss(ctx stochastikctx.Context, h ekv.Handle, defcaus []*causet.DeferredCauset) ([]types.Causet, error) {
+func (vt *VirtualBlock) EventWithDefCauss(ctx stochastikctx.Context, h solomonkey.Handle, defcaus []*causet.DeferredCauset) ([]types.Causet, error) {
 	return nil, causet.ErrUnsupportedOp
 }
 
 // Event implements causet.Block Event interface.
-func (vt *VirtualBlock) Event(ctx stochastikctx.Context, h ekv.Handle) ([]types.Causet, error) {
+func (vt *VirtualBlock) Event(ctx stochastikctx.Context, h solomonkey.Handle) ([]types.Causet, error) {
 	return nil, causet.ErrUnsupportedOp
 }
 
@@ -1823,37 +1823,37 @@ func (vt *VirtualBlock) DeleblockIndices() []causet.Index {
 }
 
 // RecordPrefix implements causet.Block RecordPrefix interface.
-func (vt *VirtualBlock) RecordPrefix() ekv.Key {
+func (vt *VirtualBlock) RecordPrefix() solomonkey.Key {
 	return nil
 }
 
 // IndexPrefix implements causet.Block IndexPrefix interface.
-func (vt *VirtualBlock) IndexPrefix() ekv.Key {
+func (vt *VirtualBlock) IndexPrefix() solomonkey.Key {
 	return nil
 }
 
 // FirstKey implements causet.Block FirstKey interface.
-func (vt *VirtualBlock) FirstKey() ekv.Key {
+func (vt *VirtualBlock) FirstKey() solomonkey.Key {
 	return nil
 }
 
 // RecordKey implements causet.Block RecordKey interface.
-func (vt *VirtualBlock) RecordKey(h ekv.Handle) ekv.Key {
+func (vt *VirtualBlock) RecordKey(h solomonkey.Handle) solomonkey.Key {
 	return nil
 }
 
 // AddRecord implements causet.Block AddRecord interface.
-func (vt *VirtualBlock) AddRecord(ctx stochastikctx.Context, r []types.Causet, opts ...causet.AddRecordOption) (recordID ekv.Handle, err error) {
+func (vt *VirtualBlock) AddRecord(ctx stochastikctx.Context, r []types.Causet, opts ...causet.AddRecordOption) (recordID solomonkey.Handle, err error) {
 	return nil, causet.ErrUnsupportedOp
 }
 
 // RemoveRecord implements causet.Block RemoveRecord interface.
-func (vt *VirtualBlock) RemoveRecord(ctx stochastikctx.Context, h ekv.Handle, r []types.Causet) error {
+func (vt *VirtualBlock) RemoveRecord(ctx stochastikctx.Context, h solomonkey.Handle, r []types.Causet) error {
 	return causet.ErrUnsupportedOp
 }
 
 // UFIDelateRecord implements causet.Block UFIDelateRecord interface.
-func (vt *VirtualBlock) UFIDelateRecord(ctx context.Context, sctx stochastikctx.Context, h ekv.Handle, oldData, newData []types.Causet, touched []bool) error {
+func (vt *VirtualBlock) UFIDelateRecord(ctx context.Context, sctx stochastikctx.Context, h solomonkey.Handle, oldData, newData []types.Causet, touched []bool) error {
 	return causet.ErrUnsupportedOp
 }
 
@@ -1878,7 +1878,7 @@ func (vt *VirtualBlock) GetPhysicalID() int64 {
 }
 
 // Seek implements causet.Block Seek interface.
-func (vt *VirtualBlock) Seek(ctx stochastikctx.Context, h ekv.Handle) (ekv.Handle, bool, error) {
+func (vt *VirtualBlock) Seek(ctx stochastikctx.Context, h solomonkey.Handle) (solomonkey.Handle, bool, error) {
 	return nil, false, causet.ErrUnsupportedOp
 }
 
