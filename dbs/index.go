@@ -26,23 +26,23 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/block/blocks"
-	"github.com/whtcorpsinc/milevadb/blockcodec"
-	"github.com/whtcorpsinc/milevadb/causetstore/einsteindb"
-	"github.com/whtcorpsinc/milevadb/causetstore/einsteindb/oracle"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/meta"
-	"github.com/whtcorpsinc/milevadb/meta/autoid"
-	"github.com/whtcorpsinc/milevadb/metrics"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	decoder "github.com/whtcorpsinc/milevadb/soliton/rowDecoder"
-	"github.com/whtcorpsinc/milevadb/soliton/timeutil"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block/blocks"
+	"github.com/whtcorpsinc/MilevaDB-Prod/blockcodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb/oracle"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid"
+	"github.com/whtcorpsinc/MilevaDB-Prod/metrics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	decoder "github.com/whtcorpsinc/MilevaDB-Prod/soliton/rowDecoder"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/timeutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"go.uber.org/zap"
 )
 
@@ -966,7 +966,7 @@ func (w *addIndexWorker) batchCheckUniqueKey(txn ekv.Transaction, idxRecords []*
 	}
 
 	w.initBatchCheckBufs(len(idxRecords))
-	stmtCtx := w.sessCtx.GetStochastikVars().StmtCtx
+	stmtCtx := w.sessCtx.GetStochaseinstein_dbars().StmtCtx
 	for i, record := range idxRecords {
 		idxKey, distinct, err := w.index.GenIndexKey(stmtCtx, record.vals, record.handle, w.idxKeyBufs[i])
 		if err != nil {

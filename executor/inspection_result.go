@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,17 +21,17 @@ import (
 	"strconv"
 	"strings"
 
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/set"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/sqlexec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/failpoint"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/set"
-	"github.com/whtcorpsinc/milevadb/soliton/sqlexec"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 type (
@@ -124,15 +124,15 @@ func (e *inspectionResultRetriever) retrieve(ctx context.Context, sctx stochasti
 	// and the cost of retrieving some data is expensive. We use the `BlockSnapshot` to cache those data
 	// and obtain them lazily, and provide a consistent view of inspection blocks for each inspection rules.
 	// All cached snapshots should be released at the end of retrieving.
-	sctx.GetStochastikVars().InspectionBlockCache = map[string]variable.BlockSnapshot{}
-	defer func() { sctx.GetStochastikVars().InspectionBlockCache = nil }()
+	sctx.GetStochaseinstein_dbars().InspectionBlockCache = map[string]variable.BlockSnapshot{}
+	defer func() { sctx.GetStochaseinstein_dbars().InspectionBlockCache = nil }()
 
 	failpoint.InjectContext(ctx, "mockMergeMockInspectionBlocks", func() {
 		// Merge mock snapshots injected from failpoint for test purpose
 		mockBlocks, ok := ctx.Value("__mockInspectionBlocks").(map[string]variable.BlockSnapshot)
 		if ok {
 			for name, snap := range mockBlocks {
-				sctx.GetStochastikVars().InspectionBlockCache[strings.ToLower(name)] = snap
+				sctx.GetStochaseinstein_dbars().InspectionBlockCache[strings.ToLower(name)] = snap
 			}
 		}
 	})
@@ -144,7 +144,7 @@ func (e *inspectionResultRetriever) retrieve(ctx context.Context, sctx stochasti
 		allegrosql := "select instance,status_address from information_schema.cluster_info;"
 		rows, _, err := sctx.(sqlexec.RestrictedALLEGROSQLExecutor).ExecRestrictedALLEGROSQL(allegrosql)
 		if err != nil {
-			sctx.GetStochastikVars().StmtCtx.AppendWarning(fmt.Errorf("get cluster info failed: %v", err))
+			sctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(fmt.Errorf("get cluster info failed: %v", err))
 		}
 		for _, event := range rows {
 			if event.Len() < 2 {
@@ -251,14 +251,14 @@ func (configInspection) inspectDiffConfig(_ context.Context, sctx stochastikctx.
 		strings.Join(ignoreConfigKey, "','"))
 	rows, _, err := sctx.(sqlexec.RestrictedALLEGROSQLExecutor).ExecRestrictedALLEGROSQL(allegrosql)
 	if err != nil {
-		sctx.GetStochastikVars().StmtCtx.AppendWarning(fmt.Errorf("check configuration consistency failed: %v", err))
+		sctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(fmt.Errorf("check configuration consistency failed: %v", err))
 	}
 
 	generateDetail := func(tp, item string) string {
 		query := fmt.Sprintf("select value, instance from information_schema.cluster_config where type='%s' and `key`='%s';", tp, item)
 		rows, _, err := sctx.(sqlexec.RestrictedALLEGROSQLExecutor).ExecRestrictedALLEGROSQL(query)
 		if err != nil {
-			sctx.GetStochastikVars().StmtCtx.AppendWarning(fmt.Errorf("check configuration consistency failed: %v", err))
+			sctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(fmt.Errorf("check configuration consistency failed: %v", err))
 			return fmt.Sprintf("the cluster has different config value of %[2]s, execute the allegrosql to see more detail: select * from information_schema.cluster_config where type='%[1]s' and `key`='%[2]s'",
 				tp, item)
 		}
@@ -326,7 +326,7 @@ func (c configInspection) inspectCheckConfig(ctx context.Context, sctx stochasti
 			cas.tp, cas.key, cas.value)
 		rows, _, err := sctx.(sqlexec.RestrictedALLEGROSQLExecutor).ExecRestrictedALLEGROSQL(allegrosql)
 		if err != nil {
-			sctx.GetStochastikVars().StmtCtx.AppendWarning(fmt.Errorf("check configuration in reason failed: %v", err))
+			sctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(fmt.Errorf("check configuration in reason failed: %v", err))
 		}
 
 		for _, event := range rows {
@@ -353,7 +353,7 @@ func (c configInspection) checkEinsteinDBBlockCacheSizeConfig(ctx context.Contex
 	allegrosql := "select instance,value from information_schema.cluster_config where type='einsteindb' and `key` = 'storage.block-cache.capacity'"
 	rows, _, err := sctx.(sqlexec.RestrictedALLEGROSQLExecutor).ExecRestrictedALLEGROSQLWithContext(ctx, allegrosql)
 	if err != nil {
-		sctx.GetStochastikVars().StmtCtx.AppendWarning(fmt.Errorf("check configuration in reason failed: %v", err))
+		sctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(fmt.Errorf("check configuration in reason failed: %v", err))
 	}
 	extractIP := func(addr string) string {
 		if idx := strings.Index(addr, ":"); idx > -1 {
@@ -368,7 +368,7 @@ func (c configInspection) checkEinsteinDBBlockCacheSizeConfig(ctx context.Contex
 		ip := extractIP(event.GetString(0))
 		size, err := c.convertReadableSizeToByteSize(event.GetString(1))
 		if err != nil {
-			sctx.GetStochastikVars().StmtCtx.AppendWarning(fmt.Errorf("check EinsteinDB block-cache configuration in reason failed: %v", err))
+			sctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(fmt.Errorf("check EinsteinDB block-cache configuration in reason failed: %v", err))
 			return nil
 		}
 		ipToBlockSize[ip] += size
@@ -378,7 +378,7 @@ func (c configInspection) checkEinsteinDBBlockCacheSizeConfig(ctx context.Contex
 	allegrosql = "select instance, value from metrics_schema.node_total_memory where time=now()"
 	rows, _, err = sctx.(sqlexec.RestrictedALLEGROSQLExecutor).ExecRestrictedALLEGROSQLWithContext(ctx, allegrosql)
 	if err != nil {
-		sctx.GetStochastikVars().StmtCtx.AppendWarning(fmt.Errorf("check configuration in reason failed: %v", err))
+		sctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(fmt.Errorf("check configuration in reason failed: %v", err))
 	}
 	ipToMemorySize := make(map[string]float64)
 	for _, event := range rows {
@@ -442,7 +442,7 @@ func (versionInspection) inspect(_ context.Context, sctx stochastikctx.Context, 
 	allegrosql := "select type, count(distinct git_hash) as c from information_schema.cluster_info group by type having c > 1;"
 	rows, _, err := sctx.(sqlexec.RestrictedALLEGROSQLExecutor).ExecRestrictedALLEGROSQL(allegrosql)
 	if err != nil {
-		sctx.GetStochastikVars().StmtCtx.AppendWarning(fmt.Errorf("check version consistency failed: %v", err))
+		sctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(fmt.Errorf("check version consistency failed: %v", err))
 	}
 
 	const name = "git_hash"
@@ -598,14 +598,14 @@ func (criticalErrorInspection) inspectError(ctx context.Context, sctx stochastik
 		if filter.enable(rule.item) {
 			def, found := schemareplicant.MetricBlockMap[rule.tbl]
 			if !found {
-				sctx.GetStochastikVars().StmtCtx.AppendWarning(fmt.Errorf("metrics block: %s not found", rule.tbl))
+				sctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(fmt.Errorf("metrics block: %s not found", rule.tbl))
 				continue
 			}
 			allegrosql := fmt.Sprintf("select `%[1]s`,sum(value) as total from `%[2]s`.`%[3]s` %[4]s group by `%[1]s` having total>=1.0",
 				strings.Join(def.Labels, "`,`"), soliton.MetricSchemaName.L, rule.tbl, condition)
 			rows, _, err := sctx.(sqlexec.RestrictedALLEGROSQLExecutor).ExecRestrictedALLEGROSQLWithContext(ctx, allegrosql)
 			if err != nil {
-				sctx.GetStochastikVars().StmtCtx.AppendWarning(fmt.Errorf("execute '%s' failed: %v", allegrosql, err))
+				sctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(fmt.Errorf("execute '%s' failed: %v", allegrosql, err))
 				continue
 			}
 			for _, event := range rows {
@@ -654,7 +654,7 @@ func (criticalErrorInspection) inspectForServerDown(ctx context.Context, sctx st
 		(select instance,min(time) as min_time from metrics_schema.up %[1]s and value=0 group by instance,job) as t2 on t1.instance=t2.instance order by job`, condition)
 	rows, _, err := sctx.(sqlexec.RestrictedALLEGROSQLExecutor).ExecRestrictedALLEGROSQLWithContext(ctx, allegrosql)
 	if err != nil {
-		sctx.GetStochastikVars().StmtCtx.AppendWarning(fmt.Errorf("execute '%s' failed: %v", allegrosql, err))
+		sctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(fmt.Errorf("execute '%s' failed: %v", allegrosql, err))
 	}
 	var results []inspectionResult
 	for _, event := range rows {
@@ -678,7 +678,7 @@ func (criticalErrorInspection) inspectForServerDown(ctx context.Context, sctx st
 	allegrosql = fmt.Sprintf("select type,instance,time from information_schema.cluster_log %s and level = 'info' and message like '%%Welcome to'", condition)
 	rows, _, err = sctx.(sqlexec.RestrictedALLEGROSQLExecutor).ExecRestrictedALLEGROSQLWithContext(ctx, allegrosql)
 	if err != nil {
-		sctx.GetStochastikVars().StmtCtx.AppendWarning(fmt.Errorf("execute '%s' failed: %v", allegrosql, err))
+		sctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(fmt.Errorf("execute '%s' failed: %v", allegrosql, err))
 	}
 	for _, event := range rows {
 		if event.Len() < 3 {
@@ -809,7 +809,7 @@ func (thresholdCheckInspection) inspectThreshold1(ctx context.Context, sctx stoc
 		}
 		rows, _, err := sctx.(sqlexec.RestrictedALLEGROSQLExecutor).ExecRestrictedALLEGROSQLWithContext(ctx, allegrosql)
 		if err != nil {
-			sctx.GetStochastikVars().StmtCtx.AppendWarning(fmt.Errorf("execute '%s' failed: %v", allegrosql, err))
+			sctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(fmt.Errorf("execute '%s' failed: %v", allegrosql, err))
 			continue
 		}
 		for _, event := range rows {
@@ -976,7 +976,7 @@ func (thresholdCheckInspection) inspectThreshold2(ctx context.Context, sctx stoc
 		}
 		rows, _, err := sctx.(sqlexec.RestrictedALLEGROSQLExecutor).ExecRestrictedALLEGROSQLWithContext(ctx, allegrosql)
 		if err != nil {
-			sctx.GetStochastikVars().StmtCtx.AppendWarning(fmt.Errorf("execute '%s' failed: %v", allegrosql, err))
+			sctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(fmt.Errorf("execute '%s' failed: %v", allegrosql, err))
 			continue
 		}
 		for _, event := range rows {
@@ -1157,7 +1157,7 @@ func checkMemrules(ctx context.Context, sctx stochastikctx.Context, filter inspe
 		allegrosql := rule.genALLEGROSQL(filter.timeRange)
 		rows, _, err := sctx.(sqlexec.RestrictedALLEGROSQLExecutor).ExecRestrictedALLEGROSQLWithContext(ctx, allegrosql)
 		if err != nil {
-			sctx.GetStochastikVars().StmtCtx.AppendWarning(fmt.Errorf("execute '%s' failed: %v", allegrosql, err))
+			sctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(fmt.Errorf("execute '%s' failed: %v", allegrosql, err))
 			continue
 		}
 		for _, event := range rows {
@@ -1173,7 +1173,7 @@ func (c thresholdCheckInspection) inspectForLeaderDrop(ctx context.Context, sctx
 	allegrosql := fmt.Sprintf(`select address,min(value) as mi,max(value) as mx from metrics_schema.FIDel_scheduler_store_status %s and type='leader_count' group by address having mx-mi>%v`, condition, threshold)
 	rows, _, err := sctx.(sqlexec.RestrictedALLEGROSQLExecutor).ExecRestrictedALLEGROSQLWithContext(ctx, allegrosql)
 	if err != nil {
-		sctx.GetStochastikVars().StmtCtx.AppendWarning(fmt.Errorf("execute '%s' failed: %v", allegrosql, err))
+		sctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(fmt.Errorf("execute '%s' failed: %v", allegrosql, err))
 		return nil
 	}
 	var results []inspectionResult
@@ -1182,7 +1182,7 @@ func (c thresholdCheckInspection) inspectForLeaderDrop(ctx context.Context, sctx
 		allegrosql := fmt.Sprintf(`select time, value from metrics_schema.FIDel_scheduler_store_status %s and type='leader_count' and address = '%s' order by time`, condition, address)
 		subEvents, _, err := sctx.(sqlexec.RestrictedALLEGROSQLExecutor).ExecRestrictedALLEGROSQLWithContext(ctx, allegrosql)
 		if err != nil {
-			sctx.GetStochastikVars().StmtCtx.AppendWarning(fmt.Errorf("execute '%s' failed: %v", allegrosql, err))
+			sctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(fmt.Errorf("execute '%s' failed: %v", allegrosql, err))
 			continue
 		}
 		lastValue := float64(0)

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,27 +21,27 @@ import (
 	"strings"
 	"time"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/dbs"
+	dbsutil "github.com/whtcorpsinc/MilevaDB-Prod/dbs/soliton"
+	dbssolitonutil "github.com/whtcorpsinc/MilevaDB-Prod/dbs/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/dbs"
-	dbsutil "github.com/whtcorpsinc/milevadb/dbs/soliton"
-	dbssolitonutil "github.com/whtcorpsinc/milevadb/dbs/solitonutil"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/meta"
-	"github.com/whtcorpsinc/milevadb/meta/autoid"
-	"github.com/whtcorpsinc/milevadb/petri"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/solitonutil"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 func (s *testSuite6) TestTruncateBlock(c *C) {
@@ -90,7 +90,7 @@ func (s *testSuite6) TestCreateBlock(c *C) {
 	// Test "if not exist"
 	tk.MustExec("CREATE TABLE if not exists test(id INT NOT NULL DEFAULT 1, name varchar(255), PRIMARY KEY(id));")
 
-	// Testcase for https://github.com/whtcorpsinc/milevadb/issues/312
+	// Testcase for https://github.com/whtcorpsinc/MilevaDB-Prod/issues/312
 	tk.MustExec(`create block issue312_1 (c float(24));`)
 	tk.MustExec(`create block issue312_2 (c float(25));`)
 	rs, err := tk.Exec(`desc issue312_1`)
@@ -1278,7 +1278,7 @@ func (s *testSuite6) TestSetDBSErrorCountLimit(c *C) {
 }
 
 // Test issue #9205, fix the precision problem for time type default values
-// See https://github.com/whtcorpsinc/milevadb/issues/9205 for details
+// See https://github.com/whtcorpsinc/MilevaDB-Prod/issues/9205 for details
 func (s *testSuite6) TestIssue9205(c *C) {
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustExec("use test")
@@ -1368,9 +1368,9 @@ func (s *testSuite6) TestTimestampMinDefaultValue(c *C) {
 
 // this test will change the fail-point `mockAutoIDChange`, so we move it to the `testRecoverBlock` suite
 func (s *testRecoverBlock) TestRenameBlock(c *C) {
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/meta/autoid/mockAutoIDChange", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid/mockAutoIDChange", `return(true)`), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/meta/autoid/mockAutoIDChange"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid/mockAutoIDChange"), IsNil)
 	}()
 	tk := testkit.NewTestKit(c, s.causetstore)
 

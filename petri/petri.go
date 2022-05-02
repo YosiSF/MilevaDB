@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,33 +22,33 @@ import (
 
 	"github.com/ngaut/pools"
 	"github.com/ngaut/sync2"
+	"github.com/whtcorpsinc/MilevaDB-Prod/bindinfo"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/dbs"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/errno"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta"
+	"github.com/whtcorpsinc/MilevaDB-Prod/metrics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/owner"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri/infosync"
+	"github.com/whtcorpsinc/MilevaDB-Prod/privilege/privileges"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant/perfschema"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/expensivequery"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/petriutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/sqlexec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/statistics/handle"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/telemetry"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/bindinfo"
-	"github.com/whtcorpsinc/milevadb/causetstore/einsteindb"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/dbs"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/errno"
-	"github.com/whtcorpsinc/milevadb/meta"
-	"github.com/whtcorpsinc/milevadb/metrics"
-	"github.com/whtcorpsinc/milevadb/owner"
-	"github.com/whtcorpsinc/milevadb/petri/infosync"
-	"github.com/whtcorpsinc/milevadb/privilege/privileges"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/schemareplicant/perfschema"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/expensivequery"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/petriutil"
-	"github.com/whtcorpsinc/milevadb/soliton/sqlexec"
-	"github.com/whtcorpsinc/milevadb/statistics/handle"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/telemetry"
 	"go.etcd.io/etcd/clientv3"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -687,7 +687,7 @@ func (do *Petri) Init(dbsLease time.Duration, sysFactory func(*Petri) (pools.Res
 		if addrs != nil {
 			cfg := config.GetGlobalConfig()
 			// silence etcd warn log, when petri closed, it won't randomly print warn log
-			// see details at the issue https://github.com/whtcorpsinc/milevadb/issues/15479
+			// see details at the issue https://github.com/whtcorpsinc/MilevaDB-Prod/issues/15479
 			etcdLogCfg := zap.NewProductionConfig()
 			etcdLogCfg.Level = zap.NewAtomicLevelAt(zap.ErrorLevel)
 			cli, err := clientv3.New(clientv3.Config{
@@ -852,7 +852,7 @@ func (do *Petri) GetEtcdClient() *clientv3.Client {
 // LoadPrivilegeLoop create a goroutine loads privilege blocks in a loop, it
 // should be called only once in BootstrapStochastik.
 func (do *Petri) LoadPrivilegeLoop(ctx stochastikctx.Context) error {
-	ctx.GetStochastikVars().InRestrictedALLEGROSQL = true
+	ctx.GetStochaseinstein_dbars().InRestrictedALLEGROSQL = true
 	do.privHandle = privileges.NewHandle()
 	err := do.privHandle.UFIDelate(ctx)
 	if err != nil {
@@ -916,8 +916,8 @@ func (do *Petri) BindHandle() *bindinfo.BindHandle {
 // LoadBindInfoLoop create a goroutine loads BindInfo in a loop, it should
 // be called only once in BootstrapStochastik.
 func (do *Petri) LoadBindInfoLoop(ctxForHandle stochastikctx.Context, ctxForEvolve stochastikctx.Context) error {
-	ctxForHandle.GetStochastikVars().InRestrictedALLEGROSQL = true
-	ctxForEvolve.GetStochastikVars().InRestrictedALLEGROSQL = true
+	ctxForHandle.GetStochaseinstein_dbars().InRestrictedALLEGROSQL = true
+	ctxForEvolve.GetStochaseinstein_dbars().InRestrictedALLEGROSQL = true
 	do.bindHandle = bindinfo.NewBindHandle(ctxForHandle)
 	err := do.bindHandle.UFIDelate(true)
 	if err != nil || bindinfo.Lease == 0 {
@@ -987,7 +987,7 @@ func (do *Petri) handleEvolvePlanTasksLoop(ctx stochastikctx.Context) {
 // TelemetryLoop create a goroutine that reports usage data in a loop, it should be called only once
 // in BootstrapStochastik.
 func (do *Petri) TelemetryLoop(ctx stochastikctx.Context) {
-	ctx.GetStochastikVars().InRestrictedALLEGROSQL = true
+	ctx.GetStochaseinstein_dbars().InRestrictedALLEGROSQL = true
 	do.wg.Add(1)
 	go func() {
 		defer func() {
@@ -1046,7 +1046,7 @@ var RunAutoAnalyze = true
 // It will also start a goroutine to analyze blocks automatically.
 // It should be called only once in BootstrapStochastik.
 func (do *Petri) UFIDelateBlockStatsLoop(ctx stochastikctx.Context) error {
-	ctx.GetStochastikVars().InRestrictedALLEGROSQL = true
+	ctx.GetStochaseinstein_dbars().InRestrictedALLEGROSQL = true
 	statsHandle := handle.NewHandle(ctx, do.statsLease)
 	atomic.StorePointer(&do.statsHandle, unsafe.Pointer(statsHandle))
 	do.dbs.RegisterEventCh(statsHandle.DBSEventCh())

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@ package aggfuncs
 import (
 	"unsafe"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
 )
 
 const (
@@ -214,7 +214,7 @@ func buildValueEvaluator(tp *types.FieldType) (ve valueEvaluator, memDelta int64
 		evalType = types.ETString
 	}
 	switch evalType {
-	case types.ETInt:
+	case types.CausetEDN:
 		return &value4Int{}, DefValue4IntSize
 	case types.ETReal:
 		switch tp.Tp {

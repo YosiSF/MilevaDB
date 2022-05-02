@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
 package core
 
 import (
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	utilhint "github.com/whtcorpsinc/MilevaDB-Prod/soliton/hint"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	utilhint "github.com/whtcorpsinc/milevadb/soliton/hint"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
 )
 
 // GenHintsFromPhysicalPlan generates hints from physical plan.
@@ -79,7 +79,7 @@ func getJoinHints(sctx stochastikctx.Context, joinType string, parentOffset int,
 		}
 		var dbName, blockName *perceptron.CIStr
 		if child.SelectBlockOffset() != parentOffset {
-			hintBlock := sctx.GetStochastikVars().PlannerSelectBlockAsName[child.SelectBlockOffset()]
+			hintBlock := sctx.GetStochaseinstein_dbars().PlannerSelectBlockAsName[child.SelectBlockOffset()]
 			// For sub-queries like `(select * from t) t1`, t1 should belong to its surrounding select block.
 			dbName, blockName, blockOffset = &hintBlock.DBName, &hintBlock.BlockName, parentOffset
 		} else {

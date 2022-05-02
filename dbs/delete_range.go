@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,12 +24,12 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/blockcodec"
-	"github.com/whtcorpsinc/milevadb/dbs/soliton"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/sqlexec"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/blockcodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/dbs/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/sqlexec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
 	"go.uber.org/zap"
 )
 

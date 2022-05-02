@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@ package executor
 import (
 	"math/rand"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 var _ = Suite(&testSuiteJoiner{})
@@ -50,7 +50,7 @@ func (s *testSuiteJoiner) TestRequiredEvents(c *C) {
 	for _, joinType := range joinTypes {
 		for _, ltype := range lTypes {
 			for _, rtype := range rTypes {
-				maxChunkSize := defaultCtx().GetStochastikVars().MaxChunkSize
+				maxChunkSize := defaultCtx().GetStochaseinstein_dbars().MaxChunkSize
 				lfields := convertTypes(ltype)
 				rfields := convertTypes(rtype)
 				outerEvent := genTestChunk(maxChunkSize, 1, lfields).GetEvent(0)

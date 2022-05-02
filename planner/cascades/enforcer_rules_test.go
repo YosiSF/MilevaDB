@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
 package cascades
 
 import (
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/memo"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/property"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/planner/memo"
-	"github.com/whtcorpsinc/milevadb/planner/property"
 )
 
 func (s *testCascadesSuite) TestGetEnforcerMemrules(c *C) {

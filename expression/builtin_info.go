@@ -1,8 +1,8 @@
-// INTERLOCKyright 2020 The ql Authors. All rights reserved.
+Copuright 2021 Whtcorps Inc; EinsteinDB and MilevaDB aithors; Licensed Under Apache 2.0. All Rights Reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSES/QL-LICENSE file.
 
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,15 +27,15 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/blockcodec"
-	"github.com/whtcorpsinc/milevadb/privilege"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/codec"
-	"github.com/whtcorpsinc/milevadb/soliton/plancodec"
-	"github.com/whtcorpsinc/milevadb/soliton/printer"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/blockcodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/privilege"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/codec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/plancodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/printer"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 var (
@@ -94,7 +94,7 @@ func (c *databaseFunctionClass) getFunction(ctx stochastikctx.Context, args []Ex
 	if err != nil {
 		return nil, err
 	}
-	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochastikVars().GetCharsetInfo()
+	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 	bf.tp.Flen = 64
 	sig := &builtinDatabaseSig{bf}
 	return sig, nil
@@ -113,7 +113,7 @@ func (b *builtinDatabaseSig) Clone() builtinFunc {
 // evalString evals a builtinDatabaseSig.
 // See https://dev.allegrosql.com/doc/refman/5.7/en/information-functions.html
 func (b *builtinDatabaseSig) evalString(event chunk.Event) (string, bool, error) {
-	currentDB := b.ctx.GetStochastikVars().CurrentDB
+	currentDB := b.ctx.GetStochaseinstein_dbars().CurrentDB
 	return currentDB, currentDB == "", nil
 }
 
@@ -125,7 +125,7 @@ func (c *foundEventsFunctionClass) getFunction(ctx stochastikctx.Context, args [
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
@@ -148,7 +148,7 @@ func (b *builtinFoundEventsSig) Clone() builtinFunc {
 // See https://dev.allegrosql.com/doc/refman/5.7/en/information-functions.html#function_found-rows
 // TODO: ALLEGROSQL_CALC_FOUND_ROWS and LIMIT not support for now, We will finish in another PR.
 func (b *builtinFoundEventsSig) evalInt(event chunk.Event) (int64, bool, error) {
-	data := b.ctx.GetStochastikVars()
+	data := b.ctx.GetStochaseinstein_dbars()
 	if data == nil {
 		return 0, true, errors.Errorf("Missing stochastik variable when eval builtin")
 	}
@@ -167,7 +167,7 @@ func (c *currentUserFunctionClass) getFunction(ctx stochastikctx.Context, args [
 	if err != nil {
 		return nil, err
 	}
-	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochastikVars().GetCharsetInfo()
+	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 	bf.tp.Flen = 64
 	sig := &builtinCurrentUserSig{bf}
 	return sig, nil
@@ -186,7 +186,7 @@ func (b *builtinCurrentUserSig) Clone() builtinFunc {
 // evalString evals a builtinCurrentUserSig.
 // See https://dev.allegrosql.com/doc/refman/5.7/en/information-functions.html#function_current-user
 func (b *builtinCurrentUserSig) evalString(event chunk.Event) (string, bool, error) {
-	data := b.ctx.GetStochastikVars()
+	data := b.ctx.GetStochaseinstein_dbars()
 	if data == nil || data.User == nil {
 		return "", true, errors.Errorf("Missing stochastik variable when eval builtin")
 	}
@@ -205,7 +205,7 @@ func (c *currentRoleFunctionClass) getFunction(ctx stochastikctx.Context, args [
 	if err != nil {
 		return nil, err
 	}
-	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochastikVars().GetCharsetInfo()
+	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 	bf.tp.Flen = 64
 	sig := &builtinCurrentRoleSig{bf}
 	return sig, nil
@@ -224,7 +224,7 @@ func (b *builtinCurrentRoleSig) Clone() builtinFunc {
 // evalString evals a builtinCurrentUserSig.
 // See https://dev.allegrosql.com/doc/refman/5.7/en/information-functions.html#function_current-user
 func (b *builtinCurrentRoleSig) evalString(event chunk.Event) (string, bool, error) {
-	data := b.ctx.GetStochastikVars()
+	data := b.ctx.GetStochaseinstein_dbars()
 	if data == nil || data.ActiveRoles == nil {
 		return "", true, errors.Errorf("Missing stochastik variable when eval builtin")
 	}
@@ -258,7 +258,7 @@ func (c *userFunctionClass) getFunction(ctx stochastikctx.Context, args []Expres
 	if err != nil {
 		return nil, err
 	}
-	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochastikVars().GetCharsetInfo()
+	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 	bf.tp.Flen = 64
 	sig := &builtinUserSig{bf}
 	return sig, nil
@@ -277,7 +277,7 @@ func (b *builtinUserSig) Clone() builtinFunc {
 // evalString evals a builtinUserSig.
 // See https://dev.allegrosql.com/doc/refman/5.7/en/information-functions.html#function_user
 func (b *builtinUserSig) evalString(event chunk.Event) (string, bool, error) {
-	data := b.ctx.GetStochastikVars()
+	data := b.ctx.GetStochaseinstein_dbars()
 	if data == nil || data.User == nil {
 		return "", true, errors.Errorf("Missing stochastik variable when eval builtin")
 	}
@@ -293,7 +293,7 @@ func (c *connectionIDFunctionClass) getFunction(ctx stochastikctx.Context, args 
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
@@ -313,7 +313,7 @@ func (b *builtinConnectionIDSig) Clone() builtinFunc {
 }
 
 func (b *builtinConnectionIDSig) evalInt(_ chunk.Event) (int64, bool, error) {
-	data := b.ctx.GetStochastikVars()
+	data := b.ctx.GetStochaseinstein_dbars()
 	if data == nil {
 		return 0, true, errors.Errorf("Missing stochastik variable `builtinConnectionIDSig.evalInt`")
 	}
@@ -331,9 +331,9 @@ func (c *lastInsertIDFunctionClass) getFunction(ctx stochastikctx.Context, args 
 
 	var argsTp []types.EvalType
 	if len(args) == 1 {
-		argsTp = append(argsTp, types.ETInt)
+		argsTp = append(argsTp, types.CausetEDN)
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, argsTp...)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, argsTp...)
 	if err != nil {
 		return nil, err
 	}
@@ -362,7 +362,7 @@ func (b *builtinLastInsertIDSig) Clone() builtinFunc {
 // evalInt evals LAST_INSERT_ID().
 // See https://dev.allegrosql.com/doc/refman/5.7/en/information-functions.html#function_last-insert-id.
 func (b *builtinLastInsertIDSig) evalInt(event chunk.Event) (res int64, isNull bool, err error) {
-	res = int64(b.ctx.GetStochastikVars().StmtCtx.PrevLastInsertID)
+	res = int64(b.ctx.GetStochaseinstein_dbars().StmtCtx.PrevLastInsertID)
 	return res, false, nil
 }
 
@@ -384,7 +384,7 @@ func (b *builtinLastInsertIDWithIDSig) evalInt(event chunk.Event) (res int64, is
 		return res, isNull, err
 	}
 
-	b.ctx.GetStochastikVars().SetLastInsertID(uint64(res))
+	b.ctx.GetStochaseinstein_dbars().SetLastInsertID(uint64(res))
 	return res, false, nil
 }
 
@@ -400,7 +400,7 @@ func (c *versionFunctionClass) getFunction(ctx stochastikctx.Context, args []Exp
 	if err != nil {
 		return nil, err
 	}
-	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochastikVars().GetCharsetInfo()
+	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 	bf.tp.Flen = 64
 	sig := &builtinVersionSig{bf}
 	return sig, nil
@@ -434,7 +434,7 @@ func (c *milevadbVersionFunctionClass) getFunction(ctx stochastikctx.Context, ar
 	if err != nil {
 		return nil, err
 	}
-	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochastikVars().GetCharsetInfo()
+	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 	bf.tp.Flen = len(printer.GetMilevaDBInfo())
 	sig := &builtinMilevaDBVersionSig{bf}
 	return sig, nil
@@ -464,7 +464,7 @@ func (c *milevadbIsDBSOwnerFunctionClass) getFunction(ctx stochastikctx.Context,
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
@@ -507,13 +507,13 @@ func (c *benchmarkFunctionClass) getFunction(ctx stochastikctx.Context, args []E
 	// constLoopCount is used by VecEvalInt
 	// since non-constant loop count would be different between rows, and cannot be vectorized.
 	var constLoopCount int64
-	con, ok := args[0].(*Constant)
+	con, ok := args[0].(*CouplingConstantWithRadix)
 	if ok && con.Value.HoTT() == types.HoTTInt64 {
 		if lc, isNull, err := con.EvalInt(ctx, chunk.Event{}); err == nil && !isNull {
 			constLoopCount = lc
 		}
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETInt, sameEvalType)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.CausetEDN, sameEvalType)
 	if err != nil {
 		return nil, err
 	}
@@ -560,7 +560,7 @@ func (b *builtinBenchmarkSig) evalInt(event chunk.Event) (int64, bool, error) {
 	var i int64
 	arg, ctx := b.args[1], b.ctx
 	switch evalType := arg.GetType().EvalType(); evalType {
-	case types.ETInt:
+	case types.CausetEDN:
 		for ; i < loopCount; i++ {
 			_, isNull, err = arg.EvalInt(ctx, event)
 			if err != nil {
@@ -633,7 +633,7 @@ func (c *coercibilityFunctionClass) getFunction(ctx stochastikctx.Context, args 
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, args[0].GetType().EvalType())
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, args[0].GetType().EvalType())
 	if err != nil {
 		return nil, err
 	}
@@ -672,7 +672,7 @@ func (c *defCauslationFunctionClass) getFunction(ctx stochastikctx.Context, args
 	if err != nil {
 		return nil, err
 	}
-	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochastikVars().GetCharsetInfo()
+	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 	sig := &builtinDefCauslationSig{bf}
 	return sig, nil
 }
@@ -699,7 +699,7 @@ func (c *rowCountFunctionClass) getFunction(ctx stochastikctx.Context, args []Ex
 	if err = c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
@@ -721,7 +721,7 @@ func (b *builtinEventCountSig) Clone() builtinFunc {
 // evalInt evals ROW_COUNT().
 // See https://dev.allegrosql.com/doc/refman/5.7/en/information-functions.html#function_row-count.
 func (b *builtinEventCountSig) evalInt(_ chunk.Event) (res int64, isNull bool, err error) {
-	res = b.ctx.GetStochastikVars().StmtCtx.PrevAffectedEvents
+	res = b.ctx.GetStochaseinstein_dbars().StmtCtx.PrevAffectedEvents
 	return res, false, nil
 }
 
@@ -763,7 +763,7 @@ func (b *builtinMilevaDBDecodeKeySig) evalString(event chunk.Event) (string, boo
 func decodeKey(ctx stochastikctx.Context, s string) string {
 	key, err := hex.DecodeString(s)
 	if err != nil {
-		ctx.GetStochastikVars().StmtCtx.AppendWarning(errors.Errorf("invalid record/index key: %X", key))
+		ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errors.Errorf("invalid record/index key: %X", key))
 		return s
 	}
 	// Auto decode byte if needed.
@@ -785,7 +785,7 @@ func decodeKey(ctx stochastikctx.Context, s string) string {
 		return "blockID=" + strconv.FormatInt(blockID, 10) + ", indexID=" + strconv.FormatInt(indexID, 10) + ", indexValues=" + strings.Join(indexValues, ",")
 	}
 	// TODO: try to decode other type key.
-	ctx.GetStochastikVars().StmtCtx.AppendWarning(errors.Errorf("invalid record/index key: %X", key))
+	ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errors.Errorf("invalid record/index key: %X", key))
 	return s
 }
 
@@ -832,7 +832,7 @@ func (c *nextValFunctionClass) getFunction(ctx stochastikctx.Context, args []Exp
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETString)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETString)
 	if err != nil {
 		return nil, err
 	}
@@ -858,17 +858,17 @@ func (b *builtinNextValSig) evalInt(event chunk.Event) (int64, bool, error) {
 	}
 	EDB, seq := getSchemaAndSequence(sequenceName)
 	if len(EDB) == 0 {
-		EDB = b.ctx.GetStochastikVars().CurrentDB
+		EDB = b.ctx.GetStochaseinstein_dbars().CurrentDB
 	}
 	// Check the blockName valid.
-	sequence, err := b.ctx.GetStochastikVars().TxnCtx.SchemaReplicant.(soliton.SequenceSchema).SequenceByName(perceptron.NewCIStr(EDB), perceptron.NewCIStr(seq))
+	sequence, err := b.ctx.GetStochaseinstein_dbars().TxnCtx.SchemaReplicant.(soliton.SequenceSchema).SequenceByName(perceptron.NewCIStr(EDB), perceptron.NewCIStr(seq))
 	if err != nil {
 		return 0, false, err
 	}
 	// Do the privilege check.
 	checker := privilege.GetPrivilegeManager(b.ctx)
-	user := b.ctx.GetStochastikVars().User
-	if checker != nil && !checker.RequestVerification(b.ctx.GetStochastikVars().ActiveRoles, EDB, seq, "", allegrosql.InsertPriv) {
+	user := b.ctx.GetStochaseinstein_dbars().User
+	if checker != nil && !checker.RequestVerification(b.ctx.GetStochaseinstein_dbars().ActiveRoles, EDB, seq, "", allegrosql.InsertPriv) {
 		return 0, false, errSequenceAccessDenied.GenWithStackByArgs("INSERT", user.AuthUsername, user.AuthHostname, seq)
 	}
 	nextVal, err := sequence.GetSequenceNextVal(b.ctx, EDB, seq)
@@ -876,7 +876,7 @@ func (b *builtinNextValSig) evalInt(event chunk.Event) (int64, bool, error) {
 		return 0, false, err
 	}
 	// uFIDelate the sequenceState.
-	b.ctx.GetStochastikVars().SequenceState.UFIDelateState(sequence.GetSequenceID(), nextVal)
+	b.ctx.GetStochaseinstein_dbars().SequenceState.UFIDelateState(sequence.GetSequenceID(), nextVal)
 	return nextVal, false, nil
 }
 
@@ -888,7 +888,7 @@ func (c *lastValFunctionClass) getFunction(ctx stochastikctx.Context, args []Exp
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETString)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETString)
 	if err != nil {
 		return nil, err
 	}
@@ -914,20 +914,20 @@ func (b *builtinLastValSig) evalInt(event chunk.Event) (int64, bool, error) {
 	}
 	EDB, seq := getSchemaAndSequence(sequenceName)
 	if len(EDB) == 0 {
-		EDB = b.ctx.GetStochastikVars().CurrentDB
+		EDB = b.ctx.GetStochaseinstein_dbars().CurrentDB
 	}
 	// Check the blockName valid.
-	sequence, err := b.ctx.GetStochastikVars().TxnCtx.SchemaReplicant.(soliton.SequenceSchema).SequenceByName(perceptron.NewCIStr(EDB), perceptron.NewCIStr(seq))
+	sequence, err := b.ctx.GetStochaseinstein_dbars().TxnCtx.SchemaReplicant.(soliton.SequenceSchema).SequenceByName(perceptron.NewCIStr(EDB), perceptron.NewCIStr(seq))
 	if err != nil {
 		return 0, false, err
 	}
 	// Do the privilege check.
 	checker := privilege.GetPrivilegeManager(b.ctx)
-	user := b.ctx.GetStochastikVars().User
-	if checker != nil && !checker.RequestVerification(b.ctx.GetStochastikVars().ActiveRoles, EDB, seq, "", allegrosql.SelectPriv) {
+	user := b.ctx.GetStochaseinstein_dbars().User
+	if checker != nil && !checker.RequestVerification(b.ctx.GetStochaseinstein_dbars().ActiveRoles, EDB, seq, "", allegrosql.SelectPriv) {
 		return 0, false, errSequenceAccessDenied.GenWithStackByArgs("SELECT", user.AuthUsername, user.AuthHostname, seq)
 	}
-	return b.ctx.GetStochastikVars().SequenceState.GetLastValue(sequence.GetSequenceID())
+	return b.ctx.GetStochaseinstein_dbars().SequenceState.GetLastValue(sequence.GetSequenceID())
 }
 
 type setValFunctionClass struct {
@@ -938,7 +938,7 @@ func (c *setValFunctionClass) getFunction(ctx stochastikctx.Context, args []Expr
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETString, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETString, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
@@ -964,17 +964,17 @@ func (b *builtinSetValSig) evalInt(event chunk.Event) (int64, bool, error) {
 	}
 	EDB, seq := getSchemaAndSequence(sequenceName)
 	if len(EDB) == 0 {
-		EDB = b.ctx.GetStochastikVars().CurrentDB
+		EDB = b.ctx.GetStochaseinstein_dbars().CurrentDB
 	}
 	// Check the blockName valid.
-	sequence, err := b.ctx.GetStochastikVars().TxnCtx.SchemaReplicant.(soliton.SequenceSchema).SequenceByName(perceptron.NewCIStr(EDB), perceptron.NewCIStr(seq))
+	sequence, err := b.ctx.GetStochaseinstein_dbars().TxnCtx.SchemaReplicant.(soliton.SequenceSchema).SequenceByName(perceptron.NewCIStr(EDB), perceptron.NewCIStr(seq))
 	if err != nil {
 		return 0, false, err
 	}
 	// Do the privilege check.
 	checker := privilege.GetPrivilegeManager(b.ctx)
-	user := b.ctx.GetStochastikVars().User
-	if checker != nil && !checker.RequestVerification(b.ctx.GetStochastikVars().ActiveRoles, EDB, seq, "", allegrosql.InsertPriv) {
+	user := b.ctx.GetStochaseinstein_dbars().User
+	if checker != nil && !checker.RequestVerification(b.ctx.GetStochaseinstein_dbars().ActiveRoles, EDB, seq, "", allegrosql.InsertPriv) {
 		return 0, false, errSequenceAccessDenied.GenWithStackByArgs("INSERT", user.AuthUsername, user.AuthHostname, seq)
 	}
 	setValue, isNull, err := b.args[1].EvalInt(b.ctx, event)

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,24 +17,24 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/executor"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/hint"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testleak"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastik"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
 	"github.com/whtcorpsinc/berolinaAllegroSQL"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/executor"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/planner"
-	"github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton/hint"
-	"github.com/whtcorpsinc/milevadb/soliton/solitonutil"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/soliton/testleak"
-	"github.com/whtcorpsinc/milevadb/stochastik"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
 )
 
 var _ = Suite(&testPlanSuite{})
@@ -121,10 +121,10 @@ func (s *testPlanSuite) TestPosetDagPlanBuilderJoin(c *C) {
 	_, err = se.Execute(context.Background(), "use test")
 	c.Assert(err, IsNil)
 	ctx := se.(stochastikctx.Context)
-	stochastikVars := ctx.GetStochastikVars()
-	stochastikVars.ExecutorConcurrency = 4
-	stochastikVars.SetDistALLEGROSQLScanConcurrency(15)
-	stochastikVars.SetHashJoinConcurrency(5)
+	stochaseinstein_dbars := ctx.GetStochaseinstein_dbars()
+	stochaseinstein_dbars.ExecutorConcurrency = 4
+	stochaseinstein_dbars.SetDistALLEGROSQLScanConcurrency(15)
+	stochaseinstein_dbars.SetHashJoinConcurrency(5)
 
 	var input []string
 	var output []struct {
@@ -161,12 +161,12 @@ func (s *testPlanSuite) TestPosetDagPlanBuilderSubquery(c *C) {
 	c.Assert(err, IsNil)
 	se.Execute(context.Background(), "set sql_mode='STRICT_TRANS_TABLES'") // disable only full group by
 	ctx := se.(stochastikctx.Context)
-	stochastikVars := ctx.GetStochastikVars()
-	stochastikVars.SetHashAggFinalConcurrency(1)
-	stochastikVars.SetHashAggPartialConcurrency(1)
-	stochastikVars.SetHashJoinConcurrency(5)
-	stochastikVars.SetDistALLEGROSQLScanConcurrency(15)
-	stochastikVars.ExecutorConcurrency = 4
+	stochaseinstein_dbars := ctx.GetStochaseinstein_dbars()
+	stochaseinstein_dbars.SetHashAggFinalConcurrency(1)
+	stochaseinstein_dbars.SetHashAggPartialConcurrency(1)
+	stochaseinstein_dbars.SetHashJoinConcurrency(5)
+	stochaseinstein_dbars.SetDistALLEGROSQLScanConcurrency(15)
+	stochaseinstein_dbars.ExecutorConcurrency = 4
 	var input []string
 	var output []struct {
 		ALLEGROALLEGROSQL string
@@ -348,11 +348,11 @@ func (s *testPlanSuite) TestPosetDagPlanBuilderAgg(c *C) {
 	se.Execute(context.Background(), "use test")
 	se.Execute(context.Background(), "set sql_mode='STRICT_TRANS_TABLES'") // disable only full group by
 	ctx := se.(stochastikctx.Context)
-	stochastikVars := ctx.GetStochastikVars()
-	stochastikVars.SetHashAggFinalConcurrency(1)
-	stochastikVars.SetHashAggPartialConcurrency(1)
-	stochastikVars.SetDistALLEGROSQLScanConcurrency(15)
-	stochastikVars.ExecutorConcurrency = 4
+	stochaseinstein_dbars := ctx.GetStochaseinstein_dbars()
+	stochaseinstein_dbars.SetHashAggFinalConcurrency(1)
+	stochaseinstein_dbars.SetHashAggPartialConcurrency(1)
+	stochaseinstein_dbars.SetDistALLEGROSQLScanConcurrency(15)
+	stochaseinstein_dbars.ExecutorConcurrency = 4
 
 	var input []string
 	var output []struct {
@@ -398,7 +398,7 @@ func (s *testPlanSuite) TestRefine(c *C) {
 		comment := Commentf("for %s", tt)
 		stmt, err := s.ParseOneStmt(tt, "", "")
 		c.Assert(err, IsNil, comment)
-		sc := se.(stochastikctx.Context).GetStochastikVars().StmtCtx
+		sc := se.(stochastikctx.Context).GetStochaseinstein_dbars().StmtCtx
 		sc.IgnoreTruncate = false
 		p, _, err := planner.Optimize(context.TODO(), se, stmt, s.is)
 		c.Assert(err, IsNil, comment)
@@ -433,7 +433,7 @@ func (s *testPlanSuite) TestAggEliminator(c *C) {
 		comment := Commentf("for %s", tt)
 		stmt, err := s.ParseOneStmt(tt, "", "")
 		c.Assert(err, IsNil, comment)
-		sc := se.(stochastikctx.Context).GetStochastikVars().StmtCtx
+		sc := se.(stochastikctx.Context).GetStochaseinstein_dbars().StmtCtx
 		sc.IgnoreTruncate = false
 		p, _, err := planner.Optimize(context.TODO(), se, stmt, s.is)
 		c.Assert(err, IsNil)
@@ -572,7 +572,7 @@ func (s *testPlanSuite) TestIndexLookupCartesianJoin(c *C) {
 	p, _, err := planner.Optimize(context.TODO(), se, stmt, s.is)
 	c.Assert(err, IsNil)
 	c.Assert(core.ToString(p), Equals, "LeftHashJoin{BlockReader(Block(t))->BlockReader(Block(t))}")
-	warnings := se.GetStochastikVars().StmtCtx.GetWarnings()
+	warnings := se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 	lastWarn := warnings[len(warnings)-1]
 	err = core.ErrInternal.GenWithStack("MilevaDB_INLJ hint is inapplicable without column equal ON condition")
 	c.Assert(terror.ErrorEqual(err, lastWarn.Err), IsTrue)
@@ -628,12 +628,12 @@ func (s *testPlanSuite) TestUnmatchedBlockInHint(c *C) {
 	}
 	s.testData.GetTestCases(c, &input, &output)
 	for i, test := range input {
-		se.GetStochastikVars().StmtCtx.SetWarnings(nil)
+		se.GetStochaseinstein_dbars().StmtCtx.SetWarnings(nil)
 		stmt, err := s.ParseOneStmt(test, "", "")
 		c.Assert(err, IsNil)
 		_, _, err = planner.Optimize(context.TODO(), se, stmt, s.is)
 		c.Assert(err, IsNil)
-		warnings := se.GetStochastikVars().StmtCtx.GetWarnings()
+		warnings := se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 		s.testData.OnRecord(func() {
 			output[i].ALLEGROALLEGROSQL = test
 			if len(warnings) > 0 {
@@ -682,7 +682,7 @@ func (s *testPlanSuite) TestHintSINTERLOCKe(c *C) {
 		})
 		c.Assert(core.ToString(p), Equals, output[i].Best)
 
-		warnings := se.GetStochastikVars().StmtCtx.GetWarnings()
+		warnings := se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 		c.Assert(warnings, HasLen, 0, comment)
 	}
 }
@@ -714,10 +714,10 @@ func (s *testPlanSuite) TestJoinHints(c *C) {
 		stmt, err := s.ParseOneStmt(test, "", "")
 		c.Assert(err, IsNil, comment)
 
-		se.GetStochastikVars().StmtCtx.SetWarnings(nil)
+		se.GetStochaseinstein_dbars().StmtCtx.SetWarnings(nil)
 		p, _, err := planner.Optimize(ctx, se, stmt, s.is)
 		c.Assert(err, IsNil)
-		warnings := se.GetStochastikVars().StmtCtx.GetWarnings()
+		warnings := se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 
 		s.testData.OnRecord(func() {
 			output[i].ALLEGROALLEGROSQL = test
@@ -752,9 +752,9 @@ func (s *testPlanSuite) TestAggregationHints(c *C) {
 	_, err = se.Execute(context.Background(), "use test")
 	c.Assert(err, IsNil)
 
-	stochastikVars := se.(stochastikctx.Context).GetStochastikVars()
-	stochastikVars.SetHashAggFinalConcurrency(1)
-	stochastikVars.SetHashAggPartialConcurrency(1)
+	stochaseinstein_dbars := se.(stochastikctx.Context).GetStochaseinstein_dbars()
+	stochaseinstein_dbars.SetHashAggFinalConcurrency(1)
+	stochaseinstein_dbars.SetHashAggPartialConcurrency(1)
 
 	var input []struct {
 		ALLEGROALLEGROSQL string
@@ -769,15 +769,15 @@ func (s *testPlanSuite) TestAggregationHints(c *C) {
 	ctx := context.Background()
 	for i, test := range input {
 		comment := Commentf("case:%v allegrosql:%s", i, test)
-		se.GetStochastikVars().StmtCtx.SetWarnings(nil)
-		se.GetStochastikVars().AllowAggPushDown = test.AggPushDown
+		se.GetStochaseinstein_dbars().StmtCtx.SetWarnings(nil)
+		se.GetStochaseinstein_dbars().AllowAggPushDown = test.AggPushDown
 
 		stmt, err := s.ParseOneStmt(test.ALLEGROALLEGROSQL, "", "")
 		c.Assert(err, IsNil, comment)
 
 		p, _, err := planner.Optimize(ctx, se, stmt, s.is)
 		c.Assert(err, IsNil)
-		warnings := se.GetStochastikVars().StmtCtx.GetWarnings()
+		warnings := se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 
 		s.testData.OnRecord(func() {
 			output[i].ALLEGROALLEGROSQL = test.ALLEGROALLEGROSQL
@@ -829,7 +829,7 @@ func (s *testPlanSuite) TestAggToINTERLOCKHint(c *C) {
 		})
 		c.Assert(test, Equals, output[i].ALLEGROALLEGROSQL, comment)
 
-		tk.Se.GetStochastikVars().StmtCtx.SetWarnings(nil)
+		tk.Se.GetStochaseinstein_dbars().StmtCtx.SetWarnings(nil)
 
 		stmt, err := s.ParseOneStmt(test, "", "")
 		c.Assert(err, IsNil, comment)
@@ -842,7 +842,7 @@ func (s *testPlanSuite) TestAggToINTERLOCKHint(c *C) {
 		})
 		c.Assert(planString, Equals, output[i].Best, comment)
 
-		warnings := tk.Se.GetStochastikVars().StmtCtx.GetWarnings()
+		warnings := tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 		s.testData.OnRecord(func() {
 			if len(warnings) > 0 {
 				output[i].Warning = warnings[0].Err.Error()
@@ -890,7 +890,7 @@ func (s *testPlanSuite) TestLimitToINTERLOCKHint(c *C) {
 		tk.MustQuery("explain " + ts).Check(testkit.Rows(output[i].Plan...))
 
 		comment := Commentf("case:%v allegrosql:%s", i, ts)
-		warnings := tk.Se.GetStochastikVars().StmtCtx.GetWarnings()
+		warnings := tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 		s.testData.OnRecord(func() {
 			if len(warnings) > 0 {
 				output[i].Warning = warnings[0].Err.Error()
@@ -1128,7 +1128,7 @@ func (s *testPlanSuite) TestIndexHint(c *C) {
 	ctx := context.Background()
 	for i, test := range input {
 		comment := Commentf("case:%v allegrosql:%s", i, test)
-		se.GetStochastikVars().StmtCtx.SetWarnings(nil)
+		se.GetStochaseinstein_dbars().StmtCtx.SetWarnings(nil)
 
 		stmt, err := s.ParseOneStmt(test, "", "")
 		c.Assert(err, IsNil, comment)
@@ -1138,11 +1138,11 @@ func (s *testPlanSuite) TestIndexHint(c *C) {
 		s.testData.OnRecord(func() {
 			output[i].ALLEGROALLEGROSQL = test
 			output[i].Best = core.ToString(p)
-			output[i].HasWarn = len(se.GetStochastikVars().StmtCtx.GetWarnings()) > 0
+			output[i].HasWarn = len(se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()) > 0
 			output[i].Hints = hint.RestoreOptimizerHints(core.GenHintsFromPhysicalPlan(p))
 		})
 		c.Assert(core.ToString(p), Equals, output[i].Best, comment)
-		warnings := se.GetStochastikVars().StmtCtx.GetWarnings()
+		warnings := se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 		if output[i].HasWarn {
 			c.Assert(warnings, HasLen, 1, comment)
 		} else {
@@ -1176,7 +1176,7 @@ func (s *testPlanSuite) TestIndexMergeHint(c *C) {
 	ctx := context.Background()
 	for i, test := range input {
 		comment := Commentf("case:%v allegrosql:%s", i, test)
-		se.GetStochastikVars().StmtCtx.SetWarnings(nil)
+		se.GetStochaseinstein_dbars().StmtCtx.SetWarnings(nil)
 		stmt, err := s.ParseOneStmt(test, "", "")
 		c.Assert(err, IsNil, comment)
 		sctx := se.(stochastikctx.Context)
@@ -1187,11 +1187,11 @@ func (s *testPlanSuite) TestIndexMergeHint(c *C) {
 		s.testData.OnRecord(func() {
 			output[i].ALLEGROALLEGROSQL = test
 			output[i].Best = core.ToString(p)
-			output[i].HasWarn = len(se.GetStochastikVars().StmtCtx.GetWarnings()) > 0
+			output[i].HasWarn = len(se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()) > 0
 			output[i].Hints = hint.RestoreOptimizerHints(core.GenHintsFromPhysicalPlan(p))
 		})
 		c.Assert(core.ToString(p), Equals, output[i].Best, comment)
-		warnings := se.GetStochastikVars().StmtCtx.GetWarnings()
+		warnings := se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 		if output[i].HasWarn {
 			c.Assert(warnings, HasLen, 1, comment)
 		} else {

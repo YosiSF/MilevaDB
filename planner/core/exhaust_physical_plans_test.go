@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@ package core
 import (
 	"fmt"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/planner/soliton"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 func (s *testUnitTestSuit) rewriteSimpleExpr(str string, schemaReplicant *expression.Schema, names types.NameSlice) ([]expression.Expression, error) {
@@ -40,13 +40,13 @@ func (s *testUnitTestSuit) rewriteSimpleExpr(str string, schemaReplicant *expres
 }
 
 func (s *testUnitTestSuit) TestIndexJoinAnalyzeLookUpFilters(c *C) {
-	s.ctx.GetStochastikVars().PlanID = -1
+	s.ctx.GetStochaseinstein_dbars().PlanID = -1
 	joinNode := LogicalJoin{}.Init(s.ctx, 0)
 	dataSourceNode := DataSource{}.Init(s.ctx, 0)
 	dsSchema := expression.NewSchema()
 	var dsNames types.NameSlice
 	dsSchema.Append(&expression.DeferredCauset{
-		UniqueID: s.ctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+		UniqueID: s.ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 		RetType:  types.NewFieldType(allegrosql.TypeLonglong),
 	})
 	dsNames = append(dsNames, &types.FieldName{
@@ -55,7 +55,7 @@ func (s *testUnitTestSuit) TestIndexJoinAnalyzeLookUpFilters(c *C) {
 		DBName:      perceptron.NewCIStr("test"),
 	})
 	dsSchema.Append(&expression.DeferredCauset{
-		UniqueID: s.ctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+		UniqueID: s.ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 		RetType:  types.NewFieldType(allegrosql.TypeLonglong),
 	})
 	dsNames = append(dsNames, &types.FieldName{
@@ -64,7 +64,7 @@ func (s *testUnitTestSuit) TestIndexJoinAnalyzeLookUpFilters(c *C) {
 		DBName:      perceptron.NewCIStr("test"),
 	})
 	dsSchema.Append(&expression.DeferredCauset{
-		UniqueID: s.ctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+		UniqueID: s.ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 		RetType:  types.NewFieldTypeWithDefCauslation(allegrosql.TypeVarchar, allegrosql.DefaultDefCauslationName, types.UnspecifiedLength),
 	})
 	dsNames = append(dsNames, &types.FieldName{
@@ -73,7 +73,7 @@ func (s *testUnitTestSuit) TestIndexJoinAnalyzeLookUpFilters(c *C) {
 		DBName:      perceptron.NewCIStr("test"),
 	})
 	dsSchema.Append(&expression.DeferredCauset{
-		UniqueID: s.ctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+		UniqueID: s.ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 		RetType:  types.NewFieldType(allegrosql.TypeLonglong),
 	})
 	dsNames = append(dsNames, &types.FieldName{
@@ -85,7 +85,7 @@ func (s *testUnitTestSuit) TestIndexJoinAnalyzeLookUpFilters(c *C) {
 	outerChildSchema := expression.NewSchema()
 	var outerChildNames types.NameSlice
 	outerChildSchema.Append(&expression.DeferredCauset{
-		UniqueID: s.ctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+		UniqueID: s.ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 		RetType:  types.NewFieldType(allegrosql.TypeLonglong),
 	})
 	outerChildNames = append(outerChildNames, &types.FieldName{
@@ -94,7 +94,7 @@ func (s *testUnitTestSuit) TestIndexJoinAnalyzeLookUpFilters(c *C) {
 		DBName:      perceptron.NewCIStr("test"),
 	})
 	outerChildSchema.Append(&expression.DeferredCauset{
-		UniqueID: s.ctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+		UniqueID: s.ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 		RetType:  types.NewFieldType(allegrosql.TypeLonglong),
 	})
 	outerChildNames = append(outerChildNames, &types.FieldName{
@@ -103,7 +103,7 @@ func (s *testUnitTestSuit) TestIndexJoinAnalyzeLookUpFilters(c *C) {
 		DBName:      perceptron.NewCIStr("test"),
 	})
 	outerChildSchema.Append(&expression.DeferredCauset{
-		UniqueID: s.ctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+		UniqueID: s.ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 		RetType:  types.NewFieldTypeWithDefCauslation(allegrosql.TypeVarchar, allegrosql.DefaultDefCauslationName, types.UnspecifiedLength),
 	})
 	outerChildNames = append(outerChildNames, &types.FieldName{
@@ -112,7 +112,7 @@ func (s *testUnitTestSuit) TestIndexJoinAnalyzeLookUpFilters(c *C) {
 		DBName:      perceptron.NewCIStr("test"),
 	})
 	outerChildSchema.Append(&expression.DeferredCauset{
-		UniqueID: s.ctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+		UniqueID: s.ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 		RetType:  types.NewFieldType(allegrosql.TypeLonglong),
 	})
 	outerChildNames = append(outerChildNames, &types.FieldName{

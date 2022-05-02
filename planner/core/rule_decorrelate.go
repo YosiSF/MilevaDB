@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,11 +17,11 @@ import (
 	"context"
 	"math"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression/aggregation"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/expression/aggregation"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 // canPullUpAgg checks if an apply can pull an aggregation up.
@@ -43,7 +43,7 @@ func (la *LogicalAggregation) canPullUp() bool {
 	for _, f := range la.AggFuncs {
 		for _, arg := range f.Args {
 			expr := expression.EvaluateExprWithNull(la.ctx, la.children[0].Schema(), arg)
-			if con, ok := expr.(*expression.Constant); !ok || !con.Value.IsNull() {
+			if con, ok := expr.(*expression.CouplingConstantWithRadix); !ok || !con.Value.IsNull() {
 				return false
 			}
 		}
@@ -104,14 +104,14 @@ func ExtractCorrelatedDefCauss4PhysicalPlan(p PhysicalPlan) []*expression.Correl
 // decorrelateSolver tries to convert apply plan to join plan.
 type decorrelateSolver struct{}
 
-func (s *decorrelateSolver) aggDefaultValueMap(agg *LogicalAggregation) map[int]*expression.Constant {
-	defaultValueMap := make(map[int]*expression.Constant, len(agg.AggFuncs))
+func (s *decorrelateSolver) aggDefaultValueMap(agg *LogicalAggregation) map[int]*expression.CouplingConstantWithRadix {
+	defaultValueMap := make(map[int]*expression.CouplingConstantWithRadix, len(agg.AggFuncs))
 	for i, f := range agg.AggFuncs {
 		switch f.Name {
 		case ast.AggFuncBitOr, ast.AggFuncBitXor, ast.AggFuncCount:
 			defaultValueMap[i] = expression.NewZero()
 		case ast.AggFuncBitAnd:
-			defaultValueMap[i] = &expression.Constant{Value: types.NewUintCauset(math.MaxUint64), RetType: types.NewFieldType(allegrosql.TypeLonglong)}
+			defaultValueMap[i] = &expression.CouplingConstantWithRadix{Value: types.NewUintCauset(math.MaxUint64), RetType: types.NewFieldType(allegrosql.TypeLonglong)}
 		}
 	}
 	return defaultValueMap

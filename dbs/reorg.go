@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,23 +26,23 @@ import (
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/failpoint"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/block/blocks"
-	"github.com/whtcorpsinc/milevadb/blockcodec"
-	"github.com/whtcorpsinc/milevadb/distsql"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/meta"
-	"github.com/whtcorpsinc/milevadb/metrics"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/codec"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/soliton/ranger"
-	"github.com/whtcorpsinc/milevadb/soliton/sqlexec"
-	"github.com/whtcorpsinc/milevadb/statistics"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block/blocks"
+	"github.com/whtcorpsinc/MilevaDB-Prod/blockcodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/distsql"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta"
+	"github.com/whtcorpsinc/MilevaDB-Prod/metrics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/codec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/ranger"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/sqlexec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/statistics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"go.uber.org/zap"
 )
 
@@ -81,8 +81,8 @@ func toString(handle ekv.Handle) string {
 func newContext(causetstore ekv.CausetStorage) stochastikctx.Context {
 	c := mock.NewContext()
 	c.CausetStore = causetstore
-	c.GetStochastikVars().SetStatusFlag(allegrosql.ServerStatusAutocommit, false)
-	c.GetStochastikVars().StmtCtx.TimeZone = time.UTC
+	c.GetStochaseinstein_dbars().SetStatusFlag(allegrosql.ServerStatusAutocommit, false)
+	c.GetStochaseinstein_dbars().StmtCtx.TimeZone = time.UTC
 	return c
 }
 
@@ -320,7 +320,7 @@ func (dc *dbsCtx) buildDescBlockScan(ctx context.Context, startTS uint64, tbl bl
 		builder = b.SetBlockRanges(tbl.GetPhysicalID(), ranges, nil)
 	} else {
 		ranges := ranger.FullNotNullRange()
-		builder = b.SetCommonHandleRanges(sctx.GetStochastikVars().StmtCtx, tbl.GetPhysicalID(), ranges)
+		builder = b.SetCommonHandleRanges(sctx.GetStochaseinstein_dbars().StmtCtx, tbl.GetPhysicalID(), ranges)
 	}
 	builder.SetPosetDagRequest(posetPosetDagPB).
 		SetStartTS(startTS).
@@ -387,7 +387,7 @@ func (dc *dbsCtx) GetBlockMaxHandle(startTS uint64, tbl block.PhysicalBlock) (ma
 	sessCtx := newContext(dc.causetstore)
 	event := chk.GetRow(0)
 	if tblInfo.IsCommonHandle {
-		maxHandle, err = buildCommonHandleFromChunkRow(sessCtx.GetStochastikVars().StmtCtx, tblInfo, pkIdx, handleDefCauss, event)
+		maxHandle, err = buildCommonHandleFromChunkRow(sessCtx.GetStochaseinstein_dbars().StmtCtx, tblInfo, pkIdx, handleDefCauss, event)
 		return maxHandle, false, err
 	}
 	return ekv.IntHandle(event.GetInt64(0)), false, nil

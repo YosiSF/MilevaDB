@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,12 +21,12 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/codec"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/codec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 )
 
 // CorrelatedDeferredCauset stands for a defCausumn in a correlated sub query.
@@ -47,7 +47,7 @@ func (defCaus *CorrelatedDeferredCauset) Clone() Expression {
 
 // VecEvalInt evaluates this expression in a vectorized manner.
 func (defCaus *CorrelatedDeferredCauset) VecEvalInt(ctx stochastikctx.Context, input *chunk.Chunk, result *chunk.DeferredCauset) error {
-	return genVecFromConstExpr(ctx, defCaus, types.ETInt, input, result)
+	return genVecFromConstExpr(ctx, defCaus, types.CausetEDN, input, result)
 }
 
 // VecEvalReal evaluates this expression in a vectorized manner.
@@ -91,7 +91,7 @@ func (defCaus *CorrelatedDeferredCauset) EvalInt(ctx stochastikctx.Context, even
 		return 0, true, nil
 	}
 	if defCaus.GetType().Hybrid() {
-		res, err := defCaus.Data.ToInt64(ctx.GetStochastikVars().StmtCtx)
+		res, err := defCaus.Data.ToInt64(ctx.GetStochaseinstein_dbars().StmtCtx)
 		return res, err != nil, err
 	}
 	return defCaus.Data.GetInt64(), false, nil
@@ -352,10 +352,10 @@ func (defCaus *DeferredCauset) EvalInt(ctx stochastikctx.Context, event chunk.Ev
 			return 0, true, nil
 		}
 		if val.HoTT() == types.HoTTMysqlBit {
-			val, err := val.GetBinaryLiteral().ToInt(ctx.GetStochastikVars().StmtCtx)
+			val, err := val.GetBinaryLiteral().ToInt(ctx.GetStochaseinstein_dbars().StmtCtx)
 			return int64(val), err != nil, err
 		}
-		res, err := val.ToInt64(ctx.GetStochastikVars().StmtCtx)
+		res, err := val.ToInt64(ctx.GetStochaseinstein_dbars().StmtCtx)
 		return res, err != nil, err
 	}
 	if event.IsNull(defCaus.Index) {

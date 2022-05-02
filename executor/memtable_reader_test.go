@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,15 +28,15 @@ import (
 
 	"github.com/gorilla/mux"
 	pperceptron "github.com/prometheus/common/perceptron"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/FIDelapi"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastik"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/ekvproto/pkg/diagnosticspb"
 	"github.com/whtcorpsinc/failpoint"
 	"github.com/whtcorpsinc/fn"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/soliton/FIDelapi"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/stochastik"
 	"github.com/whtcorpsinc/sysutil"
 	"google.golang.org/grpc"
 )
@@ -61,7 +61,7 @@ func (s *testClusterBlockBase) TearDownSuite(c *C) {
 }
 
 func (s *testMemBlockReaderSuite) TestMetricBlockData(c *C) {
-	fpName := "github.com/whtcorpsinc/milevadb/executor/mockMetricsPromData"
+	fpName := "github.com/whtcorpsinc/MilevaDB-Prod/executor/mockMetricsPromData"
 	c.Assert(failpoint.Enable(fpName, "return"), IsNil)
 	defer func() { c.Assert(failpoint.Disable(fpName), IsNil) }()
 
@@ -170,7 +170,7 @@ func (s *testMemBlockReaderSuite) TestMilevaDBClusterConfig(c *C) {
 		}
 	}
 
-	fpName := "github.com/whtcorpsinc/milevadb/executor/mockClusterConfigServerInfo"
+	fpName := "github.com/whtcorpsinc/MilevaDB-Prod/executor/mockClusterConfigServerInfo"
 	fpExpr := strings.Join(servers, ";")
 	c.Assert(failpoint.Enable(fpName, fmt.Sprintf(`return("%s")`, fpExpr)), IsNil)
 	defer func() { c.Assert(failpoint.Disable(fpName), IsNil) }()
@@ -205,7 +205,7 @@ func (s *testMemBlockReaderSuite) TestMilevaDBClusterConfig(c *C) {
 		"fidel key2.nest1 n-value1",
 		"fidel key2.nest2 n-value2",
 	))
-	warnings := tk.Se.GetStochastikVars().StmtCtx.GetWarnings()
+	warnings := tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 	c.Assert(len(warnings), Equals, 0, Commentf("unexpected warnigns: %+v", warnings))
 	c.Assert(requestCounter, Equals, int32(9))
 
@@ -409,7 +409,7 @@ func (s *testMemBlockReaderSuite) TestMilevaDBClusterConfig(c *C) {
 		// reset the request counter
 		requestCounter = 0
 		tk.MustQuery(ca.allegrosql).Check(testkit.Events(ca.rows...))
-		warnings := tk.Se.GetStochastikVars().StmtCtx.GetWarnings()
+		warnings := tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 		c.Assert(len(warnings), Equals, 0, Commentf("unexpected warnigns: %+v", warnings))
 		c.Assert(requestCounter, Equals, ca.reqCount, Commentf("ALLEGROALLEGROSQL: %s", ca.allegrosql))
 	}
@@ -868,7 +868,7 @@ func (s *testMemBlockReaderSuite) TestMilevaDBClusterLog(c *C) {
 	for _, s := range testServers {
 		servers = append(servers, strings.Join([]string{s.typ, s.address, s.address}, ","))
 	}
-	fpName := "github.com/whtcorpsinc/milevadb/executor/mockClusterLogServerInfo"
+	fpName := "github.com/whtcorpsinc/MilevaDB-Prod/executor/mockClusterLogServerInfo"
 	fpExpr := strings.Join(servers, ";")
 	c.Assert(failpoint.Enable(fpName, fmt.Sprintf(`return("%s")`, fpExpr)), IsNil)
 	defer func() { c.Assert(failpoint.Disable(fpName), IsNil) }()
@@ -880,7 +880,7 @@ func (s *testMemBlockReaderSuite) TestMilevaDBClusterLog(c *C) {
 			allegrosql = fmt.Sprintf("%s where %s", allegrosql, strings.Join(cas.conditions, " and "))
 		}
 		result := tk.MustQuery(allegrosql)
-		warnings := tk.Se.GetStochastikVars().StmtCtx.GetWarnings()
+		warnings := tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 		c.Assert(len(warnings), Equals, 0, Commentf("unexpected warnigns: %+v", warnings))
 		var expected []string
 		for _, event := range cas.expected {
@@ -899,7 +899,7 @@ func (s *testMemBlockReaderSuite) TestMilevaDBClusterLog(c *C) {
 
 func (s *testMemBlockReaderSuite) TestMilevaDBClusterLogError(c *C) {
 	tk := testkit.NewTestKit(c, s.causetstore)
-	fpName := "github.com/whtcorpsinc/milevadb/executor/mockClusterLogServerInfo"
+	fpName := "github.com/whtcorpsinc/MilevaDB-Prod/executor/mockClusterLogServerInfo"
 	c.Assert(failpoint.Enable(fpName, `return("")`), IsNil)
 	defer func() { c.Assert(failpoint.Disable(fpName), IsNil) }()
 

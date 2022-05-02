@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/solitonutil"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 func (s *testEvaluatorSuite) TestUnary(c *C) {
@@ -36,7 +36,7 @@ func (s *testEvaluatorSuite) TestUnary(c *C) {
 		{uint64(9223372036854775808), int64(-9223372036854775808), false, false},
 		{int64(math.MinInt64), "9223372036854775808", true, false}, // --9223372036854775808
 	}
-	sc := s.ctx.GetStochastikVars().StmtCtx
+	sc := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	origin := sc.InSelectStmt
 	sc.InSelectStmt = true
 	defer func() {
@@ -44,7 +44,7 @@ func (s *testEvaluatorSuite) TestUnary(c *C) {
 	}()
 
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.UnaryMinus, s.primitiveValsToConstants([]interface{}{t.args})...)
+		f, err := newFunctionForTest(s.ctx, ast.UnaryMinus, s.primitiveValsToCouplingConstantWithRadixs([]interface{}{t.args})...)
 		c.Assert(err, IsNil)
 		d, err := f.Eval(chunk.Event{})
 		if !t.getErr {
@@ -64,7 +64,7 @@ func (s *testEvaluatorSuite) TestUnary(c *C) {
 }
 
 func (s *testEvaluatorSuite) TestLogicAnd(c *C) {
-	sc := s.ctx.GetStochastikVars().StmtCtx
+	sc := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	origin := sc.IgnoreTruncate
 	defer func() {
 		sc.IgnoreTruncate = origin
@@ -102,7 +102,7 @@ func (s *testEvaluatorSuite) TestLogicAnd(c *C) {
 	}
 
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.LogicAnd, s.primitiveValsToConstants(t.args)...)
+		f, err := newFunctionForTest(s.ctx, ast.LogicAnd, s.primitiveValsToCouplingConstantWithRadixs(t.args)...)
 		c.Assert(err, IsNil)
 		d, err := f.Eval(chunk.Event{})
 		if t.getErr {
@@ -140,7 +140,7 @@ func (s *testEvaluatorSuite) TestLeftShift(c *C) {
 	}
 
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.LeftShift, s.primitiveValsToConstants(t.args)...)
+		f, err := newFunctionForTest(s.ctx, ast.LeftShift, s.primitiveValsToCouplingConstantWithRadixs(t.args)...)
 		c.Assert(err, IsNil)
 		d, err := f.Eval(chunk.Event{})
 		if t.getErr {
@@ -171,7 +171,7 @@ func (s *testEvaluatorSuite) TestRightShift(c *C) {
 	}
 
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.RightShift, s.primitiveValsToConstants(t.args)...)
+		f, err := newFunctionForTest(s.ctx, ast.RightShift, s.primitiveValsToCouplingConstantWithRadixs(t.args)...)
 		c.Assert(err, IsNil)
 		d, err := f.Eval(chunk.Event{})
 		if t.getErr {
@@ -209,7 +209,7 @@ func (s *testEvaluatorSuite) TestBitXor(c *C) {
 	}
 
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.Xor, s.primitiveValsToConstants(t.args)...)
+		f, err := newFunctionForTest(s.ctx, ast.Xor, s.primitiveValsToCouplingConstantWithRadixs(t.args)...)
 		c.Assert(err, IsNil)
 		d, err := f.Eval(chunk.Event{})
 		if t.getErr {
@@ -233,7 +233,7 @@ func (s *testEvaluatorSuite) TestBitXor(c *C) {
 }
 
 func (s *testEvaluatorSuite) TestBitOr(c *C) {
-	sc := s.ctx.GetStochastikVars().StmtCtx
+	sc := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	origin := sc.IgnoreTruncate
 	defer func() {
 		sc.IgnoreTruncate = origin
@@ -254,7 +254,7 @@ func (s *testEvaluatorSuite) TestBitOr(c *C) {
 	}
 
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.Or, s.primitiveValsToConstants(t.args)...)
+		f, err := newFunctionForTest(s.ctx, ast.Or, s.primitiveValsToCouplingConstantWithRadixs(t.args)...)
 		c.Assert(err, IsNil)
 		d, err := f.Eval(chunk.Event{})
 		if t.getErr {
@@ -278,7 +278,7 @@ func (s *testEvaluatorSuite) TestBitOr(c *C) {
 }
 
 func (s *testEvaluatorSuite) TestLogicOr(c *C) {
-	sc := s.ctx.GetStochastikVars().StmtCtx
+	sc := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	origin := sc.IgnoreTruncate
 	defer func() {
 		sc.IgnoreTruncate = origin
@@ -320,7 +320,7 @@ func (s *testEvaluatorSuite) TestLogicOr(c *C) {
 	}
 
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.LogicOr, s.primitiveValsToConstants(t.args)...)
+		f, err := newFunctionForTest(s.ctx, ast.LogicOr, s.primitiveValsToCouplingConstantWithRadixs(t.args)...)
 		c.Assert(err, IsNil)
 		d, err := f.Eval(chunk.Event{})
 		if t.getErr {
@@ -358,7 +358,7 @@ func (s *testEvaluatorSuite) TestBitAnd(c *C) {
 	}
 
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.And, s.primitiveValsToConstants(t.args)...)
+		f, err := newFunctionForTest(s.ctx, ast.And, s.primitiveValsToCouplingConstantWithRadixs(t.args)...)
 		c.Assert(err, IsNil)
 		d, err := f.Eval(chunk.Event{})
 		if t.getErr {
@@ -382,7 +382,7 @@ func (s *testEvaluatorSuite) TestBitAnd(c *C) {
 }
 
 func (s *testEvaluatorSuite) TestBitNeg(c *C) {
-	sc := s.ctx.GetStochastikVars().StmtCtx
+	sc := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	origin := sc.IgnoreTruncate
 	defer func() {
 		sc.IgnoreTruncate = origin
@@ -403,7 +403,7 @@ func (s *testEvaluatorSuite) TestBitNeg(c *C) {
 	}
 
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.BitNeg, s.primitiveValsToConstants(t.args)...)
+		f, err := newFunctionForTest(s.ctx, ast.BitNeg, s.primitiveValsToCouplingConstantWithRadixs(t.args)...)
 		c.Assert(err, IsNil)
 		d, err := f.Eval(chunk.Event{})
 		if t.getErr {
@@ -427,7 +427,7 @@ func (s *testEvaluatorSuite) TestBitNeg(c *C) {
 }
 
 func (s *testEvaluatorSuite) TestUnaryNot(c *C) {
-	sc := s.ctx.GetStochastikVars().StmtCtx
+	sc := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	origin := sc.IgnoreTruncate
 	defer func() {
 		sc.IgnoreTruncate = origin
@@ -454,7 +454,7 @@ func (s *testEvaluatorSuite) TestUnaryNot(c *C) {
 	}
 
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.UnaryNot, s.primitiveValsToConstants(t.args)...)
+		f, err := newFunctionForTest(s.ctx, ast.UnaryNot, s.primitiveValsToCouplingConstantWithRadixs(t.args)...)
 		c.Assert(err, IsNil)
 		d, err := f.Eval(chunk.Event{})
 		if t.getErr {
@@ -478,7 +478,7 @@ func (s *testEvaluatorSuite) TestUnaryNot(c *C) {
 }
 
 func (s *testEvaluatorSuite) TestIsTrueOrFalse(c *C) {
-	sc := s.ctx.GetStochastikVars().StmtCtx
+	sc := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	origin := sc.IgnoreTruncate
 	defer func() {
 		sc.IgnoreTruncate = origin
@@ -543,7 +543,7 @@ func (s *testEvaluatorSuite) TestIsTrueOrFalse(c *C) {
 	}
 
 	for _, tc := range testCases {
-		isTrueSig, err := funcs[ast.IsTruthWithoutNull].getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(tc.args...)))
+		isTrueSig, err := funcs[ast.IsTruthWithoutNull].getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(tc.args...)))
 		c.Assert(err, IsNil)
 		c.Assert(isTrueSig, NotNil)
 
@@ -553,7 +553,7 @@ func (s *testEvaluatorSuite) TestIsTrueOrFalse(c *C) {
 	}
 
 	for _, tc := range testCases {
-		isFalseSig, err := funcs[ast.IsFalsity].getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(tc.args...)))
+		isFalseSig, err := funcs[ast.IsFalsity].getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(tc.args...)))
 		c.Assert(err, IsNil)
 		c.Assert(isFalseSig, NotNil)
 
@@ -564,7 +564,7 @@ func (s *testEvaluatorSuite) TestIsTrueOrFalse(c *C) {
 }
 
 func (s *testEvaluatorSuite) TestLogicXor(c *C) {
-	sc := s.ctx.GetStochastikVars().StmtCtx
+	sc := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	origin := sc.IgnoreTruncate
 	defer func() {
 		sc.IgnoreTruncate = origin
@@ -603,7 +603,7 @@ func (s *testEvaluatorSuite) TestLogicXor(c *C) {
 	}
 
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.LogicXor, s.primitiveValsToConstants(t.args)...)
+		f, err := newFunctionForTest(s.ctx, ast.LogicXor, s.primitiveValsToCouplingConstantWithRadixs(t.args)...)
 		c.Assert(err, IsNil)
 		d, err := f.Eval(chunk.Event{})
 		if t.getErr {

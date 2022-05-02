@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,15 +16,15 @@ package core
 import (
 	"strings"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression/aggregation"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/expression/aggregation"
-	"github.com/whtcorpsinc/milevadb/planner/soliton"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 // PBPlanBuilder uses to build physical plan from posetPosetDag protocol buffers.
@@ -114,7 +114,7 @@ func (b *PBPlanBuilder) buildBlockScanSchema(tblInfo *perceptron.BlockInfo, colu
 				continue
 			}
 			newDefCaus := &expression.DeferredCauset{
-				UniqueID: b.sctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+				UniqueID: b.sctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 				ID:       col.ID,
 				RetType:  &col.FieldType,
 			}
@@ -125,7 +125,7 @@ func (b *PBPlanBuilder) buildBlockScanSchema(tblInfo *perceptron.BlockInfo, colu
 }
 
 func (b *PBPlanBuilder) pbToSelection(e *fidelpb.Executor) (PhysicalPlan, error) {
-	conds, err := expression.PBToExprs(e.Selection.Conditions, b.tps, b.sctx.GetStochastikVars().StmtCtx)
+	conds, err := expression.PBToExprs(e.Selection.Conditions, b.tps, b.sctx.GetStochaseinstein_dbars().StmtCtx)
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +137,7 @@ func (b *PBPlanBuilder) pbToSelection(e *fidelpb.Executor) (PhysicalPlan, error)
 
 func (b *PBPlanBuilder) pbToTopN(e *fidelpb.Executor) (PhysicalPlan, error) {
 	topN := e.TopN
-	sc := b.sctx.GetStochastikVars().StmtCtx
+	sc := b.sctx.GetStochaseinstein_dbars().StmtCtx
 	byItems := make([]*soliton.ByItems, 0, len(topN.OrderBy))
 	for _, item := range topN.OrderBy {
 		expr, err := expression.PBToExpr(item.Expr, b.tps, sc)
@@ -184,7 +184,7 @@ func (b *PBPlanBuilder) builPosetDaggSchema(aggFuncs []*aggregation.AggFuncDesc,
 	schemaReplicant := expression.NewSchema(make([]*expression.DeferredCauset, 0, len(aggFuncs)+len(groupBys))...)
 	for _, agg := range aggFuncs {
 		newDefCaus := &expression.DeferredCauset{
-			UniqueID: b.sctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+			UniqueID: b.sctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 			RetType:  agg.RetTp,
 		}
 		schemaReplicant.Append(newDefCaus)
@@ -202,7 +202,7 @@ func (b *PBPlanBuilder) getAggInfo(executor *fidelpb.Executor) ([]*aggregation.A
 		}
 		aggFuncs = append(aggFuncs, aggFunc)
 	}
-	groupBys, err := expression.PBToExprs(executor.Aggregation.GetGroupBy(), b.tps, b.sctx.GetStochastikVars().StmtCtx)
+	groupBys, err := expression.PBToExprs(executor.Aggregation.GetGroupBy(), b.tps, b.sctx.GetStochaseinstein_dbars().StmtCtx)
 	if err != nil {
 		return nil, nil, errors.Trace(err)
 	}

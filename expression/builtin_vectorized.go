@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ import (
 
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 // defCausumnBufferSlabPredictor is used to allocate and release defCausumn buffer in vectorized evaluation.
@@ -49,7 +49,7 @@ var globalDeferredCausetSlabPredictor = newLocalSliceBuffer(1024)
 
 func newBuffer(evalType types.EvalType, capacity int) (*chunk.DeferredCauset, error) {
 	switch evalType {
-	case types.ETInt:
+	case types.CausetEDN:
 		return chunk.NewDeferredCauset(types.NewFieldType(allegrosql.TypeLonglong), capacity), nil
 	case types.ETReal:
 		return chunk.NewDeferredCauset(types.NewFieldType(allegrosql.TypeDouble), capacity), nil

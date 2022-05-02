@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,14 +16,14 @@ package core
 import (
 	"fmt"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/property"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/planner/property"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 var _ = Suite(&testJoinReorderDPSuite{})
@@ -35,7 +35,7 @@ type testJoinReorderDPSuite struct {
 
 func (s *testJoinReorderDPSuite) SetUpTest(c *C) {
 	s.ctx = MockContext()
-	s.ctx.GetStochastikVars().PlanID = -1
+	s.ctx.GetStochaseinstein_dbars().PlanID = -1
 }
 
 type mockLogicalJoin struct {
@@ -150,9 +150,9 @@ func (s *testJoinReorderDPSuite) newDataSource(name string, count int) LogicalPl
 	tan := perceptron.NewCIStr(name)
 	ds.BlockAsName = &tan
 	ds.schemaReplicant = expression.NewSchema()
-	s.ctx.GetStochastikVars().PlanDeferredCausetID++
+	s.ctx.GetStochaseinstein_dbars().PlanDeferredCausetID++
 	ds.schemaReplicant.Append(&expression.DeferredCauset{
-		UniqueID: s.ctx.GetStochastikVars().PlanDeferredCausetID,
+		UniqueID: s.ctx.GetStochaseinstein_dbars().PlanDeferredCausetID,
 		RetType:  types.NewFieldType(allegrosql.TypeLonglong),
 	})
 	ds.stats = &property.StatsInfo{

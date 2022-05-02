@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,24 +18,24 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression/aggregation"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/collate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/hint"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/stringutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	driver "github.com/whtcorpsinc/MilevaDB-Prod/types/berolinaAllegroSQL_driver"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/charset"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/opcode"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/expression/aggregation"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/collate"
-	"github.com/whtcorpsinc/milevadb/soliton/hint"
-	"github.com/whtcorpsinc/milevadb/soliton/stringutil"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
-	driver "github.com/whtcorpsinc/milevadb/types/berolinaAllegroSQL_driver"
 )
 
 // EvalSubqueryFirstRow evaluates incorrelated subqueries once, and get first event.
@@ -56,8 +56,8 @@ func evalAstExpr(sctx stochastikctx.Context, expr ast.ExprNode) (types.Causet, e
 // rewriteAstExpr rewrites ast expression directly.
 func rewriteAstExpr(sctx stochastikctx.Context, expr ast.ExprNode, schemaReplicant *expression.Schema, names types.NameSlice) (expression.Expression, error) {
 	var is schemareplicant.SchemaReplicant
-	if sctx.GetStochastikVars().TxnCtx.SchemaReplicant != nil {
-		is = sctx.GetStochastikVars().TxnCtx.SchemaReplicant.(schemareplicant.SchemaReplicant)
+	if sctx.GetStochaseinstein_dbars().TxnCtx.SchemaReplicant != nil {
+		is = sctx.GetStochaseinstein_dbars().TxnCtx.SchemaReplicant.(schemareplicant.SchemaReplicant)
 	}
 	b := NewPlanBuilder(sctx, is, &hint.BlockHintProcessor{})
 	fakePlan := LogicalBlockDual{}.Init(sctx, 0)
@@ -542,7 +542,7 @@ func (er *expressionRewriter) handleOtherComparableSubq(lexpr, rexpr expression.
 
 	// Create a column and append it to the schemaReplicant of that aggregation.
 	colMaxOrMin := &expression.DeferredCauset{
-		UniqueID: er.sctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+		UniqueID: er.sctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 		RetType:  funcMaxOrMin.RetTp,
 	}
 	schemaReplicant := expression.NewSchema(colMaxOrMin)
@@ -566,7 +566,7 @@ func (er *expressionRewriter) buildQuantifierPlan(plan4Agg *LogicalAggregation, 
 		return
 	}
 	colSum := &expression.DeferredCauset{
-		UniqueID: er.sctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+		UniqueID: er.sctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 		RetType:  funcSum.RetTp,
 	}
 	plan4Agg.AggFuncs = append(plan4Agg.AggFuncs, funcSum)
@@ -580,7 +580,7 @@ func (er *expressionRewriter) buildQuantifierPlan(plan4Agg *LogicalAggregation, 
 		return
 	}
 	colCount := &expression.DeferredCauset{
-		UniqueID: er.sctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+		UniqueID: er.sctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 		RetType:  funcCount.RetTp,
 	}
 	plan4Agg.AggFuncs = append(plan4Agg.AggFuncs, funcCount)
@@ -627,7 +627,7 @@ func (er *expressionRewriter) buildQuantifierPlan(plan4Agg *LogicalAggregation, 
 	proj.SetSchema(expression.NewSchema(joinSchema.Clone().DeferredCausets[:outerSchemaLen]...))
 	proj.Exprs = append(proj.Exprs, cond)
 	proj.schemaReplicant.Append(&expression.DeferredCauset{
-		UniqueID: er.sctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+		UniqueID: er.sctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 		RetType:  cond.GetType(),
 	})
 	proj.names = append(proj.names, types.EmptyName)
@@ -659,11 +659,11 @@ func (er *expressionRewriter) handleNEAny(lexpr, rexpr expression.Expression, np
 	}
 	plan4Agg.SetChildren(np)
 	maxResultDefCaus := &expression.DeferredCauset{
-		UniqueID: er.sctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+		UniqueID: er.sctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 		RetType:  maxFunc.RetTp,
 	}
 	count := &expression.DeferredCauset{
-		UniqueID: er.sctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+		UniqueID: er.sctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 		RetType:  countFunc.RetTp,
 	}
 	plan4Agg.names = append(plan4Agg.names, types.EmptyName, types.EmptyName)
@@ -696,12 +696,12 @@ func (er *expressionRewriter) handleEQAll(lexpr, rexpr expression.Expression, np
 	plan4Agg.SetChildren(np)
 	plan4Agg.names = append(plan4Agg.names, types.EmptyName)
 	firstRowResultDefCaus := &expression.DeferredCauset{
-		UniqueID: er.sctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+		UniqueID: er.sctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 		RetType:  firstRowFunc.RetTp,
 	}
 	plan4Agg.names = append(plan4Agg.names, types.EmptyName)
 	count := &expression.DeferredCauset{
-		UniqueID: er.sctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+		UniqueID: er.sctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 		RetType:  countFunc.RetTp,
 	}
 	plan4Agg.SetSchema(expression.NewSchema(firstRowResultDefCaus, count))
@@ -731,10 +731,10 @@ func (er *expressionRewriter) handleExistSubquery(ctx context.Context, v *ast.Ex
 		er.ctxStackAppend(er.p.Schema().DeferredCausets[er.p.Schema().Len()-1], er.p.OutputNames()[er.p.Schema().Len()-1])
 	} else {
 		// We don't want nth_plan hint to affect separately executed subqueries here, so disable nth_plan temporarily.
-		NthPlanBackup := er.sctx.GetStochastikVars().StmtCtx.StmtHints.ForceNthPlan
-		er.sctx.GetStochastikVars().StmtCtx.StmtHints.ForceNthPlan = -1
+		NthPlanBackup := er.sctx.GetStochaseinstein_dbars().StmtCtx.StmtHints.ForceNthPlan
+		er.sctx.GetStochaseinstein_dbars().StmtCtx.StmtHints.ForceNthPlan = -1
 		physicalPlan, _, err := DoOptimize(ctx, er.sctx, er.b.optFlag, np)
-		er.sctx.GetStochastikVars().StmtCtx.StmtHints.ForceNthPlan = NthPlanBackup
+		er.sctx.GetStochaseinstein_dbars().StmtCtx.StmtHints.ForceNthPlan = NthPlanBackup
 		if err != nil {
 			er.err = err
 			return v, true
@@ -840,7 +840,7 @@ func (er *expressionRewriter) handleInSubquery(ctx context.Context, v *ast.Patte
 	// and has no correlated column from the current level plan(if the correlated column is from upper level,
 	// we can treat it as constant, because the upper LogicalApply cannot be eliminated since current node is a join node),
 	// and don't need to append a scalar value, we can rewrite it to inner join.
-	if er.sctx.GetStochastikVars().GetAllowInSubqToJoinAnPosetDagg() && !v.Not && !asScalar && len(extractCorDeferredCausetsBySchema4LogicalPlan(np, er.p.Schema())) == 0 && collFlag {
+	if er.sctx.GetStochaseinstein_dbars().GetAllowInSubqToJoinAnPosetDagg() && !v.Not && !asScalar && len(extractCorDeferredCausetsBySchema4LogicalPlan(np, er.p.Schema())) == 0 && collFlag {
 		// We need to try to eliminate the agg and the projection produced by this operation.
 		er.b.optFlag |= flagEliminateAgg
 		er.b.optFlag |= flagEliminateProjection
@@ -905,10 +905,10 @@ func (er *expressionRewriter) handleScalarSubquery(ctx context.Context, v *ast.S
 		return v, true
 	}
 	// We don't want nth_plan hint to affect separately executed subqueries here, so disable nth_plan temporarily.
-	NthPlanBackup := er.sctx.GetStochastikVars().StmtCtx.StmtHints.ForceNthPlan
-	er.sctx.GetStochastikVars().StmtCtx.StmtHints.ForceNthPlan = -1
+	NthPlanBackup := er.sctx.GetStochaseinstein_dbars().StmtCtx.StmtHints.ForceNthPlan
+	er.sctx.GetStochaseinstein_dbars().StmtCtx.StmtHints.ForceNthPlan = -1
 	physicalPlan, _, err := DoOptimize(ctx, er.sctx, er.b.optFlag, np)
-	er.sctx.GetStochastikVars().StmtCtx.StmtHints.ForceNthPlan = NthPlanBackup
+	er.sctx.GetStochaseinstein_dbars().StmtCtx.StmtHints.ForceNthPlan = NthPlanBackup
 	if err != nil {
 		er.err = err
 		return v, true
@@ -921,7 +921,7 @@ func (er *expressionRewriter) handleScalarSubquery(ctx context.Context, v *ast.S
 	if np.Schema().Len() > 1 {
 		newDefCauss := make([]expression.Expression, 0, np.Schema().Len())
 		for i, data := range event {
-			newDefCauss = append(newDefCauss, &expression.Constant{
+			newDefCauss = append(newDefCauss, &expression.CouplingConstantWithRadix{
 				Value:   data,
 				RetType: np.Schema().DeferredCausets[i].GetType()})
 		}
@@ -932,7 +932,7 @@ func (er *expressionRewriter) handleScalarSubquery(ctx context.Context, v *ast.S
 		}
 		er.ctxStackAppend(expr, types.EmptyName)
 	} else {
-		er.ctxStackAppend(&expression.Constant{
+		er.ctxStackAppend(&expression.CouplingConstantWithRadix{
 			Value:   event[0],
 			RetType: np.Schema().DeferredCausets[0].GetType(),
 		}, types.EmptyName)
@@ -954,7 +954,7 @@ func (er *expressionRewriter) Leave(originInNode ast.Node) (retNode ast.Node, ok
 		*ast.SubqueryExpr, *ast.ExistsSubqueryExpr, *ast.CompareSubqueryExpr, *ast.ValuesExpr, *ast.WindowFuncExpr, *ast.BlockNameExpr:
 	case *driver.ValueExpr:
 		v.Causet.SetValue(v.Causet.GetValue(), &v.Type)
-		value := &expression.Constant{Value: v.Causet, RetType: &v.Type}
+		value := &expression.CouplingConstantWithRadix{Value: v.Causet, RetType: &v.Type}
 		er.ctxStackAppend(value, types.EmptyName)
 	case *driver.ParamMarkerExpr:
 		var value expression.Expression
@@ -1026,17 +1026,17 @@ func (er *expressionRewriter) Leave(originInNode ast.Node) (retNode ast.Node, ok
 		er.evalDefaultExpr(v)
 	// TODO: Perhaps we don't need to transcode these back to generic integers/strings
 	case *ast.TrimDirectionExpr:
-		er.ctxStackAppend(&expression.Constant{
+		er.ctxStackAppend(&expression.CouplingConstantWithRadix{
 			Value:   types.NewIntCauset(int64(v.Direction)),
 			RetType: types.NewFieldType(allegrosql.TypeTiny),
 		}, types.EmptyName)
 	case *ast.TimeUnitExpr:
-		er.ctxStackAppend(&expression.Constant{
+		er.ctxStackAppend(&expression.CouplingConstantWithRadix{
 			Value:   types.NewStringCauset(v.Unit.String()),
 			RetType: types.NewFieldType(allegrosql.TypeVarchar),
 		}, types.EmptyName)
 	case *ast.GetFormatSelectorExpr:
-		er.ctxStackAppend(&expression.Constant{
+		er.ctxStackAppend(&expression.CouplingConstantWithRadix{
 			Value:   types.NewStringCauset(v.Selector.String()),
 			RetType: types.NewFieldType(allegrosql.TypeVarchar),
 		}, types.EmptyName)
@@ -1098,26 +1098,26 @@ func (er *expressionRewriter) checkTimePrecision(ft *types.FieldType) error {
 }
 
 func (er *expressionRewriter) useCache() bool {
-	return er.sctx.GetStochastikVars().StmtCtx.UseCache
+	return er.sctx.GetStochaseinstein_dbars().StmtCtx.UseCache
 }
 
 func (er *expressionRewriter) rewriteVariable(v *ast.VariableExpr) {
 	stkLen := len(er.ctxStack)
 	name := strings.ToLower(v.Name)
-	stochastikVars := er.b.ctx.GetStochastikVars()
+	stochaseinstein_dbars := er.b.ctx.GetStochaseinstein_dbars()
 	if !v.IsSystem {
 		if v.Value != nil {
 			er.ctxStack[stkLen-1], er.err = er.newFunction(ast.SetVar,
 				er.ctxStack[stkLen-1].GetType(),
-				expression.CausetToConstant(types.NewCauset(name), allegrosql.TypeString),
+				expression.CausetToCouplingConstantWithRadix(types.NewCauset(name), allegrosql.TypeString),
 				er.ctxStack[stkLen-1])
 			er.ctxNameStk[stkLen-1] = types.EmptyName
 			return
 		}
 		f, err := er.newFunction(ast.GetVar,
-			// TODO: Here is wrong, the stochastikVars should causetstore a name -> Causet map. Will fix it later.
+			// TODO: Here is wrong, the stochaseinstein_dbars should causetstore a name -> Causet map. Will fix it later.
 			types.NewFieldType(allegrosql.TypeString),
-			expression.CausetToConstant(types.NewStringCauset(name), allegrosql.TypeString))
+			expression.CausetToCouplingConstantWithRadix(types.NewStringCauset(name), allegrosql.TypeString))
 		if err != nil {
 			er.err = err
 			return
@@ -1142,17 +1142,17 @@ func (er *expressionRewriter) rewriteVariable(v *ast.VariableExpr) {
 	}
 	// Variable is @@gobal.variable_name or variable is only global sINTERLOCKe variable.
 	if v.IsGlobal || sysVar.SINTERLOCKe == variable.SINTERLOCKeGlobal {
-		val, err = variable.GetGlobalSystemVar(stochastikVars, name)
+		val, err = variable.GetGlobalSystemVar(stochaseinstein_dbars, name)
 	} else {
-		val, err = variable.GetStochastikSystemVar(stochastikVars, name)
+		val, err = variable.GetStochastikSystemVar(stochaseinstein_dbars, name)
 	}
 	if err != nil {
 		er.err = err
 		return
 	}
-	e := expression.CausetToConstant(types.NewStringCauset(val), allegrosql.TypeVarString)
-	e.GetType().Charset, _ = er.sctx.GetStochastikVars().GetSystemVar(variable.CharacterSetConnection)
-	e.GetType().DefCauslate, _ = er.sctx.GetStochastikVars().GetSystemVar(variable.DefCauslationConnection)
+	e := expression.CausetToCouplingConstantWithRadix(types.NewStringCauset(val), allegrosql.TypeVarString)
+	e.GetType().Charset, _ = er.sctx.GetStochaseinstein_dbars().GetSystemVar(variable.CharacterSetConnection)
+	e.GetType().DefCauslate, _ = er.sctx.GetStochaseinstein_dbars().GetSystemVar(variable.DefCauslationConnection)
 	er.ctxStackAppend(e, types.EmptyName)
 }
 
@@ -1240,7 +1240,7 @@ func (er *expressionRewriter) positionToScalarFunc(v *ast.PositionExpr) {
 	if v.P != nil {
 		stkLen := len(er.ctxStack)
 		val := er.ctxStack[stkLen-1]
-		intNum, isNull, err := expression.GetIntFromConstant(er.sctx, val)
+		intNum, isNull, err := expression.GetIntFromCouplingConstantWithRadix(er.sctx, val)
 		str = "?"
 		if err == nil {
 			if isNull {
@@ -1293,11 +1293,11 @@ func (er *expressionRewriter) inToExpression(lLen int, not bool, tp *types.Field
 		er.ctxStackAppend(expression.NewNull(), types.EmptyName)
 		return
 	}
-	if leftEt == types.ETInt {
+	if leftEt == types.CausetEDN {
 		for i := 1; i < len(args); i++ {
-			if c, ok := args[i].(*expression.Constant); ok {
+			if c, ok := args[i].(*expression.CouplingConstantWithRadix); ok {
 				var isExceptional bool
-				args[i], isExceptional = expression.RefineComparedConstant(er.sctx, *leftFt, c, opcode.EQ)
+				args[i], isExceptional = expression.RefineComparedCouplingConstantWithRadix(er.sctx, *leftFt, c, opcode.EQ)
 				if isExceptional {
 					args[i] = c
 				}
@@ -1396,12 +1396,12 @@ func (er *expressionRewriter) patternLikeToExpression(v *ast.PatternLikeExpr) {
 		return
 	}
 
-	char, col := er.sctx.GetStochastikVars().GetCharsetInfo()
+	char, col := er.sctx.GetStochaseinstein_dbars().GetCharsetInfo()
 	var function expression.Expression
 	fieldType := &types.FieldType{}
 	isPatternExactMatch := false
 	// Treat predicate 'like' the same way as predicate '=' when it is an exact match.
-	if patExpression, ok := er.ctxStack[l-1].(*expression.Constant); ok {
+	if patExpression, ok := er.ctxStack[l-1].(*expression.CouplingConstantWithRadix); ok {
 		patString, isNull, err := patExpression.EvalString(nil, chunk.Row{})
 		if err != nil {
 			er.err = err
@@ -1416,7 +1416,7 @@ func (er *expressionRewriter) patternLikeToExpression(v *ast.PatternLikeExpr) {
 				}
 				types.DefaultTypeForValue(string(patValue), fieldType, char, col)
 				function, er.err = er.constructBinaryOpFunction(er.ctxStack[l-2],
-					&expression.Constant{Value: types.NewStringCauset(string(patValue)), RetType: fieldType},
+					&expression.CouplingConstantWithRadix{Value: types.NewStringCauset(string(patValue)), RetType: fieldType},
 					op)
 				isPatternExactMatch = true
 			}
@@ -1425,7 +1425,7 @@ func (er *expressionRewriter) patternLikeToExpression(v *ast.PatternLikeExpr) {
 	if !isPatternExactMatch {
 		types.DefaultTypeForValue(int(v.Escape), fieldType, char, col)
 		function = er.notToExpression(v.Not, ast.Like, &v.Type,
-			er.ctxStack[l-2], er.ctxStack[l-1], &expression.Constant{Value: types.NewIntCauset(int64(v.Escape)), RetType: fieldType})
+			er.ctxStack[l-2], er.ctxStack[l-1], &expression.CouplingConstantWithRadix{Value: types.NewIntCauset(int64(v.Escape)), RetType: fieldType})
 	}
 
 	er.ctxStackPop(2)
@@ -1542,7 +1542,7 @@ func (er *expressionRewriter) rewriteFuncCall(v *ast.FuncCallExpr) bool {
 		// NULL
 		nullTp := types.NewFieldType(allegrosql.TypeNull)
 		nullTp.Flen, nullTp.Decimal = allegrosql.GetDefaultFieldLengthAndDecimal(allegrosql.TypeNull)
-		paramNull := &expression.Constant{
+		paramNull := &expression.CouplingConstantWithRadix{
 			Value:   types.NewCauset(nil),
 			RetType: nullTp,
 		}
@@ -1582,7 +1582,7 @@ func (er *expressionRewriter) funcCallToExpression(v *ast.FuncCallExpr) {
 			er.ctxStackAppend(function, types.EmptyName)
 		} else {
 			function, er.err = expression.NewFunctionBase(er.sctx, v.FnName.L, &v.Type, args...)
-			c := &expression.Constant{Value: types.NewCauset(nil), RetType: function.GetType().Clone(), DeferredExpr: function}
+			c := &expression.CouplingConstantWithRadix{Value: types.NewCauset(nil), RetType: function.GetType().Clone(), DeferredExpr: function}
 			er.ctxStackAppend(c, types.EmptyName)
 		}
 	} else {
@@ -1598,7 +1598,7 @@ func (er *expressionRewriter) toBlock(v *ast.BlockName) {
 	if len(v.Schema.L) != 0 {
 		fullName = v.Schema.L + "." + fullName
 	}
-	val := &expression.Constant{
+	val := &expression.CouplingConstantWithRadix{
 		Value:   types.NewCauset(fullName),
 		RetType: types.NewFieldType(allegrosql.TypeString),
 	}
@@ -1690,7 +1690,7 @@ func (er *expressionRewriter) evalDefaultExpr(v *ast.DefaultExpr) {
 	dbName := name.DBName
 	if dbName.O == "" {
 		// if database name is not specified, use current database name
-		dbName = perceptron.NewCIStr(er.sctx.GetStochastikVars().CurrentDB)
+		dbName = perceptron.NewCIStr(er.sctx.GetStochaseinstein_dbars().CurrentDB)
 	}
 	if name.OrigTblName.O == "" {
 		// column is evaluated by some expressions, for example:
@@ -1715,7 +1715,7 @@ func (er *expressionRewriter) evalDefaultExpr(v *ast.DefaultExpr) {
 		return
 	}
 	isCurrentTimestamp := hasCurrentDatetimeDefault(col)
-	var val *expression.Constant
+	var val *expression.CouplingConstantWithRadix
 	switch {
 	case isCurrentTimestamp && col.Tp == allegrosql.TypeDatetime:
 		// for DATETIME column with current_timestamp, use NULL to be compatible with MyALLEGROSQL 5.7
@@ -1723,7 +1723,7 @@ func (er *expressionRewriter) evalDefaultExpr(v *ast.DefaultExpr) {
 	case isCurrentTimestamp && col.Tp == allegrosql.TypeTimestamp:
 		// for TIMESTAMP column with current_timestamp, use 0 to be compatible with MyALLEGROSQL 5.7
 		zero := types.NewTime(types.ZeroCoreTime, allegrosql.TypeTimestamp, int8(col.Decimal))
-		val = &expression.Constant{
+		val = &expression.CouplingConstantWithRadix{
 			Value:   types.NewCauset(zero),
 			RetType: types.NewFieldType(allegrosql.TypeTimestamp),
 		}

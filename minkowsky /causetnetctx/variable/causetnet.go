@@ -9,17 +9,17 @@ import (
 	"time"
 
 	"github.com/twmb/murmur3"
-	pumpcli "github.com/whtcorpsinc/MilevaDB-tools/MilevaDB-binlog/pump_client"
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/ast"
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/auth"
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/mysql"
-	"github.com/whtcorpsinc/MilevaDB/causetnetctx/stmtctx"
-	"github.com/whtcorpsinc/MilevaDB/ekv"
-	"github.com/whtcorpsinc/MilevaDB/meta/autoid"
-	"github.com/whtcorpsinc/MilevaDB/store/einsteindb/oracle"
-	"github.com/whtcorpsinc/MilevaDB/types"
-	"github.com/whtcorpsinc/MilevaDB/util/chunk"
-	"github.com/whtcorpsinc/MilevaDB/util/rowcodec"
+	pumpcli "github.com/whtcorpsinc/MilevaDB-Prod-tools/MilevaDB-binlog/pump_client"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/ast"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/auth"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/mysql"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetnetctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid"
+	"github.com/whtcorpsinc/MilevaDB-Prod/store/einsteindb/oracle"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/rowcodec"
 )
 
 var preparedStmtCount int64
@@ -266,10 +266,10 @@ type WriteStmtBufs struct {
 	// RowValBuf is used by tablecodec.EncodeRow, to reduce runtime.growslice.
 	RowValBuf []byte
 	// AddRowValues use to store temp insert rows value, to reduce memory allocations when importing data.
-	AddRowValues []types.Datum
+	AddRowValues []types.CausetObjectQL
 
 	// IndexValsBuf is used by index.FetchValues
-	IndexValsBuf []types.Datum
+	IndexValsBuf []types.CausetObjectQL
 	// IndexKeyBuf is used by index.GenIndexKey
 	IndexKeyBuf []byte
 }
@@ -283,7 +283,7 @@ func (ib *WriteStmtBufs) clean() {
 
 // TableSnapshot represents a data snapshot of the table contained in `information_schema`.
 type TableSnapshot struct {
-	Rows [][]types.Datum
+	Rows [][]types.CausetObjectQL
 	Err  error
 }
 
@@ -327,7 +327,7 @@ type CausetNetVars struct {
 	// UsersLock is a dagger for user defined variables.
 	UsersLock sync.RWMutex
 	// Users are user defined variables.
-	Users map[string]types.Datum
+	Users map[string]types.CausetObjectQL
 	// systems variables, don't modify it directly, use GetSystemVar/SetSystemVar method.
 	systems map[string]string
 	// SysWarningCount is the system variable "warning_count", because it is on the hot path, so we extract it from the systems

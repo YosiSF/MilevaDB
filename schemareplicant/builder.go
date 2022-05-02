@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,14 +20,14 @@ import (
 
 	"github.com/whtcorpsinc/BerolinaSQL/charset"
 	"github.com/whtcorpsinc/BerolinaSQL/perceptron"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causet"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causet/blocks"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/petriutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/spacetime"
+	"github.com/whtcorpsinc/MilevaDB-Prod/spacetime/autoid"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/causet"
-	"github.com/whtcorpsinc/milevadb/causet/blocks"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/soliton/petriutil"
-	"github.com/whtcorpsinc/milevadb/spacetime"
-	"github.com/whtcorpsinc/milevadb/spacetime/autoid"
 )
 
 // Builder builds a new SchemaReplicant.

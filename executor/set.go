@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,27 +18,27 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/plugin"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/defCauslate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/gcutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/stmtsummary"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/stringutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/charset"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/plugin"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/defCauslate"
-	"github.com/whtcorpsinc/milevadb/soliton/gcutil"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/stmtsummary"
-	"github.com/whtcorpsinc/milevadb/soliton/stringutil"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
 	"go.uber.org/zap"
 )
 
 const (
-	sINTERLOCKeGlobal  = "global"
+	sINTERLOCKeGlobal     = "global"
 	sINTERLOCKeStochastik = "stochastik"
 )
 
@@ -57,7 +57,7 @@ func (e *SetExecutor) Next(ctx context.Context, req *chunk.Chunk) error {
 		return nil
 	}
 	e.done = true
-	stochastikVars := e.ctx.GetStochastikVars()
+	stochaseinstein_dbars := e.ctx.GetStochaseinstein_dbars()
 	for _, v := range e.vars {
 		// Variable is case insensitive, we use lower case.
 		if v.Name == ast.SetNames || v.Name == ast.SetCharset {
@@ -69,7 +69,7 @@ func (e *SetExecutor) Next(ctx context.Context, req *chunk.Chunk) error {
 				}
 				continue
 			}
-			dt, err := v.Expr.(*expression.Constant).Eval(chunk.Event{})
+			dt, err := v.Expr.(*expression.CouplingConstantWithRadix).Eval(chunk.Event{})
 			if err != nil {
 				return err
 			}
@@ -93,14 +93,14 @@ func (e *SetExecutor) Next(ctx context.Context, req *chunk.Chunk) error {
 			}
 
 			if value.IsNull() {
-				delete(stochastikVars.Users, name)
+				delete(stochaseinstein_dbars.Users, name)
 			} else {
 				svalue, err1 := value.ToString()
 				if err1 != nil {
 					return err1
 				}
 
-				stochastikVars.SetUserVar(name, stringutil.INTERLOCKy(svalue), value.DefCauslation())
+				stochaseinstein_dbars.SetUserVar(name, stringutil.INTERLOCKy(svalue), value.DefCauslation())
 			}
 			continue
 		}
@@ -128,7 +128,7 @@ func (e *SetExecutor) getSynonyms(varName string) []string {
 }
 
 func (e *SetExecutor) setSysVariable(name string, v *expression.VarAssignment) error {
-	stochastikVars := e.ctx.GetStochastikVars()
+	stochaseinstein_dbars := e.ctx.GetStochaseinstein_dbars()
 	sysVar := variable.GetSysVar(name)
 	if sysVar == nil {
 		return variable.ErrUnknownSystemVar.GenWithStackByArgs(name)
@@ -155,14 +155,14 @@ func (e *SetExecutor) setSysVariable(name string, v *expression.VarAssignment) e
 		if err != nil {
 			return err
 		}
-		err = stochastikVars.GlobalVarsAccessor.SetGlobalSysVar(name, valStr)
+		err = stochaseinstein_dbars.GlobalVarsAccessor.SetGlobalSysVar(name, valStr)
 		if err != nil {
 			return err
 		}
 		err = plugin.ForeachPlugin(plugin.Audit, func(p *plugin.Plugin) error {
 			auditPlugin := plugin.DeclareAuditManifest(p.Manifest)
 			if auditPlugin.OnGlobalVariableEvent != nil {
-				auditPlugin.OnGlobalVariableEvent(context.Background(), e.ctx.GetStochastikVars(), name, valStr)
+				auditPlugin.OnGlobalVariableEvent(context.Background(), e.ctx.GetStochaseinstein_dbars(), name, valStr)
 			}
 			return nil
 		})
@@ -179,29 +179,29 @@ func (e *SetExecutor) setSysVariable(name string, v *expression.VarAssignment) e
 		if err != nil {
 			return err
 		}
-		oldSnapshotTS := stochastikVars.SnapshotTS
-		if name == variable.TxnIsolationOneShot && stochastikVars.InTxn() {
+		oldSnapshotTS := stochaseinstein_dbars.SnapshotTS
+		if name == variable.TxnIsolationOneShot && stochaseinstein_dbars.InTxn() {
 			return errors.Trace(ErrCantChangeTxCharacteristics)
 		}
 		if name == variable.MilevaDBFoundInPlanCache {
-			stochastikVars.StmtCtx.AppendWarning(fmt.Errorf("Set operation for '%s' will not take effect", variable.MilevaDBFoundInPlanCache))
+			stochaseinstein_dbars.StmtCtx.AppendWarning(fmt.Errorf("Set operation for '%s' will not take effect", variable.MilevaDBFoundInPlanCache))
 			return nil
 		}
-		err = variable.SetStochastikSystemVar(stochastikVars, name, value)
+		err = variable.SetStochastikSystemVar(stochaseinstein_dbars, name, value)
 		if err != nil {
 			return err
 		}
-		newSnapshotIsSet := stochastikVars.SnapshotTS > 0 && stochastikVars.SnapshotTS != oldSnapshotTS
+		newSnapshotIsSet := stochaseinstein_dbars.SnapshotTS > 0 && stochaseinstein_dbars.SnapshotTS != oldSnapshotTS
 		if newSnapshotIsSet {
-			err = gcutil.ValidateSnapshot(e.ctx, stochastikVars.SnapshotTS)
+			err = gcutil.ValidateSnapshot(e.ctx, stochaseinstein_dbars.SnapshotTS)
 			if err != nil {
-				stochastikVars.SnapshotTS = oldSnapshotTS
+				stochaseinstein_dbars.SnapshotTS = oldSnapshotTS
 				return err
 			}
 		}
 		err = e.loadSnapshotSchemaReplicantIfNeeded(name)
 		if err != nil {
-			stochastikVars.SnapshotTS = oldSnapshotTS
+			stochaseinstein_dbars.SnapshotTS = oldSnapshotTS
 			return err
 		}
 		if value.IsNull() {
@@ -213,11 +213,11 @@ func (e *SetExecutor) setSysVariable(name string, v *expression.VarAssignment) e
 		}
 	}
 	if sINTERLOCKeStr == sINTERLOCKeGlobal {
-		logutil.BgLogger().Info(fmt.Sprintf("set %s var", sINTERLOCKeStr), zap.Uint64("conn", stochastikVars.ConnectionID), zap.String("name", name), zap.String("val", valStr))
+		logutil.BgLogger().Info(fmt.Sprintf("set %s var", sINTERLOCKeStr), zap.Uint64("conn", stochaseinstein_dbars.ConnectionID), zap.String("name", name), zap.String("val", valStr))
 	} else {
 		// Clients are often noisy in setting stochastik variables such as
 		// autocommit, timezone, query cache
-		logutil.BgLogger().Debug(fmt.Sprintf("set %s var", sINTERLOCKeStr), zap.Uint64("conn", stochastikVars.ConnectionID), zap.String("name", name), zap.String("val", valStr))
+		logutil.BgLogger().Debug(fmt.Sprintf("set %s var", sINTERLOCKeStr), zap.Uint64("conn", stochaseinstein_dbars.ConnectionID), zap.String("name", name), zap.String("val", valStr))
 	}
 
 	switch name {
@@ -255,34 +255,34 @@ func (e *SetExecutor) setCharset(cs, co string, isSetName bool) error {
 			return charset.ErrDefCauslationCharsetMismatch.GenWithStackByArgs(defCausl.Name, cs)
 		}
 	}
-	stochastikVars := e.ctx.GetStochastikVars()
+	stochaseinstein_dbars := e.ctx.GetStochaseinstein_dbars()
 	if isSetName {
 		for _, v := range variable.SetNamesVariables {
-			if err = stochastikVars.SetSystemVar(v, cs); err != nil {
+			if err = stochaseinstein_dbars.SetSystemVar(v, cs); err != nil {
 				return errors.Trace(err)
 			}
 		}
-		return errors.Trace(stochastikVars.SetSystemVar(variable.DefCauslationConnection, co))
+		return errors.Trace(stochaseinstein_dbars.SetSystemVar(variable.DefCauslationConnection, co))
 	}
 	// Set charset statement, see also https://dev.allegrosql.com/doc/refman/8.0/en/set-character-set.html.
 	for _, v := range variable.SetCharsetVariables {
-		if err = stochastikVars.SetSystemVar(v, cs); err != nil {
+		if err = stochaseinstein_dbars.SetSystemVar(v, cs); err != nil {
 			return errors.Trace(err)
 		}
 	}
-	csDb, err := stochastikVars.GlobalVarsAccessor.GetGlobalSysVar(variable.CharsetDatabase)
+	csDb, err := stochaseinstein_dbars.GlobalVarsAccessor.GetGlobalSysVar(variable.CharsetDatabase)
 	if err != nil {
 		return err
 	}
-	coDb, err := stochastikVars.GlobalVarsAccessor.GetGlobalSysVar(variable.DefCauslationDatabase)
+	coDb, err := stochaseinstein_dbars.GlobalVarsAccessor.GetGlobalSysVar(variable.DefCauslationDatabase)
 	if err != nil {
 		return err
 	}
-	err = stochastikVars.SetSystemVar(variable.CharacterSetConnection, csDb)
+	err = stochaseinstein_dbars.SetSystemVar(variable.CharacterSetConnection, csDb)
 	if err != nil {
 		return errors.Trace(err)
 	}
-	return errors.Trace(stochastikVars.SetSystemVar(variable.DefCauslationConnection, coDb))
+	return errors.Trace(stochaseinstein_dbars.SetSystemVar(variable.DefCauslationConnection, coDb))
 }
 
 func (e *SetExecutor) getVarValue(v *expression.VarAssignment, sysVar *variable.SysVar) (value types.Causet, err error) {
@@ -293,7 +293,7 @@ func (e *SetExecutor) getVarValue(v *expression.VarAssignment, sysVar *variable.
 		if sysVar != nil {
 			value = types.NewStringCauset(sysVar.Value)
 		} else {
-			s, err1 := variable.GetGlobalSystemVar(e.ctx.GetStochastikVars(), v.Name)
+			s, err1 := variable.GetGlobalSystemVar(e.ctx.GetStochaseinstein_dbars(), v.Name)
 			if err1 != nil {
 				return value, err1
 			}
@@ -309,7 +309,7 @@ func (e *SetExecutor) loadSnapshotSchemaReplicantIfNeeded(name string) error {
 	if name != variable.MilevaDBSnapshot {
 		return nil
 	}
-	vars := e.ctx.GetStochastikVars()
+	vars := e.ctx.GetStochaseinstein_dbars()
 	if vars.SnapshotTS == 0 {
 		vars.SnapshotschemaReplicant = nil
 		return nil

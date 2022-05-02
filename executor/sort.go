@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,25 +19,25 @@ import (
 	"errors"
 	"sort"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/disk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/memory"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/expression"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/planner/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/disk"
-	"github.com/whtcorpsinc/milevadb/soliton/memory"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 // SortExec represents sorting executor.
 type SortExec struct {
 	baseExecutor
 
-	ByItems []*soliton.ByItems
-	Idx     int
-	fetched bool
-	schemaReplicant  *expression.Schema
+	ByItems         []*soliton.ByItems
+	Idx             int
+	fetched         bool
+	schemaReplicant *expression.Schema
 
 	keyExprs []expression.Expression
 	keyTypes []*types.FieldType
@@ -90,9 +90,9 @@ func (e *SortExec) Open(ctx context.Context) error {
 	// To avoid duplicated initialization for TopNExec.
 	if e.memTracker == nil {
 		e.memTracker = memory.NewTracker(e.id, -1)
-		e.memTracker.AttachTo(e.ctx.GetStochastikVars().StmtCtx.MemTracker)
+		e.memTracker.AttachTo(e.ctx.GetStochaseinstein_dbars().StmtCtx.MemTracker)
 		e.diskTracker = memory.NewTracker(e.id, -1)
-		e.diskTracker.AttachTo(e.ctx.GetStochastikVars().StmtCtx.DiskTracker)
+		e.diskTracker.AttachTo(e.ctx.GetStochaseinstein_dbars().StmtCtx.DiskTracker)
 	}
 	e.partitionList = e.partitionList[:0]
 	return e.children[0].Open(ctx)
@@ -139,14 +139,14 @@ func (e *SortExec) Next(ctx context.Context, req *chunk.Chunk) error {
 }
 
 type partitionPointer struct {
-	event         chunk.Event
+	event       chunk.Event
 	partitionID int
 	consumed    int
 }
 
 type multiWayMerge struct {
 	lessEventFunction func(rowI chunk.Event, rowJ chunk.Event) bool
-	elements        []partitionPointer
+	elements          []partitionPointer
 }
 
 func (h *multiWayMerge) Less(i, j int) bool {
@@ -221,7 +221,7 @@ func (e *SortExec) fetchEventChunks(ctx context.Context) error {
 				defer e.spillCausetAction.WaitForTest()
 			}
 		})
-		e.ctx.GetStochastikVars().StmtCtx.MemTracker.FallbackOldAndSetNewCausetAction(e.spillCausetAction)
+		e.ctx.GetStochaseinstein_dbars().StmtCtx.MemTracker.FallbackOldAndSetNewCausetAction(e.spillCausetAction)
 		e.rowChunks.GetDiskTracker().AttachTo(e.diskTracker)
 		e.rowChunks.GetDiskTracker().SetLabel(memory.LabelForEventChunks)
 	}
@@ -250,7 +250,7 @@ func (e *SortExec) fetchEventChunks(ctx context.Context) error {
 						defer e.spillCausetAction.WaitForTest()
 					}
 				})
-				e.ctx.GetStochastikVars().StmtCtx.MemTracker.FallbackOldAndSetNewCausetAction(e.spillCausetAction)
+				e.ctx.GetStochaseinstein_dbars().StmtCtx.MemTracker.FallbackOldAndSetNewCausetAction(e.spillCausetAction)
 				err = e.rowChunks.Add(chk)
 			}
 			if err != nil {
@@ -380,7 +380,7 @@ func (e *TopNExec) initPointers() {
 // Open implements the Executor Open interface.
 func (e *TopNExec) Open(ctx context.Context) error {
 	e.memTracker = memory.NewTracker(e.id, -1)
-	e.memTracker.AttachTo(e.ctx.GetStochastikVars().StmtCtx.MemTracker)
+	e.memTracker.AttachTo(e.ctx.GetStochaseinstein_dbars().StmtCtx.MemTracker)
 
 	e.fetched = false
 	e.Idx = 0

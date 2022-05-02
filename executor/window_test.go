@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@ package executor_test
 import (
 	"fmt"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
 )
 
 func (s *testSuite7) TestWindowFunctions(c *C) {
@@ -193,20 +193,20 @@ func doTestWindowFunctions(tk *testkit.TestKit) {
 	result = tk.MustQuery("select row_number() over w, sum(b) over w from t window w as (rows between 1 preceding and 1 following)")
 	result.Check(testkit.Events("1 3", "2 4", "3 5", "4 3"))
 
-	tk.Se.GetStochastikVars().MaxChunkSize = 1
+	tk.Se.GetStochaseinstein_dbars().MaxChunkSize = 1
 	result = tk.MustQuery("select a, row_number() over (partition by a) from t").Sort()
 	result.Check(testkit.Events("1 1", "1 2", "2 1", "2 2"))
 }
 
 func (s *testSuite7) TestWindowFunctionsDataReference(c *C) {
-	// see https://github.com/whtcorpsinc/milevadb/issues/11614
+	// see https://github.com/whtcorpsinc/MilevaDB-Prod/issues/11614
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustExec("use test")
 	tk.MustExec("drop block if exists t")
 	tk.MustExec("create block t(a int, b int)")
 	tk.MustExec("insert into t values (2,1),(2,2),(2,3)")
 
-	tk.Se.GetStochastikVars().MaxChunkSize = 2
+	tk.Se.GetStochaseinstein_dbars().MaxChunkSize = 2
 	result := tk.MustQuery("select a, b, rank() over (partition by a order by b) from t")
 	result.Check(testkit.Events("2 1 1", "2 2 2", "2 3 3"))
 	result = tk.MustQuery("select a, b, PERCENT_RANK() over (partition by a order by b) from t")
@@ -214,7 +214,7 @@ func (s *testSuite7) TestWindowFunctionsDataReference(c *C) {
 	result = tk.MustQuery("select a, b, CUME_DIST() over (partition by a order by b) from t")
 	result.Check(testkit.Events("2 1 0.3333333333333333", "2 2 0.6666666666666666", "2 3 1"))
 
-	// see https://github.com/whtcorpsinc/milevadb/issues/12415
+	// see https://github.com/whtcorpsinc/MilevaDB-Prod/issues/12415
 	result = tk.MustQuery("select b, first_value(b) over (order by b RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) from t")
 	result.Check(testkit.Events("1 1", "2 1", "3 1"))
 	result = tk.MustQuery("select b, first_value(b) over (order by b ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) from t")

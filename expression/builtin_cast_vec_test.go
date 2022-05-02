@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,10 +22,10 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 )
 
 var vecBuiltinCastCases = map[string][]vecExprBenchCase{
@@ -34,24 +34,24 @@ var vecBuiltinCastCases = map[string][]vecExprBenchCase{
 		{retEvalType: types.ETDecimal, childrenTypes: []types.EvalType{types.ETString}, geners: []dataGenerator{newDecimalStringGener()}},
 		{retEvalType: types.ETDecimal, childrenTypes: []types.EvalType{types.ETReal}},
 		{retEvalType: types.ETDecimal, childrenTypes: []types.EvalType{types.ETDuration}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETReal}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDecimal}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETJson}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDatetime}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDuration}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETReal}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDecimal}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETJson}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDatetime}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDuration}},
 		{
-			retEvalType:   types.ETInt,
+			retEvalType:   types.CausetEDN,
 			childrenTypes: []types.EvalType{types.ETString},
 			geners:        []dataGenerator{&numStrGener{*newRangeInt64Gener(math.MinInt64+1, 0)}},
 		},
 		{
-			retEvalType:   types.ETInt,
+			retEvalType:   types.CausetEDN,
 			childrenTypes: []types.EvalType{types.ETString},
 			geners:        []dataGenerator{&numStrGener{*newRangeInt64Gener(0, math.MaxInt64)}},
 		},
-		{retEvalType: types.ETReal, childrenTypes: []types.EvalType{types.ETInt}},
-		{retEvalType: types.ETDuration, childrenTypes: []types.EvalType{types.ETInt}, geners: []dataGenerator{newRandDurInt()}},
+		{retEvalType: types.ETReal, childrenTypes: []types.EvalType{types.CausetEDN}},
+		{retEvalType: types.ETDuration, childrenTypes: []types.EvalType{types.CausetEDN}, geners: []dataGenerator{newRandDurInt()}},
 		{retEvalType: types.ETDuration, childrenTypes: []types.EvalType{types.ETReal}, geners: []dataGenerator{newRandDurReal()}},
 		{retEvalType: types.ETDuration, childrenTypes: []types.EvalType{types.ETDecimal}, geners: []dataGenerator{newRandDurDecimal()}},
 		{retEvalType: types.ETReal, childrenTypes: []types.EvalType{types.ETReal}},
@@ -66,7 +66,7 @@ var vecBuiltinCastCases = map[string][]vecExprBenchCase{
 				fsp:          1,
 			}},
 		},
-		{retEvalType: types.ETString, childrenTypes: []types.EvalType{types.ETInt}},
+		{retEvalType: types.ETString, childrenTypes: []types.EvalType{types.CausetEDN}},
 		{retEvalType: types.ETDecimal, childrenTypes: []types.EvalType{types.ETDatetime}},
 		{retEvalType: types.ETString, childrenTypes: []types.EvalType{types.ETString}},
 		{retEvalType: types.ETString, childrenTypes: []types.EvalType{types.ETDuration}},
@@ -77,7 +77,7 @@ var vecBuiltinCastCases = map[string][]vecExprBenchCase{
 		{retEvalType: types.ETString, childrenTypes: []types.EvalType{types.ETDecimal}},
 		{retEvalType: types.ETDuration, childrenTypes: []types.EvalType{types.ETJson}, geners: []dataGenerator{&randJSONDuration{}}},
 		{retEvalType: types.ETDuration, childrenTypes: []types.EvalType{types.ETDuration}},
-		{retEvalType: types.ETJson, childrenTypes: []types.EvalType{types.ETInt}},
+		{retEvalType: types.ETJson, childrenTypes: []types.EvalType{types.CausetEDN}},
 		{retEvalType: types.ETJson, childrenTypes: []types.EvalType{types.ETReal}},
 		{retEvalType: types.ETJson, childrenTypes: []types.EvalType{types.ETDuration}},
 		{retEvalType: types.ETJson, childrenTypes: []types.EvalType{types.ETDatetime}},
@@ -87,7 +87,7 @@ var vecBuiltinCastCases = map[string][]vecExprBenchCase{
 		{retEvalType: types.ETDatetime, childrenTypes: []types.EvalType{types.ETJson}, geners: []dataGenerator{&datetimeJSONGener{}}},
 		{retEvalType: types.ETDatetime, childrenTypes: []types.EvalType{types.ETReal}},
 		{retEvalType: types.ETDatetime, childrenTypes: []types.EvalType{types.ETDecimal}},
-		{retEvalType: types.ETDatetime, childrenTypes: []types.EvalType{types.ETInt}},
+		{retEvalType: types.ETDatetime, childrenTypes: []types.EvalType{types.CausetEDN}},
 		{retEvalType: types.ETDatetime, childrenTypes: []types.EvalType{types.ETString},
 			geners: []dataGenerator{
 				&dateTimeStrGener{randGen: newDefaultRandGen()},
@@ -102,7 +102,7 @@ var vecBuiltinCastCases = map[string][]vecExprBenchCase{
 				newJSONTimeGener(),
 			}},
 		{retEvalType: types.ETDecimal, childrenTypes: []types.EvalType{types.ETDecimal}},
-		{retEvalType: types.ETDecimal, childrenTypes: []types.EvalType{types.ETInt}},
+		{retEvalType: types.ETDecimal, childrenTypes: []types.EvalType{types.CausetEDN}},
 	},
 }
 
@@ -196,7 +196,7 @@ func genCastRealAsTime() *chunk.Chunk {
 	return input
 }
 
-// for issue https://github.com/whtcorpsinc/milevadb/issues/16825
+// for issue https://github.com/whtcorpsinc/MilevaDB-Prod/issues/16825
 func (s *testEvaluatorSuite) TestVectorizedCastStringAsDecimalWithUnsignedFlagInUnion(c *C) {
 	defCaus := &DeferredCauset{RetType: types.NewFieldType(allegrosql.TypeString), Index: 0}
 	baseFunc, err := newBaseBuiltinFunc(mock.NewContext(), "", []Expression{defCaus}, 0)

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@ package bindinfo
 import (
 	"time"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/metrics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
-	"github.com/whtcorpsinc/milevadb/metrics"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 // StochastikHandle is used to handle all stochastik allegrosql bind operations.
@@ -51,7 +51,7 @@ func (h *StochastikHandle) CreateBindRecord(sctx stochastikctx.Context, record *
 	if err != nil {
 		return err
 	}
-	now := types.NewTime(types.FromGoTime(time.Now().In(sctx.GetStochastikVars().StmtCtx.TimeZone)), allegrosql.TypeTimestamp, 3)
+	now := types.NewTime(types.FromGoTime(time.Now().In(sctx.GetStochaseinstein_dbars().StmtCtx.TimeZone)), allegrosql.TypeTimestamp, 3)
 	for i := range record.Bindings {
 		record.Bindings[i].CreateTime = now
 		record.Bindings[i].UFIDelateTime = now

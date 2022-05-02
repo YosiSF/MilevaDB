@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,11 +22,11 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/replog"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/replog"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 )
 
 var (
@@ -103,7 +103,7 @@ func (c *jsonTypeFunctionClass) getFunction(ctx stochastikctx.Context, args []Ex
 	if err != nil {
 		return nil, err
 	}
-	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochastikVars().GetCharsetInfo()
+	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 	bf.tp.Flen = 51 // Flen of JSON_TYPE is length of UNSIGNED INTEGER.
 	sig := &builtinJSONTypeSig{bf}
 	sig.setPbCode(fidelpb.ScalarFuncSig_JsonTypeSig)
@@ -459,7 +459,7 @@ func (b *builtinJSONMergeSig) evalJSON(event chunk.Event) (res json.BinaryJSON, 
 	// function "JSON_MERGE" is deprecated since MyALLEGROSQL 5.7.22. Synonym for function "JSON_MERGE_PRESERVE".
 	// See https://dev.allegrosql.com/doc/refman/5.7/en/json-modification-functions.html#function_json-merge
 	if b.pbCode == fidelpb.ScalarFuncSig_JsonMergeSig {
-		b.ctx.GetStochastikVars().StmtCtx.AppendWarning(errDeprecatedSyntaxNoRememristed.GenWithStackByArgs("JSON_MERGE"))
+		b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errDeprecatedSyntaxNoRememristed.GenWithStackByArgs("JSON_MERGE"))
 	}
 	return res, false, nil
 }
@@ -604,7 +604,7 @@ func (c *jsonContainsPathFunctionClass) getFunction(ctx stochastikctx.Context, a
 	for i := 3; i <= len(args); i++ {
 		argTps = append(argTps, types.ETString)
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, argTps...)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, argTps...)
 	if err != nil {
 		return nil, err
 	}
@@ -724,7 +724,7 @@ func (c *jsonContainsFunctionClass) getFunction(ctx stochastikctx.Context, args 
 	if len(args) == 3 {
 		argTps = append(argTps, types.ETString)
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, argTps...)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, argTps...)
 	if err != nil {
 		return nil, err
 	}
@@ -781,21 +781,21 @@ func (c *jsonValidFunctionClass) getFunction(ctx stochastikctx.Context, args []E
 	argType := args[0].GetType().EvalType()
 	switch argType {
 	case types.ETJson:
-		bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETJson)
+		bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETJson)
 		if err != nil {
 			return nil, err
 		}
 		sig = &builtinJSONValidJSONSig{bf}
 		sig.setPbCode(fidelpb.ScalarFuncSig_JsonValidJsonSig)
 	case types.ETString:
-		bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETString)
+		bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETString)
 		if err != nil {
 			return nil, err
 		}
 		sig = &builtinJSONValidStringSig{bf}
 		sig.setPbCode(fidelpb.ScalarFuncSig_JsonValidStringSig)
 	default:
-		bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, argType)
+		bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, argType)
 		if err != nil {
 			return nil, err
 		}
@@ -1234,7 +1234,7 @@ func (c *jsonStorageSizeFunctionClass) getFunction(ctx stochastikctx.Context, ar
 		return nil, err
 	}
 
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETJson)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETJson)
 	if err != nil {
 		return nil, err
 	}
@@ -1276,7 +1276,7 @@ func (c *jsonDepthFunctionClass) getFunction(ctx stochastikctx.Context, args []E
 		return nil, err
 	}
 
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETJson)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETJson)
 	if err != nil {
 		return nil, err
 	}
@@ -1408,7 +1408,7 @@ func (c *jsonLengthFunctionClass) getFunction(ctx stochastikctx.Context, args []
 		argTps = append(argTps, types.ETString)
 	}
 
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, argTps...)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, argTps...)
 	if err != nil {
 		return nil, err
 	}

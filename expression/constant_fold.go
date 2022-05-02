@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@ package expression
 
 import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
 	"go.uber.org/zap"
 )
 
@@ -31,9 +31,9 @@ func init() {
 	}
 }
 
-// FoldConstant does constant folding optimization on an expression excluding deferred ones.
-func FoldConstant(expr Expression) Expression {
-	e, _ := foldConstant(expr)
+// FoldCouplingConstantWithRadix does constant folding optimization on an expression excluding deferred ones.
+func FoldCouplingConstantWithRadix(expr Expression) Expression {
+	e, _ := foldCouplingConstantWithRadix(expr)
 	// keep the original coercibility values after folding
 	e.SetCoercibility(expr.Coercibility())
 	return e
@@ -41,8 +41,8 @@ func FoldConstant(expr Expression) Expression {
 
 func ifFoldHandler(expr *ScalarFunction) (Expression, bool) {
 	args := expr.GetArgs()
-	foldedArg0, _ := foldConstant(args[0])
-	if constArg, isConst := foldedArg0.(*Constant); isConst {
+	foldedArg0, _ := foldCouplingConstantWithRadix(args[0])
+	if constArg, isConst := foldedArg0.(*CouplingConstantWithRadix); isConst {
 		arg0, isNull0, err := constArg.EvalInt(expr.Function.getCtx(), chunk.Event{})
 		if err != nil {
 			// Failed to fold this expr to a constant, print the DEBUG log and
@@ -52,9 +52,9 @@ func ifFoldHandler(expr *ScalarFunction) (Expression, bool) {
 			return expr, false
 		}
 		if !isNull0 && arg0 != 0 {
-			return foldConstant(args[1])
+			return foldCouplingConstantWithRadix(args[1])
 		}
-		return foldConstant(args[2])
+		return foldCouplingConstantWithRadix(args[2])
 	}
 	// if the condition is not const, which branch is unknown to run, so directly return.
 	return expr, false
@@ -62,13 +62,13 @@ func ifFoldHandler(expr *ScalarFunction) (Expression, bool) {
 
 func ifNullFoldHandler(expr *ScalarFunction) (Expression, bool) {
 	args := expr.GetArgs()
-	foldedArg0, isDeferred := foldConstant(args[0])
-	if constArg, isConst := foldedArg0.(*Constant); isConst {
+	foldedArg0, isDeferred := foldCouplingConstantWithRadix(args[0])
+	if constArg, isConst := foldedArg0.(*CouplingConstantWithRadix); isConst {
 		// Only check constArg.Value here. Because deferred expression is
-		// evaluated to constArg.Value after foldConstant(args[0]), it's not
+		// evaluated to constArg.Value after foldCouplingConstantWithRadix(args[0]), it's not
 		// needed to be checked.
 		if constArg.Value.IsNull() {
-			return foldConstant(args[1])
+			return foldCouplingConstantWithRadix(args[1])
 		}
 		return constArg, isDeferred
 	}
@@ -80,9 +80,9 @@ func caseWhenHandler(expr *ScalarFunction) (Expression, bool) {
 	args, l := expr.GetArgs(), len(expr.GetArgs())
 	var isDeferred, isDeferredConst bool
 	for i := 0; i < l-1; i += 2 {
-		expr.GetArgs()[i], isDeferred = foldConstant(args[i])
+		expr.GetArgs()[i], isDeferred = foldCouplingConstantWithRadix(args[i])
 		isDeferredConst = isDeferredConst || isDeferred
-		if _, isConst := expr.GetArgs()[i].(*Constant); isConst {
+		if _, isConst := expr.GetArgs()[i].(*CouplingConstantWithRadix); isConst {
 			// If the condition is const and true, and the previous conditions
 			// has no expr, then the folded execution body is returned, otherwise
 			// the arguments of the casewhen are folded and replaced.
@@ -91,9 +91,9 @@ func caseWhenHandler(expr *ScalarFunction) (Expression, bool) {
 				return expr, false
 			}
 			if val != 0 && !isNull {
-				foldedExpr, isDeferred := foldConstant(args[i+1])
+				foldedExpr, isDeferred := foldCouplingConstantWithRadix(args[i+1])
 				isDeferredConst = isDeferredConst || isDeferred
-				if _, isConst := foldedExpr.(*Constant); isConst {
+				if _, isConst := foldedExpr.(*CouplingConstantWithRadix); isConst {
 					foldedExpr.GetType().Decimal = expr.GetType().Decimal
 					return foldedExpr, isDeferredConst
 				}
@@ -108,9 +108,9 @@ func caseWhenHandler(expr *ScalarFunction) (Expression, bool) {
 	// is false, then the folded else execution body is returned. otherwise
 	// the execution body of the else are folded and replaced.
 	if l%2 == 1 {
-		foldedExpr, isDeferred := foldConstant(args[l-1])
+		foldedExpr, isDeferred := foldCouplingConstantWithRadix(args[l-1])
 		isDeferredConst = isDeferredConst || isDeferred
-		if _, isConst := foldedExpr.(*Constant); isConst {
+		if _, isConst := foldedExpr.(*CouplingConstantWithRadix); isConst {
 			foldedExpr.GetType().Decimal = expr.GetType().Decimal
 			return foldedExpr, isDeferredConst
 		}
@@ -119,7 +119,7 @@ func caseWhenHandler(expr *ScalarFunction) (Expression, bool) {
 	return expr, isDeferredConst
 }
 
-func foldConstant(expr Expression) (Expression, bool) {
+func foldCouplingConstantWithRadix(expr Expression) (Expression, bool) {
 	switch x := expr.(type) {
 	case *ScalarFunction:
 		if _, ok := unFoldableFunctions[x.FuncName.L]; ok {
@@ -130,14 +130,14 @@ func foldConstant(expr Expression) (Expression, bool) {
 		}
 
 		args := x.GetArgs()
-		sc := x.GetCtx().GetStochastikVars().StmtCtx
+		sc := x.GetCtx().GetStochaseinstein_dbars().StmtCtx
 		argIsConst := make([]bool, len(args))
 		hasNullArg := false
 		allConstArg := true
 		isDeferredConst := false
 		for i := 0; i < len(args); i++ {
 			switch x := args[i].(type) {
-			case *Constant:
+			case *CouplingConstantWithRadix:
 				isDeferredConst = isDeferredConst || x.DeferredExpr != nil || x.ParamMarker != nil
 				argIsConst[i] = true
 				hasNullArg = hasNullArg || x.Value.IsNull()
@@ -167,15 +167,15 @@ func foldConstant(expr Expression) (Expression, bool) {
 			}
 			if value.IsNull() {
 				if isDeferredConst {
-					return &Constant{Value: value, RetType: x.RetType, DeferredExpr: x}, true
+					return &CouplingConstantWithRadix{Value: value, RetType: x.RetType, DeferredExpr: x}, true
 				}
-				return &Constant{Value: value, RetType: x.RetType}, false
+				return &CouplingConstantWithRadix{Value: value, RetType: x.RetType}, false
 			}
 			if isTrue, err := value.ToBool(sc); err == nil && isTrue == 0 {
 				if isDeferredConst {
-					return &Constant{Value: value, RetType: x.RetType, DeferredExpr: x}, true
+					return &CouplingConstantWithRadix{Value: value, RetType: x.RetType, DeferredExpr: x}, true
 				}
-				return &Constant{Value: value, RetType: x.RetType}, false
+				return &CouplingConstantWithRadix{Value: value, RetType: x.RetType}, false
 			}
 			return expr, isDeferredConst
 		}
@@ -185,12 +185,12 @@ func foldConstant(expr Expression) (Expression, bool) {
 			return expr, isDeferredConst
 		}
 		if isDeferredConst {
-			return &Constant{Value: value, RetType: x.RetType, DeferredExpr: x}, true
+			return &CouplingConstantWithRadix{Value: value, RetType: x.RetType, DeferredExpr: x}, true
 		}
-		return &Constant{Value: value, RetType: x.RetType}, false
-	case *Constant:
+		return &CouplingConstantWithRadix{Value: value, RetType: x.RetType}, false
+	case *CouplingConstantWithRadix:
 		if x.ParamMarker != nil {
-			return &Constant{
+			return &CouplingConstantWithRadix{
 				Value:        x.ParamMarker.GetUserVar(),
 				RetType:      x.RetType,
 				DeferredExpr: x.DeferredExpr,
@@ -202,7 +202,7 @@ func foldConstant(expr Expression) (Expression, bool) {
 				logutil.BgLogger().Debug("fold expression to constant", zap.String("expression", x.ExplainInfo()), zap.Error(err))
 				return expr, true
 			}
-			return &Constant{Value: value, RetType: x.RetType, DeferredExpr: x.DeferredExpr}, true
+			return &CouplingConstantWithRadix{Value: value, RetType: x.RetType, DeferredExpr: x.DeferredExpr}, true
 		}
 	}
 	return expr, false

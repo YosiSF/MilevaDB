@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,14 +19,14 @@ import (
 	"strings"
 	"sync/atomic"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastik"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/auth"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/petri"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/stochastik"
 )
 
 func (s *testSuite1) TestPreparedNameResolver(c *C) {
@@ -62,7 +62,7 @@ func (s *testSuite1) TestIgnorePlanCache(c *C) {
 	tk.MustExec("prepare stmt from 'select /*+ IGNORE_PLAN_CACHE() */ * from t where id=?'")
 	tk.MustExec("set @ignore_plan_doma = 1")
 	tk.MustExec("execute stmt using @ignore_plan_doma")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.UseCache, IsFalse)
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.UseCache, IsFalse)
 }
 
 func (s *testSuite1) TestPrepareStmtAfterIsolationReadChange(c *C) {
@@ -102,9 +102,9 @@ func (s *testSuite1) TestPrepareStmtAfterIsolationReadChange(c *C) {
 	rows = tk.MustQuery(fmt.Sprintf("explain for connection %d", tkProcess.ID)).Events()
 	c.Assert(rows[len(rows)-1][2], Equals, "INTERLOCK[tiflash]")
 
-	c.Assert(len(tk.Se.GetStochastikVars().PreparedStmts), Equals, 1)
-	c.Assert(tk.Se.GetStochastikVars().PreparedStmts[1].(*plannercore.CachedPrepareStmt).NormalizedALLEGROSQL, Equals, "select * from t")
-	c.Assert(tk.Se.GetStochastikVars().PreparedStmts[1].(*plannercore.CachedPrepareStmt).NormalizedPlan, Equals, "")
+	c.Assert(len(tk.Se.GetStochaseinstein_dbars().PreparedStmts), Equals, 1)
+	c.Assert(tk.Se.GetStochaseinstein_dbars().PreparedStmts[1].(*plannercore.CachedPrepareStmt).NormalizedALLEGROSQL, Equals, "select * from t")
+	c.Assert(tk.Se.GetStochaseinstein_dbars().PreparedStmts[1].(*plannercore.CachedPrepareStmt).NormalizedPlan, Equals, "")
 }
 
 type mockStochastikManager2 struct {
@@ -129,7 +129,7 @@ func (sm *mockStochastikManager2) GetProcessInfo(id uint64) (pi *soliton.Process
 }
 func (sm *mockStochastikManager2) Kill(connectionID uint64, query bool) {
 	sm.killed = true
-	atomic.StoreUint32(&sm.se.GetStochastikVars().Killed, 1)
+	atomic.StoreUint32(&sm.se.GetStochaseinstein_dbars().Killed, 1)
 }
 func (sm *mockStochastikManager2) UFIDelateTLSConfig(cfg *tls.Config) {}
 
@@ -140,7 +140,7 @@ type testSuite12 struct {
 }
 
 func (s *testSuite12) TestPreparedStmtWithHint(c *C) {
-	// see https://github.com/whtcorpsinc/milevadb/issues/18535
+	// see https://github.com/whtcorpsinc/MilevaDB-Prod/issues/18535
 	causetstore, dom, err := newStoreWithBootstrap()
 	c.Assert(err, IsNil)
 	defer func() {

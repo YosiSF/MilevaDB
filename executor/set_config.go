@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,18 +22,18 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/FIDelapi"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/set"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/stringutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/FIDelapi"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/set"
-	"github.com/whtcorpsinc/milevadb/soliton/stringutil"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 // SetConfigExec executes 'SET CONFIG' statement.
@@ -111,7 +111,7 @@ func (s *SetConfigExec) Next(ctx context.Context, req *chunk.Chunk) error {
 			return errors.Errorf("Unknown server type %s", serverInfo.ServerType)
 		}
 		if err := s.doRequest(url); err != nil {
-			s.ctx.GetStochastikVars().StmtCtx.AppendWarning(err)
+			s.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(err)
 		}
 	}
 	return nil
@@ -181,7 +181,7 @@ func ConvertConfigItem2JSON(ctx stochastikctx.Context, key string, val expressio
 		if err == nil && !isNull {
 			str = fmt.Sprintf(`"%s"`, s)
 		}
-	case types.ETInt:
+	case types.CausetEDN:
 		var i int64
 		i, isNull, err = val.EvalInt(ctx, chunk.Event{})
 		if err == nil && !isNull {

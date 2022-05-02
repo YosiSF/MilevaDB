@@ -1,11 +1,11 @@
 package aggfuncs_test
 
 import (
-	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
+	"github.com/whtcorpsinc/MilevaDB-Prod/executor/aggfuncs"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
-	"github.com/whtcorpsinc/milevadb/executor/aggfuncs"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
+	. "github.com/whtcorpsinc/check"
 )
 
 func (s *testSuite) TestMergePartialResult4Varpop(c *C) {

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,11 +17,11 @@ import (
 	"context"
 	"strings"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod-tools/milevadb-binlog/node"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb-tools/milevadb-binlog/node"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
 )
 
 // ChangeExec represents a change executor.

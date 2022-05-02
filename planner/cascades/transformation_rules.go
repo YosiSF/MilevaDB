@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,18 +16,18 @@ package cascades
 import (
 	"math"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression/aggregation"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/memo"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/ranger"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/set"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/expression/aggregation"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/planner/memo"
-	"github.com/whtcorpsinc/milevadb/planner/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/ranger"
-	"github.com/whtcorpsinc/milevadb/soliton/set"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 // Transformation defines the interface for the transformation rules.
@@ -323,7 +323,7 @@ func (r *PushSelDownEinsteinDBSingleGather) OnTransform(old *memo.ExprIter) (new
 	childGroup := old.Children[0].Children[0].Group
 	var pushed, remained []expression.Expression
 	sctx := sg.SCtx()
-	pushed, remained = expression.PushDownExprs(sctx.GetStochastikVars().StmtCtx, sel.Conditions, sctx.GetClient(), ekv.EinsteinDB)
+	pushed, remained = expression.PushDownExprs(sctx.GetStochaseinstein_dbars().StmtCtx, sel.Conditions, sctx.GetClient(), ekv.EinsteinDB)
 	if len(pushed) == 0 {
 		return nil, false, false, nil
 	}
@@ -407,7 +407,7 @@ func (r *PushAggDownGather) Match(expr *memo.ExprIter) bool {
 	if agg.HasDistinct() {
 		// TODO: remove this logic after the cost estimation of distinct pushdown is implemented.
 		// If AllowDistinctAggPushDown is set to true, we should not consider RootTask.
-		if !agg.SCtx().GetStochastikVars().AllowDistinctAggPushDown {
+		if !agg.SCtx().GetStochaseinstein_dbars().AllowDistinctAggPushDown {
 			return false
 		}
 	}
@@ -597,7 +597,7 @@ func (r *PushSelDownAggregation) OnTransform(old *memo.ExprIter) (newExprs []*me
 	groupByDeferredCausets := expression.NewSchema(agg.GetGroupByDefCauss()...)
 	for _, cond := range sel.Conditions {
 		switch cond.(type) {
-		case *expression.Constant:
+		case *expression.CouplingConstantWithRadix:
 			// Consider ALLEGROALLEGROSQL list "select sum(b) from t group by a having 1=0". "1=0" is a constant predicate which should be
 			// retained and pushed down at the same time. Because we will get a wrong query result that contains one defCausumn
 			// with value 0 rather than an empty query result.
@@ -894,7 +894,7 @@ func (r *PushSelDownJoin) OnTransform(old *memo.ExprIter) (newExprs []*memo.Grou
 		tempCond = append(tempCond, join.OtherConditions...)
 		tempCond = append(tempCond, sel.Conditions...)
 		tempCond = expression.ExtractFiltersFromDNFs(sctx, tempCond)
-		tempCond = expression.PropagateConstant(sctx, tempCond)
+		tempCond = expression.PropagateCouplingConstantWithRadix(sctx, tempCond)
 		// Return block dual when filter is constant false or null.
 		dual := plannercore.Conds2BlockDual(join, tempCond)
 		if dual != nil {
@@ -1240,7 +1240,7 @@ func (r *PushTopNDownProjection) OnTransform(old *memo.ExprIter) (newExprs []*me
 	// remove meaningless constant sort items.
 	for i := len(newTopN.ByItems) - 1; i >= 0; i-- {
 		switch newTopN.ByItems[i].Expr.(type) {
-		case *expression.Constant, *expression.CorrelatedDeferredCauset:
+		case *expression.CouplingConstantWithRadix, *expression.CorrelatedDeferredCauset:
 			topN.ByItems = append(newTopN.ByItems[:i], newTopN.ByItems[i+1:]...)
 		}
 	}
@@ -2193,7 +2193,7 @@ func (r *InjectProjectionBelowTopN) OnTransform(old *memo.ExprIter) (newExprs []
 		}
 		bottomProjExprs = append(bottomProjExprs, itemExpr)
 		newDefCaus := &expression.DeferredCauset{
-			UniqueID: topN.SCtx().GetStochastikVars().AllocPlanDeferredCausetID(),
+			UniqueID: topN.SCtx().GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 			RetType:  itemExpr.GetType(),
 		}
 		bottomProjSchema = append(bottomProjSchema, newDefCaus)
@@ -2283,7 +2283,7 @@ func (r *InjectProjectionBelowAgg) OnTransform(old *memo.ExprIter) (newExprs []*
 	for _, f := range INTERLOCKyFuncs {
 		for i, arg := range f.Args {
 			switch expr := arg.(type) {
-			case *expression.Constant:
+			case *expression.CouplingConstantWithRadix:
 				continue
 			case *expression.DeferredCauset:
 				projExprs = append(projExprs, expr)
@@ -2291,7 +2291,7 @@ func (r *InjectProjectionBelowAgg) OnTransform(old *memo.ExprIter) (newExprs []*
 			default:
 				projExprs = append(projExprs, expr)
 				newArg := &expression.DeferredCauset{
-					UniqueID: agg.SCtx().GetStochastikVars().AllocPlanDeferredCausetID(),
+					UniqueID: agg.SCtx().GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 					RetType:  arg.GetType(),
 				}
 				projSchemaDefCauss = append(projSchemaDefCauss, newArg)
@@ -2303,7 +2303,7 @@ func (r *InjectProjectionBelowAgg) OnTransform(old *memo.ExprIter) (newExprs []*
 	newGroupByItems := make([]expression.Expression, len(agg.GroupByItems))
 	for i, item := range agg.GroupByItems {
 		switch expr := item.(type) {
-		case *expression.Constant:
+		case *expression.CouplingConstantWithRadix:
 			newGroupByItems[i] = expr
 		case *expression.DeferredCauset:
 			newGroupByItems[i] = expr
@@ -2312,7 +2312,7 @@ func (r *InjectProjectionBelowAgg) OnTransform(old *memo.ExprIter) (newExprs []*
 		default:
 			projExprs = append(projExprs, expr)
 			newArg := &expression.DeferredCauset{
-				UniqueID: agg.SCtx().GetStochastikVars().AllocPlanDeferredCausetID(),
+				UniqueID: agg.SCtx().GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 				RetType:  item.GetType(),
 			}
 			projSchemaDefCauss = append(projSchemaDefCauss, newArg)

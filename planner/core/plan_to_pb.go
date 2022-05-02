@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,20 +14,20 @@
 package core
 
 import (
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block/blocks"
+	"github.com/whtcorpsinc/MilevaDB-Prod/blockcodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/distsql"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression/aggregation"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/codec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/ranger"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/block/blocks"
-	"github.com/whtcorpsinc/milevadb/blockcodec"
-	"github.com/whtcorpsinc/milevadb/distsql"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/expression/aggregation"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/codec"
-	"github.com/whtcorpsinc/milevadb/soliton/ranger"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
 )
 
 // ToPB implements PhysicalPlan ToPB interface.
@@ -37,7 +37,7 @@ func (p *basePhysicalPlan) ToPB(_ stochastikctx.Context, _ ekv.StoreType) (*fide
 
 // ToPB implements PhysicalPlan ToPB interface.
 func (p *PhysicalHashAgg) ToPB(ctx stochastikctx.Context, storeType ekv.StoreType) (*fidelpb.Executor, error) {
-	sc := ctx.GetStochastikVars().StmtCtx
+	sc := ctx.GetStochaseinstein_dbars().StmtCtx
 	client := ctx.GetClient()
 	groupByExprs, err := expression.ExpressionsToPBList(sc, p.GroupByItems, client)
 	if err != nil {
@@ -63,7 +63,7 @@ func (p *PhysicalHashAgg) ToPB(ctx stochastikctx.Context, storeType ekv.StoreTyp
 
 // ToPB implements PhysicalPlan ToPB interface.
 func (p *PhysicalStreamAgg) ToPB(ctx stochastikctx.Context, storeType ekv.StoreType) (*fidelpb.Executor, error) {
-	sc := ctx.GetStochastikVars().StmtCtx
+	sc := ctx.GetStochaseinstein_dbars().StmtCtx
 	client := ctx.GetClient()
 	groupByExprs, err := expression.ExpressionsToPBList(sc, p.GroupByItems, client)
 	if err != nil {
@@ -89,7 +89,7 @@ func (p *PhysicalStreamAgg) ToPB(ctx stochastikctx.Context, storeType ekv.StoreT
 
 // ToPB implements PhysicalPlan ToPB interface.
 func (p *PhysicalSelection) ToPB(ctx stochastikctx.Context, storeType ekv.StoreType) (*fidelpb.Executor, error) {
-	sc := ctx.GetStochastikVars().StmtCtx
+	sc := ctx.GetStochaseinstein_dbars().StmtCtx
 	client := ctx.GetClient()
 	conditions, err := expression.ExpressionsToPBList(sc, p.Conditions, client)
 	if err != nil {
@@ -112,7 +112,7 @@ func (p *PhysicalSelection) ToPB(ctx stochastikctx.Context, storeType ekv.StoreT
 
 // ToPB implements PhysicalPlan ToPB interface.
 func (p *PhysicalTopN) ToPB(ctx stochastikctx.Context, storeType ekv.StoreType) (*fidelpb.Executor, error) {
-	sc := ctx.GetStochastikVars().StmtCtx
+	sc := ctx.GetStochaseinstein_dbars().StmtCtx
 	client := ctx.GetClient()
 	topNExec := &fidelpb.TopN{
 		Limit: p.Count,
@@ -227,7 +227,7 @@ func (p *PhysicalIndexScan) ToPB(ctx stochastikctx.Context, _ ekv.StoreType) (*f
 
 // ToPB implements PhysicalPlan ToPB interface.
 func (p *PhysicalBroadCastJoin) ToPB(ctx stochastikctx.Context, storeType ekv.StoreType) (*fidelpb.Executor, error) {
-	sc := ctx.GetStochastikVars().StmtCtx
+	sc := ctx.GetStochaseinstein_dbars().StmtCtx
 	client := ctx.GetClient()
 	leftJoinKeys := make([]expression.Expression, 0, len(p.LeftJoinKeys))
 	rightJoinKeys := make([]expression.Expression, 0, len(p.RightJoinKeys))
@@ -286,7 +286,7 @@ func SetPBDeferredCausetsDefaultValue(ctx stochastikctx.Context, pbDeferredCause
 			continue
 		}
 
-		sessVars := ctx.GetStochastikVars()
+		sessVars := ctx.GetStochaseinstein_dbars()
 		originStrict := sessVars.StrictALLEGROSQLMode
 		sessVars.StrictALLEGROSQLMode = false
 		d, err := block.GetDefCausOriginDefaultValue(ctx, c)

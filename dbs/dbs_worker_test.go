@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,15 +26,15 @@ import (
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/meta"
-	"github.com/whtcorpsinc/milevadb/soliton/admin"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/soliton/solitonutil"
-	"github.com/whtcorpsinc/milevadb/soliton/sqlexec"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/admin"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/sqlexec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 var _ = Suite(&testDBSSuite{})
@@ -1070,7 +1070,7 @@ func (s *testDBSSerialSuite) TestCancelJob(c *C) {
 	c.Assert(baseBlock.Meta().Partition.Definitions[1].LessThan[0], Equals, addedPartInfo.Definitions[0].LessThan[0])
 
 	// Cancel modify defCausumn which should reorg the data.
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/dbs/skipMockContextDoExec", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/skipMockContextDoExec", `return(true)`), IsNil)
 	baseBlockInfo = testBlockInfoWith2IndexOnFirstDeferredCauset(c, d, "modify-block", 2)
 	// This will cost 2 global id, one for block id, the other for the job id.
 	testCreateBlock(c, ctx, d, dbInfo, baseBlockInfo)
@@ -1121,7 +1121,7 @@ func (s *testDBSSerialSuite) TestCancelJob(c *C) {
 	baseBlock = testGetBlock(c, d, dbInfo.ID, baseBlockInfo.ID)
 	c.Assert(baseBlock.Meta().DeferredCausets[0].FieldType.Tp, Equals, allegrosql.TypeTiny)
 	c.Assert(baseBlock.Meta().DeferredCausets[0].FieldType.Flag&allegrosql.NotNullFlag, Equals, uint(1))
-	c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/dbs/skipMockContextDoExec"), IsNil)
+	c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/skipMockContextDoExec"), IsNil)
 }
 
 func (s *testDBSSuite) TestIgnorableSpec(c *C) {

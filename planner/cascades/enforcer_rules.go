@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@ package cascades
 import (
 	"math"
 
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/planner/implementation"
-	"github.com/whtcorpsinc/milevadb/planner/memo"
-	"github.com/whtcorpsinc/milevadb/planner/property"
-	"github.com/whtcorpsinc/milevadb/planner/soliton"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/implementation"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/memo"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/property"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/soliton"
 )
 
 // Enforcer defines the interface for enforcer rules.

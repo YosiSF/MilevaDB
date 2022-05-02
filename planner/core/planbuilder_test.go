@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,22 +21,22 @@ import (
 	"unsafe"
 	_ "unsafe" // required by go:linkname
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression/aggregation"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/property"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/hint"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/statistics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/expression/aggregation"
-	"github.com/whtcorpsinc/milevadb/planner/property"
-	"github.com/whtcorpsinc/milevadb/planner/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/hint"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/statistics"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 var _ = Suite(&testPlanBuilderSuite{})
@@ -150,13 +150,13 @@ func (s *testPlanBuilderSuite) TestDisableFold(c *C) {
 		Expected          expression.Expression
 		Args              []expression.Expression
 	}{
-		{`select sin(length("abc"))`, &expression.Constant{}, nil},
+		{`select sin(length("abc"))`, &expression.CouplingConstantWithRadix{}, nil},
 		{`select benchmark(3, sin(123))`, &expression.ScalarFunction{}, []expression.Expression{
-			&expression.Constant{},
+			&expression.CouplingConstantWithRadix{},
 			&expression.ScalarFunction{},
 		}},
 		{`select pow(length("abc"), benchmark(3, sin(123)))`, &expression.ScalarFunction{}, []expression.Expression{
-			&expression.Constant{},
+			&expression.CouplingConstantWithRadix{},
 			&expression.ScalarFunction{},
 		}},
 	}
@@ -215,7 +215,7 @@ func (s *testPlanBuilderSuite) TestDeepClone(c *C) {
 
 func (s *testPlanBuilderSuite) TestPhysicalPlanClone(c *C) {
 	ctx := mock.NewContext()
-	col, cst := &expression.DeferredCauset{RetType: types.NewFieldType(allegrosql.TypeString)}, &expression.Constant{RetType: types.NewFieldType(allegrosql.TypeLonglong)}
+	col, cst := &expression.DeferredCauset{RetType: types.NewFieldType(allegrosql.TypeString)}, &expression.CouplingConstantWithRadix{RetType: types.NewFieldType(allegrosql.TypeLonglong)}
 	stats := &property.StatsInfo{RowCount: 1000}
 	schemaReplicant := expression.NewSchema(col)
 	tblInfo := &perceptron.BlockInfo{}

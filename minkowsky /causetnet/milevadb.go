@@ -19,21 +19,21 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL"
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/ast"
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/mysql"
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/terror"
-	"github.com/whtcorpsinc/MilevaDB/Interlock"
-	"github.com/whtcorpsinc/MilevaDB/causetnetctx"
-	"github.com/whtcorpsinc/MilevaDB/causetnetctx/variable"
-	"github.com/whtcorpsinc/MilevaDB/config"
-	"github.com/whtcorpsinc/MilevaDB/ekv"
-	"github.com/whtcorpsinc/MilevaDB/errno"
-	"github.com/whtcorpsinc/MilevaDB/namespace"
-	"github.com/whtcorpsinc/MilevaDB/util"
-	"github.com/whtcorpsinc/MilevaDB/util/chunk"
-	"github.com/whtcorpsinc/MilevaDB/util/logutil"
-	"github.com/whtcorpsinc/MilevaDB/util/sqlexec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/ast"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/mysql"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/terror"
+	"github.com/whtcorpsinc/MilevaDB-Prod/Interlock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetnetctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetnetctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/errno"
+	"github.com/whtcorpsinc/MilevaDB-Prod/namespace"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/sqlexec"
 	"github.com/whtcorpsinc/errors"
 	"go.uber.org/zap"
 )
@@ -309,7 +309,7 @@ func ResultSetToStringSlice(ctx context.Context, s Causetnet, rs sqlexec.RecordS
 			if row.IsNull(j) {
 				iRow[j] = "<nil>"
 			} else {
-				d := row.GetDatum(j, &rs.Fields()[j].Column.FieldType)
+				d := row.GetCausetObjectQL(j, &rs.Fields()[j].Column.FieldType)
 				iRow[j], err = d.ToString()
 				if err != nil {
 					return nil, err

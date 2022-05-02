@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,14 +20,14 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/execdetails"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/memory"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/execdetails"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/memory"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
 	"go.uber.org/zap"
 )
 
@@ -93,7 +93,7 @@ func (e *ProjectionExec) open(ctx context.Context) error {
 	e.parentReqEvents = int64(e.maxChunkSize)
 
 	e.memTracker = memory.NewTracker(e.id, -1)
-	e.memTracker.AttachTo(e.ctx.GetStochastikVars().StmtCtx.MemTracker)
+	e.memTracker.AttachTo(e.ctx.GetStochaseinstein_dbars().StmtCtx.MemTracker)
 
 	// For now a Projection can not be executed vectorially only because it
 	// contains "SetVar" or "GetVar" functions, in this scenario this
@@ -315,7 +315,7 @@ func (e *ProjectionExec) Close() error {
 		} else {
 			runtimeStats.SetConcurrencyInfo(execdetails.NewConcurrencyInfo("Concurrency", int(e.numWorkers)))
 		}
-		e.ctx.GetStochastikVars().StmtCtx.RuntimeStatsDefCausl.RegisterStats(e.id, runtimeStats)
+		e.ctx.GetStochaseinstein_dbars().StmtCtx.RuntimeStatsDefCausl.RegisterStats(e.id, runtimeStats)
 	}
 	return e.baseExecutor.Close()
 }

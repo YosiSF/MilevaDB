@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,15 +26,15 @@ import (
 	"testing"
 
 	"github.com/whtcorpsinc/BerolinaSQL/terror"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant/perfschema"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testleak"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastik"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/schemareplicant/perfschema"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/soliton/testleak"
-	"github.com/whtcorpsinc/milevadb/stochastik"
 )
 
 func TestT(t *testing.T) {
@@ -113,7 +113,7 @@ func (s *testBlockSuite) TestEinsteinDBProfileCPU(c *C) {
 		strings.Join([]string{"fidel", mockAddr, mockAddr}, ","),
 	}
 	fpExpr := strings.Join(servers, ";")
-	fpName := "github.com/whtcorpsinc/milevadb/schemareplicant/perfschema/mockRemoteNodeStatusAddress"
+	fpName := "github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant/perfschema/mockRemoteNodeStatusAddress"
 	c.Assert(failpoint.Enable(fpName, fmt.Sprintf(`return("%s")`, fpExpr)), IsNil)
 	defer func() { c.Assert(failpoint.Disable(fpName), IsNil) }()
 
@@ -122,7 +122,7 @@ func (s *testBlockSuite) TestEinsteinDBProfileCPU(c *C) {
 	tk.MustInterDirc("use performance_schema")
 	result := tk.MustQuery("select function, percent_abs, percent_rel from einsteindb_profile_cpu where depth < 3")
 
-	warnings := tk.Se.GetStochastikVars().StmtCtx.GetWarnings()
+	warnings := tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 	c.Assert(len(warnings), Equals, 0, Commentf("expect no warnings, but found: %+v", warnings))
 
 	result.Check(testkit.Events(
@@ -184,27 +184,27 @@ func (s *testBlockSuite) TestEinsteinDBProfileCPU(c *C) {
 	router.HandleFunc("/fidel/api/v1/debug/pprof/goroutine", handlerFactory("goroutine", 2))
 
 	tk.MustQuery("select * from FIDel_profile_cpu where depth < 3")
-	warnings = tk.Se.GetStochastikVars().StmtCtx.GetWarnings()
+	warnings = tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 	c.Assert(len(warnings), Equals, 0, Commentf("expect no warnings, but found: %+v", warnings))
 
 	tk.MustQuery("select * from FIDel_profile_memory where depth < 3")
-	warnings = tk.Se.GetStochastikVars().StmtCtx.GetWarnings()
+	warnings = tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 	c.Assert(len(warnings), Equals, 0, Commentf("expect no warnings, but found: %+v", warnings))
 
 	tk.MustQuery("select * from FIDel_profile_mutex where depth < 3")
-	warnings = tk.Se.GetStochastikVars().StmtCtx.GetWarnings()
+	warnings = tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 	c.Assert(len(warnings), Equals, 0, Commentf("expect no warnings, but found: %+v", warnings))
 
 	tk.MustQuery("select * from FIDel_profile_allocs where depth < 3")
-	warnings = tk.Se.GetStochastikVars().StmtCtx.GetWarnings()
+	warnings = tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 	c.Assert(len(warnings), Equals, 0, Commentf("expect no warnings, but found: %+v", warnings))
 
 	tk.MustQuery("select * from FIDel_profile_block where depth < 3")
-	warnings = tk.Se.GetStochastikVars().StmtCtx.GetWarnings()
+	warnings = tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 	c.Assert(len(warnings), Equals, 0, Commentf("expect no warnings, but found: %+v", warnings))
 
 	tk.MustQuery("select * from FIDel_profile_goroutines")
-	warnings = tk.Se.GetStochastikVars().StmtCtx.GetWarnings()
+	warnings = tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 	c.Assert(len(warnings), Equals, 0, Commentf("expect no warnings, but found: %+v", warnings))
 
 	c.Assert(len(accessed), Equals, 5, Commentf("expect all HTTP API had been accessed, but found: %v", accessed))

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@ import (
 	"context"
 
 	"github.com/cznic/mathutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
 )
 
 // ExplainExec represents an explain executor.
@@ -107,7 +107,7 @@ func (e *ExplainExec) generateExplainInfo(ctx context.Context) (rows [][]string,
 		return nil, err
 	}
 	if e.analyzeExec != nil {
-		e.ctx.GetStochastikVars().StmtCtx.RuntimeStatsDefCausl = nil
+		e.ctx.GetStochaseinstein_dbars().StmtCtx.RuntimeStatsDefCausl = nil
 	}
 	return e.explain.Events, nil
 }

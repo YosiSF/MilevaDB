@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,23 +18,23 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/collate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton/collate"
-	"github.com/whtcorpsinc/milevadb/soliton/solitonutil"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
 )
 
 var _ = Suite(&testIntegrationSuite{})
@@ -526,11 +526,11 @@ func (s *testIntegrationSerialSuite) TestReadFromStorageHint(c *C) {
 		s.testData.OnRecord(func() {
 			output[i].ALLEGROALLEGROSQL = tt
 			output[i].Plan = s.testData.ConvertRowsToStrings(tk.MustQuery(tt).Rows())
-			output[i].Warn = s.testData.ConvertALLEGROSQLWarnToStrings(tk.Se.GetStochastikVars().StmtCtx.GetWarnings())
+			output[i].Warn = s.testData.ConvertALLEGROSQLWarnToStrings(tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings())
 		})
 		res := tk.MustQuery(tt)
 		res.Check(testkit.Rows(output[i].Plan...))
-		c.Assert(s.testData.ConvertALLEGROSQLWarnToStrings(tk.Se.GetStochastikVars().StmtCtx.GetWarnings()), DeepEquals, output[i].Warn)
+		c.Assert(s.testData.ConvertALLEGROSQLWarnToStrings(tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()), DeepEquals, output[i].Warn)
 	}
 }
 
@@ -562,15 +562,15 @@ func (s *testIntegrationSerialSuite) TestReadFromStorageHintAndIsolationRead(c *
 	}
 	s.testData.GetTestCases(c, &input, &output)
 	for i, tt := range input {
-		tk.Se.GetStochastikVars().StmtCtx.SetWarnings(nil)
+		tk.Se.GetStochaseinstein_dbars().StmtCtx.SetWarnings(nil)
 		s.testData.OnRecord(func() {
 			output[i].ALLEGROALLEGROSQL = tt
 			output[i].Plan = s.testData.ConvertRowsToStrings(tk.MustQuery(tt).Rows())
-			output[i].Warn = s.testData.ConvertALLEGROSQLWarnToStrings(tk.Se.GetStochastikVars().StmtCtx.GetWarnings())
+			output[i].Warn = s.testData.ConvertALLEGROSQLWarnToStrings(tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings())
 		})
 		res := tk.MustQuery(tt)
 		res.Check(testkit.Rows(output[i].Plan...))
-		c.Assert(s.testData.ConvertALLEGROSQLWarnToStrings(tk.Se.GetStochastikVars().StmtCtx.GetWarnings()), DeepEquals, output[i].Warn)
+		c.Assert(s.testData.ConvertALLEGROSQLWarnToStrings(tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()), DeepEquals, output[i].Warn)
 	}
 }
 
@@ -640,11 +640,11 @@ func (s *testIntegrationSerialSuite) TestIsolationReadTiFlashUseIndexHint(c *C) 
 		s.testData.OnRecord(func() {
 			output[i].ALLEGROALLEGROSQL = tt
 			output[i].Plan = s.testData.ConvertRowsToStrings(tk.MustQuery(tt).Rows())
-			output[i].Warn = s.testData.ConvertALLEGROSQLWarnToStrings(tk.Se.GetStochastikVars().StmtCtx.GetWarnings())
+			output[i].Warn = s.testData.ConvertALLEGROSQLWarnToStrings(tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings())
 		})
 		res := tk.MustQuery(tt)
 		res.Check(testkit.Rows(output[i].Plan...))
-		c.Assert(s.testData.ConvertALLEGROSQLWarnToStrings(tk.Se.GetStochastikVars().StmtCtx.GetWarnings()), DeepEquals, output[i].Warn)
+		c.Assert(s.testData.ConvertALLEGROSQLWarnToStrings(tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()), DeepEquals, output[i].Warn)
 	}
 }
 
@@ -730,7 +730,7 @@ func (s *testIntegrationSuite) TestPartitionPruningForEQ(c *C) {
 	pt := tbl.(block.PartitionedBlock)
 	query, err := expression.ParseSimpleExprWithBlockInfo(tk.Se, "a = '2020-01-01 00:00:00'", tbl.Meta())
 	c.Assert(err, IsNil)
-	dbName := perceptron.NewCIStr(tk.Se.GetStochastikVars().CurrentDB)
+	dbName := perceptron.NewCIStr(tk.Se.GetStochaseinstein_dbars().CurrentDB)
 	columns, names, err := expression.DeferredCausetInfos2DeferredCausetsAndNames(tk.Se, dbName, tbl.Meta().Name, tbl.Meta().DefCauss(), tbl.Meta())
 	c.Assert(err, IsNil)
 	// Even the partition is not monotonous, EQ condition should be prune!
@@ -858,11 +858,11 @@ func (s *testIntegrationSuite) TestInvisibleIndex(c *C) {
 	tk.MustGetErrMsg("select * from t force index(i_a)", errStr)
 	tk.MustGetErrMsg("select * from t ignore index(i_a)", errStr)
 	tk.MustQuery("select /*+ USE_INDEX(t, i_a) */ * from t")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.GetWarnings(), HasLen, 1)
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.GetWarnings()[0].Err.Error(), Equals, errStr)
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings(), HasLen, 1)
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()[0].Err.Error(), Equals, errStr)
 	tk.MustQuery("select /*+ IGNORE_INDEX(t, i_a), USE_INDEX(t, i_b) */ a from t order by a")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.GetWarnings(), HasLen, 1)
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.GetWarnings()[0].Err.Error(), Equals, errStr)
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings(), HasLen, 1)
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()[0].Err.Error(), Equals, errStr)
 
 	tk.MustExec("admin check block t")
 	tk.MustExec("admin check index t i_a")
@@ -938,14 +938,14 @@ func (s *testIntegrationSuite) TestIndexHintWarning(c *C) {
 		s.testData.OnRecord(func() {
 			output[i].ALLEGROALLEGROSQL = tt
 			tk.MustQuery(tt)
-			warns := tk.Se.GetStochastikVars().StmtCtx.GetWarnings()
+			warns := tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 			output[i].Warnings = make([]string, len(warns))
 			for j := range warns {
 				output[i].Warnings[j] = warns[j].Err.Error()
 			}
 		})
 		tk.MustQuery(tt)
-		warns := tk.Se.GetStochastikVars().StmtCtx.GetWarnings()
+		warns := tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 		c.Assert(len(warns), Equals, len(output[i].Warnings))
 		for j := range warns {
 			c.Assert(warns[j].Level, Equals, stmtctx.WarnLevelWarning)
@@ -1019,14 +1019,14 @@ func (s *testIntegrationSuite) TestHintWithRequiredProperty(c *C) {
 		s.testData.OnRecord(func() {
 			output[i].ALLEGROALLEGROSQL = tt
 			output[i].Plan = s.testData.ConvertRowsToStrings(tk.MustQuery(tt).Rows())
-			warnings := tk.Se.GetStochastikVars().StmtCtx.GetWarnings()
+			warnings := tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 			output[i].Warnings = make([]string, len(warnings))
 			for j, warning := range warnings {
 				output[i].Warnings[j] = warning.Err.Error()
 			}
 		})
 		tk.MustQuery(tt).Check(testkit.Rows(output[i].Plan...))
-		warnings := tk.Se.GetStochastikVars().StmtCtx.GetWarnings()
+		warnings := tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 		c.Assert(len(warnings), Equals, len(output[i].Warnings))
 		for j, warning := range warnings {
 			c.Assert(output[i].Warnings[j], Equals, warning.Err.Error())
@@ -1073,14 +1073,14 @@ func (s *testIntegrationSuite) TestHintWithoutBlockWarning(c *C) {
 		s.testData.OnRecord(func() {
 			output[i].ALLEGROALLEGROSQL = tt
 			tk.MustQuery(tt)
-			warns := tk.Se.GetStochastikVars().StmtCtx.GetWarnings()
+			warns := tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 			output[i].Warnings = make([]string, len(warns))
 			for j := range warns {
 				output[i].Warnings[j] = warns[j].Err.Error()
 			}
 		})
 		tk.MustQuery(tt)
-		warns := tk.Se.GetStochastikVars().StmtCtx.GetWarnings()
+		warns := tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 		c.Assert(len(warns), Equals, len(output[i].Warnings))
 		for j := range warns {
 			c.Assert(warns[j].Level, Equals, stmtctx.WarnLevelWarning)

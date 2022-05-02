@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,16 +22,16 @@ import (
 
 	"github.com/opentracing/basictracer-go"
 	"github.com/opentracing/opentracing-go"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/sqlexec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/sqlexec"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
 	"go.uber.org/zap"
 	"sourcegraph.com/sourcegraph/apFIDelash"
 	traceImpl "sourcegraph.com/sourcegraph/apFIDelash/opentracing"
@@ -141,7 +141,7 @@ func (e *TraceExec) executeChild(ctx context.Context, se sqlexec.ALLEGROSQLExecu
 			}
 			logutil.Eventf(ctx, "execute with error(%d): %s", errCode, err.Error())
 		} else {
-			logutil.Eventf(ctx, "execute done, modify event: %d", e.ctx.GetStochastikVars().StmtCtx.AffectedEvents())
+			logutil.Eventf(ctx, "execute done, modify event: %d", e.ctx.GetStochaseinstein_dbars().StmtCtx.AffectedEvents())
 		}
 	}
 	for _, rs := range recordSets {
@@ -165,7 +165,7 @@ func drainRecordSet(ctx context.Context, sctx stochastikctx.Context, rs sqlexec.
 				}
 				logutil.Eventf(ctx, "execute with error(%d): %s", errCode, err.Error())
 			} else {
-				logutil.Eventf(ctx, "execute done, ReturnEvent: %d, ModifyEvent: %d", rowCount, sctx.GetStochastikVars().StmtCtx.AffectedEvents())
+				logutil.Eventf(ctx, "execute done, ReturnEvent: %d, ModifyEvent: %d", rowCount, sctx.GetStochaseinstein_dbars().StmtCtx.AffectedEvents())
 			}
 			return
 		}

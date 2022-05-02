@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ import (
 
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 func dateTimeFromString(s string) types.Time {
@@ -41,10 +41,10 @@ var vecBuiltinOtherCases = map[string][]vecExprBenchCase{
 		{retEvalType: types.ETString, childrenTypes: []types.EvalType{types.ETString}},
 	},
 	ast.In:       {},
-	ast.BitCount: {{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt}}},
+	ast.BitCount: {{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN}}},
 	ast.GetParam: {
 		{
-			retEvalType: types.ETString, childrenTypes: []types.EvalType{types.ETInt},
+			retEvalType: types.ETString, childrenTypes: []types.EvalType{types.CausetEDN},
 			geners: []dataGenerator{newRangeInt64Gener(0, 10)},
 		},
 	},

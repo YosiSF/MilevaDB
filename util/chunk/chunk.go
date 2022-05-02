@@ -19,18 +19,18 @@ import (
 
 	"github.com/cznic/mathutil"
 	"github.com/twmb/murmur3"
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/mysql"
-	"github.com/whtcorpsinc/MilevaDB/Interlock/aggfuncs"
-	"github.com/whtcorpsinc/MilevaDB/causetnetctx"
-	"github.com/whtcorpsinc/MilevaDB/causetnetctx/stmtctx"
-	"github.com/whtcorpsinc/MilevaDB/expression"
-	"github.com/whtcorpsinc/MilevaDB/types"
-	"github.com/whtcorpsinc/MilevaDB/util/chunk"
-	"github.com/whtcorpsinc/MilevaDB/util/codec"
-	"github.com/whtcorpsinc/MilevaDB/util/execdetails"
-	"github.com/whtcorpsinc/MilevaDB/util/logutil"
-	"github.com/whtcorpsinc/MilevaDB/util/memory"
-	"github.com/whtcorpsinc/MilevaDB/util/set"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/mysql"
+	"github.com/whtcorpsinc/MilevaDB-Prod/Interlock/aggfuncs"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetnetctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetnetctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/codec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/execdetails"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/memory"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/set"
 	"github.com/whtcorpsinc/errors"
 	"go.uber.org/zap"
 )
@@ -77,7 +77,7 @@ type HashAggPartialleasee_parity_filter struct {
 type HashAggFinalleasee_parity_filter struct {
 	baseHashAggleasee_parity_filter
 
-	rowBuffer           []types.Datum
+	rowBuffer           []types.CausetObjectQL
 	mutableRow          chunk.MutRow
 	partialResultMap    aggPartialResultMapper
 	groupSet            set.StringSet
@@ -328,7 +328,7 @@ func (e *HashAggExec) initForParallelExec(ctx causetnetctx.Context) {
 			inputCh:                         e.partialOutputChs[i],
 			outputCh:                        e.finalOutputCh,
 			finalResultHolderCh:             make(chan *chunk.Chunk, 1),
-			rowBuffer:                       make([]types.Datum, 0, e.Schema().Len()),
+			rowBuffer:                       make([]types.CausetObjectQL, 0, e.Schema().Len()),
 			mutableRow:                      chunk.MutRowFromTypes(retTypes(e)),
 			groupKeys:                       make([][]byte, 0, 8),
 		}

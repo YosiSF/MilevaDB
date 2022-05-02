@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,22 +24,22 @@ import (
 	"testing"
 	"time"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression/aggregation"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/property"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/disk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/memory"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/stringutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/log"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/expression/aggregation"
-	"github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/planner/property"
-	"github.com/whtcorpsinc/milevadb/planner/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/disk"
-	"github.com/whtcorpsinc/milevadb/soliton/memory"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/soliton/stringutil"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
 	"go.uber.org/zap/zapcore"
 )
 
@@ -257,8 +257,8 @@ func (a aggTestCase) String() string {
 
 func defaultAggTestCase(exec string) *aggTestCase {
 	ctx := mock.NewContext()
-	ctx.GetStochastikVars().InitChunkSize = variable.DefInitChunkSize
-	ctx.GetStochastikVars().MaxChunkSize = variable.DefMaxChunkSize
+	ctx.GetStochaseinstein_dbars().InitChunkSize = variable.DefInitChunkSize
+	ctx.GetStochaseinstein_dbars().MaxChunkSize = variable.DefMaxChunkSize
 	return &aggTestCase{exec, ast.AggFuncSum, 1000, false, 10000000, 4, ctx}
 }
 
@@ -294,10 +294,10 @@ func buildStreamAggExecutor(ctx stochastikctx.Context, src Executor, schemaRepli
 
 func builPosetDaggExecutor(b *testing.B, testCase *aggTestCase, child Executor) Executor {
 	ctx := testCase.ctx
-	if err := ctx.GetStochastikVars().SetSystemVar(variable.MilevaDBHashAggFinalConcurrency, fmt.Sprintf("%v", testCase.concurrency)); err != nil {
+	if err := ctx.GetStochaseinstein_dbars().SetSystemVar(variable.MilevaDBHashAggFinalConcurrency, fmt.Sprintf("%v", testCase.concurrency)); err != nil {
 		b.Fatal(err)
 	}
-	if err := ctx.GetStochastikVars().SetSystemVar(variable.MilevaDBHashAggPartialConcurrency, fmt.Sprintf("%v", testCase.concurrency)); err != nil {
+	if err := ctx.GetStochaseinstein_dbars().SetSystemVar(variable.MilevaDBHashAggPartialConcurrency, fmt.Sprintf("%v", testCase.concurrency)); err != nil {
 		b.Fatal(err)
 	}
 
@@ -440,9 +440,9 @@ func buildWindowExecutor(ctx stochastikctx.Context, windowFunc string, funcs int
 		var args []expression.Expression
 		switch windowFunc {
 		case ast.WindowFuncNtile:
-			args = append(args, &expression.Constant{Value: types.NewUintCauset(2)})
+			args = append(args, &expression.CouplingConstantWithRadix{Value: types.NewUintCauset(2)})
 		case ast.WindowFuncNthValue:
-			args = append(args, partitionBy[0], &expression.Constant{Value: types.NewUintCauset(2)})
+			args = append(args, partitionBy[0], &expression.CouplingConstantWithRadix{Value: types.NewUintCauset(2)})
 		case ast.AggFuncSum:
 			args = append(args, src.Schema().DeferredCausets[0])
 		case ast.AggFuncAvg:
@@ -530,8 +530,8 @@ func (a windowTestCase) String() string {
 
 func defaultWindowTestCase() *windowTestCase {
 	ctx := mock.NewContext()
-	ctx.GetStochastikVars().InitChunkSize = variable.DefInitChunkSize
-	ctx.GetStochastikVars().MaxChunkSize = variable.DefMaxChunkSize
+	ctx.GetStochaseinstein_dbars().InitChunkSize = variable.DefInitChunkSize
+	ctx.GetStochaseinstein_dbars().MaxChunkSize = variable.DefMaxChunkSize
 	return &windowTestCase{ast.WindowFuncEventNumber, 1, nil, 1000, 10000000, 1, true, ctx, strings.Repeat("x", 16),
 		[]*expression.DeferredCauset{
 			{Index: 0, RetType: types.NewFieldType(allegrosql.TypeDouble)},
@@ -543,7 +543,7 @@ func defaultWindowTestCase() *windowTestCase {
 
 func benchmarkWindowExecWithCase(b *testing.B, casTest *windowTestCase) {
 	ctx := casTest.ctx
-	if err := ctx.GetStochastikVars().SetSystemVar(variable.MilevaDBWindowConcurrency, fmt.Sprintf("%v", casTest.concurrency)); err != nil {
+	if err := ctx.GetStochaseinstein_dbars().SetSystemVar(variable.MilevaDBWindowConcurrency, fmt.Sprintf("%v", casTest.concurrency)); err != nil {
 		b.Fatal(err)
 	}
 
@@ -717,7 +717,7 @@ func baseBenchmarkWindowFunctionsWithSlidingWindow(b *testing.B, frameType ast.F
 	}
 	for _, windowFunc := range windowFuncs {
 		cas := defaultWindowTestCase()
-		cas.ctx.GetStochastikVars().WindowingUseHighPrecision = false
+		cas.ctx.GetStochaseinstein_dbars().WindowingUseHighPrecision = false
 		cas.rows = event
 		cas.ndv = ndv
 		cas.windowFunc = windowFunc.aggFunc
@@ -750,7 +750,7 @@ type hashJoinTestCase struct {
 func (tc hashJoinTestCase) defCausumns() []*expression.DeferredCauset {
 	ret := make([]*expression.DeferredCauset, 0)
 	for i, t := range tc.defcaus {
-		defCausumn := &expression.DeferredCauset{Index: i, RetType: t, UniqueID: tc.ctx.GetStochastikVars().AllocPlanDeferredCausetID()}
+		defCausumn := &expression.DeferredCauset{Index: i, RetType: t, UniqueID: tc.ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID()}
 		ret = append(ret, defCausumn)
 	}
 	return ret
@@ -763,11 +763,11 @@ func (tc hashJoinTestCase) String() string {
 
 func defaultHashJoinTestCase(defcaus []*types.FieldType, joinType core.JoinType, useOuterToBuild bool) *hashJoinTestCase {
 	ctx := mock.NewContext()
-	ctx.GetStochastikVars().InitChunkSize = variable.DefInitChunkSize
-	ctx.GetStochastikVars().MaxChunkSize = variable.DefMaxChunkSize
-	ctx.GetStochastikVars().StmtCtx.MemTracker = memory.NewTracker(-1, -1)
-	ctx.GetStochastikVars().StmtCtx.DiskTracker = disk.NewTracker(-1, -1)
-	ctx.GetStochastikVars().SetIndexLookupJoinConcurrency(4)
+	ctx.GetStochaseinstein_dbars().InitChunkSize = variable.DefInitChunkSize
+	ctx.GetStochaseinstein_dbars().MaxChunkSize = variable.DefMaxChunkSize
+	ctx.GetStochaseinstein_dbars().StmtCtx.MemTracker = memory.NewTracker(-1, -1)
+	ctx.GetStochaseinstein_dbars().StmtCtx.DiskTracker = disk.NewTracker(-1, -1)
+	ctx.GetStochaseinstein_dbars().SetIndexLookupJoinConcurrency(4)
 	tc := &hashJoinTestCase{rows: 100000, concurrency: 4, ctx: ctx, keyIdx: []int{0, 1}, rawData: wideString}
 	tc.defcaus = defcaus
 	tc.useOuterToBuild = useOuterToBuild
@@ -835,8 +835,8 @@ func prepare4HashJoin(testCase *hashJoinTestCase, innerExec, outerExec Executor)
 	t := memory.NewTracker(-1, memLimit)
 	t.SetSuperCowOrNoCausetOnExceed(nil)
 	t2 := disk.NewTracker(-1, -1)
-	e.ctx.GetStochastikVars().StmtCtx.MemTracker = t
-	e.ctx.GetStochastikVars().StmtCtx.DiskTracker = t2
+	e.ctx.GetStochaseinstein_dbars().StmtCtx.MemTracker = t
+	e.ctx.GetStochaseinstein_dbars().StmtCtx.DiskTracker = t2
 	return e
 }
 
@@ -1151,11 +1151,11 @@ func (tc indexJoinTestCase) defCausumns() []*expression.DeferredCauset {
 
 func defaultIndexJoinTestCase() *indexJoinTestCase {
 	ctx := mock.NewContext()
-	ctx.GetStochastikVars().InitChunkSize = variable.DefInitChunkSize
-	ctx.GetStochastikVars().MaxChunkSize = variable.DefMaxChunkSize
-	ctx.GetStochastikVars().SnapshotTS = 1
-	ctx.GetStochastikVars().StmtCtx.MemTracker = memory.NewTracker(-1, -1)
-	ctx.GetStochastikVars().StmtCtx.DiskTracker = disk.NewTracker(-1, -1)
+	ctx.GetStochaseinstein_dbars().InitChunkSize = variable.DefInitChunkSize
+	ctx.GetStochaseinstein_dbars().MaxChunkSize = variable.DefMaxChunkSize
+	ctx.GetStochaseinstein_dbars().SnapshotTS = 1
+	ctx.GetStochaseinstein_dbars().StmtCtx.MemTracker = memory.NewTracker(-1, -1)
+	ctx.GetStochaseinstein_dbars().StmtCtx.DiskTracker = disk.NewTracker(-1, -1)
 	tc := &indexJoinTestCase{
 		outerEvents:     100000,
 		innerEvents:     variable.DefMaxChunkSize * 100,
@@ -1291,7 +1291,7 @@ func prepare4IndexMergeJoin(tc *indexJoinTestCase, outerDS *mockDataSource, inne
 		keyOff2IdxOff:     keyOff2IdxOff,
 		lastDefCausHelper: nil,
 	}
-	concurrency := e.ctx.GetStochastikVars().IndexLookupJoinConcurrency()
+	concurrency := e.ctx.GetStochaseinstein_dbars().IndexLookupJoinConcurrency()
 	joiners := make([]joiner, concurrency)
 	for i := 0; i < concurrency; i++ {
 		joiners[i] = newJoiner(tc.ctx, 0, false, defaultValues, nil, leftTypes, rightTypes, nil)
@@ -1428,7 +1428,7 @@ func prepare4MergeJoin(tc *mergeJoinTestCase, leftExec, rightExec *mockDataSourc
 
 	// only benchmark inner join
 	e := &MergeJoinExec{
-		stmtCtx:      tc.ctx.GetStochastikVars().StmtCtx,
+		stmtCtx:      tc.ctx.GetStochaseinstein_dbars().StmtCtx,
 		baseExecutor: newBaseExecutor(tc.ctx, joinSchema, 3, leftExec, rightExec),
 		compareFuncs: compareFuncs,
 		isOuterJoin:  false,
@@ -1466,11 +1466,11 @@ func defaultMergeJoinTestCase() *mergeJoinTestCase {
 
 func newMergeJoinBenchmark(numOuterEvents, numInnerDup, numInnerRedundant int) (tc *mergeJoinTestCase, innerDS, outerDS *mockDataSource) {
 	ctx := mock.NewContext()
-	ctx.GetStochastikVars().InitChunkSize = variable.DefInitChunkSize
-	ctx.GetStochastikVars().MaxChunkSize = variable.DefMaxChunkSize
-	ctx.GetStochastikVars().SnapshotTS = 1
-	ctx.GetStochastikVars().StmtCtx.MemTracker = memory.NewTracker(-1, -1)
-	ctx.GetStochastikVars().StmtCtx.DiskTracker = disk.NewTracker(-1, -1)
+	ctx.GetStochaseinstein_dbars().InitChunkSize = variable.DefInitChunkSize
+	ctx.GetStochaseinstein_dbars().MaxChunkSize = variable.DefMaxChunkSize
+	ctx.GetStochaseinstein_dbars().SnapshotTS = 1
+	ctx.GetStochaseinstein_dbars().StmtCtx.MemTracker = memory.NewTracker(-1, -1)
+	ctx.GetStochaseinstein_dbars().StmtCtx.DiskTracker = disk.NewTracker(-1, -1)
 
 	numInnerEvents := numOuterEvents*numInnerDup + numInnerRedundant
 	itc := &indexJoinTestCase{
@@ -1628,9 +1628,9 @@ func (tc sortCase) String() string {
 
 func defaultSortTestCase() *sortCase {
 	ctx := mock.NewContext()
-	ctx.GetStochastikVars().InitChunkSize = variable.DefInitChunkSize
-	ctx.GetStochastikVars().MaxChunkSize = variable.DefMaxChunkSize
-	ctx.GetStochastikVars().StmtCtx.MemTracker = memory.NewTracker(-1, -1)
+	ctx.GetStochaseinstein_dbars().InitChunkSize = variable.DefInitChunkSize
+	ctx.GetStochaseinstein_dbars().MaxChunkSize = variable.DefMaxChunkSize
+	ctx.GetStochaseinstein_dbars().StmtCtx.MemTracker = memory.NewTracker(-1, -1)
 	tc := &sortCase{rows: 300000, orderByIdx: []int{0, 1}, ndvs: []int{0, 0}, ctx: ctx}
 	return tc
 }

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,10 +25,10 @@ import (
 	"path/filepath"
 	"text/template"
 
-	. "github.com/whtcorpsinc/milevadb/expression/generator/helper"
+	. "github.com/whtcorpsinc/MilevaDB-Prod/expression/generator/helper"
 )
 
-const header = `// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+const header = `MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -49,9 +49,9 @@ package expression
 const newLine = "\n"
 
 const builtinCompareImports = `import (
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
 )
 `
 
@@ -222,7 +222,7 @@ func (b *builtin{{ .compare.CompareName }}{{ .type.TypeName }}Sig) vecEval{{ .ty
 		return err
 	}
 	defer b.bufSlabPredictor.put(buf1)
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 	for j := 0; j < len(b.args); j++{
 		err := b.args[j].VecEval{{ .type.TypeName }}(b.ctx, input, buf1)
@@ -249,10 +249,10 @@ func (b *builtin{{ .compare.CompareName }}{{ .type.TypeName }}Sig) vecEval{{ .ty
 	argLen := len(b.args)
 
 	bufs := make([]*chunk.DeferredCauset, argLen)
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 	for i := 0; i < argLen; i++ {
-		buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+		buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 		if err != nil {
 			return err
 		}
@@ -297,7 +297,7 @@ const builtinCompareVecTestHeader = `import (
 
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 var vecGeneratedBuiltinCompareCases = map[string][]vecExprBenchCase{
@@ -306,7 +306,7 @@ var vecGeneratedBuiltinCompareCases = map[string][]vecExprBenchCase{
 var builtinCompareVecTestFuncHeader = template.Must(template.New("").Parse(`	ast.{{ .CompareName }}: {
 `))
 
-var builtinCompareVecTestCase = template.Must(template.New("").Parse(`		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ET{{ .ETName }}, types.ET{{ .ETName }}}},
+var builtinCompareVecTestCase = template.Must(template.New("").Parse(`		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ET{{ .ETName }}, types.ET{{ .ETName }}}},
 `))
 
 var builtinCompareVecTestFuncTail = `	},

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 func (s *testEvaluatorSuite) TestScalarFunction(c *C) {
@@ -34,7 +34,7 @@ func (s *testEvaluatorSuite) TestScalarFunction(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(res, DeepEquals, []byte{0x22, 0x6c, 0x74, 0x28, 0x43, 0x6f, 0x6c, 0x75, 0x6d, 0x6e, 0x23, 0x31, 0x2c, 0x20, 0x31, 0x29, 0x22})
 	c.Assert(sf.IsCorrelated(), IsFalse)
-	c.Assert(sf.ConstItem(s.ctx.GetStochastikVars().StmtCtx), IsFalse)
+	c.Assert(sf.ConstItem(s.ctx.GetStochaseinstein_dbars().StmtCtx), IsFalse)
 	c.Assert(sf.Decorrelate(nil).Equal(s.ctx, sf), IsTrue)
 	c.Assert(sf.HashCode(sc), DeepEquals, []byte{0x3, 0x4, 0x6c, 0x74, 0x1, 0x80, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1, 0x0, 0x5, 0xbf, 0xf0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0})
 

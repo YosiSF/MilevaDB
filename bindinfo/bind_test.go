@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,23 +22,23 @@ import (
 	"time"
 
 	dto "github.com/prometheus/client_perceptron/go"
+	"github.com/whtcorpsinc/MilevaDB-Prod/bindinfo"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore/cluster"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid"
+	"github.com/whtcorpsinc/MilevaDB-Prod/metrics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/stmtsummary"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testleak"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastik"
 	"github.com/whtcorpsinc/berolinaAllegroSQL"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/auth"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/bindinfo"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore/cluster"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/meta/autoid"
-	"github.com/whtcorpsinc/milevadb/metrics"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/stmtsummary"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/soliton/testleak"
-	"github.com/whtcorpsinc/milevadb/stochastik"
 )
 
 func TestT(t *testing.T) {
@@ -406,14 +406,14 @@ func (s *testSuite) TestBindingSymbolList(c *C) {
 
 	// before binding
 	tk.MustQuery("select a, b from t where a = 3 limit 1, 100")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.IndexNames[0], Equals, "t:ia")
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.IndexNames[0], Equals, "t:ia")
 	c.Assert(tk.MustUseIndex("select a, b from t where a = 3 limit 1, 100", "ia(a)"), IsTrue)
 
 	tk.MustExec(`create global binding for select a, b from t where a = 1 limit 0, 1 using select a, b from t use index (ib) where a = 1 limit 0, 1`)
 
 	// after binding
 	tk.MustQuery("select a, b from t where a = 3 limit 1, 100")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.IndexNames[0], Equals, "t:ib")
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.IndexNames[0], Equals, "t:ib")
 	c.Assert(tk.MustUseIndex("select a, b from t where a = 3 limit 1, 100", "ib(b)"), IsTrue)
 
 	// Normalize
@@ -442,11 +442,11 @@ func (s *testSuite) TestBestPlanInBaselines(c *C) {
 
 	// before binding
 	tk.MustQuery("select a, b from t where a = 3 limit 1, 100")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.IndexNames[0], Equals, "t:ia")
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.IndexNames[0], Equals, "t:ia")
 	c.Assert(tk.MustUseIndex("select a, b from t where a = 3 limit 1, 100", "ia(a)"), IsTrue)
 
 	tk.MustQuery("select a, b from t where b = 3 limit 1, 100")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.IndexNames[0], Equals, "t:ib")
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.IndexNames[0], Equals, "t:ib")
 	c.Assert(tk.MustUseIndex("select a, b from t where b = 3 limit 1, 100", "ib(b)"), IsTrue)
 
 	tk.MustExec(`create global binding for select a, b from t where a = 1 limit 0, 1 using select /*+ use_index(@sel_1 test.t, ia) */ a, b from t where a = 1 limit 0, 1`)
@@ -462,11 +462,11 @@ func (s *testSuite) TestBestPlanInBaselines(c *C) {
 	c.Check(bind.Status, Equals, "using")
 
 	tk.MustQuery("select a, b from t where a = 3 limit 1, 10")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.IndexNames[0], Equals, "t:ia")
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.IndexNames[0], Equals, "t:ia")
 	c.Assert(tk.MustUseIndex("select a, b from t where a = 3 limit 1, 100", "ia(a)"), IsTrue)
 
 	tk.MustQuery("select a, b from t where b = 3 limit 1, 100")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.IndexNames[0], Equals, "t:ib")
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.IndexNames[0], Equals, "t:ib")
 	c.Assert(tk.MustUseIndex("select a, b from t where b = 3 limit 1, 100", "ib(b)"), IsTrue)
 }
 
@@ -519,16 +519,16 @@ func (s *testSuite) TestPreparedStmt(c *C) {
 	tk.MustExec("create block t(a int, b int, index idx(a))")
 	tk.MustExec(`prepare stmt1 from 'select * from t'`)
 	tk.MustExec("execute stmt1")
-	c.Assert(len(tk.Se.GetStochastikVars().StmtCtx.IndexNames), Equals, 0)
+	c.Assert(len(tk.Se.GetStochaseinstein_dbars().StmtCtx.IndexNames), Equals, 0)
 
 	tk.MustExec("create binding for select * from t using select * from t use index(idx)")
 	tk.MustExec("execute stmt1")
-	c.Assert(len(tk.Se.GetStochastikVars().StmtCtx.IndexNames), Equals, 1)
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.IndexNames[0], Equals, "t:idx")
+	c.Assert(len(tk.Se.GetStochaseinstein_dbars().StmtCtx.IndexNames), Equals, 1)
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.IndexNames[0], Equals, "t:idx")
 
 	tk.MustExec("drop binding for select * from t")
 	tk.MustExec("execute stmt1")
-	c.Assert(len(tk.Se.GetStochastikVars().StmtCtx.IndexNames), Equals, 0)
+	c.Assert(len(tk.Se.GetStochaseinstein_dbars().StmtCtx.IndexNames), Equals, 0)
 }
 
 func (s *testSuite) TestCapturePlanBaseline(c *C) {
@@ -584,7 +584,7 @@ func (s *testSuite) TestCaptureBaselinesDefaultDB(c *C) {
 	tk.MustExec("use spm")
 	tk.MustExec("select * from spm.t where a > 10")
 	// Should use TableScan because of the "ignore index" binding.
-	c.Assert(len(tk.Se.GetStochastikVars().StmtCtx.IndexNames), Equals, 0)
+	c.Assert(len(tk.Se.GetStochaseinstein_dbars().StmtCtx.IndexNames), Equals, 0)
 }
 
 func (s *testSuite) TestDropSingleBindings(c *C) {
@@ -642,7 +642,7 @@ func (s *testSuite) TestAddEvolveTasks(c *C) {
 	tk.MustExec("set @@milevadb_evolve_plan_baselines=1")
 	// It cannot choose block path although it has lowest cost.
 	tk.MustQuery("select * from t where a >= 4 and b >= 1 and c = 0")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.IndexNames[0], Equals, "t:idx_a")
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.IndexNames[0], Equals, "t:idx_a")
 	tk.MustExec("admin flush bindings")
 	rows := tk.MustQuery("show global bindings").Rows()
 	c.Assert(len(rows), Equals, 2)
@@ -703,7 +703,7 @@ func (s *testSuite) TestBindingCache(c *C) {
 	c.Assert(len(s.petri.BindHandle().GetAllBindRecord()), Equals, 1)
 }
 
-func (s *testSuite) TestDefaultStochastikVars(c *C) {
+func (s *testSuite) TestDefaultStochaseinstein_dbars(c *C) {
 	tk := testkit.NewTestKit(c, s.causetstore)
 	s.cleanBindingEnv(tk)
 	tk.MustQuery(`show variables like "%baselines%"`).Sort().Check(testkit.Rows(
@@ -798,11 +798,11 @@ func (s *testSuite) TestStmtHints(c *C) {
 	tk.MustExec("create block t(a int, b int, index idx(a))")
 	tk.MustExec("create global binding for select * from t using select /*+ MAX_EXECUTION_TIME(100), MEMORY_QUOTA(1 GB) */ * from t use index(idx)")
 	tk.MustQuery("select * from t")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.MemQuotaQuery, Equals, int64(1073741824))
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.MaxExecutionTime, Equals, uint64(100))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.MemQuotaQuery, Equals, int64(1073741824))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.MaxExecutionTime, Equals, uint64(100))
 	tk.MustQuery("select a, b from t")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.MemQuotaQuery, Equals, int64(0))
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.MaxExecutionTime, Equals, uint64(0))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.MemQuotaQuery, Equals, int64(0))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.MaxExecutionTime, Equals, uint64(0))
 }
 
 func (s *testSuite) TestReloadBindings(c *C) {
@@ -837,7 +837,7 @@ func (s *testSuite) TestDefaultDB(c *C) {
 	tk.MustExec("use allegrosql")
 	tk.MustQuery("select * from test.t")
 	// Even in another database, we could still use the bindings.
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.IndexNames[0], Equals, "t:idx")
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.IndexNames[0], Equals, "t:idx")
 	tk.MustExec("drop global binding for select * from test.t")
 	tk.MustQuery("show global bindings").Check(testkit.Rows())
 
@@ -846,7 +846,7 @@ func (s *testSuite) TestDefaultDB(c *C) {
 	tk.MustExec("use allegrosql")
 	tk.MustQuery("select * from test.t")
 	// Even in another database, we could still use the bindings.
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.IndexNames[0], Equals, "t:idx")
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.IndexNames[0], Equals, "t:idx")
 	tk.MustExec("drop stochastik binding for select * from test.t")
 	tk.MustQuery("show stochastik bindings").Check(testkit.Rows())
 }
@@ -1121,7 +1121,7 @@ func (s *testSuite) TestReCreateBindAfterEvolvePlan(c *C) {
 
 	// It cannot choose block path although it has lowest cost.
 	tk.MustQuery("select * from t where a >= 0 and b >= 0")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.IndexNames[0], Equals, "t:idx_a")
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.IndexNames[0], Equals, "t:idx_a")
 
 	tk.MustExec("admin flush bindings")
 	rows := tk.MustQuery("show global bindings").Rows()
@@ -1133,7 +1133,7 @@ func (s *testSuite) TestReCreateBindAfterEvolvePlan(c *C) {
 	rows = tk.MustQuery("show global bindings").Rows()
 	c.Assert(len(rows), Equals, 1)
 	tk.MustQuery("select * from t where a >= 4 and b >= 1")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.IndexNames[0], Equals, "t:idx_b")
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.IndexNames[0], Equals, "t:idx_b")
 }
 
 func (s *testSuite) TestInvisibleIndex(c *C) {
@@ -1150,21 +1150,21 @@ func (s *testSuite) TestInvisibleIndex(c *C) {
 	tk.MustExec("create global binding for select * from t using select * from t use index(idx_a) ")
 
 	tk.MustQuery("select * from t")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.IndexNames[0], Equals, "t:idx_a")
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.IndexNames[0], Equals, "t:idx_a")
 	c.Assert(tk.MustUseIndex("select * from t", "idx_a(a)"), IsTrue)
 
 	tk.MustExec(`prepare stmt1 from 'select * from t'`)
 	tk.MustExec("execute stmt1")
-	c.Assert(len(tk.Se.GetStochastikVars().StmtCtx.IndexNames), Equals, 1)
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.IndexNames[0], Equals, "t:idx_a")
+	c.Assert(len(tk.Se.GetStochaseinstein_dbars().StmtCtx.IndexNames), Equals, 1)
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.IndexNames[0], Equals, "t:idx_a")
 
 	// And then make this index invisible
 	tk.MustExec("alter block t alter index idx_a invisible")
 	tk.MustQuery("select * from t")
-	c.Assert(len(tk.Se.GetStochastikVars().StmtCtx.IndexNames), Equals, 0)
+	c.Assert(len(tk.Se.GetStochaseinstein_dbars().StmtCtx.IndexNames), Equals, 0)
 
 	tk.MustExec("execute stmt1")
-	c.Assert(len(tk.Se.GetStochastikVars().StmtCtx.IndexNames), Equals, 0)
+	c.Assert(len(tk.Se.GetStochaseinstein_dbars().StmtCtx.IndexNames), Equals, 0)
 
 	tk.MustExec("drop binding for select * from t")
 }

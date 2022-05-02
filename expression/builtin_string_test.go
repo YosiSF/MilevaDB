@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,12 +26,12 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/defCauslate"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/soliton/solitonutil"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/defCauslate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 func (s *testEvaluatorSuite) TestLengthAndOctetLength(c *C) {
@@ -57,7 +57,7 @@ func (s *testEvaluatorSuite) TestLengthAndOctetLength(c *C) {
 	lengthMethods := []string{ast.Length, ast.OctetLength}
 	for _, lengthMethod := range lengthMethods {
 		for _, t := range cases {
-			f, err := newFunctionForTest(s.ctx, lengthMethod, s.primitiveValsToConstants([]interface{}{t.args})...)
+			f, err := newFunctionForTest(s.ctx, lengthMethod, s.primitiveValsToCouplingConstantWithRadixs([]interface{}{t.args})...)
 			c.Assert(err, IsNil)
 			d, err := f.Eval(chunk.Event{})
 			if t.getErr {
@@ -94,7 +94,7 @@ func (s *testEvaluatorSuite) TestASCII(c *C) {
 		{"你好", 228, false, false},
 	}
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.ASCII, s.primitiveValsToConstants([]interface{}{t.args})...)
+		f, err := newFunctionForTest(s.ctx, ast.ASCII, s.primitiveValsToCouplingConstantWithRadixs([]interface{}{t.args})...)
 		c.Assert(err, IsNil)
 
 		d, err := f.Eval(chunk.Event{})
@@ -152,7 +152,7 @@ func (s *testEvaluatorSuite) TestConcat(c *C) {
 	}
 	fcName := ast.Concat
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, fcName, s.primitiveValsToConstants(t.args)...)
+		f, err := newFunctionForTest(s.ctx, fcName, s.primitiveValsToCouplingConstantWithRadixs(t.args)...)
 		c.Assert(err, IsNil)
 		v, err := f.Eval(chunk.Event{})
 		if t.getErr {
@@ -204,7 +204,7 @@ func (s *testEvaluatorSuite) TestConcatSig(c *C) {
 			c.Assert(isNull, IsFalse)
 		} else {
 			c.Assert(isNull, IsTrue)
-			warnings := s.ctx.GetStochastikVars().StmtCtx.GetWarnings()
+			warnings := s.ctx.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 			c.Assert(warnings, HasLen, t.warnings)
 			lastWarn := warnings[len(warnings)-1]
 			c.Assert(terror.ErrorEqual(errWarnAllowedPacketOverflowed, lastWarn.Err), IsTrue)
@@ -260,11 +260,11 @@ func (s *testEvaluatorSuite) TestConcatWS(c *C) {
 
 	fcName := ast.ConcatWS
 	// ERROR 1582 (42000): Incorrect parameter count in the call to native function 'concat_ws'
-	_, err := newFunctionForTest(s.ctx, fcName, s.primitiveValsToConstants([]interface{}{nil})...)
+	_, err := newFunctionForTest(s.ctx, fcName, s.primitiveValsToCouplingConstantWithRadixs([]interface{}{nil})...)
 	c.Assert(err, NotNil)
 
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, fcName, s.primitiveValsToConstants(t.args)...)
+		f, err := newFunctionForTest(s.ctx, fcName, s.primitiveValsToCouplingConstantWithRadixs(t.args)...)
 		c.Assert(err, IsNil)
 		val, err1 := f.Eval(chunk.Event{})
 		if t.getErr {
@@ -279,7 +279,7 @@ func (s *testEvaluatorSuite) TestConcatWS(c *C) {
 		}
 	}
 
-	_, err = funcs[ast.ConcatWS].getFunction(s.ctx, s.primitiveValsToConstants([]interface{}{nil, nil}))
+	_, err = funcs[ast.ConcatWS].getFunction(s.ctx, s.primitiveValsToCouplingConstantWithRadixs([]interface{}{nil, nil}))
 	c.Assert(err, IsNil)
 }
 
@@ -322,7 +322,7 @@ func (s *testEvaluatorSuite) TestConcatWSSig(c *C) {
 			c.Assert(isNull, IsFalse)
 		} else {
 			c.Assert(isNull, IsTrue)
-			warnings := s.ctx.GetStochastikVars().StmtCtx.GetWarnings()
+			warnings := s.ctx.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 			c.Assert(warnings, HasLen, t.warnings)
 			lastWarn := warnings[len(warnings)-1]
 			c.Assert(terror.ErrorEqual(errWarnAllowedPacketOverflowed, lastWarn.Err), IsTrue)
@@ -331,7 +331,7 @@ func (s *testEvaluatorSuite) TestConcatWSSig(c *C) {
 }
 
 func (s *testEvaluatorSuite) TestLeft(c *C) {
-	stmtCtx := s.ctx.GetStochastikVars().StmtCtx
+	stmtCtx := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	origin := stmtCtx.IgnoreTruncate
 	stmtCtx.IgnoreTruncate = true
 	defer func() {
@@ -360,7 +360,7 @@ func (s *testEvaluatorSuite) TestLeft(c *C) {
 		{[]interface{}{errors.New("must err"), 0}, false, true, ""},
 	}
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.Left, s.primitiveValsToConstants(t.args)...)
+		f, err := newFunctionForTest(s.ctx, ast.Left, s.primitiveValsToCouplingConstantWithRadixs(t.args)...)
 		c.Assert(err, IsNil)
 		v, err := f.Eval(chunk.Event{})
 		if t.getErr {
@@ -380,7 +380,7 @@ func (s *testEvaluatorSuite) TestLeft(c *C) {
 }
 
 func (s *testEvaluatorSuite) TestRight(c *C) {
-	stmtCtx := s.ctx.GetStochastikVars().StmtCtx
+	stmtCtx := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	origin := stmtCtx.IgnoreTruncate
 	stmtCtx.IgnoreTruncate = true
 	defer func() {
@@ -409,7 +409,7 @@ func (s *testEvaluatorSuite) TestRight(c *C) {
 		{[]interface{}{errors.New("must err"), 0}, false, true, ""},
 	}
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.Right, s.primitiveValsToConstants(t.args)...)
+		f, err := newFunctionForTest(s.ctx, ast.Right, s.primitiveValsToCouplingConstantWithRadixs(t.args)...)
 		c.Assert(err, IsNil)
 		v, err := f.Eval(chunk.Event{})
 		if t.getErr {
@@ -431,49 +431,49 @@ func (s *testEvaluatorSuite) TestRight(c *C) {
 func (s *testEvaluatorSuite) TestRepeat(c *C) {
 	args := []interface{}{"a", int64(2)}
 	fc := funcs[ast.Repeat]
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(args...)))
+	f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(args...)))
 	c.Assert(err, IsNil)
 	v, err := evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(v.GetString(), Equals, "aa")
 
 	args = []interface{}{"a", uint64(2)}
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(args...)))
+	f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(args...)))
 	c.Assert(err, IsNil)
 	v, err = evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(v.GetString(), Equals, "aa")
 
 	args = []interface{}{"a", uint64(16777217)}
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(args...)))
+	f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(args...)))
 	c.Assert(err, IsNil)
 	v, err = evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(v.IsNull(), IsTrue)
 
 	args = []interface{}{"a", uint64(16777216)}
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(args...)))
+	f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(args...)))
 	c.Assert(err, IsNil)
 	v, err = evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(v.IsNull(), IsFalse)
 
 	args = []interface{}{"a", int64(-1)}
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(args...)))
+	f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(args...)))
 	c.Assert(err, IsNil)
 	v, err = evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(v.GetString(), Equals, "")
 
 	args = []interface{}{"a", int64(0)}
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(args...)))
+	f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(args...)))
 	c.Assert(err, IsNil)
 	v, err = evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(v.GetString(), Equals, "")
 
 	args = []interface{}{"a", uint64(0)}
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(args...)))
+	f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(args...)))
 	c.Assert(err, IsNil)
 	v, err = evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
@@ -517,7 +517,7 @@ func (s *testEvaluatorSuite) TestRepeatSig(c *C) {
 		} else {
 			c.Assert(isNull, IsTrue)
 			c.Assert(err, IsNil)
-			warnings := s.ctx.GetStochastikVars().StmtCtx.GetWarnings()
+			warnings := s.ctx.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 			c.Assert(len(warnings), Equals, t.warning)
 			lastWarn := warnings[len(warnings)-1]
 			c.Assert(terror.ErrorEqual(errWarnAllowedPacketOverflowed, lastWarn.Err), IsTrue)
@@ -542,7 +542,7 @@ func (s *testEvaluatorSuite) TestLower(c *C) {
 	}
 
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.Lower, s.primitiveValsToConstants(t.args)...)
+		f, err := newFunctionForTest(s.ctx, ast.Lower, s.primitiveValsToCouplingConstantWithRadixs(t.args)...)
 		c.Assert(err, IsNil)
 		v, err := f.Eval(chunk.Event{})
 		if t.getErr {
@@ -578,7 +578,7 @@ func (s *testEvaluatorSuite) TestUpper(c *C) {
 	}
 
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.Upper, s.primitiveValsToConstants(t.args)...)
+		f, err := newFunctionForTest(s.ctx, ast.Upper, s.primitiveValsToCouplingConstantWithRadixs(t.args)...)
 		c.Assert(err, IsNil)
 		v, err := f.Eval(chunk.Event{})
 		if t.getErr {
@@ -599,7 +599,7 @@ func (s *testEvaluatorSuite) TestUpper(c *C) {
 
 func (s *testEvaluatorSuite) TestReverse(c *C) {
 	fc := funcs[ast.Reverse]
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(nil)))
+	f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(nil)))
 	c.Assert(err, IsNil)
 	d, err := evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
@@ -618,7 +618,7 @@ func (s *testEvaluatorSuite) TestReverse(c *C) {
 	dtbl := tblToDtbl(tbl)
 
 	for _, t := range dtbl {
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		d, err = evalBuiltinFunc(f, chunk.Event{})
@@ -651,7 +651,7 @@ func (s *testEvaluatorSuite) TestStrcmp(c *C) {
 		{[]interface{}{"123", errors.New("must err")}, false, true, 0},
 	}
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.Strcmp, s.primitiveValsToConstants(t.args)...)
+		f, err := newFunctionForTest(s.ctx, ast.Strcmp, s.primitiveValsToCouplingConstantWithRadixs(t.args)...)
 		c.Assert(err, IsNil)
 		d, err := f.Eval(chunk.Event{})
 		if t.getErr {
@@ -687,7 +687,7 @@ func (s *testEvaluatorSuite) TestReplace(c *C) {
 		{[]interface{}{errors.New("must err"), "a", "b"}, false, true, "", -1},
 	}
 	for i, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.Replace, s.primitiveValsToConstants(t.args)...)
+		f, err := newFunctionForTest(s.ctx, ast.Replace, s.primitiveValsToCouplingConstantWithRadixs(t.args)...)
 		c.Assert(err, IsNil, Commentf("test %v", i))
 		c.Assert(f.GetType().Flen, Equals, t.flen, Commentf("test %v", i))
 		d, err := f.Eval(chunk.Event{})
@@ -732,7 +732,7 @@ func (s *testEvaluatorSuite) TestSubstring(c *C) {
 		{[]interface{}{errors.New("must error"), 2, 3}, false, true, ""},
 	}
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.Substring, s.primitiveValsToConstants(t.args)...)
+		f, err := newFunctionForTest(s.ctx, ast.Substring, s.primitiveValsToCouplingConstantWithRadixs(t.args)...)
 		c.Assert(err, IsNil)
 		d, err := f.Eval(chunk.Event{})
 		if t.getErr {
@@ -770,7 +770,7 @@ func (s *testEvaluatorSuite) TestConvert(c *C) {
 	}
 	for _, v := range tbl {
 		fc := funcs[ast.Convert]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(v.str, v.cs)))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(v.str, v.cs)))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		retType := f.getRetTp()
@@ -797,14 +797,14 @@ func (s *testEvaluatorSuite) TestConvert(c *C) {
 	}
 	for _, v := range errTbl {
 		fc := funcs[ast.Convert]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(v.str, v.cs)))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(v.str, v.cs)))
 		c.Assert(err.Error(), Equals, v.err)
 		c.Assert(f, IsNil)
 	}
 
 	// Test wrong charset while evaluating.
 	fc := funcs[ast.Convert]
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets("haha", "utf8")))
+	f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets("haha", "utf8")))
 	c.Assert(err, IsNil)
 	c.Assert(f, NotNil)
 	wrongFunction := f.(*builtinConvertSig)
@@ -840,7 +840,7 @@ func (s *testEvaluatorSuite) TestSubstringIndex(c *C) {
 		{[]interface{}{errors.New("must error"), ".", 1}, false, true, ""},
 	}
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.SubstringIndex, s.primitiveValsToConstants(t.args)...)
+		f, err := newFunctionForTest(s.ctx, ast.SubstringIndex, s.primitiveValsToCouplingConstantWithRadixs(t.args)...)
 		c.Assert(err, IsNil)
 		d, err := f.Eval(chunk.Event{})
 		if t.getErr {
@@ -860,7 +860,7 @@ func (s *testEvaluatorSuite) TestSubstringIndex(c *C) {
 }
 
 func (s *testEvaluatorSuite) TestSpace(c *C) {
-	stmtCtx := s.ctx.GetStochastikVars().StmtCtx
+	stmtCtx := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	origin := stmtCtx.IgnoreTruncate
 	stmtCtx.IgnoreTruncate = true
 	defer func() {
@@ -885,7 +885,7 @@ func (s *testEvaluatorSuite) TestSpace(c *C) {
 		{errors.New("must error"), false, true, ""},
 	}
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.Space, s.primitiveValsToConstants([]interface{}{t.arg})...)
+		f, err := newFunctionForTest(s.ctx, ast.Space, s.primitiveValsToCouplingConstantWithRadixs([]interface{}{t.arg})...)
 		c.Assert(err, IsNil)
 		d, err := f.Eval(chunk.Event{})
 		if t.getErr {
@@ -925,7 +925,7 @@ func (s *testEvaluatorSuite) TestSpaceSig(c *C) {
 	c.Assert(res, Equals, "")
 	c.Assert(isNull, IsTrue)
 	c.Assert(err, IsNil)
-	warnings := s.ctx.GetStochastikVars().StmtCtx.GetWarnings()
+	warnings := s.ctx.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 	c.Assert(len(warnings), Equals, 1)
 	lastWarn := warnings[len(warnings)-1]
 	c.Assert(terror.ErrorEqual(errWarnAllowedPacketOverflowed, lastWarn.Err), IsTrue, Commentf("err %v", lastWarn.Err))
@@ -970,7 +970,7 @@ func (s *testEvaluatorSuite) TestLocate(c *C) {
 	Dtbl := tblToDtbl(tbl)
 	instr := funcs[ast.Locate]
 	for i, t := range Dtbl {
-		f, err := instr.getFunction(s.ctx, s.datumsToConstants(t["Args"]))
+		f, err := instr.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Args"]))
 		c.Assert(err, IsNil)
 		got, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -990,7 +990,7 @@ func (s *testEvaluatorSuite) TestLocate(c *C) {
 	}
 	Dtbl2 := tblToDtbl(tbl2)
 	for i, t := range Dtbl2 {
-		exprs := s.datumsToConstants(t["Args"])
+		exprs := s.datumsToCouplingConstantWithRadixs(t["Args"])
 		types.SetBinChsClnFlag(exprs[0].GetType())
 		types.SetBinChsClnFlag(exprs[1].GetType())
 		f, err := instr.getFunction(s.ctx, exprs)
@@ -1029,7 +1029,7 @@ func (s *testEvaluatorSuite) TestTrim(c *C) {
 		{[]interface{}{errors.New("must error")}, false, true, ""},
 	}
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.Trim, s.primitiveValsToConstants(t.args)...)
+		f, err := newFunctionForTest(s.ctx, ast.Trim, s.primitiveValsToCouplingConstantWithRadixs(t.args)...)
 		c.Assert(err, IsNil)
 		d, err := f.Eval(chunk.Event{})
 		if t.getErr {
@@ -1076,7 +1076,7 @@ func (s *testEvaluatorSuite) TestLTrim(c *C) {
 		{errors.New("must error"), false, true, ""},
 	}
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.LTrim, s.primitiveValsToConstants([]interface{}{t.arg})...)
+		f, err := newFunctionForTest(s.ctx, ast.LTrim, s.primitiveValsToCouplingConstantWithRadixs([]interface{}{t.arg})...)
 		c.Assert(err, IsNil)
 		d, err := f.Eval(chunk.Event{})
 		if t.getErr {
@@ -1115,7 +1115,7 @@ func (s *testEvaluatorSuite) TestRTrim(c *C) {
 		{errors.New("must error"), false, true, ""},
 	}
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.RTrim, s.primitiveValsToConstants([]interface{}{t.arg})...)
+		f, err := newFunctionForTest(s.ctx, ast.RTrim, s.primitiveValsToCouplingConstantWithRadixs([]interface{}{t.arg})...)
 		c.Assert(err, IsNil)
 		d, err := f.Eval(chunk.Event{})
 		if t.getErr {
@@ -1155,7 +1155,7 @@ func (s *testEvaluatorSuite) TestHexFunc(c *C) {
 		{errors.New("must err"), false, true, ""},
 	}
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.Hex, s.primitiveValsToConstants([]interface{}{t.arg})...)
+		f, err := newFunctionForTest(s.ctx, ast.Hex, s.primitiveValsToCouplingConstantWithRadixs([]interface{}{t.arg})...)
 		c.Assert(err, IsNil)
 		d, err := f.Eval(chunk.Event{})
 		if t.getErr {
@@ -1197,7 +1197,7 @@ func (s *testEvaluatorSuite) TestUnhexFunc(c *C) {
 		{errors.New("must error"), false, true, ""},
 	}
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.Unhex, s.primitiveValsToConstants([]interface{}{t.arg})...)
+		f, err := newFunctionForTest(s.ctx, ast.Unhex, s.primitiveValsToCouplingConstantWithRadixs([]interface{}{t.arg})...)
 		c.Assert(err, IsNil)
 		d, err := f.Eval(chunk.Event{})
 		if t.getErr {
@@ -1229,7 +1229,7 @@ func (s *testEvaluatorSuite) TestBitLength(c *C) {
 	}
 
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.BitLength, s.primitiveValsToConstants([]interface{}{t.args})...)
+		f, err := newFunctionForTest(s.ctx, ast.BitLength, s.primitiveValsToCouplingConstantWithRadixs([]interface{}{t.args})...)
 		c.Assert(err, IsNil)
 		d, err := f.Eval(chunk.Event{})
 		if t.getErr {
@@ -1249,7 +1249,7 @@ func (s *testEvaluatorSuite) TestBitLength(c *C) {
 }
 
 func (s *testEvaluatorSuite) TestChar(c *C) {
-	stmtCtx := s.ctx.GetStochastikVars().StmtCtx
+	stmtCtx := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	origin := stmtCtx.IgnoreTruncate
 	stmtCtx.IgnoreTruncate = true
 	defer func() {
@@ -1270,7 +1270,7 @@ func (s *testEvaluatorSuite) TestChar(c *C) {
 	for _, v := range tbl {
 		for _, char := range []interface{}{"utf8", nil} {
 			fc := funcs[ast.CharFunc]
-			f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(v.str, v.iNum, v.fNum, char)))
+			f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(v.str, v.iNum, v.fNum, char)))
 			c.Assert(err, IsNil)
 			c.Assert(f, NotNil)
 			r, err := evalBuiltinFunc(f, chunk.Event{})
@@ -1280,7 +1280,7 @@ func (s *testEvaluatorSuite) TestChar(c *C) {
 	}
 
 	fc := funcs[ast.CharFunc]
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets("65", 66, nil)))
+	f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets("65", 66, nil)))
 	c.Assert(err, IsNil)
 	r, err := evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
@@ -1300,7 +1300,7 @@ func (s *testEvaluatorSuite) TestCharLength(c *C) {
 	}
 	for _, v := range tbl {
 		fc := funcs[ast.CharLength]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(v.input)))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(v.input)))
 		c.Assert(err, IsNil)
 		r, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -1320,7 +1320,7 @@ func (s *testEvaluatorSuite) TestCharLength(c *C) {
 	}
 	for _, v := range tbl {
 		fc := funcs[ast.CharLength]
-		arg := s.datumsToConstants(types.MakeCausets(v.input))
+		arg := s.datumsToCouplingConstantWithRadixs(types.MakeCausets(v.input))
 		tp := arg[0].GetType()
 		tp.Tp = allegrosql.TypeVarString
 		tp.Charset = charset.CharsetBin
@@ -1354,7 +1354,7 @@ func (s *testEvaluatorSuite) TestFindInSet(c *C) {
 		{nil, "bar", nil},
 	} {
 		fc := funcs[ast.FindInSet]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(t.str, t.strlst)))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(t.str, t.strlst)))
 		c.Assert(err, IsNil)
 		r, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -1363,7 +1363,7 @@ func (s *testEvaluatorSuite) TestFindInSet(c *C) {
 }
 
 func (s *testEvaluatorSuite) TestField(c *C) {
-	stmtCtx := s.ctx.GetStochastikVars().StmtCtx
+	stmtCtx := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	origin := stmtCtx.IgnoreTruncate
 	stmtCtx.IgnoreTruncate = true
 	defer func() {
@@ -1387,7 +1387,7 @@ func (s *testEvaluatorSuite) TestField(c *C) {
 	}
 	for _, t := range tbl {
 		fc := funcs[ast.Field]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(t.argLst...)))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(t.argLst...)))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		r, err := evalBuiltinFunc(f, chunk.Event{})
@@ -1417,7 +1417,7 @@ func (s *testEvaluatorSuite) TestLpad(c *C) {
 		str := types.NewStringCauset(test.str)
 		length := types.NewIntCauset(test.len)
 		padStr := types.NewStringCauset(test.padStr)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{str, length, padStr}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{str, length, padStr}))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		result, err := evalBuiltinFunc(f, chunk.Event{})
@@ -1452,7 +1452,7 @@ func (s *testEvaluatorSuite) TestRpad(c *C) {
 		str := types.NewStringCauset(test.str)
 		length := types.NewIntCauset(test.len)
 		padStr := types.NewStringCauset(test.padStr)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{str, length, padStr}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{str, length, padStr}))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		result, err := evalBuiltinFunc(f, chunk.Event{})
@@ -1501,7 +1501,7 @@ func (s *testEvaluatorSuite) TestRpadSig(c *C) {
 	c.Assert(isNull, IsTrue)
 	c.Assert(err, IsNil)
 
-	warnings := s.ctx.GetStochastikVars().StmtCtx.GetWarnings()
+	warnings := s.ctx.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 	c.Assert(len(warnings), Equals, 1)
 	lastWarn := warnings[len(warnings)-1]
 	c.Assert(terror.ErrorEqual(errWarnAllowedPacketOverflowed, lastWarn.Err), IsTrue, Commentf("err %v", lastWarn.Err))
@@ -1591,7 +1591,7 @@ func (s *testEvaluatorSuite) TestInsertBinarySig(c *C) {
 	c.Assert(isNull, IsTrue)
 	c.Assert(err, IsNil)
 
-	warnings := s.ctx.GetStochastikVars().StmtCtx.GetWarnings()
+	warnings := s.ctx.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 	c.Assert(len(warnings), Equals, 1)
 	lastWarn := warnings[len(warnings)-1]
 	c.Assert(terror.ErrorEqual(errWarnAllowedPacketOverflowed, lastWarn.Err), IsTrue, Commentf("err %v", lastWarn.Err))
@@ -1632,7 +1632,7 @@ func (s *testEvaluatorSuite) TestInstr(c *C) {
 	Dtbl := tblToDtbl(tbl)
 	instr := funcs[ast.Instr]
 	for i, t := range Dtbl {
-		f, err := instr.getFunction(s.ctx, s.datumsToConstants(t["Args"]))
+		f, err := instr.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Args"]))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		got, err := evalBuiltinFunc(f, chunk.Event{})
@@ -1657,7 +1657,7 @@ func (s *testEvaluatorSuite) TestMakeSet(c *C) {
 
 	for _, t := range tbl {
 		fc := funcs[ast.MakeSet]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(t.argList...)))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(t.argList...)))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		r, err := evalBuiltinFunc(f, chunk.Event{})
@@ -1698,7 +1698,7 @@ func (s *testEvaluatorSuite) TestOct(c *C) {
 	fc := funcs[ast.Oct]
 	for _, tt := range octTests {
 		in := types.NewCauset(tt.origin)
-		f, _ := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{in}))
+		f, _ := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{in}))
 		c.Assert(f, NotNil)
 		r, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -1708,7 +1708,7 @@ func (s *testEvaluatorSuite) TestOct(c *C) {
 	}
 	// tt NULL input for sha
 	var argNull types.Causet
-	f, _ := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{argNull}))
+	f, _ := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{argNull}))
 	r, err := evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(r.IsNull(), IsTrue)
@@ -1786,7 +1786,7 @@ func (s *testEvaluatorSuite) TestFormat(c *C) {
 
 	fc := funcs[ast.Format]
 	for _, tt := range formatTests {
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(tt.number, tt.precision, tt.locale)))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(tt.number, tt.precision, tt.locale)))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		r, err := evalBuiltinFunc(f, chunk.Event{})
@@ -1794,50 +1794,50 @@ func (s *testEvaluatorSuite) TestFormat(c *C) {
 		c.Assert(r, solitonutil.CausetEquals, types.NewCauset(tt.ret))
 	}
 
-	origConfig := s.ctx.GetStochastikVars().StmtCtx.TruncateAsWarning
-	s.ctx.GetStochastikVars().StmtCtx.TruncateAsWarning = true
+	origConfig := s.ctx.GetStochaseinstein_dbars().StmtCtx.TruncateAsWarning
+	s.ctx.GetStochaseinstein_dbars().StmtCtx.TruncateAsWarning = true
 	for _, tt := range formatTests1 {
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(tt.number, tt.precision)))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(tt.number, tt.precision)))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		r, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(r, solitonutil.CausetEquals, types.NewCauset(tt.ret), Commentf("test %v", tt))
 		if tt.warnings > 0 {
-			warnings := s.ctx.GetStochastikVars().StmtCtx.GetWarnings()
+			warnings := s.ctx.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 			c.Assert(len(warnings), Equals, tt.warnings, Commentf("test %v", tt))
 			for i := 0; i < tt.warnings; i++ {
 				c.Assert(terror.ErrorEqual(types.ErrTruncatedWrongVal, warnings[i].Err), IsTrue, Commentf("test %v", tt))
 			}
-			s.ctx.GetStochastikVars().StmtCtx.SetWarnings([]stmtctx.ALLEGROSQLWarn{})
+			s.ctx.GetStochaseinstein_dbars().StmtCtx.SetWarnings([]stmtctx.ALLEGROSQLWarn{})
 		}
 	}
-	s.ctx.GetStochastikVars().StmtCtx.TruncateAsWarning = origConfig
+	s.ctx.GetStochaseinstein_dbars().StmtCtx.TruncateAsWarning = origConfig
 
-	f2, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(formatTests2.number, formatTests2.precision, formatTests2.locale)))
+	f2, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(formatTests2.number, formatTests2.precision, formatTests2.locale)))
 	c.Assert(err, IsNil)
 	c.Assert(f2, NotNil)
 	r2, err := evalBuiltinFunc(f2, chunk.Event{})
 	c.Assert(types.NewCauset(err), solitonutil.CausetEquals, types.NewCauset(errors.New("not implemented")))
 	c.Assert(r2, solitonutil.CausetEquals, types.NewCauset(formatTests2.ret))
 
-	f3, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(formatTests3.number, formatTests3.precision, formatTests3.locale)))
+	f3, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(formatTests3.number, formatTests3.precision, formatTests3.locale)))
 	c.Assert(err, IsNil)
 	c.Assert(f3, NotNil)
 	r3, err := evalBuiltinFunc(f3, chunk.Event{})
 	c.Assert(types.NewCauset(err), solitonutil.CausetEquals, types.NewCauset(errors.New("not support for the specific locale")))
 	c.Assert(r3, solitonutil.CausetEquals, types.NewCauset(formatTests3.ret))
 
-	f4, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(formatTests4.number, formatTests4.precision, formatTests4.locale)))
+	f4, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(formatTests4.number, formatTests4.precision, formatTests4.locale)))
 	c.Assert(err, IsNil)
 	c.Assert(f4, NotNil)
 	r4, err := evalBuiltinFunc(f4, chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(r4, solitonutil.CausetEquals, types.NewCauset(formatTests4.ret))
-	warnings := s.ctx.GetStochastikVars().StmtCtx.GetWarnings()
+	warnings := s.ctx.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 	c.Assert(len(warnings), Equals, 1)
 	c.Assert(terror.ErrorEqual(errUnknownLocale, warnings[0].Err), IsTrue)
-	s.ctx.GetStochastikVars().StmtCtx.SetWarnings([]stmtctx.ALLEGROSQLWarn{})
+	s.ctx.GetStochaseinstein_dbars().StmtCtx.SetWarnings([]stmtctx.ALLEGROSQLWarn{})
 }
 
 func (s *testEvaluatorSuite) TestFromBase64(c *C) {
@@ -1870,7 +1870,7 @@ func (s *testEvaluatorSuite) TestFromBase64(c *C) {
 	}
 	fc := funcs[ast.FromBase64]
 	for _, test := range tests {
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(test.args)))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(test.args)))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		result, err := evalBuiltinFunc(f, chunk.Event{})
@@ -1926,11 +1926,11 @@ func (s *testEvaluatorSuite) TestFromBase64Sig(c *C) {
 		c.Assert(err, IsNil)
 		c.Assert(isNull, Equals, test.isNil)
 		if isNull {
-			warnings := s.ctx.GetStochastikVars().StmtCtx.GetWarnings()
+			warnings := s.ctx.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 			c.Assert(len(warnings), Equals, 1)
 			lastWarn := warnings[len(warnings)-1]
 			c.Assert(terror.ErrorEqual(errWarnAllowedPacketOverflowed, lastWarn.Err), IsTrue)
-			s.ctx.GetStochastikVars().StmtCtx.SetWarnings([]stmtctx.ALLEGROSQLWarn{})
+			s.ctx.GetStochaseinstein_dbars().StmtCtx.SetWarnings([]stmtctx.ALLEGROSQLWarn{})
 		}
 		c.Assert(res, Equals, test.expect)
 	}
@@ -1967,7 +1967,7 @@ func (s *testEvaluatorSuite) TestInsert(c *C) {
 	}
 	fc := funcs[ast.InsertFunc]
 	for _, test := range tests {
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(test.args...)))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(test.args...)))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		result, err := evalBuiltinFunc(f, chunk.Event{})
@@ -2002,7 +2002,7 @@ func (s *testEvaluatorSuite) TestOrd(c *C) {
 		{"א", 55184, false, false},
 	}
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.Ord, s.primitiveValsToConstants([]interface{}{t.args})...)
+		f, err := newFunctionForTest(s.ctx, ast.Ord, s.primitiveValsToCouplingConstantWithRadixs([]interface{}{t.args})...)
 		c.Assert(err, IsNil)
 
 		d, err := f.Eval(chunk.Event{})
@@ -2035,7 +2035,7 @@ func (s *testEvaluatorSuite) TestElt(c *C) {
 	}
 	for _, t := range tbl {
 		fc := funcs[ast.Elt]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(t.argLst...)))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(t.argLst...)))
 		c.Assert(err, IsNil)
 		r, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -2061,7 +2061,7 @@ func (s *testEvaluatorSuite) TestExportSet(c *C) {
 	}
 	fc := funcs[ast.ExportSet]
 	for _, t := range estd {
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(t.argLst...)))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(t.argLst...)))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		exportSetRes, err := evalBuiltinFunc(f, chunk.Event{})
@@ -2092,9 +2092,9 @@ func (s *testEvaluatorSuite) TestBin(c *C) {
 	fc := funcs[ast.Bin]
 	dtbl := tblToDtbl(tbl)
 	ctx := mock.NewContext()
-	ctx.GetStochastikVars().StmtCtx.IgnoreTruncate = true
+	ctx.GetStochaseinstein_dbars().StmtCtx.IgnoreTruncate = true
 	for _, t := range dtbl {
-		f, err := fc.getFunction(ctx, s.datumsToConstants(t["Input"]))
+		f, err := fc.getFunction(ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		r, err := evalBuiltinFunc(f, chunk.Event{})
@@ -2122,7 +2122,7 @@ func (s *testEvaluatorSuite) TestQuote(c *C) {
 
 	for _, t := range tbl {
 		fc := funcs[ast.Quote]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(t.arg)))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(t.arg)))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		r, err := evalBuiltinFunc(f, chunk.Event{})
@@ -2181,7 +2181,7 @@ func (s *testEvaluatorSuite) TestToBase64(c *C) {
 	}
 
 	for _, test := range tests {
-		f, err := newFunctionForTest(s.ctx, ast.ToBase64, s.primitiveValsToConstants([]interface{}{test.args})...)
+		f, err := newFunctionForTest(s.ctx, ast.ToBase64, s.primitiveValsToCouplingConstantWithRadixs([]interface{}{test.args})...)
 		c.Assert(err, IsNil)
 		d, err := f.Eval(chunk.Event{})
 		if test.getErr {
@@ -2255,11 +2255,11 @@ func (s *testEvaluatorSuite) TestToBase64Sig(c *C) {
 		if test.isNil {
 			c.Assert(isNull, IsTrue)
 
-			warnings := s.ctx.GetStochastikVars().StmtCtx.GetWarnings()
+			warnings := s.ctx.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 			c.Assert(len(warnings), Equals, 1)
 			lastWarn := warnings[len(warnings)-1]
 			c.Assert(terror.ErrorEqual(errWarnAllowedPacketOverflowed, lastWarn.Err), IsTrue)
-			s.ctx.GetStochastikVars().StmtCtx.SetWarnings([]stmtctx.ALLEGROSQLWarn{})
+			s.ctx.GetStochaseinstein_dbars().StmtCtx.SetWarnings([]stmtctx.ALLEGROSQLWarn{})
 
 		} else {
 			c.Assert(isNull, IsFalse)
@@ -2286,7 +2286,7 @@ func (s *testEvaluatorSuite) TestStringRight(c *C) {
 	for _, test := range tests {
 		str := types.NewCauset(test.str)
 		length := types.NewCauset(test.length)
-		f, _ := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{str, length}))
+		f, _ := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{str, length}))
 		result, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		if result.IsNull() {
@@ -2339,15 +2339,15 @@ func (s *testEvaluatorSuite) TestWeightString(c *C) {
 		var f builtinFunc
 		var err error
 		if test.padding == "NONE" {
-			f, err = fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{str}))
+			f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{str}))
 		} else {
 			padding := types.NewCauset(test.padding)
 			length := types.NewCauset(test.length)
-			f, err = fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{str, padding, length}))
+			f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{str, padding, length}))
 		}
 		c.Assert(err, IsNil)
 		// Reset warnings.
-		s.ctx.GetStochastikVars().StmtCtx.ResetForRetry()
+		s.ctx.GetStochaseinstein_dbars().StmtCtx.ResetForRetry()
 		result, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		if result.IsNull() {
@@ -2363,7 +2363,7 @@ func (s *testEvaluatorSuite) TestWeightString(c *C) {
 		strExpr := fmt.Sprintf("%v", test.expr)
 		if test.padding == "BINARY" && test.length < len(strExpr) {
 			expectWarn := fmt.Sprintf("[expression:1292]Truncated incorrect BINARY(%d) value: '%s'", test.length, strExpr)
-			obtainedWarns := s.ctx.GetStochastikVars().StmtCtx.GetWarnings()
+			obtainedWarns := s.ctx.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 			c.Assert(len(obtainedWarns), Equals, 1)
 			c.Assert(obtainedWarns[0].Level, Equals, "Warning")
 			c.Assert(obtainedWarns[0].Err.Error(), Equals, expectWarn)
@@ -2389,11 +2389,11 @@ func (s *testEvaluatorSerialSuites) TestCIWeightString(c *C) {
 			var f builtinFunc
 			var err error
 			if test.padding == "NONE" {
-				f, err = fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{str}))
+				f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{str}))
 			} else {
 				padding := types.NewCauset(test.padding)
 				length := types.NewCauset(test.length)
-				f, err = fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{str, padding, length}))
+				f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{str, padding, length}))
 			}
 			c.Assert(err, IsNil)
 			result, err := evalBuiltinFunc(f, chunk.Event{})

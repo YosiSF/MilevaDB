@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,19 +16,19 @@ package core
 import (
 	"math"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression/aggregation"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/property"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/ranger"
+	"github.com/whtcorpsinc/MilevaDB-Prod/statistics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/auth"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/expression/aggregation"
-	"github.com/whtcorpsinc/milevadb/planner/property"
-	"github.com/whtcorpsinc/milevadb/planner/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/ranger"
-	"github.com/whtcorpsinc/milevadb/statistics"
-	"github.com/whtcorpsinc/milevadb/types"
 	"go.uber.org/zap"
 )
 
@@ -280,7 +280,7 @@ type LogicalProjection struct {
 	// building columnEvaluator for the expressions of Projection which is
 	// built by buildProjection4Union.
 	// This can be removed after column pool being supported.
-	// Related issue: MilevaDB#8141(https://github.com/whtcorpsinc/milevadb/issues/8141)
+	// Related issue: MilevaDB#8141(https://github.com/whtcorpsinc/MilevaDB-Prod/issues/8141)
 	AvoidDeferredCausetEvaluator bool
 }
 
@@ -655,7 +655,7 @@ func (ds *DataSource) deriveCommonHandleBlockPathStats(path *soliton.AccessPath,
 	if len(conds) == 0 {
 		return false, nil
 	}
-	sc := ds.ctx.GetStochastikVars().StmtCtx
+	sc := ds.ctx.GetStochaseinstein_dbars().StmtCtx
 	if len(path.IdxDefCauss) != 0 {
 		res, err := ranger.DetachCondAndBuildRangeForIndex(ds.ctx, conds, path.IdxDefCauss, path.IdxDefCausLens)
 		if err != nil {
@@ -729,7 +729,7 @@ func (ds *DataSource) deriveBlockPathStats(path *soliton.AccessPath, conds []exp
 		return ds.deriveCommonHandleBlockPathStats(path, conds, isIm)
 	}
 	var err error
-	sc := ds.ctx.GetStochastikVars().StmtCtx
+	sc := ds.ctx.GetStochaseinstein_dbars().StmtCtx
 	path.CountAfterAccess = float64(ds.statisticBlock.Count)
 	path.BlockFilters = conds
 	var pkDefCaus *expression.DeferredCauset
@@ -810,7 +810,7 @@ func (ds *DataSource) deriveBlockPathStats(path *soliton.AccessPath, conds []exp
 }
 
 func (ds *DataSource) fillIndexPath(path *soliton.AccessPath, conds []expression.Expression) error {
-	sc := ds.ctx.GetStochastikVars().StmtCtx
+	sc := ds.ctx.GetStochaseinstein_dbars().StmtCtx
 	path.Ranges = ranger.FullRange()
 	path.CountAfterAccess = float64(ds.statisticBlock.Count)
 	path.IdxDefCauss, path.IdxDefCausLens = expression.IndexInfo2PrefixDefCauss(ds.DeferredCausets, ds.schemaReplicant.DeferredCausets, path.Index)
@@ -858,7 +858,7 @@ func (ds *DataSource) fillIndexPath(path *soliton.AccessPath, conds []expression
 // conds is the conditions used to generate the DetachRangeResult for path.
 // isIm indicates whether this function is called to generate the partial path for IndexMerge.
 func (ds *DataSource) deriveIndexPathStats(path *soliton.AccessPath, conds []expression.Expression, isIm bool) bool {
-	sc := ds.ctx.GetStochastikVars().StmtCtx
+	sc := ds.ctx.GetStochaseinstein_dbars().StmtCtx
 	if path.EqOrInCondCount == len(path.AccessConds) {
 		accesses, remained := path.SplitCorDefCausAccessCondFromFilters(ds.ctx, path.EqOrInCondCount)
 		path.AccessConds = append(path.AccessConds, accesses...)

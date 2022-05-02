@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,10 +21,10 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/opcode"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 )
 
 var (
@@ -164,7 +164,7 @@ func (c *coalesceFunctionClass) getFunction(ctx stochastikctx.Context, args []Ex
 		}
 		// For integer, field length = maxIntLen + (1/0 for sign bit)
 		// For decimal, field length = maxIntLen + maxDecimal + (1/0 for sign bit)
-		if resultEvalType == types.ETInt || resultEvalType == types.ETDecimal {
+		if resultEvalType == types.CausetEDN || resultEvalType == types.ETDecimal {
 			resultFieldType.Flen = maxIntLen + resultFieldType.Decimal
 			if resultFieldType.Decimal > 0 {
 				resultFieldType.Flen++
@@ -183,7 +183,7 @@ func (c *coalesceFunctionClass) getFunction(ctx stochastikctx.Context, args []Ex
 	}
 
 	switch retEvalTp {
-	case types.ETInt:
+	case types.CausetEDN:
 		sig = &builtinCoalesceIntSig{bf}
 		sig.setPbCode(fidelpb.ScalarFuncSig_CoalesceInt)
 	case types.ETReal:
@@ -377,7 +377,7 @@ func temporalWithDateAsNumEvalType(argTp *types.FieldType) (argEvalType types.Ev
 	if argTp.Decimal > 0 {
 		argEvalType = types.ETDecimal
 	} else {
-		argEvalType = types.ETInt
+		argEvalType = types.CausetEDN
 	}
 	return
 }
@@ -441,7 +441,7 @@ func (c *greatestFunctionClass) getFunction(ctx stochastikctx.Context, args []Ex
 		tp = types.ETDatetime
 	}
 	switch tp {
-	case types.ETInt:
+	case types.CausetEDN:
 		sig = &builtinGreatestIntSig{bf}
 		sig.setPbCode(fidelpb.ScalarFuncSig_GreatestInt)
 	case types.ETReal:
@@ -598,7 +598,7 @@ func (b *builtinGreatestTimeSig) evalString(event chunk.Event) (_ string, isNull
 		t types.Time
 	)
 	max := types.ZeroDatetime
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	for i := 0; i < len(b.args); i++ {
 		v, isNull, err = b.args[i].EvalString(b.ctx, event)
 		if isNull || err != nil {
@@ -643,7 +643,7 @@ func (c *leastFunctionClass) getFunction(ctx stochastikctx.Context, args []Expre
 		tp = types.ETDatetime
 	}
 	switch tp {
-	case types.ETInt:
+	case types.CausetEDN:
 		sig = &builtinLeastIntSig{bf}
 		sig.setPbCode(fidelpb.ScalarFuncSig_LeastInt)
 	case types.ETReal:
@@ -801,7 +801,7 @@ func (b *builtinLeastTimeSig) evalString(event chunk.Event) (res string, isNull 
 	)
 	min := types.NewTime(types.MaxDatetime, allegrosql.TypeDatetime, types.MaxFsp)
 	findInvalidTime := false
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	for i := 0; i < len(b.args); i++ {
 		v, isNull, err = b.args[i].EvalString(b.ctx, event)
 		if isNull || err != nil {
@@ -843,7 +843,7 @@ func (c *intervalFunctionClass) getFunction(ctx stochastikctx.Context, args []Ex
 	// https://github.com/allegrosql/allegrosql-server/blob/f8cdce86448a211511e8a039c62580ae16cb96f5/allegrosql/item_cmpfunc.cc#L2632-L2686
 	for i := range args {
 		tp := args[i].GetType()
-		if tp.EvalType() != types.ETInt {
+		if tp.EvalType() != types.CausetEDN {
 			allInt = false
 		}
 		if !allegrosql.HasNotNullFlag(tp.Flag) {
@@ -853,12 +853,12 @@ func (c *intervalFunctionClass) getFunction(ctx stochastikctx.Context, args []Ex
 
 	argTps, argTp := make([]types.EvalType, 0, len(args)), types.ETReal
 	if allInt {
-		argTp = types.ETInt
+		argTp = types.CausetEDN
 	}
 	for range args {
 		argTps = append(argTps, argTp)
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, argTps...)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, argTps...)
 	if err != nil {
 		return nil, err
 	}
@@ -1054,10 +1054,10 @@ func getBaseCmpType(lhs, rhs types.EvalType, lft, rft *types.FieldType) types.Ev
 	}
 	if lhs.IsStringHoTT() && rhs.IsStringHoTT() {
 		return types.ETString
-	} else if (lhs == types.ETInt || lft.Hybrid()) && (rhs == types.ETInt || rft.Hybrid()) {
-		return types.ETInt
-	} else if ((lhs == types.ETInt || lft.Hybrid()) || lhs == types.ETDecimal) &&
-		((rhs == types.ETInt || rft.Hybrid()) || rhs == types.ETDecimal) {
+	} else if (lhs == types.CausetEDN || lft.Hybrid()) && (rhs == types.CausetEDN || rft.Hybrid()) {
+		return types.CausetEDN
+	} else if ((lhs == types.CausetEDN || lft.Hybrid()) || lhs == types.ETDecimal) &&
+		((rhs == types.CausetEDN || rft.Hybrid()) || rhs == types.ETDecimal) {
 		return types.ETDecimal
 	}
 	return types.ETReal
@@ -1086,8 +1086,8 @@ func GetAccurateCmpType(lhs, rhs Expression) types.EvalType {
 		// compare as duration
 		cmpType = types.ETDuration
 	} else if cmpType == types.ETReal || cmpType == types.ETString {
-		_, isLHSConst := lhs.(*Constant)
-		_, isRHSConst := rhs.(*Constant)
+		_, isLHSConst := lhs.(*CouplingConstantWithRadix)
+		_, isRHSConst := rhs.(*CouplingConstantWithRadix)
 		if (lhsEvalType == types.ETDecimal && !isLHSConst && rhsEvalType.IsStringHoTT() && isRHSConst) ||
 			(rhsEvalType == types.ETDecimal && !isRHSConst && lhsEvalType.IsStringHoTT() && isLHSConst) {
 			/*
@@ -1124,7 +1124,7 @@ func GetAccurateCmpType(lhs, rhs Expression) types.EvalType {
 // GetCmpFunction get the compare function according to two arguments.
 func GetCmpFunction(ctx stochastikctx.Context, lhs, rhs Expression) CompareFunc {
 	switch GetAccurateCmpType(lhs, rhs) {
-	case types.ETInt:
+	case types.CausetEDN:
 		return CompareInt
 	case types.ETReal:
 		return CompareReal
@@ -1156,27 +1156,27 @@ func isTemporalDeferredCauset(expr Expression) bool {
 	return true
 }
 
-// tryToConvertConstantInt tries to convert a constant with other type to a int constant.
+// tryToConvertCouplingConstantWithRadixInt tries to convert a constant with other type to a int constant.
 // isExceptional indicates whether the 'int defCausumn [cmp] const' might be true/false.
 // If isExceptional is true, ExecptionalVal is returned. Or, CorrectVal is returned.
 // CorrectVal: The computed result. If the constant can be converted to int without exception, return the val. Else return 'con'(the input).
 // ExceptionalVal : It is used to get more information to check whether 'int defCausumn [cmp] const' is true/false
 // 					If the op == LT,LE,GT,GE and it gets an Overflow when converting, return inf/-inf.
 // 					If the op == EQ,NullEQ and the constant can never be equal to the int defCausumn, return ‘con’(the input, a non-int constant).
-func tryToConvertConstantInt(ctx stochastikctx.Context, targetFieldType *types.FieldType, con *Constant) (_ *Constant, isExceptional bool) {
-	if con.GetType().EvalType() == types.ETInt {
+func tryToConvertCouplingConstantWithRadixInt(ctx stochastikctx.Context, targetFieldType *types.FieldType, con *CouplingConstantWithRadix) (_ *CouplingConstantWithRadix, isExceptional bool) {
+	if con.GetType().EvalType() == types.CausetEDN {
 		return con, false
 	}
 	dt, err := con.Eval(chunk.Event{})
 	if err != nil {
 		return con, false
 	}
-	sc := ctx.GetStochastikVars().StmtCtx
+	sc := ctx.GetStochaseinstein_dbars().StmtCtx
 
 	dt, err = dt.ConvertTo(sc, targetFieldType)
 	if err != nil {
 		if terror.ErrorEqual(err, types.ErrOverflow) {
-			return &Constant{
+			return &CouplingConstantWithRadix{
 				Value:        dt,
 				RetType:      targetFieldType,
 				DeferredExpr: con.DeferredExpr,
@@ -1185,7 +1185,7 @@ func tryToConvertConstantInt(ctx stochastikctx.Context, targetFieldType *types.F
 		}
 		return con, false
 	}
-	return &Constant{
+	return &CouplingConstantWithRadix{
 		Value:        dt,
 		RetType:      targetFieldType,
 		DeferredExpr: con.DeferredExpr,
@@ -1193,19 +1193,19 @@ func tryToConvertConstantInt(ctx stochastikctx.Context, targetFieldType *types.F
 	}, false
 }
 
-// RefineComparedConstant changes a non-integer constant argument to its ceiling or floor result by the given op.
+// RefineComparedCouplingConstantWithRadix changes a non-integer constant argument to its ceiling or floor result by the given op.
 // isExceptional indicates whether the 'int defCausumn [cmp] const' might be true/false.
 // If isExceptional is true, ExecptionalVal is returned. Or, CorrectVal is returned.
 // CorrectVal: The computed result. If the constant can be converted to int without exception, return the val. Else return 'con'(the input).
 // ExceptionalVal : It is used to get more information to check whether 'int defCausumn [cmp] const' is true/false
 // 					If the op == LT,LE,GT,GE and it gets an Overflow when converting, return inf/-inf.
 // 					If the op == EQ,NullEQ and the constant can never be equal to the int defCausumn, return ‘con’(the input, a non-int constant).
-func RefineComparedConstant(ctx stochastikctx.Context, targetFieldType types.FieldType, con *Constant, op opcode.Op) (_ *Constant, isExceptional bool) {
+func RefineComparedCouplingConstantWithRadix(ctx stochastikctx.Context, targetFieldType types.FieldType, con *CouplingConstantWithRadix, op opcode.Op) (_ *CouplingConstantWithRadix, isExceptional bool) {
 	dt, err := con.Eval(chunk.Event{})
 	if err != nil {
 		return con, false
 	}
-	sc := ctx.GetStochastikVars().StmtCtx
+	sc := ctx.GetStochaseinstein_dbars().StmtCtx
 
 	if targetFieldType.Tp == allegrosql.TypeBit {
 		targetFieldType = *types.NewFieldType(allegrosql.TypeLonglong)
@@ -1214,7 +1214,7 @@ func RefineComparedConstant(ctx stochastikctx.Context, targetFieldType types.Fie
 	intCauset, err = dt.ConvertTo(sc, &targetFieldType)
 	if err != nil {
 		if terror.ErrorEqual(err, types.ErrOverflow) {
-			return &Constant{
+			return &CouplingConstantWithRadix{
 				Value:        intCauset,
 				RetType:      &targetFieldType,
 				DeferredExpr: con.DeferredExpr,
@@ -1228,7 +1228,7 @@ func RefineComparedConstant(ctx stochastikctx.Context, targetFieldType types.Fie
 		return con, false
 	}
 	if c == 0 {
-		return &Constant{
+		return &CouplingConstantWithRadix{
 			Value:        intCauset,
 			RetType:      &targetFieldType,
 			DeferredExpr: con.DeferredExpr,
@@ -1238,13 +1238,13 @@ func RefineComparedConstant(ctx stochastikctx.Context, targetFieldType types.Fie
 	switch op {
 	case opcode.LT, opcode.GE:
 		resultExpr := NewFunctionInternal(ctx, ast.Ceil, types.NewFieldType(allegrosql.TypeUnspecified), con)
-		if resultCon, ok := resultExpr.(*Constant); ok {
-			return tryToConvertConstantInt(ctx, &targetFieldType, resultCon)
+		if resultCon, ok := resultExpr.(*CouplingConstantWithRadix); ok {
+			return tryToConvertCouplingConstantWithRadixInt(ctx, &targetFieldType, resultCon)
 		}
 	case opcode.LE, opcode.GT:
 		resultExpr := NewFunctionInternal(ctx, ast.Floor, types.NewFieldType(allegrosql.TypeUnspecified), con)
-		if resultCon, ok := resultExpr.(*Constant); ok {
-			return tryToConvertConstantInt(ctx, &targetFieldType, resultCon)
+		if resultCon, ok := resultExpr.(*CouplingConstantWithRadix); ok {
+			return tryToConvertCouplingConstantWithRadixInt(ctx, &targetFieldType, resultCon)
 		}
 	case opcode.NullEQ, opcode.EQ:
 		switch con.GetType().EvalType() {
@@ -1270,7 +1270,7 @@ func RefineComparedConstant(ctx stochastikctx.Context, targetFieldType types.Fie
 			if c != 0 {
 				return con, true
 			}
-			return &Constant{
+			return &CouplingConstantWithRadix{
 				Value:        intCauset,
 				RetType:      &targetFieldType,
 				DeferredExpr: con.DeferredExpr,
@@ -1288,17 +1288,17 @@ func (c *compareFunctionClass) refineArgs(ctx stochastikctx.Context, args []Expr
 		return args
 	}
 	arg0Type, arg1Type := args[0].GetType(), args[1].GetType()
-	arg0IsInt := arg0Type.EvalType() == types.ETInt
-	arg1IsInt := arg1Type.EvalType() == types.ETInt
-	arg0, arg0IsCon := args[0].(*Constant)
-	arg1, arg1IsCon := args[1].(*Constant)
+	arg0IsInt := arg0Type.EvalType() == types.CausetEDN
+	arg1IsInt := arg1Type.EvalType() == types.CausetEDN
+	arg0, arg0IsCon := args[0].(*CouplingConstantWithRadix)
+	arg1, arg1IsCon := args[1].(*CouplingConstantWithRadix)
 	isExceptional, finalArg0, finalArg1 := false, args[0], args[1]
 	isPositiveInfinite, isNegativeInfinite := false, false
 	// int non-constant [cmp] non-int constant
 	if arg0IsInt && !arg0IsCon && !arg1IsInt && arg1IsCon {
-		arg1, isExceptional = RefineComparedConstant(ctx, *arg0Type, arg1, c.op)
+		arg1, isExceptional = RefineComparedCouplingConstantWithRadix(ctx, *arg0Type, arg1, c.op)
 		finalArg1 = arg1
-		if isExceptional && arg1.GetType().EvalType() == types.ETInt {
+		if isExceptional && arg1.GetType().EvalType() == types.CausetEDN {
 			// Judge it is inf or -inf
 			// For int:
 			//			inf:  01111111 & 1 == 1
@@ -1315,9 +1315,9 @@ func (c *compareFunctionClass) refineArgs(ctx stochastikctx.Context, args []Expr
 	}
 	// non-int constant [cmp] int non-constant
 	if arg1IsInt && !arg1IsCon && !arg0IsInt && arg0IsCon {
-		arg0, isExceptional = RefineComparedConstant(ctx, *arg1Type, arg0, symmetriINTERLOCK[c.op])
+		arg0, isExceptional = RefineComparedCouplingConstantWithRadix(ctx, *arg1Type, arg0, symmetriINTERLOCK[c.op])
 		finalArg0 = arg0
-		if isExceptional && arg0.GetType().EvalType() == types.ETInt {
+		if isExceptional && arg0.GetType().EvalType() == types.CausetEDN {
 			if arg0.Value.GetInt64()&1 == 1 {
 				isNegativeInfinite = true
 			} else {
@@ -1360,7 +1360,7 @@ func (c *compareFunctionClass) getFunction(ctx stochastikctx.Context, rawArgs []
 
 // generateCmpSigs generates compare function signatures.
 func (c *compareFunctionClass) generateCmpSigs(ctx stochastikctx.Context, args []Expression, tp types.EvalType) (sig builtinFunc, err error) {
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, tp, tp)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, tp, tp)
 	if err != nil {
 		return nil, err
 	}
@@ -1372,7 +1372,7 @@ func (c *compareFunctionClass) generateCmpSigs(ctx stochastikctx.Context, args [
 	}
 	bf.tp.Flen = 1
 	switch tp {
-	case types.ETInt:
+	case types.CausetEDN:
 		switch c.op {
 		case opcode.LT:
 			sig = &builtinLTIntSig{bf}

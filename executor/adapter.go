@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,33 +23,33 @@ import (
 	"time"
 
 	"github.com/opentracing/opentracing-go"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/metrics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/plugin"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/execdetails"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/memory"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/plancodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/sqlexec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/stmtsummary"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/stringutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/log"
-	"github.com/whtcorpsinc/milevadb/causetstore/einsteindb"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/metrics"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/planner"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/plugin"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/execdetails"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/memory"
-	"github.com/whtcorpsinc/milevadb/soliton/plancodec"
-	"github.com/whtcorpsinc/milevadb/soliton/sqlexec"
-	"github.com/whtcorpsinc/milevadb/soliton/stmtsummary"
-	"github.com/whtcorpsinc/milevadb/soliton/stringutil"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -70,7 +70,7 @@ type recordSet struct {
 
 func (a *recordSet) Fields() []*ast.ResultField {
 	if len(a.fields) == 0 {
-		a.fields = defCausNames2ResultFields(a.executor.Schema(), a.stmt.OutputNames, a.stmt.Ctx.GetStochastikVars().CurrentDB)
+		a.fields = defCausNames2ResultFields(a.executor.Schema(), a.stmt.OutputNames, a.stmt.Ctx.GetStochaseinstein_dbars().CurrentDB)
 	}
 	return a.fields
 }
@@ -95,7 +95,7 @@ func defCausNames2ResultFields(schemaReplicant *expression.Schema, names []*type
 			DBName:               dbName,
 		}
 		// This is for compatibility.
-		// See issue https://github.com/whtcorpsinc/milevadb/issues/10513 .
+		// See issue https://github.com/whtcorpsinc/MilevaDB-Prod/issues/10513 .
 		if len(rf.DeferredCausetAsName.O) > allegrosql.MaxAliasIdentifierLen {
 			rf.DeferredCausetAsName.O = rf.DeferredCausetAsName.O[:allegrosql.MaxAliasIdentifierLen]
 		}
@@ -132,12 +132,12 @@ func (a *recordSet) Next(ctx context.Context, req *chunk.Chunk) (err error) {
 	numEvents := req.NumEvents()
 	if numEvents == 0 {
 		if a.stmt != nil {
-			a.stmt.Ctx.GetStochastikVars().LastFoundEvents = a.stmt.Ctx.GetStochastikVars().StmtCtx.FoundEvents()
+			a.stmt.Ctx.GetStochaseinstein_dbars().LastFoundEvents = a.stmt.Ctx.GetStochaseinstein_dbars().StmtCtx.FoundEvents()
 		}
 		return nil
 	}
 	if a.stmt != nil {
-		a.stmt.Ctx.GetStochastikVars().StmtCtx.AddFoundEvents(uint64(numEvents))
+		a.stmt.Ctx.GetStochaseinstein_dbars().StmtCtx.AddFoundEvents(uint64(numEvents))
 	}
 	return nil
 }
@@ -198,7 +198,7 @@ func (a *ExecStmt) PointGet(ctx context.Context, is schemareplicant.SchemaReplic
 	if err != nil {
 		return nil, err
 	}
-	a.Ctx.GetStochastikVars().StmtCtx.Priority = ekv.PriorityHigh
+	a.Ctx.GetStochaseinstein_dbars().StmtCtx.Priority = ekv.PriorityHigh
 
 	// try to reuse point get executor
 	if a.PsStmt.Executor != nil {
@@ -246,7 +246,7 @@ func (a *ExecStmt) IsPrepared() bool {
 // IsReadOnly returns true if a statement is read only.
 // If current StmtNode is an ExecuteStmt, we can get its prepared stmt,
 // then using ast.IsReadOnly function to determine a statement is read only or not.
-func (a *ExecStmt) IsReadOnly(vars *variable.StochastikVars) bool {
+func (a *ExecStmt) IsReadOnly(vars *variable.Stochaseinstein_dbars) bool {
 	return planner.IsReadOnly(a.StmtNode, vars)
 }
 
@@ -277,7 +277,7 @@ func (a *ExecStmt) Exec(ctx context.Context) (_ sqlexec.RecordSet, err error) {
 			if a.retryCount > 0 {
 				metrics.StatementPessimisticRetryCount.Observe(float64(a.retryCount))
 			}
-			lockKeysCnt := a.Ctx.GetStochastikVars().StmtCtx.LockKeysCount
+			lockKeysCnt := a.Ctx.GetStochaseinstein_dbars().StmtCtx.LockKeysCount
 			if lockKeysCnt > 0 {
 				metrics.StatementLockKeysCount.Observe(float64(lockKeysCnt))
 			}
@@ -292,25 +292,25 @@ func (a *ExecStmt) Exec(ctx context.Context) (_ sqlexec.RecordSet, err error) {
 
 	sctx := a.Ctx
 	ctx = stochastikctx.SetCommitCtx(ctx, sctx)
-	if _, ok := a.Plan.(*plannercore.Analyze); ok && sctx.GetStochastikVars().InRestrictedALLEGROSQL {
-		oriStats, _ := sctx.GetStochastikVars().GetSystemVar(variable.MilevaDBBuildStatsConcurrency)
-		oriScan := sctx.GetStochastikVars().DistALLEGROSQLScanConcurrency()
-		oriIndex := sctx.GetStochastikVars().IndexSerialScanConcurrency()
-		oriIso, _ := sctx.GetStochastikVars().GetSystemVar(variable.TxnIsolation)
-		terror.Log(sctx.GetStochastikVars().SetSystemVar(variable.MilevaDBBuildStatsConcurrency, "1"))
-		sctx.GetStochastikVars().SetDistALLEGROSQLScanConcurrency(1)
-		sctx.GetStochastikVars().SetIndexSerialScanConcurrency(1)
-		terror.Log(sctx.GetStochastikVars().SetSystemVar(variable.TxnIsolation, ast.ReadCommitted))
+	if _, ok := a.Plan.(*plannercore.Analyze); ok && sctx.GetStochaseinstein_dbars().InRestrictedALLEGROSQL {
+		oriStats, _ := sctx.GetStochaseinstein_dbars().GetSystemVar(variable.MilevaDBBuildStatsConcurrency)
+		oriScan := sctx.GetStochaseinstein_dbars().DistALLEGROSQLScanConcurrency()
+		oriIndex := sctx.GetStochaseinstein_dbars().IndexSerialScanConcurrency()
+		oriIso, _ := sctx.GetStochaseinstein_dbars().GetSystemVar(variable.TxnIsolation)
+		terror.Log(sctx.GetStochaseinstein_dbars().SetSystemVar(variable.MilevaDBBuildStatsConcurrency, "1"))
+		sctx.GetStochaseinstein_dbars().SetDistALLEGROSQLScanConcurrency(1)
+		sctx.GetStochaseinstein_dbars().SetIndexSerialScanConcurrency(1)
+		terror.Log(sctx.GetStochaseinstein_dbars().SetSystemVar(variable.TxnIsolation, ast.ReadCommitted))
 		defer func() {
-			terror.Log(sctx.GetStochastikVars().SetSystemVar(variable.MilevaDBBuildStatsConcurrency, oriStats))
-			sctx.GetStochastikVars().SetDistALLEGROSQLScanConcurrency(oriScan)
-			sctx.GetStochastikVars().SetIndexSerialScanConcurrency(oriIndex)
-			terror.Log(sctx.GetStochastikVars().SetSystemVar(variable.TxnIsolation, oriIso))
+			terror.Log(sctx.GetStochaseinstein_dbars().SetSystemVar(variable.MilevaDBBuildStatsConcurrency, oriStats))
+			sctx.GetStochaseinstein_dbars().SetDistALLEGROSQLScanConcurrency(oriScan)
+			sctx.GetStochaseinstein_dbars().SetIndexSerialScanConcurrency(oriIndex)
+			terror.Log(sctx.GetStochaseinstein_dbars().SetSystemVar(variable.TxnIsolation, oriIso))
 		}()
 	}
 
-	if sctx.GetStochastikVars().StmtCtx.HasMemQuotaHint {
-		sctx.GetStochastikVars().StmtCtx.MemTracker.SetBytesLimit(sctx.GetStochastikVars().StmtCtx.MemQuotaQuery)
+	if sctx.GetStochaseinstein_dbars().StmtCtx.HasMemQuotaHint {
+		sctx.GetStochaseinstein_dbars().StmtCtx.MemTracker.SetBytesLimit(sctx.GetStochaseinstein_dbars().StmtCtx.MemQuotaQuery)
 	}
 
 	e, err := a.buildExecutor()
@@ -323,7 +323,7 @@ func (a *ExecStmt) Exec(ctx context.Context) (_ sqlexec.RecordSet, err error) {
 		return nil, err
 	}
 
-	cmd32 := atomic.LoadUint32(&sctx.GetStochastikVars().CommandValue)
+	cmd32 := atomic.LoadUint32(&sctx.GetStochaseinstein_dbars().CommandValue)
 	cmd := byte(cmd32)
 	var pi processinfoSetter
 	if raw, ok := sctx.(processinfoSetter); ok {
@@ -338,12 +338,12 @@ func (a *ExecStmt) Exec(ctx context.Context) (_ sqlexec.RecordSet, err error) {
 		maxExecutionTime := getMaxExecutionTime(sctx)
 		// UFIDelate processinfo, ShowProcess() will use it.
 		pi.SetProcessInfo(allegrosql, time.Now(), cmd, maxExecutionTime)
-		if a.Ctx.GetStochastikVars().StmtCtx.StmtType == "" {
-			a.Ctx.GetStochastikVars().StmtCtx.StmtType = GetStmtLabel(a.StmtNode)
+		if a.Ctx.GetStochaseinstein_dbars().StmtCtx.StmtType == "" {
+			a.Ctx.GetStochaseinstein_dbars().StmtCtx.StmtType = GetStmtLabel(a.StmtNode)
 		}
 	}
 
-	isPessimistic := sctx.GetStochastikVars().TxnCtx.IsPessimistic
+	isPessimistic := sctx.GetStochaseinstein_dbars().TxnCtx.IsPessimistic
 
 	// Special handle for "select for uFIDelate statement" in pessimistic transaction.
 	if isPessimistic && a.isSelectForUFIDelate {
@@ -370,7 +370,7 @@ func (a *ExecStmt) Exec(ctx context.Context) (_ sqlexec.RecordSet, err error) {
 }
 
 func (a *ExecStmt) handleNoDelay(ctx context.Context, e Executor, isPessimistic bool) (handled bool, rs sqlexec.RecordSet, err error) {
-	sc := a.Ctx.GetStochastikVars().StmtCtx
+	sc := a.Ctx.GetStochaseinstein_dbars().StmtCtx
 	defer func() {
 		// If the stmt have no rs like `insert`, The stochastik tracker detachment will be directly
 		// done in the `defer` function. If the rs is not nil, the detachment will be done in
@@ -412,10 +412,10 @@ func (a *ExecStmt) handleNoDelay(ctx context.Context, e Executor, isPessimistic 
 
 // getMaxExecutionTime get the max execution timeout value.
 func getMaxExecutionTime(sctx stochastikctx.Context) uint64 {
-	if sctx.GetStochastikVars().StmtCtx.HasMaxExecutionTime {
-		return sctx.GetStochastikVars().StmtCtx.MaxExecutionTime
+	if sctx.GetStochaseinstein_dbars().StmtCtx.HasMaxExecutionTime {
+		return sctx.GetStochaseinstein_dbars().StmtCtx.MaxExecutionTime
 	}
-	return sctx.GetStochastikVars().MaxExecutionTime
+	return sctx.GetStochaseinstein_dbars().MaxExecutionTime
 }
 
 type chunkEventRecordSet struct {
@@ -444,7 +444,7 @@ func (c *chunkEventRecordSet) NewChunk() *chunk.Chunk {
 }
 
 func (c *chunkEventRecordSet) Close() error {
-	c.execStmt.CloseRecordSet(c.execStmt.Ctx.GetStochastikVars().TxnCtx.StartTS, nil)
+	c.execStmt.CloseRecordSet(c.execStmt.Ctx.GetStochaseinstein_dbars().TxnCtx.StartTS, nil)
 	return nil
 }
 
@@ -475,14 +475,14 @@ func (a *ExecStmt) runPessimisticSelectForUFIDelate(ctx context.Context, e Execu
 			break
 		}
 		if req.NumEvents() == 0 {
-			fields := defCausNames2ResultFields(e.Schema(), a.OutputNames, a.Ctx.GetStochastikVars().CurrentDB)
+			fields := defCausNames2ResultFields(e.Schema(), a.OutputNames, a.Ctx.GetStochaseinstein_dbars().CurrentDB)
 			return &chunkEventRecordSet{rows: rows, fields: fields, e: e, execStmt: a}, nil
 		}
 		iter := chunk.NewIterator4Chunk(req)
 		for r := iter.Begin(); r != iter.End(); r = iter.Next() {
 			rows = append(rows, r)
 		}
-		req = chunk.Renew(req, a.Ctx.GetStochastikVars().MaxChunkSize)
+		req = chunk.Renew(req, a.Ctx.GetStochaseinstein_dbars().MaxChunkSize)
 	}
 	return nil, err
 }
@@ -499,11 +499,11 @@ func (a *ExecStmt) handleNoDelayExecutor(ctx context.Context, e Executor) (sqlex
 	// In history read mode, we can not do write operations.
 	switch e.(type) {
 	case *DeleteExec, *InsertExec, *UFIDelateExec, *ReplaceExec, *LoadDataExec, *DBSExec:
-		snapshotTS := sctx.GetStochastikVars().SnapshotTS
+		snapshotTS := sctx.GetStochaseinstein_dbars().SnapshotTS
 		if snapshotTS != 0 {
 			return nil, errors.New("can not execute write statement when 'milevadb_snapshot' is set")
 		}
-		lowResolutionTSO := sctx.GetStochastikVars().LowResolutionTSO
+		lowResolutionTSO := sctx.GetStochaseinstein_dbars().LowResolutionTSO
 		if lowResolutionTSO {
 			return nil, errors.New("can not execute write statement when 'milevadb_low_resolution_tso' is set")
 		}
@@ -531,7 +531,7 @@ func (a *ExecStmt) handlePessimisticDML(ctx context.Context, e Executor) error {
 	if err != nil {
 		return err
 	}
-	txnCtx := sctx.GetStochastikVars().TxnCtx
+	txnCtx := sctx.GetStochaseinstein_dbars().TxnCtx
 	for {
 		startPointGetLocking := time.Now()
 		_, err = a.handleNoDelayExecutor(ctx, e)
@@ -557,7 +557,7 @@ func (a *ExecStmt) handlePessimisticDML(ctx context.Context, e Executor) error {
 		if len(keys) == 0 {
 			return nil
 		}
-		seVars := sctx.GetStochastikVars()
+		seVars := sctx.GetStochaseinstein_dbars()
 		lockCtx := newLockCtx(seVars, seVars.LockWaitTimeout)
 		var lockKeyStats *execdetails.LockKeysDetails
 		ctx = context.WithValue(ctx, execdetails.LockKeysDetailCtxKey, &lockKeyStats)
@@ -595,14 +595,14 @@ func UFIDelateForUFIDelateTS(seCtx stochastikctx.Context, newForUFIDelateTS uint
 		}
 		newForUFIDelateTS = version.Ver
 	}
-	seCtx.GetStochastikVars().TxnCtx.SetForUFIDelateTS(newForUFIDelateTS)
-	txn.SetOption(ekv.SnapshotTS, seCtx.GetStochastikVars().TxnCtx.GetForUFIDelateTS())
+	seCtx.GetStochaseinstein_dbars().TxnCtx.SetForUFIDelateTS(newForUFIDelateTS)
+	txn.SetOption(ekv.SnapshotTS, seCtx.GetStochaseinstein_dbars().TxnCtx.GetForUFIDelateTS())
 	return nil
 }
 
 // handlePessimisticLockError uFIDelates TS and rebuild executor if the err is write conflict.
 func (a *ExecStmt) handlePessimisticLockError(ctx context.Context, err error) (Executor, error) {
-	txnCtx := a.Ctx.GetStochastikVars().TxnCtx
+	txnCtx := a.Ctx.GetStochaseinstein_dbars().TxnCtx
 	var newForUFIDelateTS uint64
 	if deadlock, ok := errors.Cause(err).(*einsteindb.ErrDeadlock); ok {
 		if !deadlock.IsRetryable {
@@ -656,7 +656,7 @@ func (a *ExecStmt) handlePessimisticLockError(ctx context.Context, err error) (E
 	}
 	// Rollback the statement change before retry it.
 	a.Ctx.StmtRollback()
-	a.Ctx.GetStochastikVars().StmtCtx.ResetForRetry()
+	a.Ctx.GetStochaseinstein_dbars().StmtCtx.ResetForRetry()
 
 	if err = e.Open(ctx); err != nil {
 		return nil, err
@@ -691,7 +691,7 @@ type pessimisticTxn interface {
 // buildExecutor build a executor from plan, prepared statement may need additional procedure.
 func (a *ExecStmt) buildExecutor() (Executor, error) {
 	ctx := a.Ctx
-	stmtCtx := ctx.GetStochastikVars().StmtCtx
+	stmtCtx := ctx.GetStochaseinstein_dbars().StmtCtx
 	if _, ok := a.Plan.(*plannercore.Execute); !ok {
 		// Do not sync transaction for Execute statement, because the real optimization work is done in
 		// "ExecuteExec.Build".
@@ -700,11 +700,11 @@ func (a *ExecStmt) buildExecutor() (Executor, error) {
 			return nil, err
 		}
 		if useMaxTS {
-			logutil.BgLogger().Debug("init txnStartTS with MaxUint64", zap.Uint64("conn", ctx.GetStochastikVars().ConnectionID), zap.String("text", a.Text))
+			logutil.BgLogger().Debug("init txnStartTS with MaxUint64", zap.Uint64("conn", ctx.GetStochaseinstein_dbars().ConnectionID), zap.String("text", a.Text))
 			err = ctx.InitTxnWithStartTS(math.MaxUint64)
-		} else if ctx.GetStochastikVars().SnapshotTS != 0 {
+		} else if ctx.GetStochaseinstein_dbars().SnapshotTS != 0 {
 			if _, ok := a.Plan.(*plannercore.CheckBlock); ok {
-				err = ctx.InitTxnWithStartTS(ctx.GetStochastikVars().SnapshotTS)
+				err = ctx.InitTxnWithStartTS(ctx.GetStochaseinstein_dbars().SnapshotTS)
 			}
 		}
 		if err != nil {
@@ -720,8 +720,8 @@ func (a *ExecStmt) buildExecutor() (Executor, error) {
 			}
 		}
 	}
-	if _, ok := a.Plan.(*plannercore.Analyze); ok && ctx.GetStochastikVars().InRestrictedALLEGROSQL {
-		ctx.GetStochastikVars().StmtCtx.Priority = ekv.PriorityLow
+	if _, ok := a.Plan.(*plannercore.Analyze); ok && ctx.GetStochaseinstein_dbars().InRestrictedALLEGROSQL {
+		ctx.GetStochaseinstein_dbars().StmtCtx.Priority = ekv.PriorityLow
 	}
 
 	b := newExecutorBuilder(ctx, a.SchemaReplicant)
@@ -741,7 +741,7 @@ func (a *ExecStmt) buildExecutor() (Executor, error) {
 		a.isPreparedStmt = true
 		a.Plan = executorExec.plan
 		if executorExec.lowerPriority {
-			ctx.GetStochastikVars().StmtCtx.Priority = ekv.PriorityLow
+			ctx.GetStochaseinstein_dbars().StmtCtx.Priority = ekv.PriorityLow
 		}
 		e = executorExec.stmtExec
 	}
@@ -753,15 +753,15 @@ func (a *ExecStmt) buildExecutor() (Executor, error) {
 var QueryReplacer = strings.NewReplacer("\r", " ", "\n", " ", "\t", " ")
 
 func (a *ExecStmt) logAudit() {
-	sessVars := a.Ctx.GetStochastikVars()
+	sessVars := a.Ctx.GetStochaseinstein_dbars()
 	if sessVars.InRestrictedALLEGROSQL {
 		return
 	}
 	err := plugin.ForeachPlugin(plugin.Audit, func(p *plugin.Plugin) error {
 		audit := plugin.DeclareAuditManifest(p.Manifest)
 		if audit.OnGeneralEvent != nil {
-			cmd := allegrosql.Command2Str[byte(atomic.LoadUint32(&a.Ctx.GetStochastikVars().CommandValue))]
-			ctx := context.WithValue(context.Background(), plugin.ExecStartTimeCtxKey, a.Ctx.GetStochastikVars().StartTime)
+			cmd := allegrosql.Command2Str[byte(atomic.LoadUint32(&a.Ctx.GetStochaseinstein_dbars().CommandValue))]
+			ctx := context.WithValue(context.Background(), plugin.ExecStartTimeCtxKey, a.Ctx.GetStochaseinstein_dbars().StartTime)
 			audit.OnGeneralEvent(ctx, sessVars, plugin.Log, cmd)
 		}
 		return nil
@@ -794,7 +794,7 @@ var (
 // 3. record execute duration metric.
 // 4. uFIDelate the `PrevStmt` in stochastik variable.
 func (a *ExecStmt) FinishExecuteStmt(txnTS uint64, succ bool, hasMoreResults bool) {
-	sessVars := a.Ctx.GetStochastikVars()
+	sessVars := a.Ctx.GetStochaseinstein_dbars()
 	execDetail := sessVars.StmtCtx.GetExecDetails()
 	// Attach commit/lockKeys runtime stats to executor runtime stats.
 	if (execDetail.CommitDetail != nil || execDetail.LockKeysDetail != nil) && sessVars.StmtCtx.RuntimeStatsDefCausl != nil {
@@ -828,7 +828,7 @@ func (a *ExecStmt) CloseRecordSet(txnStartTS uint64, lastErr error) {
 	a.FinishExecuteStmt(txnStartTS, lastErr == nil, false)
 	a.logAudit()
 	// Detach the Memory and disk tracker for the previous stmtCtx from GlobalMemoryUsageTracker and GlobalDiskUsageTracker
-	if stmtCtx := a.Ctx.GetStochastikVars().StmtCtx; stmtCtx != nil {
+	if stmtCtx := a.Ctx.GetStochaseinstein_dbars().StmtCtx; stmtCtx != nil {
 		if stmtCtx.DiskTracker != nil {
 			stmtCtx.DiskTracker.DetachFromGlobalTracker()
 		}
@@ -840,7 +840,7 @@ func (a *ExecStmt) CloseRecordSet(txnStartTS uint64, lastErr error) {
 
 // LogSlowQuery is used to print the slow query in the log files.
 func (a *ExecStmt) LogSlowQuery(txnTS uint64, succ bool, hasMoreResults bool) {
-	sessVars := a.Ctx.GetStochastikVars()
+	sessVars := a.Ctx.GetStochaseinstein_dbars()
 	level := log.GetLevel()
 	cfg := config.GetGlobalConfig()
 	costTime := time.Since(sessVars.StartTime) + sessVars.DurationParse
@@ -956,18 +956,18 @@ func getPlanTree(p plannercore.Plan) string {
 
 // getPlanDigest will try to get the select plan tree if the plan is select or the select plan of delete/uFIDelate/insert statement.
 func getPlanDigest(sctx stochastikctx.Context, p plannercore.Plan) (normalized, planDigest string) {
-	normalized, planDigest = sctx.GetStochastikVars().StmtCtx.GetPlanDigest()
+	normalized, planDigest = sctx.GetStochaseinstein_dbars().StmtCtx.GetPlanDigest()
 	if len(normalized) > 0 {
 		return
 	}
 	normalized, planDigest = plannercore.NormalizePlan(p)
-	sctx.GetStochastikVars().StmtCtx.SetPlanDigest(normalized, planDigest)
+	sctx.GetStochaseinstein_dbars().StmtCtx.SetPlanDigest(normalized, planDigest)
 	return
 }
 
 // SummaryStmt defCauslects statements for information_schema.statements_summary
 func (a *ExecStmt) SummaryStmt(succ bool) {
-	sessVars := a.Ctx.GetStochastikVars()
+	sessVars := a.Ctx.GetStochaseinstein_dbars()
 	var userString string
 	if sessVars.User != nil {
 		userString = sessVars.User.Username
@@ -1055,7 +1055,7 @@ func (a *ExecStmt) SummaryStmt(succ bool) {
 func (a *ExecStmt) GetTextToLog() string {
 	var allegrosql string
 	if config.RedactLogEnabled() {
-		allegrosql, _ = a.Ctx.GetStochastikVars().StmtCtx.ALLEGROSQLDigest()
+		allegrosql, _ = a.Ctx.GetStochaseinstein_dbars().StmtCtx.ALLEGROSQLDigest()
 	} else if sensitiveStmt, ok := a.StmtNode.(ast.SensitiveStmtNode); ok {
 		allegrosql = sensitiveStmt.SecureText()
 	} else {

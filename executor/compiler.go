@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,14 +17,14 @@ import (
 	"context"
 
 	"github.com/opentracing/opentracing-go"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/metrics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/metrics"
-	"github.com/whtcorpsinc/milevadb/planner"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
 )
 
 var (
@@ -64,9 +64,9 @@ func (c *Compiler) Compile(ctx context.Context, stmtNode ast.StmtNode) (*ExecStm
 		return nil, err
 	}
 
-	CountStmtNode(stmtNode, c.Ctx.GetStochastikVars().InRestrictedALLEGROSQL)
+	CountStmtNode(stmtNode, c.Ctx.GetStochaseinstein_dbars().InRestrictedALLEGROSQL)
 	var lowerPriority bool
-	if c.Ctx.GetStochastikVars().StmtCtx.Priority == allegrosql.NoPriority {
+	if c.Ctx.GetStochaseinstein_dbars().StmtCtx.Priority == allegrosql.NoPriority {
 		lowerPriority = needLowerPriority(finalPlan)
 	}
 	return &ExecStmt{

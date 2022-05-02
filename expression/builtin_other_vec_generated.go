@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,15 +17,15 @@ package expression
 
 import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/defCauslate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/defCauslate"
 )
 
 func (b *builtinInIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	buf0, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf0, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -33,7 +33,7 @@ func (b *builtinInIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredC
 	if err := b.args[0].VecEvalInt(b.ctx, input, buf0); err != nil {
 		return err
 	}
-	buf1, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf1, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}

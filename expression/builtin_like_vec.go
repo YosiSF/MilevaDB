@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@ import (
 	"regexp"
 
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 func (b *builtinLikeSig) vectorized() bool {
@@ -44,7 +44,7 @@ func (b *builtinLikeSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredCa
 		return err
 	}
 
-	bufEscape, err := b.bufSlabPredictor.get(types.ETInt, n)
+	bufEscape, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -127,7 +127,7 @@ func (b *builtinRegexpSharedSig) vecEvalInt(input *chunk.Chunk, result *chunk.De
 		return err
 	}
 
-	if b.args[1].ConstItem(b.ctx.GetStochastikVars().StmtCtx) && !b.isMemorizedRegexpInitialized() {
+	if b.args[1].ConstItem(b.ctx.GetStochaseinstein_dbars().StmtCtx) && !b.isMemorizedRegexpInitialized() {
 		b.initMemoizedRegexp(bufPat, n)
 	}
 	getRegexp := func(pat string) (*regexp.Regexp, error) {

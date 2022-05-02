@@ -26,35 +26,35 @@ import (
 
 	"github.com/cznic/mathutil"
 	"github.com/opentracing/opentracing-go"
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/ast"
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/auth"
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/mysql"
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/serial"
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/terror"
-	"github.com/whtcorpsinc/MilevaDB/causetnetctx"
-	"github.com/whtcorpsinc/MilevaDB/causetnetctx/stmtctx"
-	"github.com/whtcorpsinc/MilevaDB/causetnetctx/variable"
-	"github.com/whtcorpsinc/MilevaDB/config"
-	"github.com/whtcorpsinc/MilevaDB/ekv"
-	"github.com/whtcorpsinc/MilevaDB/expression"
-	"github.com/whtcorpsinc/MilevaDB/meta"
-	"github.com/whtcorpsinc/MilevaDB/meta/autoid"
-	"github.com/whtcorpsinc/MilevaDB/namespace"
-	"github.com/whtcorpsinc/MilevaDB/namespace/infosync"
-	"github.com/whtcorpsinc/MilevaDB/privilege"
-	plannercore "github.com/whtcorpsinc/MilevaDB/rel-planner/core"
-	"github.com/whtcorpsinc/MilevaDB/table"
-	"github.com/whtcorpsinc/MilevaDB/table/blocks"
-	"github.com/whtcorpsinc/MilevaDB/tablecodec"
-	"github.com/whtcorpsinc/MilevaDB/types"
-	"github.com/whtcorpsinc/MilevaDB/util"
-	"github.com/whtcorpsinc/MilevaDB/util/admin"
-	"github.com/whtcorpsinc/MilevaDB/util/chunk"
-	"github.com/whtcorpsinc/MilevaDB/util/disk"
-	"github.com/whtcorpsinc/MilevaDB/util/execdetails"
-	"github.com/whtcorpsinc/MilevaDB/util/logutil"
-	"github.com/whtcorpsinc/MilevaDB/util/memory"
-	"github.com/whtcorpsinc/MilevaDB/util/stringutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/ast"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/auth"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/mysql"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/serial"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/terror"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetnetctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetnetctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetnetctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid"
+	"github.com/whtcorpsinc/MilevaDB-Prod/namespace"
+	"github.com/whtcorpsinc/MilevaDB-Prod/namespace/infosync"
+	"github.com/whtcorpsinc/MilevaDB-Prod/privilege"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/rel-planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/table"
+	"github.com/whtcorpsinc/MilevaDB-Prod/table/blocks"
+	"github.com/whtcorpsinc/MilevaDB-Prod/tablecodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/admin"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/disk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/execdetails"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/memory"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/stringutil"
 	"github.com/whtcorpsinc/errors"
 	"go.uber.org/zap"
 )
@@ -728,7 +728,7 @@ func (e *CheckTableExec) Next(ctx context.Context, req *chunk.Chunk) error {
 
 	if e.table.Meta().IsCommonHandle {
 		// TODO: fix me to support cluster index table admin check table.
-		// https://github.com/whtcorpsinc/MilevaDB/projects/45#card-39562229
+		// https://github.com/whtcorpsinc/MilevaDB-Prod/projects/45#card-39562229
 		return nil
 	}
 
@@ -924,7 +924,7 @@ func (e *SelectLockExec) Next(ctx context.Context, req *chunk.Chunk) error {
 				physicalID := id
 				if pt, ok := e.tblID2Table[id]; ok {
 					// On a partitioned table, we have to use physical ID to encode the dagger key!
-					p, err := pt.GetPartitionByRow(e.ctx, row.GetDatumRow(e.base().retFieldTypes))
+					p, err := pt.GetPartitionByRow(e.ctx, row.GetCausetObjectQLRow(e.base().retFieldTypes))
 					if err != nil {
 						return err
 					}
@@ -1092,7 +1092,7 @@ func init() {
 	// While doing optimization in the plan package, we need to execute uncorrelated subquery,
 	// but the plan package cannot import the Interlock package because of the dependency cycle.
 	// So we assign a function implemented in the Interlock package to the plan package to avoid the dependency cycle.
-	plannercore.EvalSubqueryFirstRow = func(ctx context.Context, p plannercore.PhysicalPlan, is schemareplicant.schemareplicant, sctx causetnetctx.Context) ([]types.Datum, error) {
+	plannercore.EvalSubqueryFirstRow = func(ctx context.Context, p plannercore.PhysicalPlan, is schemareplicant.schemareplicant, sctx causetnetctx.Context) ([]types.CausetObjectQL, error) {
 		defer func(begin time.Time) {
 			s := sctx.GetCausetNetVars()
 			s.RewritePhaseInfo.PreprocessSubQueries++
@@ -1124,7 +1124,7 @@ func init() {
 			if chk.NumRows() == 0 {
 				return nil, nil
 			}
-			row := chk.GetRow(0).GetDatumRow(retTypes(exec))
+			row := chk.GetRow(0).GetCausetObjectQLRow(retTypes(exec))
 			return row, err
 		}
 	}
@@ -1297,8 +1297,8 @@ func (e *TableScanExec) nextChunk4schemareplicant(ctx context.Context, chk *chun
 			columns[i] = table.ToColumn(colInfo)
 		}
 		mutableRow := chunk.MutRowFromTypes(retTypes(e))
-		err := e.t.IterRecords(e.ctx, nil, columns, func(_ ekv.Handle, rec []types.Datum, cols []*table.Column) (bool, error) {
-			mutableRow.SetDatums(rec...)
+		err := e.t.IterRecords(e.ctx, nil, columns, func(_ ekv.Handle, rec []types.CausetObjectQL, cols []*table.Column) (bool, error) {
+			mutableRow.SetCausetObjectQLs(rec...)
 			e.virtualTableChunkList.AppendRow(mutableRow.ToRow())
 			return true, nil
 		})
@@ -1694,11 +1694,11 @@ func FillVirtualColumnValue(virtualRetTypes []*types.FieldType, virtualColumnInd
 			}
 			// Because the expression might return different type from
 			// the generated column, we should wrap a CAST on the result.
-			castDatum, err := table.CastValue(sctx, datum, columns[idx], false, true)
+			castCausetObjectQL, err := table.CastValue(sctx, datum, columns[idx], false, true)
 			if err != nil {
 				return err
 			}
-			virCols.AppendDatum(i, &castDatum)
+			virCols.AppendCausetObjectQL(i, &castCausetObjectQL)
 		}
 		req.SetCol(idx, virCols.Column(i))
 	}

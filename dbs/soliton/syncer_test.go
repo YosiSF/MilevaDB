@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package soliton_test
+package MilevaDB_test
 
 import (
 	"context"
@@ -21,17 +21,17 @@ import (
 	"testing"
 	"time"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore"
+	. "github.com/whtcorpsinc/MilevaDB-Prod/dbs"
+	. "github.com/whtcorpsinc/MilevaDB-Prod/dbs/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/owner"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore"
-	. "github.com/whtcorpsinc/milevadb/dbs"
-	. "github.com/whtcorpsinc/milevadb/dbs/soliton"
-	"github.com/whtcorpsinc/milevadb/owner"
 	"go.etcd.io/etcd/clientv3"
 	"go.etcd.io/etcd/etcdserver"
 	"go.etcd.io/etcd/integration"
-	"go.etcd.io/etcd/mvcc/mvccpb"
+	"go.etcd.io/etcd/mvsr-ooc/mvsr-oocpb"
 	goctx "golang.org/x/net/context"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -256,7 +256,7 @@ func isTimeoutError(err error) bool {
 }
 
 func checkRespKV(t *testing.T, kvCount int, key, val string,
-	kvs ...*mvccpb.KeyValue) {
+	kvs ...*mvsr-oocpb.KeyValue) {
 	if len(kvs) != kvCount {
 		t.Fatalf("resp key %s kvs %v length is != %d", key, kvs, kvCount)
 	}

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,6 +23,30 @@ import (
 	"unsafe"
 
 	"github.com/cznic/mathutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block/blocks"
+	"github.com/whtcorpsinc/MilevaDB-Prod/distsql"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/executor/aggfuncs"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression/aggregation"
+	"github.com/whtcorpsinc/MilevaDB-Prod/metrics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	plannerutil "github.com/whtcorpsinc/MilevaDB-Prod/planner/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/admin"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/execdetails"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/ranger"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/rowcodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/timeutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/statistics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/auth"
@@ -30,30 +54,6 @@ import (
 	"github.com/whtcorpsinc/ekvproto/pkg/diagnosticspb"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/block/blocks"
-	"github.com/whtcorpsinc/milevadb/distsql"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/executor/aggfuncs"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/expression/aggregation"
-	"github.com/whtcorpsinc/milevadb/metrics"
-	"github.com/whtcorpsinc/milevadb/petri"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	plannerutil "github.com/whtcorpsinc/milevadb/planner/soliton"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/admin"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/execdetails"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/ranger"
-	"github.com/whtcorpsinc/milevadb/soliton/rowcodec"
-	"github.com/whtcorpsinc/milevadb/soliton/timeutil"
-	"github.com/whtcorpsinc/milevadb/statistics"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/types"
 	"go.uber.org/zap"
 )
 
@@ -445,7 +445,7 @@ func (b *executorBuilder) buildRecoverIndex(v *plannercore.RecoverIndex) Executo
 		block:        t,
 		physicalID:   t.Meta().ID,
 	}
-	sessCtx := e.ctx.GetStochastikVars().StmtCtx
+	sessCtx := e.ctx.GetStochaseinstein_dbars().StmtCtx
 	e.handleDefCauss = buildHandleDefCaussForExec(sessCtx, tblInfo, index.Meta(), e.defCausumns)
 	return e
 }
@@ -506,7 +506,7 @@ func (b *executorBuilder) buildCleanupIndex(v *plannercore.CleanupIndex) Executo
 		physicalID:   t.Meta().ID,
 		batchSize:    20000,
 	}
-	sessCtx := e.ctx.GetStochastikVars().StmtCtx
+	sessCtx := e.ctx.GetStochaseinstein_dbars().StmtCtx
 	e.handleDefCauss = buildHandleDefCaussForExec(sessCtx, tblInfo, index.Meta(), e.defCausumns)
 	return e
 }
@@ -579,13 +579,13 @@ func (b *executorBuilder) buildSelectLock(v *plannercore.PhysicalLock) Executor 
 		return nil
 	}
 	// Build 'select for uFIDelate' using the 'for uFIDelate' ts.
-	b.snapshotTS = b.ctx.GetStochastikVars().TxnCtx.GetForUFIDelateTS()
+	b.snapshotTS = b.ctx.GetStochaseinstein_dbars().TxnCtx.GetForUFIDelateTS()
 
 	src := b.build(v.Children()[0])
 	if b.err != nil {
 		return nil
 	}
-	if !b.ctx.GetStochastikVars().InTxn() {
+	if !b.ctx.GetStochaseinstein_dbars().InTxn() {
 		// Locking of rows for uFIDelate using SELECT FOR UFIDelATE only applies when autocommit
 		// is disabled (either by beginning transaction with START TRANSACTION or by setting
 		// autocommit to 0. If autocommit is enabled, the rows matching the specification are not locked.
@@ -606,7 +606,7 @@ func (b *executorBuilder) buildLimit(v *plannercore.PhysicalLimit) Executor {
 	if b.err != nil {
 		return nil
 	}
-	n := int(mathutil.MinUint64(v.Count, uint64(b.ctx.GetStochastikVars().MaxChunkSize)))
+	n := int(mathutil.MinUint64(v.Count, uint64(b.ctx.GetStochaseinstein_dbars().MaxChunkSize)))
 	base := newBaseExecutor(b.ctx, v.Schema(), v.ID(), childExec)
 	base.initCap = n
 	e := &LimitExec{
@@ -663,7 +663,7 @@ func (b *executorBuilder) buildShow(v *plannercore.PhysicalShow) Executor {
 		// The input is a "show grants" statement, fulfill the user and roles field.
 		// Note: "show grants" result are different from "show grants for current_user",
 		// The former determine privileges with roles, while the later doesn't.
-		vars := e.ctx.GetStochastikVars()
+		vars := e.ctx.GetStochaseinstein_dbars()
 		e.User = &auth.UserIdentity{Username: vars.User.AuthUsername, Hostname: vars.User.AuthHostname}
 		e.Roles = vars.ActiveRoles
 	}
@@ -720,7 +720,7 @@ func (b *executorBuilder) buildInsert(v *plannercore.Insert) Executor {
 			return nil
 		}
 	}
-	b.snapshotTS = b.ctx.GetStochastikVars().TxnCtx.GetForUFIDelateTS()
+	b.snapshotTS = b.ctx.GetStochaseinstein_dbars().TxnCtx.GetForUFIDelateTS()
 	selectExec := b.build(v.SelectPlan)
 	if b.err != nil {
 		return nil
@@ -734,15 +734,15 @@ func (b *executorBuilder) buildInsert(v *plannercore.Insert) Executor {
 	baseExec.initCap = chunk.ZeroCapacity
 
 	ivs := &InsertValues{
-		baseExecutor:              baseExec,
-		Block:                     v.Block,
-		DeferredCausets:           v.DeferredCausets,
-		Lists:                     v.Lists,
-		SetList:                   v.SetList,
-		GenExprs:                  v.GenDefCauss.Exprs,
-		allAssignmentsAreConstant: v.AllAssignmentsAreConstant,
-		hasRefDefCauss:            v.NeedFillDefaultValue,
-		SelectExec:                selectExec,
+		baseExecutor:    baseExec,
+		Block:           v.Block,
+		DeferredCausets: v.DeferredCausets,
+		Lists:           v.Lists,
+		SetList:         v.SetList,
+		GenExprs:        v.GenDefCauss.Exprs,
+		allAssignmentsAreCouplingConstantWithRadix: v.AllAssignmentsAreCouplingConstantWithRadix,
+		hasRefDefCauss: v.NeedFillDefaultValue,
+		SelectExec:     selectExec,
 	}
 	err := ivs.initInsertDeferredCausets()
 	if err != nil {
@@ -900,8 +900,8 @@ func (b *executorBuilder) buildExplain(v *plannercore.Explain) Executor {
 		explain:      v,
 	}
 	if v.Analyze {
-		if b.ctx.GetStochastikVars().StmtCtx.RuntimeStatsDefCausl == nil {
-			b.ctx.GetStochastikVars().StmtCtx.RuntimeStatsDefCausl = execdetails.NewRuntimeStatsDefCausl()
+		if b.ctx.GetStochaseinstein_dbars().StmtCtx.RuntimeStatsDefCausl == nil {
+			b.ctx.GetStochaseinstein_dbars().StmtCtx.RuntimeStatsDefCausl = execdetails.NewRuntimeStatsDefCausl()
 		}
 		explainExec.analyzeExec = b.build(v.TargetPlan)
 	}
@@ -1036,7 +1036,7 @@ func (b *executorBuilder) buildMergeJoin(v *plannercore.PhysicalMergeJoin) Execu
 	}
 
 	e := &MergeJoinExec{
-		stmtCtx:      b.ctx.GetStochastikVars().StmtCtx,
+		stmtCtx:      b.ctx.GetStochaseinstein_dbars().StmtCtx,
 		baseExecutor: newBaseExecutor(b.ctx, v.Schema(), v.ID(), leftExec, rightExec),
 		compareFuncs: v.CompareFuncs,
 		joiner: newJoiner(
@@ -1198,10 +1198,10 @@ func (b *executorBuilder) buildHashAgg(v *plannercore.PhysicalHashAgg) Executor 
 	if b.err != nil {
 		return nil
 	}
-	stochastikVars := b.ctx.GetStochastikVars()
+	stochaseinstein_dbars := b.ctx.GetStochaseinstein_dbars()
 	e := &HashAggExec{
 		baseExecutor:    newBaseExecutor(b.ctx, v.Schema(), v.ID(), src),
-		sc:              stochastikVars.StmtCtx,
+		sc:              stochaseinstein_dbars.StmtCtx,
 		PartialAggFuncs: make([]aggfuncs.AggFunc, 0, len(v.AggFuncs)),
 		GroupByItems:    v.GroupByItems,
 	}
@@ -1237,7 +1237,7 @@ func (b *executorBuilder) buildHashAgg(v *plannercore.PhysicalHashAgg) Executor 
 	// When we set both milevadb_hashagg_final_concurrency and milevadb_hashagg_partial_concurrency to 1,
 	// we do not need to parallelly execute hash agg,
 	// and this action can be a workaround when meeting some unexpected situation using parallelExec.
-	if finalCon, partialCon := stochastikVars.HashAggFinalConcurrency(), stochastikVars.HashAggPartialConcurrency(); finalCon <= 0 || partialCon <= 0 || finalCon == 1 && partialCon == 1 {
+	if finalCon, partialCon := stochaseinstein_dbars.HashAggFinalConcurrency(), stochaseinstein_dbars.HashAggPartialConcurrency(); finalCon <= 0 || partialCon <= 0 || finalCon == 1 && partialCon == 1 {
 		e.isUnparallelExec = true
 	}
 	partialOrdinal := 0
@@ -1320,7 +1320,7 @@ func (b *executorBuilder) buildProjection(v *plannercore.PhysicalProjection) Exe
 	}
 	e := &ProjectionExec{
 		baseExecutor:     newBaseExecutor(b.ctx, v.Schema(), v.ID(), childExec),
-		numWorkers:       int64(b.ctx.GetStochastikVars().ProjectionConcurrency()),
+		numWorkers:       int64(b.ctx.GetStochaseinstein_dbars().ProjectionConcurrency()),
 		evaluatorSuit:    expression.NewEvaluatorSuite(v.Exprs, v.AvoidDeferredCausetEvaluator),
 		calculateNoDelay: v.CalculateNoDelay,
 	}
@@ -1328,7 +1328,7 @@ func (b *executorBuilder) buildProjection(v *plannercore.PhysicalProjection) Exe
 	// If the calculation event count for this Projection operator is smaller
 	// than a Chunk size, we turn back to the un-parallel Projection
 	// implementation to reduce the goroutine overhead.
-	if int64(v.StatsCount()) < int64(b.ctx.GetStochastikVars().MaxChunkSize) {
+	if int64(v.StatsCount()) < int64(b.ctx.GetStochaseinstein_dbars().MaxChunkSize) {
 		e.numWorkers = 0
 	}
 	return e
@@ -1354,7 +1354,7 @@ func (b *executorBuilder) getSnapshotTS() (uint64, error) {
 		return b.snapshotTS, nil
 	}
 
-	snapshotTS := b.ctx.GetStochastikVars().SnapshotTS
+	snapshotTS := b.ctx.GetStochaseinstein_dbars().SnapshotTS
 	txn, err := b.ctx.Txn(true)
 	if err != nil {
 		return 0, err
@@ -1494,7 +1494,7 @@ func (b *executorBuilder) buildMemBlock(v *plannercore.PhysicalMemBlock) Executo
 			strings.ToLower(schemareplicant.BlockEinsteinDBRegionStatus),
 			strings.ToLower(schemareplicant.BlockEinsteinDBRegionPeers),
 			strings.ToLower(schemareplicant.BlockMilevaDBHotRegions),
-			strings.ToLower(schemareplicant.BlockStochastikVar),
+			strings.ToLower(schemareplicant.BlockStochaseinstein_dbar),
 			strings.ToLower(schemareplicant.BlockConstraints),
 			strings.ToLower(schemareplicant.BlockTiFlashReplica),
 			strings.ToLower(schemareplicant.BlockMilevaDBServersInfo),
@@ -1711,7 +1711,7 @@ func (b *executorBuilder) buildUnionAll(v *plannercore.PhysicalUnionAll) Executo
 	}
 	e := &UnionExec{
 		baseExecutor: newBaseExecutor(b.ctx, v.Schema(), v.ID(), childExecs...),
-		concurrency:  b.ctx.GetStochastikVars().UnionConcurrency(),
+		concurrency:  b.ctx.GetStochaseinstein_dbars().UnionConcurrency(),
 	}
 	return e
 }
@@ -1753,7 +1753,7 @@ func (b *executorBuilder) buildSplitRegion(v *plannercore.SplitRegion) Executor 
 			valueLists:     v.ValueLists,
 		}
 	}
-	handleDefCauss := buildHandleDefCaussForSplit(b.ctx.GetStochastikVars().StmtCtx, v.BlockInfo)
+	handleDefCauss := buildHandleDefCaussForSplit(b.ctx.GetStochaseinstein_dbars().StmtCtx, v.BlockInfo)
 	if len(v.ValueLists) > 0 {
 		return &SplitBlockRegionExec{
 			baseExecutor:   base,
@@ -1794,7 +1794,7 @@ func (b *executorBuilder) buildUFIDelate(v *plannercore.UFIDelate) Executor {
 	if b.err = b.uFIDelateForUFIDelateTSIfNeeded(v.SelectPlan); b.err != nil {
 		return nil
 	}
-	b.snapshotTS = b.ctx.GetStochastikVars().TxnCtx.GetForUFIDelateTS()
+	b.snapshotTS = b.ctx.GetStochaseinstein_dbars().TxnCtx.GetForUFIDelateTS()
 	selExec := b.build(v.SelectPlan)
 	if b.err != nil {
 		return nil
@@ -1802,11 +1802,11 @@ func (b *executorBuilder) buildUFIDelate(v *plannercore.UFIDelate) Executor {
 	base := newBaseExecutor(b.ctx, v.Schema(), v.ID(), selExec)
 	base.initCap = chunk.ZeroCapacity
 	uFIDelateExec := &UFIDelateExec{
-		baseExecutor:              base,
-		OrderedList:               v.OrderedList,
-		allAssignmentsAreConstant: v.AllAssignmentsAreConstant,
-		tblID2block:               tblID2block,
-		tblDefCausPosInfos:        v.TblDefCausPosInfos,
+		baseExecutor: base,
+		OrderedList:  v.OrderedList,
+		allAssignmentsAreCouplingConstantWithRadix: v.AllAssignmentsAreCouplingConstantWithRadix,
+		tblID2block:        tblID2block,
+		tblDefCausPosInfos: v.TblDefCausPosInfos,
 	}
 	return uFIDelateExec
 }
@@ -1819,7 +1819,7 @@ func (b *executorBuilder) buildDelete(v *plannercore.Delete) Executor {
 	if b.err = b.uFIDelateForUFIDelateTSIfNeeded(v.SelectPlan); b.err != nil {
 		return nil
 	}
-	b.snapshotTS = b.ctx.GetStochastikVars().TxnCtx.GetForUFIDelateTS()
+	b.snapshotTS = b.ctx.GetStochaseinstein_dbars().TxnCtx.GetForUFIDelateTS()
 	selExec := b.build(v.SelectPlan)
 	if b.err != nil {
 		return nil
@@ -1839,7 +1839,7 @@ func (b *executorBuilder) buildDelete(v *plannercore.Delete) Executor {
 // PointGet executor will get conflict error if the ForUFIDelateTS is older than the latest commitTS,
 // so we don't need to uFIDelate now for better latency.
 func (b *executorBuilder) uFIDelateForUFIDelateTSIfNeeded(selectPlan plannercore.PhysicalPlan) error {
-	txnCtx := b.ctx.GetStochastikVars().TxnCtx
+	txnCtx := b.ctx.GetStochaseinstein_dbars().TxnCtx
 	if !txnCtx.IsPessimistic {
 		return nil
 	}
@@ -1860,7 +1860,7 @@ func (b *executorBuilder) uFIDelateForUFIDelateTSIfNeeded(selectPlan plannercore
 	}
 	// The Repeablock Read transaction use Read Committed level to read data for writing (insert, uFIDelate, delete, select for uFIDelate),
 	// We should always uFIDelate/refresh the for-uFIDelate-ts no matter the isolation level is RR or RC.
-	if b.ctx.GetStochastikVars().IsPessimisticReadConsistency() {
+	if b.ctx.GetStochaseinstein_dbars().IsPessimisticReadConsistency() {
 		return b.refreshForUFIDelateTSForRC()
 	}
 	return UFIDelateForUFIDelateTS(b.ctx, 0)
@@ -1870,32 +1870,32 @@ func (b *executorBuilder) uFIDelateForUFIDelateTSIfNeeded(selectPlan plannercore
 // It could use the cached tso from the statement future to avoid get tso many times.
 func (b *executorBuilder) refreshForUFIDelateTSForRC() error {
 	defer func() {
-		b.snapshotTS = b.ctx.GetStochastikVars().TxnCtx.GetForUFIDelateTS()
+		b.snapshotTS = b.ctx.GetStochaseinstein_dbars().TxnCtx.GetForUFIDelateTS()
 	}()
-	future := b.ctx.GetStochastikVars().TxnCtx.GetStmtFutureForRC()
+	future := b.ctx.GetStochaseinstein_dbars().TxnCtx.GetStmtFutureForRC()
 	if future == nil {
 		return nil
 	}
 	newForUFIDelateTS, waitErr := future.Wait()
 	if waitErr != nil {
 		logutil.BgLogger().Warn("wait tso failed",
-			zap.Uint64("startTS", b.ctx.GetStochastikVars().TxnCtx.StartTS),
+			zap.Uint64("startTS", b.ctx.GetStochaseinstein_dbars().TxnCtx.StartTS),
 			zap.Error(waitErr))
 	}
-	b.ctx.GetStochastikVars().TxnCtx.SetStmtFutureForRC(nil)
+	b.ctx.GetStochaseinstein_dbars().TxnCtx.SetStmtFutureForRC(nil)
 	// If newForUFIDelateTS is 0, it will force to get a new for-uFIDelate-ts from FIDel.
 	return UFIDelateForUFIDelateTS(b.ctx, newForUFIDelateTS)
 }
 
 func (b *executorBuilder) buildAnalyzeIndexPushdown(task plannercore.AnalyzeIndexTask, opts map[ast.AnalyzeOptionType]uint64, autoAnalyze string) *analyzeTask {
-	_, offset := timeutil.Zone(b.ctx.GetStochastikVars().Location())
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	_, offset := timeutil.Zone(b.ctx.GetStochaseinstein_dbars().Location())
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	e := &AnalyzeIndexExec{
 		ctx:            b.ctx,
 		blockID:        task.BlockID,
 		isCommonHandle: task.TblInfo.IsCommonHandle,
 		idxInfo:        task.IndexInfo,
-		concurrency:    b.ctx.GetStochastikVars().IndexSerialScanConcurrency(),
+		concurrency:    b.ctx.GetStochaseinstein_dbars().IndexSerialScanConcurrency(),
 		analyzePB: &fidelpb.AnalyzeReq{
 			Tp:             fidelpb.AnalyzeType_TypeIndex,
 			Flags:          sc.PushDownFlags(),
@@ -1966,14 +1966,14 @@ func (b *executorBuilder) buildAnalyzeDeferredCausetsPushdown(task plannercore.A
 		task.DefCaussInfo = defcaus
 	}
 
-	_, offset := timeutil.Zone(b.ctx.GetStochastikVars().Location())
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	_, offset := timeutil.Zone(b.ctx.GetStochaseinstein_dbars().Location())
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	e := &AnalyzeDeferredCausetsExec{
 		ctx:            b.ctx,
 		blockID:        task.BlockID,
 		defcausInfo:    task.DefCaussInfo,
 		handleDefCauss: task.HandleDefCauss,
-		concurrency:    b.ctx.GetStochastikVars().DistALLEGROSQLScanConcurrency(),
+		concurrency:    b.ctx.GetStochaseinstein_dbars().DistALLEGROSQLScanConcurrency(),
 		analyzePB: &fidelpb.AnalyzeReq{
 			Tp:             fidelpb.AnalyzeType_TypeDeferredCauset,
 			Flags:          sc.PushDownFlags(),
@@ -2017,7 +2017,7 @@ func (b *executorBuilder) buildAnalyzePKIncremental(task plannercore.AnalyzeDefe
 	if statistics.IsAnalyzed(defCaus.Flag) {
 		oldHist = defCaus.Histogram.INTERLOCKy()
 	} else {
-		d, err := defCaus.LastAnalyzePos.ConvertTo(b.ctx.GetStochastikVars().StmtCtx, defCaus.Tp)
+		d, err := defCaus.LastAnalyzePos.ConvertTo(b.ctx.GetStochaseinstein_dbars().StmtCtx, defCaus.Tp)
 		if err != nil {
 			b.err = err
 			return nil
@@ -2115,9 +2115,9 @@ func (b *executorBuilder) buildAnalyze(v *plannercore.Analyze) Executor {
 		tasks:        make([]*analyzeTask, 0, len(v.DefCausTasks)+len(v.IdxTasks)),
 		wg:           &sync.WaitGroup{},
 	}
-	enableFastAnalyze := b.ctx.GetStochastikVars().EnableFastAnalyze
+	enableFastAnalyze := b.ctx.GetStochaseinstein_dbars().EnableFastAnalyze
 	autoAnalyze := ""
-	if b.ctx.GetStochastikVars().InRestrictedALLEGROSQL {
+	if b.ctx.GetStochaseinstein_dbars().InRestrictedALLEGROSQL {
 		autoAnalyze = "auto "
 	}
 	for _, task := range v.DefCausTasks {
@@ -2185,8 +2185,8 @@ func constructDistExecForTiFlash(sctx stochastikctx.Context, p plannercore.Physi
 
 func (b *executorBuilder) constructPosetDagReq(plans []plannercore.PhysicalPlan, storeType ekv.StoreType) (posetPosetDagReq *fidelpb.PosetDagRequest, streaming bool, err error) {
 	posetPosetDagReq = &fidelpb.PosetDagRequest{}
-	posetPosetDagReq.TimeZoneName, posetPosetDagReq.TimeZoneOffset = timeutil.Zone(b.ctx.GetStochastikVars().Location())
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	posetPosetDagReq.TimeZoneName, posetPosetDagReq.TimeZoneOffset = timeutil.Zone(b.ctx.GetStochaseinstein_dbars().Location())
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	if sc.RuntimeStatsDefCausl != nil {
 		defCauslExec := true
 		posetPosetDagReq.DefCauslectExecutionSummaries = &defCauslExec
@@ -2385,7 +2385,7 @@ func (b *executorBuilder) buildIndexLookUpMergeJoin(v *plannercore.PhysicalIndex
 		lastDefCausHelper: v.CompareFilters,
 	}
 	childrenUsedSchema := markChildrenUsedDefCauss(v.Schema(), v.Children()[0].Schema(), v.Children()[1].Schema())
-	joiners := make([]joiner, e.ctx.GetStochastikVars().IndexLookupJoinConcurrency())
+	joiners := make([]joiner, e.ctx.GetStochaseinstein_dbars().IndexLookupJoinConcurrency())
 	for i := 0; i < len(joiners); i++ {
 		joiners[i] = newJoiner(b.ctx, v.JoinType, v.InnerChildIdx == 0, defaultValues, v.OtherConditions, leftTypes, rightTypes, childrenUsedSchema)
 	}
@@ -2399,7 +2399,7 @@ func (b *executorBuilder) buildIndexNestedLoopHashJoin(v *plannercore.PhysicalIn
 		IndexLookUpJoin: *e,
 		keepOuterOrder:  v.KeepOuterOrder,
 	}
-	concurrency := e.ctx.GetStochastikVars().IndexLookupJoinConcurrency()
+	concurrency := e.ctx.GetStochaseinstein_dbars().IndexLookupJoinConcurrency()
 	idxHash.joiners = make([]joiner, concurrency)
 	for i := 0; i < concurrency; i++ {
 		idxHash.joiners[i] = e.joiner.Clone()
@@ -2424,7 +2424,7 @@ func (e *BlockReaderExecutor) setBatchINTERLOCK(v *plannercore.PhysicalBlockRead
 	if e.storeType != ekv.TiFlash || e.keepOrder {
 		return
 	}
-	switch e.ctx.GetStochastikVars().AllowBatchINTERLOCK {
+	switch e.ctx.GetStochaseinstein_dbars().AllowBatchINTERLOCK {
 	case 1:
 		for _, p := range v.BlockPlans {
 			switch p.(type) {
@@ -2480,16 +2480,16 @@ func buildNoRangeBlockReader(b *executorBuilder, v *plannercore.PhysicalBlockRea
 	} else {
 		e.feedback = statistics.NewQueryFeedback(getPhysicalBlockID(tbl), ts.Hist, int64(ts.StatsCount()), ts.Desc)
 	}
-	defCauslect := statistics.DefCauslectFeedback(b.ctx.GetStochastikVars().StmtCtx, e.feedback, len(ts.Ranges))
+	defCauslect := statistics.DefCauslectFeedback(b.ctx.GetStochaseinstein_dbars().StmtCtx, e.feedback, len(ts.Ranges))
 	if !defCauslect {
 		e.feedback.Invalidate()
 	}
 	e.posetPosetDagPB.DefCauslectRangeCounts = &defCauslect
-	if v.StoreType == ekv.MilevaDB && b.ctx.GetStochastikVars().User != nil {
+	if v.StoreType == ekv.MilevaDB && b.ctx.GetStochaseinstein_dbars().User != nil {
 		// User info is used to do privilege check. It is only used in MilevaDB cluster memory block.
 		e.posetPosetDagPB.User = &fidelpb.UserIdentity{
-			UserName: b.ctx.GetStochastikVars().User.Username,
-			UserHost: b.ctx.GetStochastikVars().User.Hostname,
+			UserName: b.ctx.GetStochaseinstein_dbars().User.Username,
+			UserHost: b.ctx.GetStochaseinstein_dbars().User.Hostname,
 		}
 	}
 
@@ -2503,7 +2503,7 @@ func buildNoRangeBlockReader(b *executorBuilder, v *plannercore.PhysicalBlockRea
 // buildBlockReader builds a block reader executor. It first build a no range block reader,
 // and then uFIDelate it ranges from block scan plan.
 func (b *executorBuilder) buildBlockReader(v *plannercore.PhysicalBlockReader) Executor {
-	if b.ctx.GetStochastikVars().IsPessimisticReadConsistency() {
+	if b.ctx.GetStochaseinstein_dbars().IsPessimisticReadConsistency() {
 		if err := b.refreshForUFIDelateTSForRC(); err != nil {
 			b.err = err
 			return nil
@@ -2517,10 +2517,10 @@ func (b *executorBuilder) buildBlockReader(v *plannercore.PhysicalBlockReader) E
 
 	ts := v.GetBlockScan()
 	ret.ranges = ts.Ranges
-	sctx := b.ctx.GetStochastikVars().StmtCtx
+	sctx := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	sctx.BlockIDs = append(sctx.BlockIDs, ts.Block.ID)
 
-	if !b.ctx.GetStochastikVars().UseDynamicPartitionPrune() {
+	if !b.ctx.GetStochaseinstein_dbars().UseDynamicPartitionPrune() {
 		return ret
 	}
 
@@ -2559,7 +2559,7 @@ func (b *executorBuilder) buildBlockReader(v *plannercore.PhysicalBlockReader) E
 		}
 		return &UnionExec{
 			baseExecutor: newBaseExecutor(b.ctx, v.Schema(), v.ID(), partsExecutor...),
-			concurrency:  b.ctx.GetStochastikVars().UnionConcurrency(),
+			concurrency:  b.ctx.GetStochaseinstein_dbars().UnionConcurrency(),
 		}
 	}
 
@@ -2631,7 +2631,7 @@ func buildNoRangeIndexReader(b *executorBuilder, v *plannercore.PhysicalIndexRea
 	} else {
 		e.feedback = statistics.NewQueryFeedback(e.physicalBlockID, is.Hist, int64(is.StatsCount()), is.Desc)
 	}
-	defCauslect := statistics.DefCauslectFeedback(b.ctx.GetStochastikVars().StmtCtx, e.feedback, len(is.Ranges))
+	defCauslect := statistics.DefCauslectFeedback(b.ctx.GetStochaseinstein_dbars().StmtCtx, e.feedback, len(is.Ranges))
 	if !defCauslect {
 		e.feedback.Invalidate()
 	}
@@ -2645,7 +2645,7 @@ func buildNoRangeIndexReader(b *executorBuilder, v *plannercore.PhysicalIndexRea
 }
 
 func (b *executorBuilder) buildIndexReader(v *plannercore.PhysicalIndexReader) Executor {
-	if b.ctx.GetStochastikVars().IsPessimisticReadConsistency() {
+	if b.ctx.GetStochaseinstein_dbars().IsPessimisticReadConsistency() {
 		if err := b.refreshForUFIDelateTSForRC(); err != nil {
 			b.err = err
 			return nil
@@ -2659,10 +2659,10 @@ func (b *executorBuilder) buildIndexReader(v *plannercore.PhysicalIndexReader) E
 
 	is := v.IndexPlans[0].(*plannercore.PhysicalIndexScan)
 	ret.ranges = is.Ranges
-	sctx := b.ctx.GetStochastikVars().StmtCtx
+	sctx := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	sctx.IndexNames = append(sctx.IndexNames, is.Block.Name.O+":"+is.Index.Name.O)
 
-	if !b.ctx.GetStochastikVars().UseDynamicPartitionPrune() {
+	if !b.ctx.GetStochaseinstein_dbars().UseDynamicPartitionPrune() {
 		return ret
 	}
 
@@ -2757,7 +2757,7 @@ func buildNoRangeIndexLookUpReader(b *executorBuilder, v *plannercore.PhysicalIn
 	// Do not defCauslect the feedback for block request.
 	defCauslectBlock := false
 	e.blockRequest.DefCauslectRangeCounts = &defCauslectBlock
-	defCauslectIndex := statistics.DefCauslectFeedback(b.ctx.GetStochastikVars().StmtCtx, e.feedback, len(is.Ranges))
+	defCauslectIndex := statistics.DefCauslectFeedback(b.ctx.GetStochaseinstein_dbars().StmtCtx, e.feedback, len(is.Ranges))
 	if !defCauslectIndex {
 		e.feedback.Invalidate()
 	}
@@ -2776,7 +2776,7 @@ func buildNoRangeIndexLookUpReader(b *executorBuilder, v *plannercore.PhysicalIn
 }
 
 func (b *executorBuilder) buildIndexLookUpReader(v *plannercore.PhysicalIndexLookUpReader) Executor {
-	if b.ctx.GetStochastikVars().IsPessimisticReadConsistency() {
+	if b.ctx.GetStochaseinstein_dbars().IsPessimisticReadConsistency() {
 		if err := b.refreshForUFIDelateTSForRC(); err != nil {
 			b.err = err
 			return nil
@@ -2794,11 +2794,11 @@ func (b *executorBuilder) buildIndexLookUpReader(v *plannercore.PhysicalIndexLoo
 	ret.ranges = is.Ranges
 	executorCounterIndexLookUpExecutor.Inc()
 
-	sctx := b.ctx.GetStochastikVars().StmtCtx
+	sctx := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	sctx.IndexNames = append(sctx.IndexNames, is.Block.Name.O+":"+is.Index.Name.O)
 	sctx.BlockIDs = append(sctx.BlockIDs, ts.Block.ID)
 
-	if !b.ctx.GetStochastikVars().UseDynamicPartitionPrune() {
+	if !b.ctx.GetStochaseinstein_dbars().UseDynamicPartitionPrune() {
 		return ret
 	}
 
@@ -2890,7 +2890,7 @@ func (b *executorBuilder) buildIndexMergeReader(v *plannercore.PhysicalIndexMerg
 		return nil
 	}
 	ret.ranges = make([][]*ranger.Range, 0, len(v.PartialPlans))
-	sctx := b.ctx.GetStochastikVars().StmtCtx
+	sctx := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	for i := 0; i < len(v.PartialPlans); i++ {
 		if is, ok := v.PartialPlans[i][0].(*plannercore.PhysicalIndexScan); ok {
 			ret.ranges = append(ret.ranges, is.Ranges)
@@ -2907,7 +2907,7 @@ func (b *executorBuilder) buildIndexMergeReader(v *plannercore.PhysicalIndexMerg
 	sctx.BlockIDs = append(sctx.BlockIDs, ts.Block.ID)
 	executorCounterIndexMergeReaderExecutor.Inc()
 
-	if !b.ctx.GetStochastikVars().UseDynamicPartitionPrune() {
+	if !b.ctx.GetStochaseinstein_dbars().UseDynamicPartitionPrune() {
 		return ret
 	}
 
@@ -3039,7 +3039,7 @@ func (builder *dataReaderBuilder) buildBlockReaderForIndexJoin(ctx context.Conte
 	if tbInfo.GetPartitionInfo() == nil {
 		return builder.buildBlockReaderFromHandles(ctx, e, handles)
 	}
-	if !builder.ctx.GetStochastikVars().UseDynamicPartitionPrune() {
+	if !builder.ctx.GetStochaseinstein_dbars().UseDynamicPartitionPrune() {
 		return builder.buildBlockReaderFromHandles(ctx, e, handles)
 	}
 
@@ -3075,7 +3075,7 @@ func (builder *dataReaderBuilder) buildBlockReaderBase(ctx context.Context, e *B
 		SetDesc(e.desc).
 		SetKeepOrder(e.keepOrder).
 		SetStreaming(e.streaming).
-		SetFromStochastikVars(e.ctx.GetStochastikVars()).
+		SetFromStochaseinstein_dbars(e.ctx.GetStochaseinstein_dbars()).
 		Build()
 	if err != nil {
 		return nil, err
@@ -3113,7 +3113,7 @@ func (builder *dataReaderBuilder) buildIndexReaderForIndexJoin(ctx context.Conte
 		return nil, err
 	}
 	tbInfo := e.block.Meta()
-	if tbInfo.GetPartitionInfo() == nil || !builder.ctx.GetStochastikVars().UseDynamicPartitionPrune() {
+	if tbInfo.GetPartitionInfo() == nil || !builder.ctx.GetStochaseinstein_dbars().UseDynamicPartitionPrune() {
 		kvRanges, err := buildKvRangesForIndexJoin(e.ctx, e.physicalBlockID, e.index.ID, lookUpContents, indexRanges, keyOff2IdxOff, cwc)
 		if err != nil {
 			return nil, err
@@ -3143,7 +3143,7 @@ func (builder *dataReaderBuilder) buildIndexLookUpReaderForIndexJoin(ctx context
 	}
 
 	tbInfo := e.block.Meta()
-	if tbInfo.GetPartitionInfo() == nil || !builder.ctx.GetStochastikVars().UseDynamicPartitionPrune() {
+	if tbInfo.GetPartitionInfo() == nil || !builder.ctx.GetStochaseinstein_dbars().UseDynamicPartitionPrune() {
 		e.kvRanges, err = buildKvRangesForIndexJoin(e.ctx, getPhysicalBlockID(e.block), e.index.ID, lookUpContents, indexRanges, keyOff2IdxOff, cwc)
 		if err != nil {
 			return nil, err
@@ -3178,7 +3178,7 @@ func (builder *dataReaderBuilder) buildProjectionForIndexJoin(ctx context.Contex
 
 	e := &ProjectionExec{
 		baseExecutor:     newBaseExecutor(builder.ctx, v.Schema(), v.ID(), childExec),
-		numWorkers:       int64(builder.ctx.GetStochastikVars().ProjectionConcurrency()),
+		numWorkers:       int64(builder.ctx.GetStochaseinstein_dbars().ProjectionConcurrency()),
 		evaluatorSuit:    expression.NewEvaluatorSuite(v.Exprs, v.AvoidDeferredCausetEvaluator),
 		calculateNoDelay: v.CalculateNoDelay,
 	}
@@ -3186,7 +3186,7 @@ func (builder *dataReaderBuilder) buildProjectionForIndexJoin(ctx context.Contex
 	// If the calculation event count for this Projection operator is smaller
 	// than a Chunk size, we turn back to the un-parallel Projection
 	// implementation to reduce the goroutine overhead.
-	if int64(v.StatsCount()) < int64(builder.ctx.GetStochastikVars().MaxChunkSize) {
+	if int64(v.StatsCount()) < int64(builder.ctx.GetStochaseinstein_dbars().MaxChunkSize) {
 		e.numWorkers = 0
 	}
 	err = e.open(ctx)
@@ -3233,7 +3233,7 @@ func buildRangesForIndexJoin(ctx stochastikctx.Context, lookUpContents []*indexJ
 		return retRanges, nil
 	}
 
-	return ranger.UnionRanges(ctx.GetStochastikVars().StmtCtx, tmFIDelatumRanges, true)
+	return ranger.UnionRanges(ctx.GetStochaseinstein_dbars().StmtCtx, tmFIDelatumRanges, true)
 }
 
 // buildKvRangesForIndexJoin builds ekv ranges for index join when the inner plan is index scan plan.
@@ -3241,7 +3241,7 @@ func buildKvRangesForIndexJoin(ctx stochastikctx.Context, blockID, indexID int64
 	ranges []*ranger.Range, keyOff2IdxOff []int, cwc *plannercore.DefCausWithCmpFuncManager) (_ []ekv.KeyRange, err error) {
 	kvRanges := make([]ekv.KeyRange, 0, len(ranges)*len(lookUpContents))
 	lastPos := len(ranges[0].LowVal) - 1
-	sc := ctx.GetStochastikVars().StmtCtx
+	sc := ctx.GetStochaseinstein_dbars().StmtCtx
 	tmFIDelatumRanges := make([]*ranger.Range, 0, len(lookUpContents))
 	for _, content := range lookUpContents {
 		for _, ran := range ranges {
@@ -3287,15 +3287,15 @@ func buildKvRangesForIndexJoin(ctx stochastikctx.Context, blockID, indexID int64
 		return kvRanges, nil
 	}
 
-	tmFIDelatumRanges, err = ranger.UnionRanges(ctx.GetStochastikVars().StmtCtx, tmFIDelatumRanges, true)
+	tmFIDelatumRanges, err = ranger.UnionRanges(ctx.GetStochaseinstein_dbars().StmtCtx, tmFIDelatumRanges, true)
 	if err != nil {
 		return nil, err
 	}
 	// Index id is -1 means it's a common handle.
 	if indexID == -1 {
-		return distsql.CommonHandleRangesToKVRanges(ctx.GetStochastikVars().StmtCtx, blockID, tmFIDelatumRanges)
+		return distsql.CommonHandleRangesToKVRanges(ctx.GetStochaseinstein_dbars().StmtCtx, blockID, tmFIDelatumRanges)
 	}
-	return distsql.IndexRangesToKVRanges(ctx.GetStochastikVars().StmtCtx, blockID, indexID, tmFIDelatumRanges, nil)
+	return distsql.IndexRangesToKVRanges(ctx.GetStochaseinstein_dbars().StmtCtx, blockID, indexID, tmFIDelatumRanges, nil)
 }
 
 func (b *executorBuilder) buildWindow(v *plannercore.PhysicalWindow) *WindowExec {
@@ -3473,11 +3473,11 @@ func NewEventDecoder(ctx stochastikctx.Context, schemaReplicant *expression.Sche
 		chk.AppendCauset(i, &d)
 		return nil
 	}
-	return rowcodec.NewChunkDecoder(reqDefCauss, pkDefCauss, defVal, ctx.GetStochastikVars().TimeZone)
+	return rowcodec.NewChunkDecoder(reqDefCauss, pkDefCauss, defVal, ctx.GetStochaseinstein_dbars().TimeZone)
 }
 
 func (b *executorBuilder) buildBatchPointGet(plan *plannercore.BatchPointGetPlan) Executor {
-	if b.ctx.GetStochastikVars().IsPessimisticReadConsistency() {
+	if b.ctx.GetStochaseinstein_dbars().IsPessimisticReadConsistency() {
 		if err := b.refreshForUFIDelateTSForRC(); err != nil {
 			b.err = err
 			return nil

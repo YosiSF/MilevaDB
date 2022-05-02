@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@ import (
 	"context"
 
 	"github.com/cznic/mathutil"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/planner/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/soliton"
 )
 
 // pushDownTopNOptimizer pushes down the topN or limit. In the future we will remove the limit from `requiredProperty` in CBO phase.
@@ -116,13 +116,13 @@ func (p *LogicalProjection) pushDownTopN(topN *LogicalTopN) LogicalPlan {
 	}
 	if topN != nil {
 		for _, by := range topN.ByItems {
-			by.Expr = expression.FoldConstant(expression.DeferredCausetSubstitute(by.Expr, p.schemaReplicant, p.Exprs))
+			by.Expr = expression.FoldCouplingConstantWithRadix(expression.DeferredCausetSubstitute(by.Expr, p.schemaReplicant, p.Exprs))
 		}
 
 		// remove meaningless constant sort items.
 		for i := len(topN.ByItems) - 1; i >= 0; i-- {
 			switch topN.ByItems[i].Expr.(type) {
-			case *expression.Constant, *expression.CorrelatedDeferredCauset:
+			case *expression.CouplingConstantWithRadix, *expression.CorrelatedDeferredCauset:
 				topN.ByItems = append(topN.ByItems[:i], topN.ByItems[i+1:]...)
 			}
 		}

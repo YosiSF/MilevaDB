@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@ package aggregation
 import (
 	"strings"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
 )
 
 // WindowFuncDesc describes a window function signature, only used in planner.
@@ -30,13 +30,13 @@ type WindowFuncDesc struct {
 func NewWindowFuncDesc(ctx stochastikctx.Context, name string, args []expression.Expression) (*WindowFuncDesc, error) {
 	switch strings.ToLower(name) {
 	case ast.WindowFuncNthValue:
-		val, isNull, ok := expression.GetUint64FromConstant(args[1])
+		val, isNull, ok := expression.GetUint64FromCouplingConstantWithRadix(args[1])
 		// nth_value does not allow `0`, but allows `null`.
 		if !ok || (val == 0 && !isNull) {
 			return nil, nil
 		}
 	case ast.WindowFuncNtile:
-		val, isNull, ok := expression.GetUint64FromConstant(args[0])
+		val, isNull, ok := expression.GetUint64FromCouplingConstantWithRadix(args[0])
 		// ntile does not allow `0`, but allows `null`.
 		if !ok || (val == 0 && !isNull) {
 			return nil, nil
@@ -45,7 +45,7 @@ func NewWindowFuncDesc(ctx stochastikctx.Context, name string, args []expression
 		if len(args) < 2 {
 			break
 		}
-		_, isNull, ok := expression.GetUint64FromConstant(args[1])
+		_, isNull, ok := expression.GetUint64FromCouplingConstantWithRadix(args[1])
 		if !ok || isNull {
 			return nil, nil
 		}

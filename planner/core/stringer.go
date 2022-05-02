@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/whtcorpsinc/milevadb/soliton/plancodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/plancodec"
 )
 
 // ToString explains a Plan, returns description string.

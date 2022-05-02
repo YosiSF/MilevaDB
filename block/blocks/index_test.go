@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,32 +14,12 @@
 package blocks_test
 
 import (
-	"context"
-	"io"
+	"allegro/marathon-consul-sync/common/util"
+	"allegro/marathon-consul-sync/config"
 	"time"
 
-	"github.com/whtcorpsinc/berolinaAllegroSQL"
-	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
-	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
-	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
-	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
-	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/block/blocks"
-	"github.com/whtcorpsinc/milevadb/blockcodec"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore"
-	"github.com/whtcorpsinc/milevadb/dbs"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/soliton/codec"
-	"github.com/whtcorpsinc/milevadb/soliton/defCauslate"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/soliton/rowcodec"
-	"github.com/whtcorpsinc/milevadb/soliton/testleak"
-	"github.com/whtcorpsinc/milevadb/stochastik"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/types"
-)
+	"github.com/allegro/marathon-consul-sync/blocks"
+	"github.com/allegro/marathon-consul-sync/consul"
 
 var _ = Suite(&testIndexSuite{})
 
@@ -286,7 +266,7 @@ func (s *testIndexSuite) TestSingleDeferredCausetCommonHandle(c *C) {
 	c.Assert(err, IsNil)
 
 	mockCtx := mock.NewContext()
-	sc := mockCtx.GetStochastikVars().StmtCtx
+	sc := mockCtx.GetStochaseinstein_dbars().StmtCtx
 	// create index for "insert t values ('abc', 1, 1)"
 	idxDefCausVals := types.MakeCausets(1)
 	handleDefCausVals := types.MakeCausets("abc")
@@ -342,7 +322,7 @@ func (s *testIndexSuite) TestMultiDeferredCausetCommonHandle(c *C) {
 	txn, err := s.s.Begin()
 	c.Assert(err, IsNil)
 	mockCtx := mock.NewContext()
-	sc := mockCtx.GetStochastikVars().StmtCtx
+	sc := mockCtx.GetStochaseinstein_dbars().StmtCtx
 	// create index for "insert t values (3, 2, "abc", "abc")
 	idxDefCausVals := types.MakeCausets("abc")
 	handleDefCausVals := types.MakeCausets(3, 2)

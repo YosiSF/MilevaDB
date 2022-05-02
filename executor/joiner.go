@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
 package executor
 
 import (
-	"github.com/whtcorpsinc/milevadb/expression"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"go.uber.org/zap"
 )
 
@@ -134,7 +134,7 @@ func newJoiner(ctx stochastikctx.Context, joinType plannercore.JoinType,
 		ctx:          ctx,
 		conditions:   filter,
 		outerIsRight: outerIsRight,
-		maxChunkSize: ctx.GetStochastikVars().MaxChunkSize,
+		maxChunkSize: ctx.GetStochaseinstein_dbars().MaxChunkSize,
 	}
 	base.selected = make([]bool, 0, chunk.InitialCapacity)
 	base.isNull = make([]bool, 0, chunk.InitialCapacity)
@@ -183,7 +183,7 @@ func newJoiner(ctx stochastikctx.Context, joinType plannercore.JoinType,
 		return &antiLeftOuterSemiJoiner{base}
 	case plannercore.LeftOuterJoin, plannercore.RightOuterJoin, plannercore.InnerJoin:
 		if len(base.conditions) > 0 {
-			base.chk = chunk.NewChunkWithCapacity(shallowEventType, ctx.GetStochastikVars().MaxChunkSize)
+			base.chk = chunk.NewChunkWithCapacity(shallowEventType, ctx.GetStochaseinstein_dbars().MaxChunkSize)
 		}
 		switch joinType {
 		case plannercore.LeftOuterJoin:
@@ -211,7 +211,7 @@ type baseJoiner struct {
 	defaultInner chunk.Event
 	outerIsRight bool
 	chk          *chunk.Chunk
-	shallowEvent   chunk.MutEvent
+	shallowEvent chunk.MutEvent
 	selected     []bool
 	isNull       []bool
 	maxChunkSize int
@@ -231,7 +231,7 @@ func (j *baseJoiner) initDefaultInner(innerTypes []*types.FieldType, defaultInne
 
 func (j *baseJoiner) makeJoinEventToChunk(chk *chunk.Chunk, lhs, rhs chunk.Event, lUsed, rUsed []int) {
 	// Call AppendEvent() first to increment the virtual rows.
-	// Fix: https://github.com/whtcorpsinc/milevadb/issues/5771
+	// Fix: https://github.com/whtcorpsinc/MilevaDB-Prod/issues/5771
 	lWide := chk.AppendEventByDefCausIdxs(lhs, lUsed)
 	chk.AppendPartialEventByDefCausIdxs(lWide, rhs, rUsed)
 }

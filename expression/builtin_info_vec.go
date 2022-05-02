@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ import (
 
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/printer"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/printer"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 func (b *builtinDatabaseSig) vectorized() bool {
@@ -33,7 +33,7 @@ func (b *builtinDatabaseSig) vectorized() bool {
 func (b *builtinDatabaseSig) vecEvalString(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
 
-	currentDB := b.ctx.GetStochastikVars().CurrentDB
+	currentDB := b.ctx.GetStochaseinstein_dbars().CurrentDB
 	result.ReserveString(n)
 	if currentDB == "" {
 		for i := 0; i < n; i++ {
@@ -53,7 +53,7 @@ func (b *builtinConnectionIDSig) vectorized() bool {
 
 func (b *builtinConnectionIDSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	data := b.ctx.GetStochastikVars()
+	data := b.ctx.GetStochaseinstein_dbars()
 	if data == nil {
 		return errors.Errorf("Missing stochastik variable in `builtinConnectionIDSig.vecEvalInt`")
 	}
@@ -90,7 +90,7 @@ func (b *builtinEventCountSig) vecEvalInt(input *chunk.Chunk, result *chunk.Defe
 	n := input.NumEvents()
 	result.ResizeInt64(n, false)
 	i64s := result.Int64s()
-	res := b.ctx.GetStochastikVars().StmtCtx.PrevAffectedEvents
+	res := b.ctx.GetStochaseinstein_dbars().StmtCtx.PrevAffectedEvents
 	for i := 0; i < n; i++ {
 		i64s[i] = res
 	}
@@ -106,7 +106,7 @@ func (b *builtinCurrentUserSig) vectorized() bool {
 func (b *builtinCurrentUserSig) vecEvalString(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
 
-	data := b.ctx.GetStochastikVars()
+	data := b.ctx.GetStochaseinstein_dbars()
 	result.ReserveString(n)
 	if data == nil || data.User == nil {
 		return errors.Errorf("Missing stochastik variable when eval builtin")
@@ -126,7 +126,7 @@ func (b *builtinCurrentRoleSig) vectorized() bool {
 func (b *builtinCurrentRoleSig) vecEvalString(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
 
-	data := b.ctx.GetStochastikVars()
+	data := b.ctx.GetStochaseinstein_dbars()
 	if data == nil || data.ActiveRoles == nil {
 		return errors.Errorf("Missing stochastik variable when eval builtin")
 	}
@@ -159,7 +159,7 @@ func (b *builtinUserSig) vectorized() bool {
 // See https://dev.allegrosql.com/doc/refman/5.7/en/information-functions.html#function_user
 func (b *builtinUserSig) vecEvalString(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	data := b.ctx.GetStochastikVars()
+	data := b.ctx.GetStochaseinstein_dbars()
 	if data == nil || data.User == nil {
 		return errors.Errorf("Missing stochastik variable when eval builtin")
 	}
@@ -195,7 +195,7 @@ func (b *builtinFoundEventsSig) vectorized() bool {
 }
 
 func (b *builtinFoundEventsSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredCauset) error {
-	data := b.ctx.GetStochastikVars()
+	data := b.ctx.GetStochaseinstein_dbars()
 	if data == nil {
 		return errors.Errorf("Missing stochastik variable when eval builtin")
 	}
@@ -226,7 +226,7 @@ func (b *builtinBenchmarkSig) vecEvalInt(input *chunk.Chunk, result *chunk.Defer
 
 	var k int64
 	switch evalType {
-	case types.ETInt:
+	case types.CausetEDN:
 		for ; k < loopCount; k++ {
 			if err = arg.VecEvalInt(ctx, input, buf); err != nil {
 				return err
@@ -287,7 +287,7 @@ func (b *builtinLastInsertIDSig) vecEvalInt(input *chunk.Chunk, result *chunk.De
 	n := input.NumEvents()
 	result.ResizeInt64(n, false)
 	i64s := result.Int64s()
-	res := int64(b.ctx.GetStochastikVars().StmtCtx.PrevLastInsertID)
+	res := int64(b.ctx.GetStochaseinstein_dbars().StmtCtx.PrevLastInsertID)
 	for i := 0; i < n; i++ {
 		i64s[i] = res
 	}
@@ -305,7 +305,7 @@ func (b *builtinLastInsertIDWithIDSig) vecEvalInt(input *chunk.Chunk, result *ch
 	i64s := result.Int64s()
 	for i := len(i64s) - 1; i >= 0; i-- {
 		if !result.IsNull(i) {
-			b.ctx.GetStochastikVars().SetLastInsertID(uint64(i64s[i]))
+			b.ctx.GetStochaseinstein_dbars().SetLastInsertID(uint64(i64s[i]))
 			break
 		}
 	}

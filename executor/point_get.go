@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,27 +16,27 @@ package executor
 import (
 	"context"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block/blocks"
+	"github.com/whtcorpsinc/MilevaDB-Prod/blockcodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/codec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/execdetails"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/rowcodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/block/blocks"
-	"github.com/whtcorpsinc/milevadb/blockcodec"
-	"github.com/whtcorpsinc/milevadb/causetstore/einsteindb"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/expression"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/codec"
-	"github.com/whtcorpsinc/milevadb/soliton/execdetails"
-	"github.com/whtcorpsinc/milevadb/soliton/rowcodec"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 func (b *executorBuilder) buildPointGet(p *plannercore.PointGetPlan) Executor {
-	if b.ctx.GetStochastikVars().IsPessimisticReadConsistency() {
+	if b.ctx.GetStochaseinstein_dbars().IsPessimisticReadConsistency() {
 		if err := b.refreshForUFIDelateTSForRC(); err != nil {
 			b.err = err
 			return nil
@@ -119,7 +119,7 @@ func (e *PointGetExecutor) buildVirtualDeferredCausetInfo() {
 
 // Open implements the Executor interface.
 func (e *PointGetExecutor) Open(context.Context) error {
-	txnCtx := e.ctx.GetStochastikVars().TxnCtx
+	txnCtx := e.ctx.GetStochaseinstein_dbars().TxnCtx
 	snapshotTS := e.startTS
 	if e.dagger {
 		snapshotTS = txnCtx.GetForUFIDelateTS()
@@ -143,12 +143,12 @@ func (e *PointGetExecutor) Open(context.Context) error {
 			SnapshotRuntimeStats: snapshotStats,
 		}
 		e.snapshot.SetOption(ekv.DefCauslectRuntimeStats, snapshotStats)
-		e.ctx.GetStochastikVars().StmtCtx.RuntimeStatsDefCausl.RegisterStats(e.id, e.stats)
+		e.ctx.GetStochaseinstein_dbars().StmtCtx.RuntimeStatsDefCausl.RegisterStats(e.id, e.stats)
 	}
-	if e.ctx.GetStochastikVars().GetReplicaRead().IsFollowerRead() {
+	if e.ctx.GetStochaseinstein_dbars().GetReplicaRead().IsFollowerRead() {
 		e.snapshot.SetOption(ekv.ReplicaRead, ekv.ReplicaReadFollower)
 	}
-	e.snapshot.SetOption(ekv.TaskID, e.ctx.GetStochastikVars().StmtCtx.TaskID)
+	e.snapshot.SetOption(ekv.TaskID, e.ctx.GetStochaseinstein_dbars().StmtCtx.TaskID)
 	return nil
 }
 
@@ -200,7 +200,7 @@ func (e *PointGetExecutor) Next(ctx context.Context, req *chunk.Chunk) error {
 			}
 			if len(e.handleVal) == 0 {
 				// handle is not found, try dagger the index key if isolation level is not read consistency
-				if e.ctx.GetStochastikVars().IsPessimisticReadConsistency() {
+				if e.ctx.GetStochaseinstein_dbars().IsPessimisticReadConsistency() {
 					return nil
 				}
 				return e.lockKeyIfNeeded(ctx, e.idxKey)
@@ -254,7 +254,7 @@ func (e *PointGetExecutor) Next(ctx context.Context, req *chunk.Chunk) error {
 }
 
 func (e *PointGetExecutor) getAndLock(ctx context.Context, key ekv.Key) (val []byte, err error) {
-	if e.ctx.GetStochastikVars().IsPessimisticReadConsistency() {
+	if e.ctx.GetStochaseinstein_dbars().IsPessimisticReadConsistency() {
 		// Only Lock the exist keys in RC isolation.
 		val, err = e.get(ctx, key)
 		if err != nil {
@@ -286,7 +286,7 @@ func (e *PointGetExecutor) getAndLock(ctx context.Context, key ekv.Key) (val []b
 
 func (e *PointGetExecutor) lockKeyIfNeeded(ctx context.Context, key []byte) error {
 	if e.dagger {
-		seVars := e.ctx.GetStochastikVars()
+		seVars := e.ctx.GetStochaseinstein_dbars()
 		lockCtx := newLockCtx(seVars, e.lockWaitTime)
 		lockCtx.ReturnValues = true
 		lockCtx.Values = map[string]ekv.ReturnedValue{}
@@ -326,7 +326,7 @@ func (e *PointGetExecutor) get(ctx context.Context, key ekv.Key) ([]byte, error)
 		}
 		// key does not exist in mem buffer, check the dagger cache
 		var ok bool
-		val, ok = e.ctx.GetStochastikVars().TxnCtx.GetKeyInPessimisticLockCache(key)
+		val, ok = e.ctx.GetStochaseinstein_dbars().TxnCtx.GetKeyInPessimisticLockCache(key)
 		if ok {
 			return val, nil
 		}
@@ -346,7 +346,7 @@ func EncodeUniqueIndexKey(ctx stochastikctx.Context, tblInfo *perceptron.BlockIn
 
 // EncodeUniqueIndexValuesForKey encodes unique index values for a key.
 func EncodeUniqueIndexValuesForKey(ctx stochastikctx.Context, tblInfo *perceptron.BlockInfo, idxInfo *perceptron.IndexInfo, idxVals []types.Causet) (_ []byte, err error) {
-	sc := ctx.GetStochastikVars().StmtCtx
+	sc := ctx.GetStochaseinstein_dbars().StmtCtx
 	for i := range idxVals {
 		defCausInfo := tblInfo.DeferredCausets[idxInfo.DeferredCausets[i].Offset]
 		// block.CastValue will append 0x0 if the string value's length is smaller than the BINARY defCausumn's length.
@@ -399,7 +399,7 @@ func decodeOldEventValToChunk(sctx stochastikctx.Context, schemaReplicant *expre
 	if cutVals == nil {
 		cutVals = make([][]byte, len(defCausID2CutPos))
 	}
-	decoder := codec.NewDecoder(chk, sctx.GetStochastikVars().Location())
+	decoder := codec.NewDecoder(chk, sctx.GetStochaseinstein_dbars().Location())
 	for i, defCaus := range schemaReplicant.DeferredCausets {
 		// fill the virtual defCausumn value after event calculation
 		if defCaus.VirtualExpr != nil {

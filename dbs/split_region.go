@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,18 +18,18 @@ import (
 
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/blockcodec"
-	"github.com/whtcorpsinc/milevadb/causetstore/einsteindb"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/blockcodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
 	"go.uber.org/zap"
 )
 
 func splitPartitionBlockRegion(ctx stochastikctx.Context, causetstore ekv.SplitblockStore, tbInfo *perceptron.BlockInfo, pi *perceptron.PartitionInfo, scatter bool) {
 	// Max partition count is 4096, should we sample and just choose some of the partition to split?
 	regionIDs := make([]uint64, 0, len(pi.Definitions))
-	ctxWithTimeout, cancel := context.WithTimeout(context.Background(), ctx.GetStochastikVars().GetSplitRegionTimeout())
+	ctxWithTimeout, cancel := context.WithTimeout(context.Background(), ctx.GetStochaseinstein_dbars().GetSplitRegionTimeout())
 	defer cancel()
 	if tbInfo.ShardRowIDBits > 0 && tbInfo.PreSplitRegions > 0 {
 		for _, def := range pi.Definitions {
@@ -46,7 +46,7 @@ func splitPartitionBlockRegion(ctx stochastikctx.Context, causetstore ekv.Splitb
 }
 
 func splitBlockRegion(ctx stochastikctx.Context, causetstore ekv.SplitblockStore, tbInfo *perceptron.BlockInfo, scatter bool) {
-	ctxWithTimeout, cancel := context.WithTimeout(context.Background(), ctx.GetStochastikVars().GetSplitRegionTimeout())
+	ctxWithTimeout, cancel := context.WithTimeout(context.Background(), ctx.GetStochaseinstein_dbars().GetSplitRegionTimeout())
 	defer cancel()
 	var regionIDs []uint64
 	if tbInfo.ShardRowIDBits > 0 && tbInfo.PreSplitRegions > 0 {

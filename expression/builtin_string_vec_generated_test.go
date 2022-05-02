@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,17 +20,17 @@ import (
 
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 var vecGeneratedBuiltinStringCases = map[string][]vecExprBenchCase{
 	ast.Field: {
 
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt, types.ETInt, types.ETInt, types.ETInt}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN, types.CausetEDN, types.CausetEDN, types.CausetEDN}},
 
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETReal, types.ETReal, types.ETReal, types.ETReal}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETReal, types.ETReal, types.ETReal, types.ETReal}},
 
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETString, types.ETString, types.ETString, types.ETString}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETString, types.ETString, types.ETString, types.ETString}},
 	},
 }
 

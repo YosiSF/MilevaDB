@@ -18,21 +18,21 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/ast"
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/charset"
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/mysql"
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/terror"
-	"github.com/whtcorpsinc/MilevaDB/causetnetctx/variable"
-	"github.com/whtcorpsinc/MilevaDB/expression"
-	"github.com/whtcorpsinc/MilevaDB/namespace"
-	"github.com/whtcorpsinc/MilevaDB/plugin"
-	"github.com/whtcorpsinc/MilevaDB/types"
-	"github.com/whtcorpsinc/MilevaDB/util/chunk"
-	"github.com/whtcorpsinc/MilevaDB/util/collate"
-	"github.com/whtcorpsinc/MilevaDB/util/gcutil"
-	"github.com/whtcorpsinc/MilevaDB/util/logutil"
-	"github.com/whtcorpsinc/MilevaDB/util/stmtsummary"
-	"github.com/whtcorpsinc/MilevaDB/util/stringutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/ast"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/charset"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/mysql"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/terror"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetnetctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/namespace"
+	"github.com/whtcorpsinc/MilevaDB-Prod/plugin"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/collate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/gcutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/stmtsummary"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/stringutil"
 	"github.com/whtcorpsinc/errors"
 	"go.uber.org/zap"
 )
@@ -64,7 +64,7 @@ func (e *SetInterlock) Next(ctx context.Context, req *chunk.Chunk) error {
 				}
 				continue
 			}
-			dt, err := v.Expr.(*expression.Constant).Eval(chunk.Row{})
+			dt, err := v.Expr.(*expression.CouplingConstantWithRadix).Eval(chunk.Row{})
 			if err != nil {
 				return err
 			}
@@ -277,19 +277,19 @@ func (e *SetInterlock) setCharset(cs, co string, isSetName bool) error {
 	return errors.Trace(CausetNetVars.SetSystemVar(variable.CollationConnection, coDb))
 }
 
-func (e *SetInterlock) getVarValue(v *expression.VarAssignment, sysVar *variable.SysVar) (value types.Datum, err error) {
+func (e *SetInterlock) getVarValue(v *expression.VarAssignment, sysVar *variable.SysVar) (value types.CausetObjectQL, err error) {
 	if v.IsDefault {
 		// To set a CausetNet variable to the GLOBAL value or a GLOBAL value
 		// to the compiled-in MySQL default value, use the DEFAULT keyword.
 		// See http://dev.mysql.com/doc/refman/5.7/en/set-statement.html
 		if sysVar != nil {
-			value = types.NewStringDatum(sysVar.Value)
+			value = types.NewStringCausetObjectQL(sysVar.Value)
 		} else {
 			s, err1 := variable.GetGlobalSystemVar(e.ctx.GetCausetNetVars(), v.Name)
 			if err1 != nil {
 				return value, err1
 			}
-			value = types.NewStringDatum(s)
+			value = types.NewStringCausetObjectQL(s)
 		}
 		return
 	}

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,35 +26,35 @@ import (
 	"sync"
 	"time"
 
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/privilege"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/execdetails"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/plancodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/replog"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/auth"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/failpoint"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/privilege"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton/execdetails"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/plancodec"
-	"github.com/whtcorpsinc/milevadb/soliton/replog"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
 	"go.uber.org/zap"
 )
 
 //slowQueryRetriever is used to read slow log data.
 type slowQueryRetriever struct {
-	block       *perceptron.BlockInfo
-	outputDefCauss  []*perceptron.DeferredCausetInfo
-	initialized bool
-	extractor   *plannercore.SlowQueryExtractor
-	files       []logFile
-	fileIdx     int
-	fileLine    int
-	checker     *slowLogChecker
+	block          *perceptron.BlockInfo
+	outputDefCauss []*perceptron.DeferredCausetInfo
+	initialized    bool
+	extractor      *plannercore.SlowQueryExtractor
+	files          []logFile
+	fileIdx        int
+	fileLine       int
+	checker        *slowLogChecker
 
 	parsedSlowLogCh chan parsedSlowLog
 }
@@ -92,11 +92,11 @@ func (e *slowQueryRetriever) initialize(sctx stochastikctx.Context) error {
 	var err error
 	var hasProcessPriv bool
 	if pm := privilege.GetPrivilegeManager(sctx); pm != nil {
-		hasProcessPriv = pm.RequestVerification(sctx.GetStochastikVars().ActiveRoles, "", "", "", allegrosql.ProcessPriv)
+		hasProcessPriv = pm.RequestVerification(sctx.GetStochaseinstein_dbars().ActiveRoles, "", "", "", allegrosql.ProcessPriv)
 	}
 	e.checker = &slowLogChecker{
 		hasProcessPriv: hasProcessPriv,
-		user:           sctx.GetStochastikVars().User,
+		user:           sctx.GetStochaseinstein_dbars().User,
 	}
 	if e.extractor != nil {
 		e.checker.enableTimeCheck = e.extractor.Enable
@@ -104,7 +104,7 @@ func (e *slowQueryRetriever) initialize(sctx stochastikctx.Context) error {
 		e.checker.endTime = types.NewTime(types.FromGoTime(e.extractor.EndTime), allegrosql.TypeDatetime, types.MaxFsp)
 	}
 	e.initialized = true
-	e.files, err = e.getAllFiles(sctx, sctx.GetStochastikVars().SlowQueryFile)
+	e.files, err = e.getAllFiles(sctx, sctx.GetStochaseinstein_dbars().SlowQueryFile)
 	return err
 }
 
@@ -256,7 +256,7 @@ func (e *slowQueryRetriever) parseSlowLog(ctx context.Context, sctx stochastikct
 	var wg sync.WaitGroup
 	offset := offset{offset: 0, length: 0}
 	// To limit the num of go routine
-	ch := make(chan int, sctx.GetStochastikVars().Concurrency.DistALLEGROSQLScanConcurrency())
+	ch := make(chan int, sctx.GetStochaseinstein_dbars().Concurrency.DistALLEGROSQLScanConcurrency())
 	defer close(ch)
 	for {
 		log, err := e.getBatchLog(reader, &offset, logNum)
@@ -314,7 +314,7 @@ func (e *slowQueryRetriever) parseLog(ctx stochastikctx.Context, log []string, o
 		}
 	})
 	var st *slowQueryTuple
-	tz := ctx.GetStochastikVars().Location()
+	tz := ctx.GetStochaseinstein_dbars().Location()
 	startFlag := false
 	for index, line := range log {
 		fileLine := getLineIndex(offset, index)
@@ -322,7 +322,7 @@ func (e *slowQueryRetriever) parseLog(ctx stochastikctx.Context, log []string, o
 			st = &slowQueryTuple{}
 			valid, err := st.setFieldValue(tz, variable.SlowLogTimeStr, line[len(variable.SlowLogStartPrefixStr):], fileLine, e.checker)
 			if err != nil {
-				ctx.GetStochastikVars().StmtCtx.AppendWarning(err)
+				ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(err)
 				continue
 			}
 			if valid {
@@ -339,7 +339,7 @@ func (e *slowQueryRetriever) parseLog(ctx stochastikctx.Context, log []string, o
 					value := line[len(variable.SlowLogUserAndHostStr+variable.SlowLogSpaceMarkStr):]
 					valid, err := st.setFieldValue(tz, variable.SlowLogUserAndHostStr, value, fileLine, e.checker)
 					if err != nil {
-						ctx.GetStochastikVars().StmtCtx.AppendWarning(err)
+						ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(err)
 						continue
 					}
 					if !valid {
@@ -354,7 +354,7 @@ func (e *slowQueryRetriever) parseLog(ctx stochastikctx.Context, log []string, o
 						}
 						valid, err := st.setFieldValue(tz, field, fieldValues[i+1], fileLine, e.checker)
 						if err != nil {
-							ctx.GetStochastikVars().StmtCtx.AppendWarning(err)
+							ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(err)
 							continue
 						}
 						if !valid {
@@ -366,13 +366,13 @@ func (e *slowQueryRetriever) parseLog(ctx stochastikctx.Context, log []string, o
 				if strings.HasPrefix(line, "use") {
 					// `use EDB` statements in the slow log is used to keep it be compatible with MyALLEGROSQL,
 					// since we already get the current EDB from the `# EDB` field, we can ignore it here,
-					// please see https://github.com/whtcorpsinc/milevadb/issues/17846 for more details.
+					// please see https://github.com/whtcorpsinc/MilevaDB-Prod/issues/17846 for more details.
 					continue
 				}
 				// Get the allegrosql string, and mark the start flag to false.
 				_, err := st.setFieldValue(tz, variable.SlowLogQueryALLEGROSQLStr, string(replog.Slice(line)), fileLine, e.checker)
 				if err != nil {
-					ctx.GetStochastikVars().StmtCtx.AppendWarning(err)
+					ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(err)
 					continue
 				}
 				if e.checker.hasPrivilege(st.user) {
@@ -415,7 +415,7 @@ type slowQueryTuple struct {
 	writeSize              uint64
 	prewriteRegion         uint64
 	txnRetry               uint64
-	INTERLOCKTime                float64
+	INTERLOCKTime          float64
 	processTime            float64
 	waitTime               float64
 	backOffTime            float64
@@ -423,7 +423,7 @@ type slowQueryTuple struct {
 	requestCount           uint64
 	totalKeys              uint64
 	processKeys            uint64
-	EDB                     string
+	EDB                    string
 	indexIDs               string
 	digest                 string
 	statsInfo              string
@@ -438,7 +438,7 @@ type slowQueryTuple struct {
 	memMax                 int64
 	diskMax                int64
 	prevStmt               string
-	allegrosql                    string
+	allegrosql             string
 	isInternal             bool
 	succ                   bool
 	planFromCache          bool
@@ -721,7 +721,7 @@ func (e *slowQueryRetriever) getAllFiles(sctx stochastikctx.Context, logFilePath
 	handleErr := func(err error) error {
 		// Ignore the error and append warning for usability.
 		if err != io.EOF {
-			sctx.GetStochastikVars().StmtCtx.AppendWarning(err)
+			sctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(err)
 		}
 		return nil
 	}

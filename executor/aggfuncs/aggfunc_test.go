@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,28 +21,28 @@ import (
 	"unsafe"
 
 	"github.com/dgryski/go-farm"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore/cluster"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/executor/aggfuncs"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression/aggregation"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/codec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/replog"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/set"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastik"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 	"github.com/whtcorpsinc/berolinaAllegroSQL"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore/cluster"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/executor/aggfuncs"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/expression/aggregation"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/planner/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/codec"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/soliton/replog"
-	"github.com/whtcorpsinc/milevadb/soliton/set"
-	"github.com/whtcorpsinc/milevadb/stochastik"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
 )
 
 var _ = Suite(&testSuite{})
@@ -64,7 +64,7 @@ type testSuite struct {
 func (s *testSuite) SetUpSuite(c *C) {
 	s.berolinaAllegroSQL = berolinaAllegroSQL.New()
 	s.ctx = mock.NewContext()
-	s.ctx.GetStochastikVars().StmtCtx.TimeZone = time.Local
+	s.ctx.GetStochaseinstein_dbars().StmtCtx.TimeZone = time.Local
 	causetstore, err := mockstore.NewMockStore(
 		mockstore.WithClusterInspector(func(c cluster.Cluster) {
 			mockstore.BootstrapWithSingleStore(c)
@@ -83,11 +83,11 @@ func (s *testSuite) TearDownSuite(c *C) {
 }
 
 func (s *testSuite) SetUpTest(c *C) {
-	s.ctx.GetStochastikVars().PlanDeferredCausetID = 0
+	s.ctx.GetStochaseinstein_dbars().PlanDeferredCausetID = 0
 }
 
 func (s *testSuite) TearDownTest(c *C) {
-	s.ctx.GetStochastikVars().StmtCtx.SetWarnings(nil)
+	s.ctx.GetStochaseinstein_dbars().StmtCtx.SetWarnings(nil)
 }
 
 type aggTest struct {
@@ -287,7 +287,7 @@ func (s *testSuite) testMergePartialResult(c *C, p aggTest) {
 
 	args := []expression.Expression{&expression.DeferredCauset{RetType: p.dataType, Index: 0}}
 	if p.funcName == ast.AggFuncGroupConcat {
-		args = append(args, &expression.Constant{Value: types.NewStringCauset(" "), RetType: types.NewFieldType(allegrosql.TypeString)})
+		args = append(args, &expression.CouplingConstantWithRadix{Value: types.NewStringCauset(" "), RetType: types.NewFieldType(allegrosql.TypeString)})
 	}
 	desc, err := aggregation.NewAggFuncDesc(s.ctx, p.funcName, args, false)
 	c.Assert(err, IsNil)
@@ -320,7 +320,7 @@ func (s *testSuite) testMergePartialResult(c *C, p aggTest) {
 	if p.funcName == ast.AggFuncApproxCountDistinct {
 		dt = resultChk.GetEvent(0).GetCauset(0, types.NewFieldType(allegrosql.TypeString))
 	}
-	result, err := dt.CompareCauset(s.ctx.GetStochastikVars().StmtCtx, &p.results[0])
+	result, err := dt.CompareCauset(s.ctx.GetStochaseinstein_dbars().StmtCtx, &p.results[0])
 	c.Assert(err, IsNil)
 	c.Assert(result, Equals, 0, Commentf("%v != %v", dt.String(), p.results[0]))
 
@@ -342,7 +342,7 @@ func (s *testSuite) testMergePartialResult(c *C, p aggTest) {
 	if p.funcName == ast.AggFuncApproxCountDistinct {
 		dt = resultChk.GetEvent(0).GetCauset(0, types.NewFieldType(allegrosql.TypeString))
 	}
-	result, err = dt.CompareCauset(s.ctx.GetStochastikVars().StmtCtx, &p.results[1])
+	result, err = dt.CompareCauset(s.ctx.GetStochaseinstein_dbars().StmtCtx, &p.results[1])
 	c.Assert(err, IsNil)
 	c.Assert(result, Equals, 0, Commentf("%v != %v", dt.String(), p.results[1]))
 	_, err = finalFunc.MergePartialResult(s.ctx, partialResult, finalPr)
@@ -359,7 +359,7 @@ func (s *testSuite) testMergePartialResult(c *C, p aggTest) {
 	if p.funcName == ast.AggFuncApproxCountDistinct {
 		dt = resultChk.GetEvent(0).GetCauset(0, types.NewFieldType(allegrosql.TypeLonglong))
 	}
-	result, err = dt.CompareCauset(s.ctx.GetStochastikVars().StmtCtx, &p.results[2])
+	result, err = dt.CompareCauset(s.ctx.GetStochaseinstein_dbars().StmtCtx, &p.results[2])
 	c.Assert(err, IsNil)
 	c.Assert(result, Equals, 0, Commentf("%v != %v", dt.String(), p.results[2]))
 }
@@ -415,7 +415,7 @@ func (s *testSuite) testMultiArgsMergePartialResult(c *C, p multiArgsAggTest) {
 	p.messUpChunk(srcChk)
 	partialFunc.AppendFinalResult2Chunk(s.ctx, partialResult, resultChk)
 	dt := resultChk.GetEvent(0).GetCauset(0, p.retType)
-	result, err := dt.CompareCauset(s.ctx.GetStochastikVars().StmtCtx, &p.results[0])
+	result, err := dt.CompareCauset(s.ctx.GetStochaseinstein_dbars().StmtCtx, &p.results[0])
 	c.Assert(err, IsNil)
 	c.Assert(result, Equals, 0)
 
@@ -434,7 +434,7 @@ func (s *testSuite) testMultiArgsMergePartialResult(c *C, p multiArgsAggTest) {
 	resultChk.Reset()
 	partialFunc.AppendFinalResult2Chunk(s.ctx, partialResult, resultChk)
 	dt = resultChk.GetEvent(0).GetCauset(0, p.retType)
-	result, err = dt.CompareCauset(s.ctx.GetStochastikVars().StmtCtx, &p.results[1])
+	result, err = dt.CompareCauset(s.ctx.GetStochaseinstein_dbars().StmtCtx, &p.results[1])
 	c.Assert(err, IsNil)
 	c.Assert(result, Equals, 0)
 	_, err = finalFunc.MergePartialResult(s.ctx, partialResult, finalPr)
@@ -445,7 +445,7 @@ func (s *testSuite) testMultiArgsMergePartialResult(c *C, p multiArgsAggTest) {
 	c.Assert(err, IsNil)
 
 	dt = resultChk.GetEvent(0).GetCauset(0, p.retType)
-	result, err = dt.CompareCauset(s.ctx.GetStochastikVars().StmtCtx, &p.results[2])
+	result, err = dt.CompareCauset(s.ctx.GetStochaseinstein_dbars().StmtCtx, &p.results[2])
 	c.Assert(err, IsNil)
 	c.Assert(result, Equals, 0)
 }
@@ -516,7 +516,7 @@ func (s *testSuite) testAggFunc(c *C, p aggTest) {
 
 	args := []expression.Expression{&expression.DeferredCauset{RetType: p.dataType, Index: 0}}
 	if p.funcName == ast.AggFuncGroupConcat {
-		args = append(args, &expression.Constant{Value: types.NewStringCauset(" "), RetType: types.NewFieldType(allegrosql.TypeString)})
+		args = append(args, &expression.CouplingConstantWithRadix{Value: types.NewStringCauset(" "), RetType: types.NewFieldType(allegrosql.TypeString)})
 	}
 	desc, err := aggregation.NewAggFuncDesc(s.ctx, p.funcName, args, false)
 	c.Assert(err, IsNil)
@@ -536,7 +536,7 @@ func (s *testSuite) testAggFunc(c *C, p aggTest) {
 	p.messUpChunk(srcChk)
 	finalFunc.AppendFinalResult2Chunk(s.ctx, finalPr, resultChk)
 	dt := resultChk.GetEvent(0).GetCauset(0, desc.RetTp)
-	result, err := dt.CompareCauset(s.ctx.GetStochastikVars().StmtCtx, &p.results[1])
+	result, err := dt.CompareCauset(s.ctx.GetStochaseinstein_dbars().StmtCtx, &p.results[1])
 	c.Assert(err, IsNil)
 	c.Assert(result, Equals, 0, Commentf("%v != %v", dt.String(), p.results[1]))
 
@@ -545,7 +545,7 @@ func (s *testSuite) testAggFunc(c *C, p aggTest) {
 	finalFunc.ResetPartialResult(finalPr)
 	finalFunc.AppendFinalResult2Chunk(s.ctx, finalPr, resultChk)
 	dt = resultChk.GetEvent(0).GetCauset(0, desc.RetTp)
-	result, err = dt.CompareCauset(s.ctx.GetStochastikVars().StmtCtx, &p.results[0])
+	result, err = dt.CompareCauset(s.ctx.GetStochaseinstein_dbars().StmtCtx, &p.results[0])
 	c.Assert(err, IsNil)
 	c.Assert(result, Equals, 0, Commentf("%v != %v", dt.String(), p.results[0]))
 
@@ -575,7 +575,7 @@ func (s *testSuite) testAggFunc(c *C, p aggTest) {
 	p.messUpChunk(srcChk)
 	finalFunc.AppendFinalResult2Chunk(s.ctx, finalPr, resultChk)
 	dt = resultChk.GetEvent(0).GetCauset(0, desc.RetTp)
-	result, err = dt.CompareCauset(s.ctx.GetStochastikVars().StmtCtx, &p.results[1])
+	result, err = dt.CompareCauset(s.ctx.GetStochaseinstein_dbars().StmtCtx, &p.results[1])
 	c.Assert(err, IsNil)
 	c.Assert(result, Equals, 0, Commentf("%v != %v", dt.String(), p.results[1]))
 
@@ -584,7 +584,7 @@ func (s *testSuite) testAggFunc(c *C, p aggTest) {
 	finalFunc.ResetPartialResult(finalPr)
 	finalFunc.AppendFinalResult2Chunk(s.ctx, finalPr, resultChk)
 	dt = resultChk.GetEvent(0).GetCauset(0, desc.RetTp)
-	result, err = dt.CompareCauset(s.ctx.GetStochastikVars().StmtCtx, &p.results[0])
+	result, err = dt.CompareCauset(s.ctx.GetStochaseinstein_dbars().StmtCtx, &p.results[0])
 	c.Assert(err, IsNil)
 	c.Assert(result, Equals, 0, Commentf("%v != %v", dt.String(), p.results[0]))
 }
@@ -594,7 +594,7 @@ func (s *testSuite) testAggMemFunc(c *C, p aggMemTest) {
 
 	args := []expression.Expression{&expression.DeferredCauset{RetType: p.aggTest.dataType, Index: 0}}
 	if p.aggTest.funcName == ast.AggFuncGroupConcat {
-		args = append(args, &expression.Constant{Value: types.NewStringCauset(" "), RetType: types.NewFieldType(allegrosql.TypeString)})
+		args = append(args, &expression.CouplingConstantWithRadix{Value: types.NewStringCauset(" "), RetType: types.NewFieldType(allegrosql.TypeString)})
 	}
 	desc, err := aggregation.NewAggFuncDesc(s.ctx, p.aggTest.funcName, args, p.isDistinct)
 	c.Assert(err, IsNil)
@@ -627,7 +627,7 @@ func (s *testSuite) testMultiArgsAggFunc(c *C, p multiArgsAggTest) {
 		args[k] = &expression.DeferredCauset{RetType: p.dataTypes[k], Index: k}
 	}
 	if p.funcName == ast.AggFuncGroupConcat {
-		args = append(args, &expression.Constant{Value: types.NewStringCauset(" "), RetType: types.NewFieldType(allegrosql.TypeString)})
+		args = append(args, &expression.CouplingConstantWithRadix{Value: types.NewStringCauset(" "), RetType: types.NewFieldType(allegrosql.TypeString)})
 	}
 
 	desc, err := aggregation.NewAggFuncDesc(s.ctx, p.funcName, args, false)
@@ -648,7 +648,7 @@ func (s *testSuite) testMultiArgsAggFunc(c *C, p multiArgsAggTest) {
 	p.messUpChunk(srcChk)
 	finalFunc.AppendFinalResult2Chunk(s.ctx, finalPr, resultChk)
 	dt := resultChk.GetEvent(0).GetCauset(0, desc.RetTp)
-	result, err := dt.CompareCauset(s.ctx.GetStochastikVars().StmtCtx, &p.results[1])
+	result, err := dt.CompareCauset(s.ctx.GetStochaseinstein_dbars().StmtCtx, &p.results[1])
 	c.Assert(err, IsNil)
 	c.Assert(result, Equals, 0, Commentf("%v != %v", dt.String(), p.results[1]))
 
@@ -657,7 +657,7 @@ func (s *testSuite) testMultiArgsAggFunc(c *C, p multiArgsAggTest) {
 	finalFunc.ResetPartialResult(finalPr)
 	finalFunc.AppendFinalResult2Chunk(s.ctx, finalPr, resultChk)
 	dt = resultChk.GetEvent(0).GetCauset(0, desc.RetTp)
-	result, err = dt.CompareCauset(s.ctx.GetStochastikVars().StmtCtx, &p.results[0])
+	result, err = dt.CompareCauset(s.ctx.GetStochaseinstein_dbars().StmtCtx, &p.results[0])
 	c.Assert(err, IsNil)
 	c.Assert(result, Equals, 0, Commentf("%v != %v", dt.String(), p.results[0]))
 
@@ -687,7 +687,7 @@ func (s *testSuite) testMultiArgsAggFunc(c *C, p multiArgsAggTest) {
 	p.messUpChunk(srcChk)
 	finalFunc.AppendFinalResult2Chunk(s.ctx, finalPr, resultChk)
 	dt = resultChk.GetEvent(0).GetCauset(0, desc.RetTp)
-	result, err = dt.CompareCauset(s.ctx.GetStochastikVars().StmtCtx, &p.results[1])
+	result, err = dt.CompareCauset(s.ctx.GetStochaseinstein_dbars().StmtCtx, &p.results[1])
 	c.Assert(err, IsNil)
 	c.Assert(result, Equals, 0, Commentf("%v != %v", dt.String(), p.results[1]))
 
@@ -696,7 +696,7 @@ func (s *testSuite) testMultiArgsAggFunc(c *C, p multiArgsAggTest) {
 	finalFunc.ResetPartialResult(finalPr)
 	finalFunc.AppendFinalResult2Chunk(s.ctx, finalPr, resultChk)
 	dt = resultChk.GetEvent(0).GetCauset(0, desc.RetTp)
-	result, err = dt.CompareCauset(s.ctx.GetStochastikVars().StmtCtx, &p.results[0])
+	result, err = dt.CompareCauset(s.ctx.GetStochaseinstein_dbars().StmtCtx, &p.results[0])
 	c.Assert(err, IsNil)
 	c.Assert(result, Equals, 0)
 }
@@ -711,7 +711,7 @@ func (s *testSuite) benchmarkAggFunc(b *testing.B, p aggTest) {
 
 	args := []expression.Expression{&expression.DeferredCauset{RetType: p.dataType, Index: 0}}
 	if p.funcName == ast.AggFuncGroupConcat {
-		args = append(args, &expression.Constant{Value: types.NewStringCauset(" "), RetType: types.NewFieldType(allegrosql.TypeString)})
+		args = append(args, &expression.CouplingConstantWithRadix{Value: types.NewStringCauset(" "), RetType: types.NewFieldType(allegrosql.TypeString)})
 	}
 	desc, err := aggregation.NewAggFuncDesc(s.ctx, p.funcName, args, false)
 	if err != nil {
@@ -764,7 +764,7 @@ func (s *testSuite) benchmarkMultiArgsAggFunc(b *testing.B, p multiArgsAggTest) 
 		args[k] = &expression.DeferredCauset{RetType: p.dataTypes[k], Index: k}
 	}
 	if p.funcName == ast.AggFuncGroupConcat {
-		args = append(args, &expression.Constant{Value: types.NewStringCauset(" "), RetType: types.NewFieldType(allegrosql.TypeString)})
+		args = append(args, &expression.CouplingConstantWithRadix{Value: types.NewStringCauset(" "), RetType: types.NewFieldType(allegrosql.TypeString)})
 	}
 
 	desc, err := aggregation.NewAggFuncDesc(s.ctx, p.funcName, args, false)

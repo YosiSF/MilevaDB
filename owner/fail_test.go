@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,11 +24,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testleak"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/testleak"
 	"go.etcd.io/etcd/clientv3"
 	"google.golang.org/grpc"
 )
@@ -89,9 +89,9 @@ func (s *testSuite) TestFailNewStochastik(c *C) {
 			if cli != nil {
 				cli.Close()
 			}
-			c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/owner/closeClient"), IsNil)
+			c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/owner/closeClient"), IsNil)
 		}()
-		c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/owner/closeClient", `return(true)`), IsNil)
+		c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/owner/closeClient", `return(true)`), IsNil)
 		_, err = NewStochastik(context.Background(), "fail_new_serssion", cli, retryCnt, ManagerStochastikTTL)
 		isContextDone := terror.ErrorEqual(grpc.ErrClientConnClosing, err) || terror.ErrorEqual(context.Canceled, err)
 		c.Assert(isContextDone, IsTrue, Commentf("err %v", err))
@@ -107,9 +107,9 @@ func (s *testSuite) TestFailNewStochastik(c *C) {
 			if cli != nil {
 				cli.Close()
 			}
-			c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/owner/closeGrpc"), IsNil)
+			c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/owner/closeGrpc"), IsNil)
 		}()
-		c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/owner/closeGrpc", `return(true)`), IsNil)
+		c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/owner/closeGrpc", `return(true)`), IsNil)
 		_, err = NewStochastik(context.Background(), "fail_new_serssion", cli, retryCnt, ManagerStochastikTTL)
 		isContextDone := terror.ErrorEqual(grpc.ErrClientConnClosing, err) || terror.ErrorEqual(context.Canceled, err)
 		c.Assert(isContextDone, IsTrue, Commentf("err %v", err))

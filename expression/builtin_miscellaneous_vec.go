@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,14 +24,14 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 func (b *builtinInetNtoaSig) vecEvalString(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -308,7 +308,7 @@ func (b *builtinSleepSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredC
 		isNull := buf.IsNull(i)
 		val := buf.GetFloat64(i)
 
-		sessVars := b.ctx.GetStochastikVars()
+		sessVars := b.ctx.GetStochaseinstein_dbars()
 		if isNull || val < 0 {
 			if sessVars.StrictALLEGROSQLMode {
 				return errIncorrectArgs.GenWithStackByArgs("sleep")
@@ -333,7 +333,7 @@ func (b *builtinSleepSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredC
 	return nil
 }
 
-func doSleep(secs float64, sessVars *variable.StochastikVars) (isKilled bool) {
+func doSleep(secs float64, sessVars *variable.Stochaseinstein_dbars) (isKilled bool) {
 	if secs <= 0.0 {
 		return false
 	}

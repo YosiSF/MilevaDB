@@ -17,14 +17,14 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/executor"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
 	"github.com/whtcorpsinc/berolinaAllegroSQL"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/executor"
-	"github.com/whtcorpsinc/milevadb/planner"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
 )
 
 func (s *testSuite7) TestStmtLabel(c *C) {

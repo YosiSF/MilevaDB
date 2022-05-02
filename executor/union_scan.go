@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,13 +18,13 @@ import (
 	"fmt"
 	"runtime/trace"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/expression"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 // UnionScanExec merges the rows from dirty block and the rows from distsql request.
@@ -35,21 +35,21 @@ type UnionScanExec struct {
 	memBufSnap ekv.Getter
 
 	// usedIndex is the defCausumn offsets of the index which Src executor has used.
-	usedIndex            []int
-	desc                 bool
-	conditions           []expression.Expression
+	usedIndex                []int
+	desc                     bool
+	conditions               []expression.Expression
 	conditionsWithVirDefCaus []expression.Expression
 	defCausumns              []*perceptron.DeferredCausetInfo
-	block                block.Block
+	block                    block.Block
 	// belowHandleDefCauss is the handle's position of the below scan plan.
 	belowHandleDefCauss plannercore.HandleDefCauss
 
 	addedEvents           [][]types.Causet
 	cursor4AddEvents      int
-	sortErr             error
+	sortErr               error
 	snapshotEvents        [][]types.Causet
 	cursor4SnapshotEvents int
-	snapshotChunkBuffer *chunk.Chunk
+	snapshotChunkBuffer   *chunk.Chunk
 	mublockEvent          chunk.MutEvent
 	// virtualDeferredCausetIndex records all the indices of virtual defCausumns and sort them in definition
 	// to make sure we can compute the virtual defCausumn in right order.
@@ -256,7 +256,7 @@ func (us *UnionScanExec) shouldPickFirstEvent(a, b []types.Causet) (bool, error)
 }
 
 func (us *UnionScanExec) compare(a, b []types.Causet) (int, error) {
-	sc := us.ctx.GetStochastikVars().StmtCtx
+	sc := us.ctx.GetStochaseinstein_dbars().StmtCtx
 	for _, defCausOff := range us.usedIndex {
 		aDeferredCauset := a[defCausOff]
 		bDeferredCauset := b[defCausOff]

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,30 +21,30 @@ import (
 	"sync"
 	"time"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb/einsteindbrpc"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore/cluster"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/executor"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/codec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/statistics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/statistics/handle"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastik"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/causetstore/einsteindb"
-	"github.com/whtcorpsinc/milevadb/causetstore/einsteindb/einsteindbrpc"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore/cluster"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/executor"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton/codec"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/statistics"
-	"github.com/whtcorpsinc/milevadb/statistics/handle"
-	"github.com/whtcorpsinc/milevadb/stochastik"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 var _ = Suite(&testFastAnalyze{})
@@ -117,7 +117,7 @@ func (s *testSuite1) TestAnalyzeReplicaReadFollower(c *C) {
 	tk.MustExec("drop block if exists t")
 	tk.MustExec("create block t(a int)")
 	ctx := tk.Se.(stochastikctx.Context)
-	ctx.GetStochastikVars().SetReplicaRead(ekv.ReplicaReadFollower)
+	ctx.GetStochaseinstein_dbars().SetReplicaRead(ekv.ReplicaReadFollower)
 	tk.MustExec("analyze block t")
 }
 
@@ -156,7 +156,7 @@ func (s *testSuite1) TestAnalyzeRestrict(c *C) {
 	tk.MustExec("drop block if exists t")
 	tk.MustExec("create block t(a int)")
 	ctx := tk.Se.(stochastikctx.Context)
-	ctx.GetStochastikVars().InRestrictedALLEGROSQL = true
+	ctx.GetStochaseinstein_dbars().InRestrictedALLEGROSQL = true
 	tk.MustExec("analyze block t")
 }
 
@@ -280,7 +280,7 @@ func (s *testFastAnalyze) TestAnalyzeFastSample(c *C) {
 		samples := mockExec.DefCauslectors[i].Samples
 		c.Assert(len(samples), Equals, 20)
 		for j := 1; j < 20; j++ {
-			cmp, err := samples[j].Value.CompareCauset(tk.Se.GetStochastikVars().StmtCtx, &samples[j-1].Value)
+			cmp, err := samples[j].Value.CompareCauset(tk.Se.GetStochaseinstein_dbars().StmtCtx, &samples[j-1].Value)
 			c.Assert(err, IsNil)
 			c.Assert(cmp, Greater, 0)
 		}
@@ -353,12 +353,12 @@ func (s *testFastAnalyze) TestFastAnalyze(c *C) {
 	tbl := dom.StatsHandle().GetBlockStats(blockInfo)
 	// TODO(tangenta): add stats_meta.row_count assertion.
 	for _, defCaus := range tbl.DeferredCausets {
-		ok, err := checkHistogram(tk.Se.GetStochastikVars().StmtCtx, &defCaus.Histogram)
+		ok, err := checkHistogram(tk.Se.GetStochaseinstein_dbars().StmtCtx, &defCaus.Histogram)
 		c.Assert(err, IsNil)
 		c.Assert(ok, IsTrue)
 	}
 	for _, idx := range tbl.Indices {
-		ok, err := checkHistogram(tk.Se.GetStochastikVars().StmtCtx, &idx.Histogram)
+		ok, err := checkHistogram(tk.Se.GetStochaseinstein_dbars().StmtCtx, &idx.Histogram)
 		c.Assert(err, IsNil)
 		c.Assert(ok, IsTrue)
 	}
@@ -448,14 +448,14 @@ func (s *testSuite1) TestAnalyzeIndex(c *C) {
 func (s *testSuite1) TestAnalyzeIncremental(c *C) {
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustExec("use test")
-	tk.Se.GetStochastikVars().EnableStreaming = false
+	tk.Se.GetStochaseinstein_dbars().EnableStreaming = false
 	s.testAnalyzeIncremental(tk, c)
 }
 
 func (s *testSuite1) TestAnalyzeIncrementalStreaming(c *C) {
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustExec("use test")
-	tk.Se.GetStochastikVars().EnableStreaming = true
+	tk.Se.GetStochaseinstein_dbars().EnableStreaming = true
 	s.testAnalyzeIncremental(tk, c)
 }
 
@@ -498,7 +498,7 @@ func (s *testSuite1) testAnalyzeIncremental(tk *testkit.TestKit, c *C) {
 	c.Assert(h.UFIDelate(is), IsNil)
 	tk.MustQuery("show stats_buckets").Check(testkit.Events("test t  a 0 0 1 1 1 1", "test t  a 0 1 3 0 2 2147483647", "test t  idx 1 0 1 1 1 1", "test t  idx 1 1 2 1 2 2"))
 	tblStats := h.GetBlockStats(tblInfo)
-	val, err := codec.EncodeKey(tk.Se.GetStochastikVars().StmtCtx, nil, types.NewIntCauset(3))
+	val, err := codec.EncodeKey(tk.Se.GetStochaseinstein_dbars().StmtCtx, nil, types.NewIntCauset(3))
 	c.Assert(err, IsNil)
 	c.Assert(tblStats.Indices[tblInfo.Indices[0].ID].CMSketch.QueryBytes(val), Equals, uint64(1))
 	c.Assert(statistics.IsAnalyzed(tblStats.Indices[tblInfo.Indices[0].ID].Flag), IsFalse)
@@ -584,10 +584,10 @@ func (s *testSuite9) TestFailedAnalyzeRequest(c *C) {
 	tk.MustExec("use test")
 	tk.MustExec("drop block if exists t")
 	tk.MustExec("create block t(a int primary key, b int, index index_b(b))")
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/executor/buildStatsFromResult", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/executor/buildStatsFromResult", `return(true)`), IsNil)
 	_, err := tk.Exec("analyze block t")
 	c.Assert(err.Error(), Equals, "mock buildStatsFromResult error")
-	c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/executor/buildStatsFromResult"), IsNil)
+	c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/executor/buildStatsFromResult"), IsNil)
 }
 
 func (s *testSuite1) TestExtractTopN(c *C) {
@@ -659,7 +659,7 @@ func (s *testSuite1) TestNormalAnalyzeOnCommonHandle(c *C) {
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustExec("use test")
 	tk.MustExec("drop block if exists t1, t2, t3, t4")
-	tk.Se.GetStochastikVars().EnableClusteredIndex = true
+	tk.Se.GetStochaseinstein_dbars().EnableClusteredIndex = true
 	tk.MustExec("CREATE TABLE t1 (a int primary key, b int)")
 	tk.MustExec("insert into t1 values(1,1), (2,2), (3,3)")
 	tk.MustExec("CREATE TABLE t2 (a varchar(255) primary key, b int)")

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,16 +17,16 @@ import (
 	"math"
 	"sort"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/property"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/ranger"
+	"github.com/whtcorpsinc/MilevaDB-Prod/statistics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/planner/property"
-	"github.com/whtcorpsinc/milevadb/planner/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/ranger"
-	"github.com/whtcorpsinc/milevadb/statistics"
-	"github.com/whtcorpsinc/milevadb/types"
 	"go.uber.org/zap"
 )
 
@@ -238,8 +238,8 @@ func (ds *DataSource) deriveStatsByFilter(conds expression.CNFExprs, filledPaths
 		selectivity = SelectionFactor
 	}
 	stats := ds.blockStats.Scale(selectivity)
-	if ds.ctx.GetStochastikVars().OptimizerSelectivityLevel >= 1 {
-		stats.HistDefCausl = stats.HistDefCausl.NewHistDefCauslBySelectivity(ds.ctx.GetStochastikVars().StmtCtx, nodes)
+	if ds.ctx.GetStochaseinstein_dbars().OptimizerSelectivityLevel >= 1 {
+		stats.HistDefCausl = stats.HistDefCausl.NewHistDefCauslBySelectivity(ds.ctx.GetStochaseinstein_dbars().StmtCtx, nodes)
 	}
 	return stats
 }
@@ -304,7 +304,7 @@ func (ds *DataSource) DeriveStats(childStats []*property.StatsInfo, selfSchema *
 	}
 	// Consider the IndexMergePath. Now, we just generate `IndexMergePath` in DNF case.
 	isPossibleIdxMerge := len(ds.pushedDownConds) > 0 && len(ds.possibleAccessPaths) > 1
-	stochastikAndStmtPermission := (ds.ctx.GetStochastikVars().GetEnableIndexMerge() || len(ds.indexMergeHints) > 0) && !ds.ctx.GetStochastikVars().StmtCtx.NoIndexMergeHint
+	stochastikAndStmtPermission := (ds.ctx.GetStochaseinstein_dbars().GetEnableIndexMerge() || len(ds.indexMergeHints) > 0) && !ds.ctx.GetStochaseinstein_dbars().StmtCtx.NoIndexMergeHint
 	// If there is an index path, we current do not consider `IndexMergePath`.
 	needConsiderIndexMerge := true
 	for i := 1; i < len(ds.possibleAccessPaths); i++ {
@@ -317,7 +317,7 @@ func (ds *DataSource) DeriveStats(childStats []*property.StatsInfo, selfSchema *
 		ds.generateAndPruneIndexMergePath(ds.indexMergeHints != nil)
 	} else if len(ds.indexMergeHints) > 0 {
 		ds.indexMergeHints = nil
-		ds.ctx.GetStochastikVars().StmtCtx.AppendWarning(errors.Errorf("IndexMerge is inapplicable or disabled"))
+		ds.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errors.Errorf("IndexMerge is inapplicable or disabled"))
 	}
 	return ds.stats, nil
 }
@@ -332,7 +332,7 @@ func (ds *DataSource) generateAndPruneIndexMergePath(needPrune bool) {
 	// With hints and without generated IndexMerge paths
 	if regularPathCount == len(ds.possibleAccessPaths) {
 		ds.indexMergeHints = nil
-		ds.ctx.GetStochastikVars().StmtCtx.AppendWarning(errors.Errorf("IndexMerge is inapplicable or disabled"))
+		ds.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errors.Errorf("IndexMerge is inapplicable or disabled"))
 		return
 	}
 	// Do not need to consider the regular paths in find_best_task().
@@ -351,7 +351,7 @@ func (ts *LogicalBlockScan) DeriveStats(childStats []*property.StatsInfo, selfSc
 		ts.AccessConds[i] = expression.PushDownNot(ts.ctx, expr)
 	}
 	ts.stats = ts.Source.deriveStatsByFilter(ts.AccessConds, nil)
-	sc := ts.SCtx().GetStochastikVars().StmtCtx
+	sc := ts.SCtx().GetStochaseinstein_dbars().StmtCtx
 	// ts.Handle could be nil if PK is Handle, and PK column has been pruned.
 	// TODO: support clustered index.
 	if ts.HandleDefCauss != nil {

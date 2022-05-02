@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,15 +19,15 @@ import (
 	"strconv"
 
 	"github.com/cznic/mathutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/property"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/stringutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/planner/property"
-	"github.com/whtcorpsinc/milevadb/planner/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/stringutil"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 // Plan is the description of an execution flow.
@@ -97,7 +97,7 @@ func optimizeByShuffle(pp PhysicalPlan, tsk task, ctx stochastikctx.Context) tas
 }
 
 func optimizeByShuffle4Window(pp *PhysicalWindow, ctx stochastikctx.Context) *PhysicalShuffle {
-	concurrency := ctx.GetStochastikVars().WindowConcurrency()
+	concurrency := ctx.GetStochaseinstein_dbars().WindowConcurrency()
 	if concurrency <= 1 {
 		return nil
 	}
@@ -331,12 +331,12 @@ func (p *basePhysicalPlan) ExtractCorrelatedDefCauss() []*expression.CorrelatedD
 
 // GetlogicalTS4TaskMap get the logical TimeStamp now to help rollback the TaskMap changes after that.
 func (p *baseLogicalPlan) GetlogicalTS4TaskMap() uint64 {
-	p.ctx.GetStochastikVars().StmtCtx.TaskMapBakTS += 1
-	return p.ctx.GetStochastikVars().StmtCtx.TaskMapBakTS
+	p.ctx.GetStochaseinstein_dbars().StmtCtx.TaskMapBakTS += 1
+	return p.ctx.GetStochaseinstein_dbars().StmtCtx.TaskMapBakTS
 }
 
 func (p *baseLogicalPlan) rollBackTaskMap(TS uint64) {
-	if !p.ctx.GetStochastikVars().StmtCtx.StmtHints.TaskMapNeedBackUp() {
+	if !p.ctx.GetStochaseinstein_dbars().StmtCtx.StmtHints.TaskMapNeedBackUp() {
 		return
 	}
 	if len(p.taskMapBak) > 0 {
@@ -370,7 +370,7 @@ func (p *baseLogicalPlan) getTask(prop *property.PhysicalProperty) task {
 
 func (p *baseLogicalPlan) storeTask(prop *property.PhysicalProperty, task task) {
 	key := prop.HashCode()
-	if p.ctx.GetStochastikVars().StmtCtx.StmtHints.TaskMapNeedBackUp() {
+	if p.ctx.GetStochaseinstein_dbars().StmtCtx.StmtHints.TaskMapNeedBackUp() {
 		// Empty string for useless change.
 		TS := p.GetlogicalTS4TaskMap()
 		p.taskMapBakTS = append(p.taskMapBakTS, TS)
@@ -420,8 +420,8 @@ func (p *logicalSchemaProducer) BuildKeyInfo(selfSchema *expression.Schema, chil
 }
 
 func newBasePlan(ctx stochastikctx.Context, tp string, offset int) basePlan {
-	ctx.GetStochastikVars().PlanID++
-	id := ctx.GetStochastikVars().PlanID
+	ctx.GetStochaseinstein_dbars().PlanID++
+	id := ctx.GetStochaseinstein_dbars().PlanID
 	return basePlan{
 		tp:          tp,
 		id:          id,

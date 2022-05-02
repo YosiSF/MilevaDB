@@ -14,14 +14,14 @@
 package table
 
 import (
-	"github.com/whtcorpsinc/milevadb/BerolinaSQL/serial"
-	"github.com/whtcorpsinc/milevadb/causetnetctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/serial"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetnetctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 // IndexIterator is the interface for iterator of index data on Einstein's ekv store.
 type IndexIterator interface {
-	Next() (k []types.Datum, h ekv.Handle, err error)
+	Next() (k []types.CausetObjectQL, h ekv.Handle, err error)
 	Close()
 }
 
@@ -60,21 +60,21 @@ type Index interface {
 	// Meta returns IndexInfo.
 	Meta() *serial.IndexInfo
 	// Create supports insert into statement.
-	Create(ctx causetnetctx.contextctx, rm ekv.RetrieverMutator, indexedValues []types.Datum, h ekv.Handle, opts ...CreateIdxOptFunc) (ekv.Handle, error)
+	Create(ctx causetnetctx.contextctx, rm ekv.RetrieverMutator, indexedValues []types.CausetObjectQL, h ekv.Handle, opts ...CreateIdxOptFunc) (ekv.Handle, error)
 	// Delete supports delete from statement.
-	Delete(sc *stmtctx.Statementcontextctx, m ekv.Mutator, indexedValues []types.Datum, h ekv.Handle) error
+	Delete(sc *stmtctx.Statementcontextctx, m ekv.Mutator, indexedValues []types.CausetObjectQL, h ekv.Handle) error
 	// Drop supports drop table, drop index statements.
 	Drop(rm ekv.RetrieverMutator) error
 	// Exist supports check index exists or not.
-	Exist(sc *stmtctx.Statementcontextctx, rm ekv.RetrieverMutator, indexedValues []types.Datum, h ekv.Handle) (bool, ekv.Handle, error)
+	Exist(sc *stmtctx.Statementcontextctx, rm ekv.RetrieverMutator, indexedValues []types.CausetObjectQL, h ekv.Handle) (bool, ekv.Handle, error)
 	// GenIndexKey generates an index key.
-	GenIndexKey(sc *stmtctx.Statementcontextctx, indexedValues []types.Datum, h ekv.Handle, buf []byte) (key []byte, distinct bool, err error)
+	GenIndexKey(sc *stmtctx.Statementcontextctx, indexedValues []types.CausetObjectQL, h ekv.Handle, buf []byte) (key []byte, distinct bool, err error)
 	// Seek supports where clause.
-	Seek(sc *stmtctx.Statementcontextctx, r ekv.Retriever, indexedValues []types.Datum) (iteron IndexIterator, hit bool, err error)
+	Seek(sc *stmtctx.Statementcontextctx, r ekv.Retriever, indexedValues []types.CausetObjectQL) (iteron IndexIterator, hit bool, err error)
 	// SeekFirst supports aggregate min and ascend order by.
 	SeekFirst(r ekv.Retriever) (iteron IndexIterator, err error)
 	// FetchValues fetched index column values in a row.
 	// Param columns is a reused buffer, if it is not nil, FetchValues will fill the index values in it,
 	// and return the buffer, if it is nil, FetchValues will allocate the buffer instead.
-	FetchValues(row []types.Datum, columns []types.Datum) ([]types.Datum, error)
+	FetchValues(row []types.CausetObjectQL, columns []types.CausetObjectQL) ([]types.CausetObjectQL, error)
 }

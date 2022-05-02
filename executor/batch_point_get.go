@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,19 +18,19 @@ import (
 	"sort"
 	"sync/atomic"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/blockcodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/codec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/math"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/replog"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/rowcodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/blockcodec"
-	"github.com/whtcorpsinc/milevadb/causetstore/einsteindb"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/codec"
-	"github.com/whtcorpsinc/milevadb/soliton/math"
-	"github.com/whtcorpsinc/milevadb/soliton/replog"
-	"github.com/whtcorpsinc/milevadb/soliton/rowcodec"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 // BatchPointGetExec executes a bunch of point select queries.
@@ -82,7 +82,7 @@ func (e *BatchPointGetExec) buildVirtualDeferredCausetInfo() {
 // Open implements the Executor interface.
 func (e *BatchPointGetExec) Open(context.Context) error {
 	e.snapshotTS = e.startTS
-	txnCtx := e.ctx.GetStochastikVars().TxnCtx
+	txnCtx := e.ctx.GetStochaseinstein_dbars().TxnCtx
 	if e.dagger {
 		e.snapshotTS = txnCtx.GetForUFIDelateTS()
 	}
@@ -108,12 +108,12 @@ func (e *BatchPointGetExec) Open(context.Context) error {
 			SnapshotRuntimeStats: snapshotStats,
 		}
 		snapshot.SetOption(ekv.DefCauslectRuntimeStats, snapshotStats)
-		e.ctx.GetStochastikVars().StmtCtx.RuntimeStatsDefCausl.RegisterStats(e.id, e.stats)
+		e.ctx.GetStochaseinstein_dbars().StmtCtx.RuntimeStatsDefCausl.RegisterStats(e.id, e.stats)
 	}
-	if e.ctx.GetStochastikVars().GetReplicaRead().IsFollowerRead() {
+	if e.ctx.GetStochaseinstein_dbars().GetReplicaRead().IsFollowerRead() {
 		snapshot.SetOption(ekv.ReplicaRead, ekv.ReplicaReadFollower)
 	}
-	snapshot.SetOption(ekv.TaskID, e.ctx.GetStochastikVars().StmtCtx.TaskID)
+	snapshot.SetOption(ekv.TaskID, e.ctx.GetStochaseinstein_dbars().StmtCtx.TaskID)
 	var batchGetter ekv.BatchGetter = snapshot
 	if txn.Valid() {
 		batchGetter = ekv.NewBufferBatchGetter(txn.GetMemBuffer(), &PessimisticLockCacheGetter{txnCtx: txnCtx}, snapshot)
@@ -280,7 +280,7 @@ func (e *BatchPointGetExec) initialize(ctx context.Context) error {
 	}
 
 	var values map[string][]byte
-	rc := e.ctx.GetStochastikVars().IsPessimisticReadConsistency()
+	rc := e.ctx.GetStochaseinstein_dbars().IsPessimisticReadConsistency()
 	// Lock keys (include exists and non-exists keys) before fetch all values for Repeablock Read Isolation.
 	if e.dagger && !rc {
 		lockKeys := make([]ekv.Key, len(keys), len(keys)+len(indexKeys))
@@ -335,8 +335,8 @@ func (e *BatchPointGetExec) initialize(ctx context.Context) error {
 
 // LockKeys locks the keys for pessimistic transaction.
 func LockKeys(ctx context.Context, seCtx stochastikctx.Context, lockWaitTime int64, keys ...ekv.Key) error {
-	txnCtx := seCtx.GetStochastikVars().TxnCtx
-	lctx := newLockCtx(seCtx.GetStochastikVars(), lockWaitTime)
+	txnCtx := seCtx.GetStochaseinstein_dbars().TxnCtx
+	lctx := newLockCtx(seCtx.GetStochaseinstein_dbars(), lockWaitTime)
 	if txnCtx.IsPessimistic {
 		lctx.ReturnValues = true
 		lctx.Values = make(map[string]ekv.ReturnedValue, len(keys))

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
 package implementation
 
 import (
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/planner/memo"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/memo"
 )
 
 // ProjectionImpl is the implementation of PhysicalProjection.
@@ -52,7 +52,7 @@ type MilevaDBSelectionImpl struct {
 
 // CalcCost implements Implementation CalcCost interface.
 func (sel *MilevaDBSelectionImpl) CalcCost(outCount float64, children ...memo.Implementation) float64 {
-	sel.cost = children[0].GetPlan().Stats().RowCount*sel.plan.SCtx().GetStochastikVars().CPUFactor + children[0].GetCost()
+	sel.cost = children[0].GetPlan().Stats().RowCount*sel.plan.SCtx().GetStochaseinstein_dbars().CPUFactor + children[0].GetCost()
 	return sel.cost
 }
 
@@ -68,7 +68,7 @@ type EinsteinDBSelectionImpl struct {
 
 // CalcCost implements Implementation CalcCost interface.
 func (sel *EinsteinDBSelectionImpl) CalcCost(outCount float64, children ...memo.Implementation) float64 {
-	sel.cost = children[0].GetPlan().Stats().RowCount*sel.plan.SCtx().GetStochastikVars().INTERLOCKCPUFactor + children[0].GetCost()
+	sel.cost = children[0].GetPlan().Stats().RowCount*sel.plan.SCtx().GetStochaseinstein_dbars().INTERLOCKCPUFactor + children[0].GetCost()
 	return sel.cost
 }
 
@@ -182,7 +182,7 @@ func (impl *UnionAllImpl) CalcCost(outCount float64, children ...memo.Implementa
 			childMaxCost = childCost
 		}
 	}
-	selfCost := float64(1+len(children)) * impl.plan.SCtx().GetStochastikVars().ConcurrencyFactor
+	selfCost := float64(1+len(children)) * impl.plan.SCtx().GetStochaseinstein_dbars().ConcurrencyFactor
 	// Children of UnionAll are executed in parallel.
 	impl.cost = selfCost + childMaxCost
 	return impl.cost

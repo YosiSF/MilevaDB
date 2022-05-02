@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,22 +17,22 @@ import (
 	"context"
 	"math"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block/blocks"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/dbs"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/memory"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/block/blocks"
-	"github.com/whtcorpsinc/milevadb/causetstore/einsteindb"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/dbs"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/meta/autoid"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/memory"
-	"github.com/whtcorpsinc/milevadb/types"
 	"go.uber.org/zap"
 )
 
@@ -62,7 +62,7 @@ type InsertValues struct {
 	evalBuffer         chunk.MutEvent
 	evalBufferTypes    []*types.FieldType
 
-	allAssignmentsAreConstant bool
+	allAssignmentsAreCouplingConstantWithRadix bool
 
 	hasRefDefCauss bool
 	hasExtraHandle bool
@@ -141,7 +141,7 @@ func (e *InsertValues) initInsertDeferredCausets() error {
 			e.insertDeferredCausets = append(e.insertDeferredCausets, defCaus)
 		}
 		if defCaus.Name.L == perceptron.ExtraHandleName.L {
-			if !e.ctx.GetStochastikVars().AllowWriteEventID {
+			if !e.ctx.GetStochaseinstein_dbars().AllowWriteEventID {
 				return errors.Errorf("insert, uFIDelate and replace statements for _milevadb_rowid are not supported.")
 			}
 			e.hasExtraHandle = true
@@ -208,13 +208,13 @@ func insertEvents(ctx context.Context, base insertCommon) (err error) {
 	if err = e.processSetList(); err != nil {
 		return err
 	}
-	sessVars := e.ctx.GetStochastikVars()
+	sessVars := e.ctx.GetStochaseinstein_dbars()
 	batchSize := sessVars.DMLBatchSize
 	batchInsert := sessVars.BatchInsert && !sessVars.InTxn() && config.GetGlobalConfig().EnableBatchDML && batchSize > 0
 
 	e.lazyFillAutoID = true
 	evalEventFunc := e.fastEvalEvent
-	if !e.allAssignmentsAreConstant {
+	if !e.allAssignmentsAreCouplingConstantWithRadix {
 		evalEventFunc = e.evalEvent
 	}
 
@@ -294,7 +294,7 @@ func (e *InsertValues) handleErr(defCaus *block.DeferredCauset, val *types.Cause
 		err = block.ErrTruncatedWrongValueForField.GenWithStackByArgs(types.TypeStr(defCausTp), valStr, defCausName, rowIdx+1)
 	}
 
-	if !e.ctx.GetStochastikVars().StmtCtx.DupKeyAsWarning {
+	if !e.ctx.GetStochaseinstein_dbars().StmtCtx.DupKeyAsWarning {
 		return err
 	}
 	// TODO: should not filter all types of errors here.
@@ -349,7 +349,7 @@ func (e *InsertValues) fastEvalEvent(ctx context.Context, list []expression.Expr
 	event := make([]types.Causet, rowLen)
 	hasValue := make([]bool, rowLen)
 	for i, expr := range list {
-		con := expr.(*expression.Constant)
+		con := expr.(*expression.CouplingConstantWithRadix)
 		val, err := con.Eval(emptyEvent)
 		if err = e.handleErr(e.insertDeferredCausets[i], &val, rowIdx, err); err != nil {
 			return nil, err
@@ -403,7 +403,7 @@ func insertEventsFromSelect(ctx context.Context, base insertCommon) error {
 	iter := chunk.NewIterator4Chunk(chk)
 	rows := make([][]types.Causet, 0, chk.Capacity())
 
-	sessVars := e.ctx.GetStochastikVars()
+	sessVars := e.ctx.GetStochaseinstein_dbars()
 	if !sessVars.StrictALLEGROSQLMode {
 		// If StrictALLEGROSQLMode is disabled and it is a insert-select statement, it also handle BadNullAsWarning.
 		sessVars.StmtCtx.BadNullAsWarning = true
@@ -567,7 +567,7 @@ func (e *InsertValues) fillEvent(ctx context.Context, event []types.Causet, hasV
 				return nil, err
 			}
 			if !e.lazyFillAutoID || (e.lazyFillAutoID && !allegrosql.HasAutoIncrementFlag(c.Flag)) {
-				if err = c.HandleBadNull(&event[i], e.ctx.GetStochastikVars().StmtCtx); err != nil {
+				if err = c.HandleBadNull(&event[i], e.ctx.GetStochaseinstein_dbars().StmtCtx); err != nil {
 					return nil, err
 				}
 			}
@@ -584,7 +584,7 @@ func (e *InsertValues) fillEvent(ctx context.Context, event []types.Causet, hasV
 			return nil, err
 		}
 		// Handle the bad null error.
-		if err = gDefCaus.HandleBadNull(&event[defCausIdx], e.ctx.GetStochastikVars().StmtCtx); err != nil {
+		if err = gDefCaus.HandleBadNull(&event[defCausIdx], e.ctx.GetStochaseinstein_dbars().StmtCtx); err != nil {
 			return nil, err
 		}
 	}
@@ -608,7 +608,7 @@ func (e *InsertValues) isAutoNull(ctx context.Context, d types.Causet, defCaus *
 	}
 	// Change NULL to auto id.
 	// Change value 0 to auto id, if NoAutoValueOnZero ALLEGROALLEGROSQL mode is not set.
-	if d.IsNull() || e.ctx.GetStochastikVars().ALLEGROSQLMode&allegrosql.ModeNoAutoValueOnZero == 0 {
+	if d.IsNull() || e.ctx.GetStochaseinstein_dbars().ALLEGROSQLMode&allegrosql.ModeNoAutoValueOnZero == 0 {
 		return true
 	}
 	return false
@@ -634,7 +634,7 @@ func (e *InsertValues) lazyAdjustAutoIncrementCausetInRetry(ctx context.Context,
 		autoCauset := rows[i][defCausIdx]
 
 		// autoID can be found in RetryInfo.
-		retryInfo := e.ctx.GetStochastikVars().RetryInfo
+		retryInfo := e.ctx.GetStochaseinstein_dbars().RetryInfo
 		if retryInfo.Retrying {
 			id, err := retryInfo.GetCurrAutoIncrementID()
 			if err != nil {
@@ -642,7 +642,7 @@ func (e *InsertValues) lazyAdjustAutoIncrementCausetInRetry(ctx context.Context,
 			}
 			autoCauset.SetAutoID(id, defCaus.Flag)
 
-			if err = defCaus.HandleBadNull(&autoCauset, e.ctx.GetStochastikVars().StmtCtx); err != nil {
+			if err = defCaus.HandleBadNull(&autoCauset, e.ctx.GetStochaseinstein_dbars().StmtCtx); err != nil {
 				return nil, err
 			}
 			rows[i][defCausIdx] = autoCauset
@@ -664,7 +664,7 @@ func (e *InsertValues) lazyAdjustAutoIncrementCauset(ctx context.Context, rows [
 		return rows, nil
 	}
 	// autoID can be found in RetryInfo.
-	retryInfo := e.ctx.GetStochastikVars().RetryInfo
+	retryInfo := e.ctx.GetStochaseinstein_dbars().RetryInfo
 	if retryInfo.Retrying {
 		return e.lazyAdjustAutoIncrementCausetInRetry(ctx, rows, defCausIdx)
 	}
@@ -689,7 +689,7 @@ func (e *InsertValues) lazyAdjustAutoIncrementCauset(ctx context.Context, rows [
 			if err != nil {
 				return nil, err
 			}
-			e.ctx.GetStochastikVars().StmtCtx.InsertID = uint64(recordID)
+			e.ctx.GetStochaseinstein_dbars().StmtCtx.InsertID = uint64(recordID)
 			retryInfo.AddAutoIncrementID(recordID)
 			rows[i][defCausIdx] = autoCauset
 			continue
@@ -697,7 +697,7 @@ func (e *InsertValues) lazyAdjustAutoIncrementCauset(ctx context.Context, rows [
 
 		// Change NULL to auto id.
 		// Change value 0 to auto id, if NoAutoValueOnZero ALLEGROALLEGROSQL mode is not set.
-		if autoCauset.IsNull() || e.ctx.GetStochastikVars().ALLEGROSQLMode&allegrosql.ModeNoAutoValueOnZero == 0 {
+		if autoCauset.IsNull() || e.ctx.GetStochaseinstein_dbars().ALLEGROSQLMode&allegrosql.ModeNoAutoValueOnZero == 0 {
 			// Find consecutive num.
 			start := i
 			cnt := 1
@@ -749,7 +749,7 @@ func (e *InsertValues) lazyAdjustAutoIncrementCauset(ctx context.Context, rows [
 }
 
 func (e *InsertValues) adjustAutoIncrementCauset(ctx context.Context, d types.Causet, hasValue bool, c *block.DeferredCauset) (types.Causet, error) {
-	retryInfo := e.ctx.GetStochastikVars().RetryInfo
+	retryInfo := e.ctx.GetStochaseinstein_dbars().RetryInfo
 	if retryInfo.Retrying {
 		id, err := retryInfo.GetCurrAutoIncrementID()
 		if err != nil {
@@ -776,14 +776,14 @@ func (e *InsertValues) adjustAutoIncrementCauset(ctx context.Context, d types.Ca
 		if err != nil {
 			return types.Causet{}, err
 		}
-		e.ctx.GetStochastikVars().StmtCtx.InsertID = uint64(recordID)
+		e.ctx.GetStochaseinstein_dbars().StmtCtx.InsertID = uint64(recordID)
 		retryInfo.AddAutoIncrementID(recordID)
 		return d, nil
 	}
 
 	// Change NULL to auto id.
 	// Change value 0 to auto id, if NoAutoValueOnZero ALLEGROALLEGROSQL mode is not set.
-	if d.IsNull() || e.ctx.GetStochastikVars().ALLEGROSQLMode&allegrosql.ModeNoAutoValueOnZero == 0 {
+	if d.IsNull() || e.ctx.GetStochaseinstein_dbars().ALLEGROSQLMode&allegrosql.ModeNoAutoValueOnZero == 0 {
 		recordID, err = block.AllocAutoIncrementValue(ctx, e.Block, e.ctx)
 		if e.handleErr(c, &d, 0, err) != nil {
 			return types.Causet{}, err
@@ -827,7 +827,7 @@ func getAutoRecordID(d types.Causet, target *types.FieldType, isInsert bool) (in
 }
 
 func (e *InsertValues) adjustAutoRandomCauset(ctx context.Context, d types.Causet, hasValue bool, c *block.DeferredCauset) (types.Causet, error) {
-	retryInfo := e.ctx.GetStochastikVars().RetryInfo
+	retryInfo := e.ctx.GetStochaseinstein_dbars().RetryInfo
 	if retryInfo.Retrying {
 		autoRandomID, err := retryInfo.GetCurrAutoRandomID()
 		if err != nil {
@@ -850,14 +850,14 @@ func (e *InsertValues) adjustAutoRandomCauset(ctx context.Context, d types.Cause
 	}
 	// Use the value if it's not null and not 0.
 	if recordID != 0 {
-		if !e.ctx.GetStochastikVars().AllowAutoRandExplicitInsert {
+		if !e.ctx.GetStochaseinstein_dbars().AllowAutoRandExplicitInsert {
 			return types.Causet{}, dbs.ErrInvalidAutoRandom.GenWithStackByArgs(autoid.AutoRandomExplicitInsertDisabledErrMsg)
 		}
 		err = e.rebaseAutoRandomID(recordID, &c.FieldType)
 		if err != nil {
 			return types.Causet{}, err
 		}
-		e.ctx.GetStochastikVars().StmtCtx.InsertID = uint64(recordID)
+		e.ctx.GetStochaseinstein_dbars().StmtCtx.InsertID = uint64(recordID)
 		d.SetAutoID(recordID, c.Flag)
 		retryInfo.AddAutoRandomID(recordID)
 		return d, nil
@@ -865,7 +865,7 @@ func (e *InsertValues) adjustAutoRandomCauset(ctx context.Context, d types.Cause
 
 	// Change NULL to auto id.
 	// Change value 0 to auto id, if NoAutoValueOnZero ALLEGROALLEGROSQL mode is not set.
-	if d.IsNull() || e.ctx.GetStochastikVars().ALLEGROSQLMode&allegrosql.ModeNoAutoValueOnZero == 0 {
+	if d.IsNull() || e.ctx.GetStochaseinstein_dbars().ALLEGROSQLMode&allegrosql.ModeNoAutoValueOnZero == 0 {
 		_, err := e.ctx.Txn(true)
 		if err != nil {
 			return types.Causet{}, errors.Trace(err)
@@ -895,8 +895,8 @@ func (e *InsertValues) adjustAutoRandomCauset(ctx context.Context, d types.Cause
 func (e *InsertValues) allocAutoRandomID(fieldType *types.FieldType) (int64, error) {
 	alloc := e.Block.SlabPredictors(e.ctx).Get(autoid.AutoRandomType)
 	blockInfo := e.Block.Meta()
-	increment := e.ctx.GetStochastikVars().AutoIncrementIncrement
-	offset := e.ctx.GetStochastikVars().AutoIncrementOffset
+	increment := e.ctx.GetStochaseinstein_dbars().AutoIncrementIncrement
+	offset := e.ctx.GetStochaseinstein_dbars().AutoIncrementOffset
 	_, autoRandomID, err := alloc.Alloc(blockInfo.ID, 1, int64(increment), int64(offset))
 	if err != nil {
 		return 0, err
@@ -906,7 +906,7 @@ func (e *InsertValues) allocAutoRandomID(fieldType *types.FieldType) (int64, err
 	if blocks.OverflowShardBits(autoRandomID, blockInfo.AutoRandomBits, layout.TypeBitsLength, layout.HasSignBit) {
 		return 0, autoid.ErrAutoRandReadFailed
 	}
-	shard := e.ctx.GetStochastikVars().TxnCtx.GetShard(blockInfo.AutoRandomBits, layout.TypeBitsLength, layout.HasSignBit, 1)
+	shard := e.ctx.GetStochaseinstein_dbars().TxnCtx.GetShard(blockInfo.AutoRandomBits, layout.TypeBitsLength, layout.HasSignBit, 1)
 	autoRandomID |= shard
 	return autoRandomID, nil
 }
@@ -925,7 +925,7 @@ func (e *InsertValues) rebaseAutoRandomID(recordID int64, fieldType *types.Field
 }
 
 func (e *InsertValues) handleWarning(err error) {
-	sc := e.ctx.GetStochastikVars().StmtCtx
+	sc := e.ctx.GetStochaseinstein_dbars().StmtCtx
 	sc.AppendWarning(err)
 }
 
@@ -936,7 +936,7 @@ func (e *InsertValues) defCauslectRuntimeStatsEnabled() bool {
 			e.stats = &runtimeStatsWithSnapshot{
 				SnapshotRuntimeStats: snapshotStats,
 			}
-			e.ctx.GetStochastikVars().StmtCtx.RuntimeStatsDefCausl.RegisterStats(e.id, e.stats)
+			e.ctx.GetStochaseinstein_dbars().StmtCtx.RuntimeStatsDefCausl.RegisterStats(e.id, e.stats)
 		}
 		return true
 	}
@@ -947,7 +947,7 @@ func (e *InsertValues) defCauslectRuntimeStatsEnabled() bool {
 // All duplicate rows will be ignored and appended as duplicate warnings.
 func (e *InsertValues) batchCheckAndInsert(ctx context.Context, rows [][]types.Causet, addRecord func(ctx context.Context, event []types.Causet) error) error {
 	// all the rows will be checked, so it is safe to set BatchCheck = true
-	e.ctx.GetStochastikVars().StmtCtx.BatchCheck = true
+	e.ctx.GetStochaseinstein_dbars().StmtCtx.BatchCheck = true
 
 	// Get keys need to be checked.
 	toBeCheckedEvents, err := getKeysNeedCheck(ctx, e.ctx, e.Block, rows)
@@ -978,7 +978,7 @@ func (e *InsertValues) batchCheckAndInsert(ctx context.Context, rows [][]types.C
 		if r.handleKey != nil {
 			_, err := txn.Get(ctx, r.handleKey.newKey)
 			if err == nil {
-				e.ctx.GetStochastikVars().StmtCtx.AppendWarning(r.handleKey.dupErr)
+				e.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(r.handleKey.dupErr)
 				continue
 			}
 			if !ekv.IsErrNotFound(err) {
@@ -989,7 +989,7 @@ func (e *InsertValues) batchCheckAndInsert(ctx context.Context, rows [][]types.C
 			_, err := txn.Get(ctx, uk.newKey)
 			if err == nil {
 				// If duplicate keys were found in BatchGet, mark event = nil.
-				e.ctx.GetStochastikVars().StmtCtx.AppendWarning(uk.dupErr)
+				e.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(uk.dupErr)
 				skip = true
 				break
 			}
@@ -1001,7 +1001,7 @@ func (e *InsertValues) batchCheckAndInsert(ctx context.Context, rows [][]types.C
 		// it should be add to values map for the further event check.
 		// There may be duplicate keys inside the insert statement.
 		if !skip {
-			e.ctx.GetStochastikVars().StmtCtx.AddINTERLOCKiedEvents(1)
+			e.ctx.GetStochaseinstein_dbars().StmtCtx.AddINTERLOCKiedEvents(1)
 			err = addRecord(ctx, rows[i])
 			if err != nil {
 				return err
@@ -1016,7 +1016,7 @@ func (e *InsertValues) addRecord(ctx context.Context, event []types.Causet) erro
 }
 
 func (e *InsertValues) addRecordWithAutoIDHint(ctx context.Context, event []types.Causet, reserveAutoIDCount int) (err error) {
-	vars := e.ctx.GetStochastikVars()
+	vars := e.ctx.GetStochaseinstein_dbars()
 	if !vars.ConstraintCheckInPlace {
 		vars.PresumeKeyNotExists = true
 	}

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,19 +19,19 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block/blocks"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/math"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/plancodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/ranger"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/set"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/block/blocks"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/math"
-	"github.com/whtcorpsinc/milevadb/soliton/plancodec"
-	"github.com/whtcorpsinc/milevadb/soliton/ranger"
-	"github.com/whtcorpsinc/milevadb/soliton/set"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 // FullRange represent used all partitions.
@@ -111,7 +111,7 @@ func generateHashPartitionExpr(ctx stochastikctx.Context, pi *perceptron.Partiti
 	if err != nil {
 		return nil, err
 	}
-	exprs[0].HashCode(ctx.GetStochastikVars().StmtCtx)
+	exprs[0].HashCode(ctx.GetStochaseinstein_dbars().StmtCtx)
 	return exprs[0], nil
 }
 
@@ -135,7 +135,7 @@ func (s *partitionProcessor) findUsedPartitions(ctx stochastikctx.Context, tbl b
 	ranges := datchedResult.Ranges
 	used := make([]int, 0, len(ranges))
 	for _, r := range ranges {
-		if r.IsPointNullable(ctx.GetStochastikVars().StmtCtx) {
+		if r.IsPointNullable(ctx.GetStochaseinstein_dbars().StmtCtx) {
 			if !r.HighVal[0].IsNull() {
 				if len(r.HighVal) != len(partIdx) {
 					used = []int{-1}
@@ -544,8 +544,8 @@ type rangePruner struct {
 }
 
 func (p *rangePruner) partitionRangeForExpr(sctx stochastikctx.Context, expr expression.Expression) (int, int, bool) {
-	if constExpr, ok := expr.(*expression.Constant); ok {
-		if b, err := constExpr.Value.ToBool(sctx.GetStochastikVars().StmtCtx); err == nil && b == 0 {
+	if constExpr, ok := expr.(*expression.CouplingConstantWithRadix); ok {
+		if b, err := constExpr.Value.ToBool(sctx.GetStochaseinstein_dbars().StmtCtx); err == nil && b == 0 {
 			// A constant false expression.
 			return 0, 0, true
 		}
@@ -583,7 +583,7 @@ func partitionRangeForInExpr(sctx stochastikctx.Context, args []expression.Expre
 	var result partitionRangeOR
 	unsigned := allegrosql.HasUnsignedFlag(col.RetType.Flag)
 	for i := 1; i < len(args); i++ {
-		constExpr, ok := args[i].(*expression.Constant)
+		constExpr, ok := args[i].(*expression.CouplingConstantWithRadix)
 		if !ok {
 			return pruner.fullRange()
 		}
@@ -595,7 +595,7 @@ func partitionRangeForInExpr(sctx stochastikctx.Context, args []expression.Expre
 		default:
 			return pruner.fullRange()
 		}
-		val, err := constExpr.Value.ToInt64(sctx.GetStochastikVars().StmtCtx)
+		val, err := constExpr.Value.ToInt64(sctx.GetStochaseinstein_dbars().StmtCtx)
 		if err != nil {
 			return pruner.fullRange()
 		}
@@ -641,13 +641,13 @@ func (p *rangePruner) extractDataForPrune(sctx stochastikctx.Context, expr expre
 	}
 
 	var col *expression.DeferredCauset
-	var con *expression.Constant
+	var con *expression.CouplingConstantWithRadix
 	if arg0, ok := op.GetArgs()[0].(*expression.DeferredCauset); ok && arg0.ID == p.col.ID {
-		if arg1, ok := op.GetArgs()[1].(*expression.Constant); ok {
+		if arg1, ok := op.GetArgs()[1].(*expression.CouplingConstantWithRadix); ok {
 			col, con = arg0, arg1
 		}
 	} else if arg0, ok := op.GetArgs()[1].(*expression.DeferredCauset); ok && arg0.ID == p.col.ID {
-		if arg1, ok := op.GetArgs()[0].(*expression.Constant); ok {
+		if arg1, ok := op.GetArgs()[0].(*expression.CouplingConstantWithRadix); ok {
 			ret.op = opposite(ret.op)
 			col, con = arg0, arg1
 		}
@@ -686,7 +686,7 @@ func (p *rangePruner) extractDataForPrune(sctx stochastikctx.Context, expr expre
 }
 
 // replaceDeferredCausetWithConst change fn(col) to fn(const)
-func replaceDeferredCausetWithConst(partFn *expression.ScalarFunction, con *expression.Constant) *expression.ScalarFunction {
+func replaceDeferredCausetWithConst(partFn *expression.ScalarFunction, con *expression.CouplingConstantWithRadix) *expression.ScalarFunction {
 	args := partFn.GetArgs()
 	// The partition function may be floor(unix_timestamp(ts)) instead of a simple fn(col).
 	if partFn.FuncName.L == ast.Floor {
@@ -862,7 +862,7 @@ func (s *partitionProcessor) resolveOptimizeHint(ds *DataSource, partitionName p
 		}
 	}
 	if ds.preferStoreType&preferTiFlash != 0 && ds.preferStoreType&preferEinsteinDB != 0 {
-		ds.ctx.GetStochastikVars().StmtCtx.AppendWarning(
+		ds.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(
 			errors.New("hint `read_from_storage` has conflict storage type for the partition " + partitionName.L))
 	}
 
@@ -883,7 +883,7 @@ func appendWarnForUnknownPartitions(ctx stochastikctx.Context, hintName string, 
 	if len(unknownPartitions) == 0 {
 		return
 	}
-	ctx.GetStochastikVars().StmtCtx.AppendWarning(
+	ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(
 		errors.New(fmt.Sprintf("Unknown partitions (%s) in optimizer hint %s",
 			strings.Join(unknownPartitions, ","), hintName)))
 }
@@ -1012,13 +1012,13 @@ func (p *rangeDeferredCausetsPruner) partitionRangeForExpr(sctx stochastikctx.Co
 	opName := op.FuncName.L
 
 	var col *expression.DeferredCauset
-	var con *expression.Constant
+	var con *expression.CouplingConstantWithRadix
 	if arg0, ok := op.GetArgs()[0].(*expression.DeferredCauset); ok && arg0.ID == p.partDefCaus.ID {
-		if arg1, ok := op.GetArgs()[1].(*expression.Constant); ok {
+		if arg1, ok := op.GetArgs()[1].(*expression.CouplingConstantWithRadix); ok {
 			col, con = arg0, arg1
 		}
 	} else if arg0, ok := op.GetArgs()[1].(*expression.DeferredCauset); ok && arg0.ID == p.partDefCaus.ID {
-		if arg1, ok := op.GetArgs()[0].(*expression.Constant); ok {
+		if arg1, ok := op.GetArgs()[0].(*expression.CouplingConstantWithRadix); ok {
 			opName = opposite(opName)
 			col, con = arg0, arg1
 		}
@@ -1031,10 +1031,10 @@ func (p *rangeDeferredCausetsPruner) partitionRangeForExpr(sctx stochastikctx.Co
 	return start, end, true
 }
 
-func (p *rangeDeferredCausetsPruner) pruneUseBinarySearch(sctx stochastikctx.Context, op string, data *expression.Constant) (start int, end int) {
+func (p *rangeDeferredCausetsPruner) pruneUseBinarySearch(sctx stochastikctx.Context, op string, data *expression.CouplingConstantWithRadix) (start int, end int) {
 	var err error
 	var isNull bool
-	compare := func(ith int, op string, v *expression.Constant) bool {
+	compare := func(ith int, op string, v *expression.CouplingConstantWithRadix) bool {
 		if ith == len(p.data)-1 {
 			if p.maxvalue {
 				return true

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@ package expression
 
 import (
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 func genVecFromConstExpr(ctx stochastikctx.Context, expr Expression, targetType types.EvalType, input *chunk.Chunk, result *chunk.DeferredCauset) error {
@@ -30,7 +30,7 @@ func genVecFromConstExpr(ctx stochastikctx.Context, expr Expression, targetType 
 		}
 	}
 	switch targetType {
-	case types.ETInt:
+	case types.CausetEDN:
 		v, isNull, err := expr.EvalInt(ctx, chunk.Event{})
 		if err != nil {
 			return err
@@ -131,7 +131,7 @@ func genVecFromConstExpr(ctx stochastikctx.Context, expr Expression, targetType 
 			}
 		}
 	default:
-		return errors.Errorf("unsupported Constant type for vectorized evaluation")
+		return errors.Errorf("unsupported CouplingConstantWithRadix type for vectorized evaluation")
 	}
 	return nil
 }

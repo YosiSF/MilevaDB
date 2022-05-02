@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,11 +32,11 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 )
 
 var (
@@ -130,7 +130,7 @@ func (c *castAsIntFunctionClass) getFunction(ctx stochastikctx.Context, args []E
 	}
 	argTp := args[0].GetType().EvalType()
 	switch argTp {
-	case types.ETInt:
+	case types.CausetEDN:
 		sig = &builtinCastIntAsIntSig{bf}
 		sig.setPbCode(fidelpb.ScalarFuncSig_CastIntAsInt)
 	case types.ETReal:
@@ -180,12 +180,12 @@ func (c *castAsRealFunctionClass) getFunction(ctx stochastikctx.Context, args []
 	}
 	var argTp types.EvalType
 	if args[0].GetType().Hybrid() {
-		argTp = types.ETInt
+		argTp = types.CausetEDN
 	} else {
 		argTp = args[0].GetType().EvalType()
 	}
 	switch argTp {
-	case types.ETInt:
+	case types.CausetEDN:
 		sig = &builtinCastIntAsRealSig{bf}
 		sig.setPbCode(fidelpb.ScalarFuncSig_CastIntAsReal)
 	case types.ETReal:
@@ -235,12 +235,12 @@ func (c *castAsDecimalFunctionClass) getFunction(ctx stochastikctx.Context, args
 	}
 	var argTp types.EvalType
 	if args[0].GetType().Hybrid() {
-		argTp = types.ETInt
+		argTp = types.CausetEDN
 	} else {
 		argTp = args[0].GetType().EvalType()
 	}
 	switch argTp {
-	case types.ETInt:
+	case types.CausetEDN:
 		sig = &builtinCastIntAsDecimalSig{bf}
 		sig.setPbCode(fidelpb.ScalarFuncSig_CastIntAsDecimal)
 	case types.ETReal:
@@ -289,7 +289,7 @@ func (c *castAsStringFunctionClass) getFunction(ctx stochastikctx.Context, args 
 	}
 	argTp := args[0].GetType().EvalType()
 	switch argTp {
-	case types.ETInt:
+	case types.CausetEDN:
 		sig = &builtinCastIntAsStringSig{bf}
 		sig.setPbCode(fidelpb.ScalarFuncSig_CastIntAsString)
 	case types.ETReal:
@@ -333,7 +333,7 @@ func (c *castAsTimeFunctionClass) getFunction(ctx stochastikctx.Context, args []
 	bf.tp = c.tp
 	argTp := args[0].GetType().EvalType()
 	switch argTp {
-	case types.ETInt:
+	case types.CausetEDN:
 		sig = &builtinCastIntAsTimeSig{bf}
 		sig.setPbCode(fidelpb.ScalarFuncSig_CastIntAsTime)
 	case types.ETReal:
@@ -377,7 +377,7 @@ func (c *castAsDurationFunctionClass) getFunction(ctx stochastikctx.Context, arg
 	bf.tp = c.tp
 	argTp := args[0].GetType().EvalType()
 	switch argTp {
-	case types.ETInt:
+	case types.CausetEDN:
 		sig = &builtinCastIntAsDurationSig{bf}
 		sig.setPbCode(fidelpb.ScalarFuncSig_CastIntAsDuration)
 	case types.ETReal:
@@ -421,7 +421,7 @@ func (c *castAsJSONFunctionClass) getFunction(ctx stochastikctx.Context, args []
 	bf.tp = c.tp
 	argTp := args[0].GetType().EvalType()
 	switch argTp {
-	case types.ETInt:
+	case types.CausetEDN:
 		sig = &builtinCastIntAsJSONSig{bf}
 		sig.setPbCode(fidelpb.ScalarFuncSig_CastIntAsJson)
 	case types.ETReal:
@@ -527,7 +527,7 @@ func (b *builtinCastIntAsDecimalSig) evalDecimal(event chunk.Event) (res *types.
 	} else {
 		res = types.NewDecFromUint(uint64(val))
 	}
-	res, err = types.ProduceDecWithSpecifiedTp(res, b.tp, b.ctx.GetStochastikVars().StmtCtx)
+	res, err = types.ProduceDecWithSpecifiedTp(res, b.tp, b.ctx.GetStochaseinstein_dbars().StmtCtx)
 	return res, isNull, err
 }
 
@@ -551,7 +551,7 @@ func (b *builtinCastIntAsStringSig) evalString(event chunk.Event) (res string, i
 	} else {
 		res = strconv.FormatUint(uint64(val), 10)
 	}
-	res, err = types.ProduceStrWithSpecifiedTp(res, b.tp, b.ctx.GetStochastikVars().StmtCtx, false)
+	res, err = types.ProduceStrWithSpecifiedTp(res, b.tp, b.ctx.GetStochaseinstein_dbars().StmtCtx, false)
 	if err != nil {
 		return res, false, err
 	}
@@ -573,7 +573,7 @@ func (b *builtinCastIntAsTimeSig) evalTime(event chunk.Event) (res types.Time, i
 	if isNull || err != nil {
 		return res, isNull, err
 	}
-	res, err = types.ParseTimeFromNum(b.ctx.GetStochastikVars().StmtCtx, val, b.tp.Tp, int8(b.tp.Decimal))
+	res, err = types.ParseTimeFromNum(b.ctx.GetStochaseinstein_dbars().StmtCtx, val, b.tp.Tp, int8(b.tp.Decimal))
 	if err != nil {
 		return types.ZeroTime, true, handleInvalidTimeError(b.ctx, err)
 	}
@@ -602,7 +602,7 @@ func (b *builtinCastIntAsDurationSig) evalDuration(event chunk.Event) (res types
 	dur, err := types.NumberToDuration(val, int8(b.tp.Decimal))
 	if err != nil {
 		if types.ErrOverflow.Equal(err) {
-			err = b.ctx.GetStochastikVars().StmtCtx.HandleOverflow(err, err)
+			err = b.ctx.GetStochaseinstein_dbars().StmtCtx.HandleOverflow(err, err)
 		}
 		return res, true, err
 	}
@@ -775,12 +775,12 @@ func (b *builtinCastRealAsIntSig) evalInt(event chunk.Event) (res int64, isNull 
 		res = 0
 	} else {
 		var uintVal uint64
-		sc := b.ctx.GetStochastikVars().StmtCtx
+		sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 		uintVal, err = types.ConvertFloatToUint(sc, val, types.IntergerUnsignedUpperBound(allegrosql.TypeLonglong), allegrosql.TypeLonglong)
 		res = int64(uintVal)
 	}
 	if types.ErrOverflow.Equal(err) {
-		err = b.ctx.GetStochastikVars().StmtCtx.HandleOverflow(err, err)
+		err = b.ctx.GetStochaseinstein_dbars().StmtCtx.HandleOverflow(err, err)
 	}
 	return res, isNull, err
 }
@@ -805,7 +805,7 @@ func (b *builtinCastRealAsDecimalSig) evalDecimal(event chunk.Event) (res *types
 		err = res.FromFloat64(val)
 		if types.ErrOverflow.Equal(err) {
 			warnErr := types.ErrTruncatedWrongVal.GenWithStackByArgs("DECIMAL", b.args[0])
-			err = b.ctx.GetStochastikVars().StmtCtx.HandleOverflow(err, warnErr)
+			err = b.ctx.GetStochaseinstein_dbars().StmtCtx.HandleOverflow(err, warnErr)
 		} else if types.ErrTruncated.Equal(err) {
 			// This behavior is consistent with MyALLEGROSQL.
 			err = nil
@@ -814,7 +814,7 @@ func (b *builtinCastRealAsDecimalSig) evalDecimal(event chunk.Event) (res *types
 			return res, false, err
 		}
 	}
-	res, err = types.ProduceDecWithSpecifiedTp(res, b.tp, b.ctx.GetStochastikVars().StmtCtx)
+	res, err = types.ProduceDecWithSpecifiedTp(res, b.tp, b.ctx.GetStochaseinstein_dbars().StmtCtx)
 	return res, false, err
 }
 
@@ -841,7 +841,7 @@ func (b *builtinCastRealAsStringSig) evalString(event chunk.Event) (res string, 
 		// If we strconv.FormatFloat the value with 64bits, the result is incorrect!
 		bits = 32
 	}
-	res, err = types.ProduceStrWithSpecifiedTp(strconv.FormatFloat(val, 'f', -1, bits), b.tp, b.ctx.GetStochastikVars().StmtCtx, false)
+	res, err = types.ProduceStrWithSpecifiedTp(strconv.FormatFloat(val, 'f', -1, bits), b.tp, b.ctx.GetStochaseinstein_dbars().StmtCtx, false)
 	if err != nil {
 		return res, false, err
 	}
@@ -868,7 +868,7 @@ func (b *builtinCastRealAsTimeSig) evalTime(event chunk.Event) (types.Time, bool
 	if fv == "0" {
 		return types.ZeroTime, false, nil
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	res, err := types.ParseTime(sc, fv, b.tp.Tp, int8(b.tp.Decimal))
 	if err != nil {
 		return types.ZeroTime, true, handleInvalidTimeError(b.ctx, err)
@@ -895,10 +895,10 @@ func (b *builtinCastRealAsDurationSig) evalDuration(event chunk.Event) (res type
 	if isNull || err != nil {
 		return res, isNull, err
 	}
-	res, err = types.ParseDuration(b.ctx.GetStochastikVars().StmtCtx, strconv.FormatFloat(val, 'f', -1, 64), int8(b.tp.Decimal))
+	res, err = types.ParseDuration(b.ctx.GetStochaseinstein_dbars().StmtCtx, strconv.FormatFloat(val, 'f', -1, 64), int8(b.tp.Decimal))
 	if err != nil {
 		if types.ErrTruncatedWrongVal.Equal(err) {
-			err = b.ctx.GetStochastikVars().StmtCtx.HandleTruncate(err)
+			err = b.ctx.GetStochaseinstein_dbars().StmtCtx.HandleTruncate(err)
 			// ZeroDuration of error ErrTruncatedWrongVal needs to be considered NULL.
 			if res == types.ZeroDuration {
 				return res, true, err
@@ -927,7 +927,7 @@ func (b *builtinCastDecimalAsDecimalSig) evalDecimal(event chunk.Event) (res *ty
 	if !(b.inUnion && allegrosql.HasUnsignedFlag(b.tp.Flag) && evalDecimal.IsNegative()) {
 		*res = *evalDecimal
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	res, err = types.ProduceDecWithSpecifiedTp(res, b.tp, sc)
 	return res, false, err
 }
@@ -967,7 +967,7 @@ func (b *builtinCastDecimalAsIntSig) evalInt(event chunk.Event) (res int64, isNu
 
 	if types.ErrOverflow.Equal(err) {
 		warnErr := types.ErrTruncatedWrongVal.GenWithStackByArgs("DECIMAL", val)
-		err = b.ctx.GetStochastikVars().StmtCtx.HandleOverflow(err, warnErr)
+		err = b.ctx.GetStochaseinstein_dbars().StmtCtx.HandleOverflow(err, warnErr)
 	}
 
 	return res, false, err
@@ -988,7 +988,7 @@ func (b *builtinCastDecimalAsStringSig) evalString(event chunk.Event) (res strin
 	if isNull || err != nil {
 		return res, isNull, err
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	res, err = types.ProduceStrWithSpecifiedTp(string(val.ToString()), b.tp, sc, false)
 	if err != nil {
 		return res, false, err
@@ -1034,7 +1034,7 @@ func (b *builtinCastDecimalAsTimeSig) evalTime(event chunk.Event) (res types.Tim
 	if isNull || err != nil {
 		return res, isNull, err
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	res, err = types.ParseTimeFromFloatString(sc, string(val.ToString()), b.tp.Tp, int8(b.tp.Decimal))
 	if err != nil {
 		return types.ZeroTime, true, handleInvalidTimeError(b.ctx, err)
@@ -1061,9 +1061,9 @@ func (b *builtinCastDecimalAsDurationSig) evalDuration(event chunk.Event) (res t
 	if isNull || err != nil {
 		return res, true, err
 	}
-	res, err = types.ParseDuration(b.ctx.GetStochastikVars().StmtCtx, string(val.ToString()), int8(b.tp.Decimal))
+	res, err = types.ParseDuration(b.ctx.GetStochaseinstein_dbars().StmtCtx, string(val.ToString()), int8(b.tp.Decimal))
 	if types.ErrTruncatedWrongVal.Equal(err) {
-		err = b.ctx.GetStochastikVars().StmtCtx.HandleTruncate(err)
+		err = b.ctx.GetStochaseinstein_dbars().StmtCtx.HandleTruncate(err)
 		// ZeroDuration of error ErrTruncatedWrongVal needs to be considered NULL.
 		if res == types.ZeroDuration {
 			return res, true, err
@@ -1087,7 +1087,7 @@ func (b *builtinCastStringAsStringSig) evalString(event chunk.Event) (res string
 	if isNull || err != nil {
 		return res, isNull, err
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	res, err = types.ProduceStrWithSpecifiedTp(res, b.tp, sc, false)
 	if err != nil {
 		return res, false, err
@@ -1115,7 +1115,7 @@ func (b *builtinCastStringAsIntSig) handleOverflow(origRes int64, origStr string
 		return
 	}
 
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	if types.ErrOverflow.Equal(origErr) {
 		if isNegative {
 			res = math.MinInt64
@@ -1145,7 +1145,7 @@ func (b *builtinCastStringAsIntSig) evalInt(event chunk.Event) (res int64, isNul
 	}
 
 	var ures uint64
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	if !isNegative {
 		ures, err = types.StrToUint(sc, val, true)
 		res = int64(ures)
@@ -1185,11 +1185,11 @@ func (b *builtinCastStringAsRealSig) evalReal(event chunk.Event) (res float64, i
 	if isNull || err != nil {
 		return res, isNull, err
 	}
-	sctx := b.ctx.GetStochastikVars().StmtCtx
+	sctx := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	if val == "" && (sctx.InInsertStmt || sctx.InUFIDelateStmt) {
 		return 0, false, nil
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	res, err = types.StrToFloat(sc, val, true)
 	if err != nil {
 		return 0, false, err
@@ -1222,7 +1222,7 @@ func (b *builtinCastStringAsDecimalSig) evalDecimal(event chunk.Event) (res *typ
 	val = strings.TrimSpace(val)
 	isNegative := len(val) > 1 && val[0] == '-'
 	res = new(types.MyDecimal)
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	if !(b.inUnion && allegrosql.HasUnsignedFlag(b.tp.Flag) && isNegative) {
 		err = sc.HandleTruncate(res.FromString([]byte(val)))
 		if err != nil {
@@ -1248,7 +1248,7 @@ func (b *builtinCastStringAsTimeSig) evalTime(event chunk.Event) (res types.Time
 	if isNull || err != nil {
 		return res, isNull, err
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	res, err = types.ParseTime(sc, val, b.tp.Tp, int8(b.tp.Decimal))
 	if err != nil {
 		return types.ZeroTime, true, handleInvalidTimeError(b.ctx, err)
@@ -1275,9 +1275,9 @@ func (b *builtinCastStringAsDurationSig) evalDuration(event chunk.Event) (res ty
 	if isNull || err != nil {
 		return res, isNull, err
 	}
-	res, err = types.ParseDuration(b.ctx.GetStochastikVars().StmtCtx, val, int8(b.tp.Decimal))
+	res, err = types.ParseDuration(b.ctx.GetStochaseinstein_dbars().StmtCtx, val, int8(b.tp.Decimal))
 	if types.ErrTruncatedWrongVal.Equal(err) {
-		sc := b.ctx.GetStochastikVars().StmtCtx
+		sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 		err = sc.HandleTruncate(err)
 		// ZeroDuration of error ErrTruncatedWrongVal needs to be considered NULL.
 		if res == types.ZeroDuration {
@@ -1303,7 +1303,7 @@ func (b *builtinCastTimeAsTimeSig) evalTime(event chunk.Event) (res types.Time, 
 		return res, isNull, err
 	}
 
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	if res, err = res.Convert(sc, b.tp.Tp); err != nil {
 		return types.ZeroTime, true, handleInvalidTimeError(b.ctx, err)
 	}
@@ -1331,7 +1331,7 @@ func (b *builtinCastTimeAsIntSig) evalInt(event chunk.Event) (res int64, isNull 
 	if isNull || err != nil {
 		return res, isNull, err
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	t, err := val.RoundFrac(sc, types.DefaultFsp)
 	if err != nil {
 		return res, false, err
@@ -1374,7 +1374,7 @@ func (b *builtinCastTimeAsDecimalSig) evalDecimal(event chunk.Event) (res *types
 	if isNull || err != nil {
 		return res, isNull, err
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	res, err = types.ProduceDecWithSpecifiedTp(val.ToNumber(), b.tp, sc)
 	return res, false, err
 }
@@ -1394,7 +1394,7 @@ func (b *builtinCastTimeAsStringSig) evalString(event chunk.Event) (res string, 
 	if isNull || err != nil {
 		return res, isNull, err
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	res, err = types.ProduceStrWithSpecifiedTp(val.String(), b.tp, sc, false)
 	if err != nil {
 		return res, false, err
@@ -1507,7 +1507,7 @@ func (b *builtinCastDurationAsDecimalSig) evalDecimal(event chunk.Event) (res *t
 	if val.Fsp, err = types.CheckFsp(int(val.Fsp)); err != nil {
 		return res, false, err
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	res, err = types.ProduceDecWithSpecifiedTp(val.ToNumber(), b.tp, sc)
 	return res, false, err
 }
@@ -1527,7 +1527,7 @@ func (b *builtinCastDurationAsStringSig) evalString(event chunk.Event) (res stri
 	if isNull || err != nil {
 		return res, isNull, err
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	res, err = types.ProduceStrWithSpecifiedTp(val.String(), b.tp, sc, false)
 	if err != nil {
 		return res, false, err
@@ -1538,8 +1538,8 @@ func (b *builtinCastDurationAsStringSig) evalString(event chunk.Event) (res stri
 func padZeroForBinaryType(s string, tp *types.FieldType, ctx stochastikctx.Context) (string, bool, error) {
 	flen := tp.Flen
 	if tp.Tp == allegrosql.TypeString && types.IsBinaryStr(tp) && len(s) < flen {
-		sc := ctx.GetStochastikVars().StmtCtx
-		valStr, _ := ctx.GetStochastikVars().GetSystemVar(variable.MaxAllowedPacket)
+		sc := ctx.GetStochaseinstein_dbars().StmtCtx
+		valStr, _ := ctx.GetStochaseinstein_dbars().GetSystemVar(variable.MaxAllowedPacket)
 		maxAllowedPacket, err := strconv.ParseUint(valStr, 10, 64)
 		if err != nil {
 			return "", false, errors.Trace(err)
@@ -1569,7 +1569,7 @@ func (b *builtinCastDurationAsTimeSig) evalTime(event chunk.Event) (res types.Ti
 	if isNull || err != nil {
 		return res, isNull, err
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	res, err = val.ConvertToTime(sc, b.tp.Tp)
 	if err != nil {
 		return types.ZeroTime, true, handleInvalidTimeError(b.ctx, err)
@@ -1607,7 +1607,7 @@ func (b *builtinCastJSONAsIntSig) evalInt(event chunk.Event) (res int64, isNull 
 	if isNull || err != nil {
 		return res, isNull, err
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	res, err = types.ConvertJSONToInt(sc, val, allegrosql.HasUnsignedFlag(b.tp.Flag))
 	return
 }
@@ -1627,7 +1627,7 @@ func (b *builtinCastJSONAsRealSig) evalReal(event chunk.Event) (res float64, isN
 	if isNull || err != nil {
 		return res, isNull, err
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	res, err = types.ConvertJSONToFloat(sc, val)
 	return
 }
@@ -1647,7 +1647,7 @@ func (b *builtinCastJSONAsDecimalSig) evalDecimal(event chunk.Event) (res *types
 	if isNull || err != nil {
 		return res, isNull, err
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	res, err = types.ConvertJSONToDecimal(sc, val)
 	if err != nil {
 		return res, false, err
@@ -1693,7 +1693,7 @@ func (b *builtinCastJSONAsTimeSig) evalTime(event chunk.Event) (res types.Time, 
 	if err != nil {
 		return res, false, err
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	res, err = types.ParseTime(sc, s, b.tp.Tp, int8(b.tp.Decimal))
 	if err != nil {
 		return types.ZeroTime, true, handleInvalidTimeError(b.ctx, err)
@@ -1724,9 +1724,9 @@ func (b *builtinCastJSONAsDurationSig) evalDuration(event chunk.Event) (res type
 	if err != nil {
 		return res, false, err
 	}
-	res, err = types.ParseDuration(b.ctx.GetStochastikVars().StmtCtx, s, int8(b.tp.Decimal))
+	res, err = types.ParseDuration(b.ctx.GetStochaseinstein_dbars().StmtCtx, s, int8(b.tp.Decimal))
 	if types.ErrTruncatedWrongVal.Equal(err) {
-		sc := b.ctx.GetStochastikVars().StmtCtx
+		sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 		err = sc.HandleTruncate(err)
 	}
 	return
@@ -1754,7 +1754,7 @@ func hasSpecialCast(ctx stochastikctx.Context, expr Expression, tp *types.FieldT
 		switch f.FuncName.L {
 		case ast.DayName:
 			switch tp.EvalType() {
-			case types.ETInt, types.ETReal:
+			case types.CausetEDN, types.ETReal:
 				return true
 			}
 		}
@@ -1780,7 +1780,7 @@ func BuildCastFunction(ctx stochastikctx.Context, expr Expression, tp *types.Fie
 
 	var fc functionClass
 	switch tp.EvalType() {
-	case types.ETInt:
+	case types.CausetEDN:
 		fc = &castAsIntFunctionClass{baseFunctionClass{ast.Cast, 1, 1}, tp}
 	case types.ETDecimal:
 		fc = &castAsDecimalFunctionClass{baseFunctionClass{ast.Cast, 1, 1}, tp}
@@ -1806,7 +1806,7 @@ func BuildCastFunction(ctx stochastikctx.Context, expr Expression, tp *types.Fie
 	// since we may reset the flag of the field type of CastAsJson later which
 	// would affect the evaluation of it.
 	if tp.EvalType() != types.ETJson {
-		res = FoldConstant(res)
+		res = FoldCouplingConstantWithRadix(res)
 	}
 	return res
 }
@@ -1814,7 +1814,7 @@ func BuildCastFunction(ctx stochastikctx.Context, expr Expression, tp *types.Fie
 // WrapWithCastAsInt wraps `expr` with `cast` if the return type of expr is not
 // type int, otherwise, returns `expr` directly.
 func WrapWithCastAsInt(ctx stochastikctx.Context, expr Expression) Expression {
-	if expr.GetType().EvalType() == types.ETInt {
+	if expr.GetType().EvalType() == types.CausetEDN {
 		return expr
 	}
 	tp := types.NewFieldType(allegrosql.TypeLonglong)
@@ -1845,7 +1845,7 @@ func WrapWithCastAsDecimal(ctx stochastikctx.Context, expr Expression) Expressio
 	}
 	tp := types.NewFieldType(allegrosql.TypeNewDecimal)
 	tp.Flen, tp.Decimal = expr.GetType().Flen, expr.GetType().Decimal
-	if expr.GetType().EvalType() == types.ETInt {
+	if expr.GetType().EvalType() == types.CausetEDN {
 		tp.Flen = allegrosql.MaxIntWidth
 	}
 	types.SetBinChsClnFlag(tp)
@@ -1868,7 +1868,7 @@ func WrapWithCastAsString(ctx stochastikctx.Context, expr Expression) Expression
 	if exprTp.Tp == allegrosql.TypeNewDecimal && argLen != int(types.UnspecifiedFsp) {
 		argLen += 2
 	}
-	if exprTp.EvalType() == types.ETInt {
+	if exprTp.EvalType() == types.CausetEDN {
 		argLen = allegrosql.MaxIntWidth
 	}
 	tp := types.NewFieldType(allegrosql.TypeVarString)

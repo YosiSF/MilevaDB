@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,20 +16,20 @@ package core
 import (
 	"math"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression/aggregation"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/property"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/plancodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/statistics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/charset"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/expression/aggregation"
-	"github.com/whtcorpsinc/milevadb/planner/property"
-	"github.com/whtcorpsinc/milevadb/planner/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/plancodec"
-	"github.com/whtcorpsinc/milevadb/statistics"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 // task is a new version of `PhysicalPlanInfo`. It stores cost information for a task.
@@ -133,7 +133,7 @@ func (t *INTERLOCKTask) finishIndexPlan() {
 	}
 	cnt := t.count()
 	t.indexPlanFinished = true
-	sessVars := t.indexPlan.SCtx().GetStochastikVars()
+	sessVars := t.indexPlan.SCtx().GetStochaseinstein_dbars()
 	// Network cost of transferring rows of index scan to MilevaDB.
 	t.cst += cnt * sessVars.NetworkFactor * t.tblDefCausHists.GetAvgRowSize(t.indexPlan.SCtx(), t.indexPlan.Schema().DeferredCausets, true, false)
 
@@ -190,7 +190,7 @@ func (p *PhysicalApply) attach2Task(tasks ...task) task {
 // GetCost computes the cost of apply operator.
 func (p *PhysicalApply) GetCost(lCount, rCount, lCost, rCost float64) float64 {
 	var cpuCost float64
-	sessVars := p.ctx.GetStochastikVars()
+	sessVars := p.ctx.GetStochaseinstein_dbars()
 	if len(p.LeftConditions) > 0 {
 		cpuCost += lCount * sessVars.CPUFactor
 		lCount *= SelectionFactor
@@ -232,7 +232,7 @@ func (p *PhysicalIndexMergeJoin) attach2Task(tasks ...task) task {
 func (p *PhysicalIndexMergeJoin) GetCost(outerTask, innerTask task) float64 {
 	var cpuCost float64
 	outerCnt, innerCnt := outerTask.count(), innerTask.count()
-	sessVars := p.ctx.GetStochastikVars()
+	sessVars := p.ctx.GetStochaseinstein_dbars()
 	// Add the cost of evaluating outer filter, since inner filter of index join
 	// is always empty, we can simply tell whether outer filter is empty using the
 	// summed length of left/right conditions.
@@ -246,7 +246,7 @@ func (p *PhysicalIndexMergeJoin) GetCost(outerTask, innerTask task) float64 {
 	// (outerCnt / batchSize) * (sortFactor + 1.0) * batchSize * cpuFactor
 	// If `p.NeedOuterSort` is true, the sortFactor is batchSize * Log2(batchSize).
 	// Otherwise, it's 0.
-	batchSize := math.Min(float64(p.ctx.GetStochastikVars().IndexJoinBatchSize), outerCnt)
+	batchSize := math.Min(float64(p.ctx.GetStochaseinstein_dbars().IndexJoinBatchSize), outerCnt)
 	sortFactor := 0.0
 	if p.NeedOuterSort {
 		sortFactor = math.Log2(float64(batchSize))
@@ -258,7 +258,7 @@ func (p *PhysicalIndexMergeJoin) GetCost(outerTask, innerTask task) float64 {
 	// (outerCnt / batchSize) * (batchSize * distinctFactor) * cpuFactor
 	// Since we don't know the number of CausetTasks built, ignore these network cost now.
 	innerCPUCost += outerCnt * distinctFactor * sessVars.CPUFactor
-	innerConcurrency := float64(p.ctx.GetStochastikVars().IndexLookupJoinConcurrency())
+	innerConcurrency := float64(p.ctx.GetStochaseinstein_dbars().IndexLookupJoinConcurrency())
 	cpuCost += innerCPUCost / innerConcurrency
 	// Cost of merge join in inner worker.
 	numPairs := outerCnt * innerCnt
@@ -309,7 +309,7 @@ func (p *PhysicalIndexHashJoin) attach2Task(tasks ...task) task {
 func (p *PhysicalIndexHashJoin) GetCost(outerTask, innerTask task) float64 {
 	var cpuCost float64
 	outerCnt, innerCnt := outerTask.count(), innerTask.count()
-	sessVars := p.ctx.GetStochastikVars()
+	sessVars := p.ctx.GetStochaseinstein_dbars()
 	// Add the cost of evaluating outer filter, since inner filter of index join
 	// is always empty, we can simply tell whether outer filter is empty using the
 	// summed length of left/right conditions.
@@ -384,7 +384,7 @@ func (p *PhysicalIndexJoin) attach2Task(tasks ...task) task {
 func (p *PhysicalIndexJoin) GetCost(outerTask, innerTask task) float64 {
 	var cpuCost float64
 	outerCnt, innerCnt := outerTask.count(), innerTask.count()
-	sessVars := p.ctx.GetStochastikVars()
+	sessVars := p.ctx.GetStochaseinstein_dbars()
 	// Add the cost of evaluating outer filter, since inner filter of index join
 	// is always empty, we can simply tell whether outer filter is empty using the
 	// summed length of left/right conditions.
@@ -396,7 +396,7 @@ func (p *PhysicalIndexJoin) GetCost(outerTask, innerTask task) float64 {
 	innerCPUCost := sessVars.CPUFactor * outerCnt
 	// Cost of sorting and removing duplicate lookup keys:
 	// (outerCnt / batchSize) * (batchSize * Log2(batchSize) + batchSize) * CPUFactor
-	batchSize := math.Min(float64(p.ctx.GetStochastikVars().IndexJoinBatchSize), outerCnt)
+	batchSize := math.Min(float64(p.ctx.GetStochaseinstein_dbars().IndexJoinBatchSize), outerCnt)
 	if batchSize > 2 {
 		innerCPUCost += outerCnt * (math.Log2(batchSize) + 1) * sessVars.CPUFactor
 	}
@@ -407,7 +407,7 @@ func (p *PhysicalIndexJoin) GetCost(outerTask, innerTask task) float64 {
 	// CPU cost of building hash block for inner results:
 	// (outerCnt / batchSize) * (batchSize * distinctFactor) * innerCnt * CPUFactor
 	innerCPUCost += outerCnt * distinctFactor * innerCnt * sessVars.CPUFactor
-	innerConcurrency := float64(p.ctx.GetStochastikVars().IndexLookupJoinConcurrency())
+	innerConcurrency := float64(p.ctx.GetStochaseinstein_dbars().IndexLookupJoinConcurrency())
 	cpuCost += innerCPUCost / innerConcurrency
 	// Cost of probing hash block in main thread.
 	numPairs := outerCnt * innerCnt
@@ -452,7 +452,7 @@ func (p *PhysicalHashJoin) GetCost(lCnt, rCnt float64) float64 {
 		buildCnt, probeCnt = rCnt, lCnt
 		build = p.children[1]
 	}
-	sessVars := p.ctx.GetStochastikVars()
+	sessVars := p.ctx.GetStochaseinstein_dbars()
 	oomUseTmpStorage := config.GetGlobalConfig().OOMUseTmpStorage
 	memQuota := sessVars.StmtCtx.MemTracker.GetBytesLimit() // sessVars.MemQuotaQuery && hint
 	rowSize := getAvgRowSize(build.statsInfo(), build.Schema())
@@ -539,7 +539,7 @@ func (p *PhysicalBroadCastJoin) GetCost(lCnt, rCnt float64) float64 {
 	if p.InnerChildIdx == 1 {
 		buildCnt = rCnt
 	}
-	sessVars := p.ctx.GetStochastikVars()
+	sessVars := p.ctx.GetStochaseinstein_dbars()
 	// Cost of building hash block.
 	cpuCost := buildCnt * sessVars.INTERLOCKCPUFactor
 	memoryCost := buildCnt * sessVars.MemoryFactor
@@ -622,7 +622,7 @@ func (p *PhysicalMergeJoin) GetCost(lCnt, rCnt float64) float64 {
 			numPairs = 0
 		}
 	}
-	sessVars := p.ctx.GetStochastikVars()
+	sessVars := p.ctx.GetStochaseinstein_dbars()
 	probeCost := numPairs * sessVars.CPUFactor
 	// Cost of evaluating outer filters.
 	var cpuCost float64
@@ -650,7 +650,7 @@ func (p *PhysicalMergeJoin) attach2Task(tasks ...task) task {
 
 func buildIndexLookUpTask(ctx stochastikctx.Context, t *INTERLOCKTask) *rootTask {
 	newTask := &rootTask{cst: t.cst}
-	sessVars := ctx.GetStochastikVars()
+	sessVars := ctx.GetStochaseinstein_dbars()
 	p := PhysicalIndexLookUpReader{
 		blockPlan:            t.blockPlan,
 		indexPlan:            t.indexPlan,
@@ -706,12 +706,12 @@ func finishINTERLOCKTask(ctx stochastikctx.Context, task task) task {
 	if !ok {
 		return task
 	}
-	sessVars := ctx.GetStochastikVars()
+	sessVars := ctx.GetStochaseinstein_dbars()
 	// CausetTasks are run in parallel, to make the estimated cost closer to execution time, we amortize
 	// the cost to INTERLOCK iterator workers. According to `INTERLOCKClient::Send`, the concurrency
 	// is Min(DistALLEGROSQLScanConcurrency, numRegionsInvolvedInScan), since we cannot infer
 	// the number of regions involved, we simply use DistALLEGROSQLScanConcurrency.
-	INTERLOCKIterWorkers := float64(t.plan().SCtx().GetStochastikVars().DistALLEGROSQLScanConcurrency())
+	INTERLOCKIterWorkers := float64(t.plan().SCtx().GetStochaseinstein_dbars().DistALLEGROSQLScanConcurrency())
 	t.finishIndexPlan()
 	// Network cost of transferring rows of block scan to MilevaDB.
 	if t.blockPlan != nil {
@@ -881,7 +881,7 @@ func (p *PhysicalTopN) GetCost(count float64, isRoot bool) float64 {
 	if heapSize < 2.0 {
 		heapSize = 2.0
 	}
-	sessVars := p.ctx.GetStochastikVars()
+	sessVars := p.ctx.GetStochaseinstein_dbars()
 	// Ignore the cost of `doCompaction` in current implementation of `TopNExec`, since it is the
 	// special side-effect of our Chunk format in MilevaDB layer, which may not exist in interlock's
 	// implementation, or may be removed in the future if we change data format.
@@ -904,7 +904,7 @@ func (p *PhysicalTopN) canPushDown(INTERLOCK *INTERLOCKTask) bool {
 	for _, item := range p.ByItems {
 		exprs = append(exprs, item.Expr)
 	}
-	return expression.CanExprsPushDown(p.ctx.GetStochastikVars().StmtCtx, exprs, p.ctx.GetClient(), INTERLOCK.getStoreType())
+	return expression.CanExprsPushDown(p.ctx.GetStochaseinstein_dbars().StmtCtx, exprs, p.ctx.GetClient(), INTERLOCK.getStoreType())
 }
 
 func (p *PhysicalTopN) allDefCaussFromSchema(schemaReplicant *expression.Schema) bool {
@@ -920,7 +920,7 @@ func (p *PhysicalSort) GetCost(count float64, schemaReplicant *expression.Schema
 	if count < 2.0 {
 		count = 2.0
 	}
-	sessVars := p.ctx.GetStochastikVars()
+	sessVars := p.ctx.GetStochaseinstein_dbars()
 	cpuCost := count * math.Log2(count) * sessVars.CPUFactor
 	memoryCost := count * sessVars.MemoryFactor
 
@@ -996,7 +996,7 @@ func (p *PhysicalTopN) attach2Task(tasks ...task) task {
 
 // GetCost computes the cost of projection operator itself.
 func (p *PhysicalProjection) GetCost(count float64) float64 {
-	sessVars := p.ctx.GetStochastikVars()
+	sessVars := p.ctx.GetStochaseinstein_dbars()
 	cpuCost := count * sessVars.CPUFactor
 	concurrency := float64(sessVars.ProjectionConcurrency())
 	if concurrency <= 0 {
@@ -1031,14 +1031,14 @@ func (p *PhysicalUnionAll) attach2Task(tasks ...task) task {
 		childPlans = append(childPlans, task.plan())
 	}
 	p.SetChildren(childPlans...)
-	sessVars := p.ctx.GetStochastikVars()
+	sessVars := p.ctx.GetStochaseinstein_dbars()
 	// Children of UnionExec are executed in parallel.
 	t.cst = childMaxCost + float64(1+len(tasks))*sessVars.ConcurrencyFactor
 	return t
 }
 
 func (sel *PhysicalSelection) attach2Task(tasks ...task) task {
-	sessVars := sel.ctx.GetStochastikVars()
+	sessVars := sel.ctx.GetStochaseinstein_dbars()
 	t := finishINTERLOCKTask(sel.ctx, tasks[0].INTERLOCKy())
 	t.addCost(t.count() * sessVars.CPUFactor)
 	t = attachPlan2Task(sel, t)
@@ -1048,7 +1048,7 @@ func (sel *PhysicalSelection) attach2Task(tasks ...task) task {
 // CheckAggCanPushINTERLOCK checks whether the aggFuncs and groupByItems can
 // be pushed down to interlock.
 func CheckAggCanPushINTERLOCK(sctx stochastikctx.Context, aggFuncs []*aggregation.AggFuncDesc, groupByItems []expression.Expression, storeType ekv.StoreType) bool {
-	sc := sctx.GetStochastikVars().StmtCtx
+	sc := sctx.GetStochaseinstein_dbars().StmtCtx
 	client := sctx.GetClient()
 	for _, aggFunc := range aggFuncs {
 		if expression.ContainVirtualDeferredCauset(aggFunc.Args) {
@@ -1105,7 +1105,7 @@ func BuildFinalModeAggregation(
 			gbyDefCaus = col
 		} else {
 			gbyDefCaus = &expression.DeferredCauset{
-				UniqueID: sctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+				UniqueID: sctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 				RetType:  gbyExpr.GetType(),
 			}
 		}
@@ -1147,7 +1147,7 @@ func BuildFinalModeAggregation(
 						gbyDefCaus = col
 					} else {
 						gbyDefCaus = &expression.DeferredCauset{
-							UniqueID: sctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+							UniqueID: sctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 							RetType:  distinctArg.GetType(),
 						}
 					}
@@ -1179,7 +1179,7 @@ func BuildFinalModeAggregation(
 				ft := types.NewFieldType(allegrosql.TypeLonglong)
 				ft.Flen, ft.Charset, ft.DefCauslate = 21, charset.CharsetBin, charset.DefCauslationBin
 				partial.Schema.Append(&expression.DeferredCauset{
-					UniqueID: sctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+					UniqueID: sctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 					RetType:  ft,
 				})
 				args = append(args, partial.Schema.DeferredCausets[partialCursor])
@@ -1190,7 +1190,7 @@ func BuildFinalModeAggregation(
 				ft.Charset, ft.DefCauslate = charset.CharsetBin, charset.DefCauslationBin
 				ft.Flag |= allegrosql.NotNullFlag
 				partial.Schema.Append(&expression.DeferredCauset{
-					UniqueID: sctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+					UniqueID: sctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 					RetType:  ft,
 				})
 				args = append(args, partial.Schema.DeferredCausets[partialCursor])
@@ -1198,7 +1198,7 @@ func BuildFinalModeAggregation(
 			}
 			if aggregation.NeedValue(finalAggFunc.Name) {
 				partial.Schema.Append(&expression.DeferredCauset{
-					UniqueID: sctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+					UniqueID: sctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 					RetType:  original.Schema.DeferredCausets[i].GetType(),
 				})
 				args = append(args, partial.Schema.DeferredCausets[partialCursor])
@@ -1399,7 +1399,7 @@ func (p *PhysicalStreamAgg) attach2Task(tasks ...task) task {
 func (p *PhysicalStreamAgg) GetCost(inputRows float64, isRoot bool) float64 {
 	aggFuncFactor := p.getAggFuncCostFactor()
 	var cpuCost float64
-	sessVars := p.ctx.GetStochastikVars()
+	sessVars := p.ctx.GetStochaseinstein_dbars()
 	if isRoot {
 		cpuCost = inputRows * sessVars.CPUFactor * aggFuncFactor
 	} else {
@@ -1416,8 +1416,8 @@ func (p *PhysicalHashAgg) cpuCostDivisor(hasDistinct bool) (float64, float64) {
 	if hasDistinct {
 		return 0, 0
 	}
-	stochastikVars := p.ctx.GetStochastikVars()
-	finalCon, partialCon := stochastikVars.HashAggFinalConcurrency(), stochastikVars.HashAggPartialConcurrency()
+	stochaseinstein_dbars := p.ctx.GetStochaseinstein_dbars()
+	finalCon, partialCon := stochaseinstein_dbars.HashAggFinalConcurrency(), stochaseinstein_dbars.HashAggPartialConcurrency()
 	// According to `ValidateSetSystemVar`, `finalCon` and `partialCon` cannot be less than or equal to 0.
 	if finalCon == 1 && partialCon == 1 {
 		return 0, 0
@@ -1485,7 +1485,7 @@ func (p *PhysicalHashAgg) GetCost(inputRows float64, isRoot bool) float64 {
 	numDistinctFunc := p.numDistinctFunc()
 	aggFuncFactor := p.getAggFuncCostFactor()
 	var cpuCost float64
-	sessVars := p.ctx.GetStochastikVars()
+	sessVars := p.ctx.GetStochaseinstein_dbars()
 	if isRoot {
 		cpuCost = inputRows * sessVars.CPUFactor * aggFuncFactor
 		divisor, con := p.cpuCostDivisor(numDistinctFunc > 0)

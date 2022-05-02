@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,17 +24,17 @@ import (
 	"github.com/prometheus/client_golang/api"
 	promv1 "github.com/prometheus/client_golang/api/prometheus/v1"
 	pperceptron "github.com/prometheus/common/perceptron"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri/infosync"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/sqlexec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/petri/infosync"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/sqlexec"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 const promReadTimeout = time.Second * 10
@@ -132,7 +132,7 @@ type promQLQueryRange = promv1.Range
 
 func (e *MetricRetriever) getQueryRange(sctx stochastikctx.Context) promQLQueryRange {
 	startTime, endTime := e.extractor.StartTime, e.extractor.EndTime
-	step := time.Second * time.Duration(sctx.GetStochastikVars().MetricSchemaStep)
+	step := time.Second * time.Duration(sctx.GetStochaseinstein_dbars().MetricSchemaStep)
 	return promQLQueryRange{Start: startTime, End: endTime, Step: step}
 }
 
@@ -209,7 +209,7 @@ func (e *MetricsSummaryRetriever) retrieve(_ context.Context, sctx stochastikctx
 		}
 		def, found := schemareplicant.MetricBlockMap[name]
 		if !found {
-			sctx.GetStochastikVars().StmtCtx.AppendWarning(fmt.Errorf("metrics block: %s not found", name))
+			sctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(fmt.Errorf("metrics block: %s not found", name))
 			continue
 		}
 		var allegrosql string
@@ -281,7 +281,7 @@ func (e *MetricsSummaryByLabelRetriever) retrieve(ctx context.Context, sctx stoc
 		}
 		def, found := schemareplicant.MetricBlockMap[name]
 		if !found {
-			sctx.GetStochastikVars().StmtCtx.AppendWarning(fmt.Errorf("metrics block: %s not found", name))
+			sctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(fmt.Errorf("metrics block: %s not found", name))
 			continue
 		}
 		defcaus := def.Labels

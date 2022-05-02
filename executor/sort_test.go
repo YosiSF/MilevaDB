@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,11 +18,11 @@ import (
 	"os"
 	"strings"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
 )
 
 func (s *testSerialSuite1) TestSortInDisk(c *C) {
@@ -35,9 +35,9 @@ func (s *testSerialSuite1) testSortInDisk(c *C, removeDir bool) {
 	config.UFIDelateGlobal(func(conf *config.Config) {
 		conf.OOMUseTmpStorage = true
 	})
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/executor/testSortedEventContainerSpill", "return(true)"), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/executor/testSortedEventContainerSpill", "return(true)"), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/executor/testSortedEventContainerSpill"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/executor/testSortedEventContainerSpill"), IsNil)
 	}()
 
 	tk := testkit.NewTestKit(c, s.causetstore)
@@ -74,10 +74,10 @@ func (s *testSerialSuite1) testSortInDisk(c *C, removeDir bool) {
 		c.Assert(result.Events()[i][1].(string), Equals, fmt.Sprint(i))
 		c.Assert(result.Events()[i][2].(string), Equals, fmt.Sprint(i))
 	}
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.MemTracker.BytesConsumed(), Equals, int64(0))
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.MemTracker.MaxConsumed(), Greater, int64(0))
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.DiskTracker.BytesConsumed(), Equals, int64(0))
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.DiskTracker.MaxConsumed(), Greater, int64(0))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.MemTracker.BytesConsumed(), Equals, int64(0))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.MemTracker.MaxConsumed(), Greater, int64(0))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.DiskTracker.BytesConsumed(), Equals, int64(0))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.DiskTracker.MaxConsumed(), Greater, int64(0))
 }
 
 func (s *testSerialSuite1) TestIssue16696(c *C) {
@@ -85,13 +85,13 @@ func (s *testSerialSuite1) TestIssue16696(c *C) {
 	config.UFIDelateGlobal(func(conf *config.Config) {
 		conf.OOMUseTmpStorage = true
 	})
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/executor/testSortedEventContainerSpill", "return(true)"), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/executor/testSortedEventContainerSpill", "return(true)"), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/executor/testSortedEventContainerSpill"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/executor/testSortedEventContainerSpill"), IsNil)
 	}()
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/executor/testEventContainerSpill", "return(true)"), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/executor/testEventContainerSpill", "return(true)"), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/executor/testEventContainerSpill"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/executor/testEventContainerSpill"), IsNil)
 	}()
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustExec("use test")

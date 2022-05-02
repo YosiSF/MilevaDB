@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,75 +20,75 @@ import (
 
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 var vecGeneratedBuiltinCompareCases = map[string][]vecExprBenchCase{
 	ast.LT: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETReal, types.ETReal}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDecimal, types.ETDecimal}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETString, types.ETString}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDatetime, types.ETDatetime}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDuration, types.ETDuration}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETJson, types.ETJson}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETReal, types.ETReal}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDecimal, types.ETDecimal}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETString, types.ETString}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDatetime, types.ETDatetime}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDuration, types.ETDuration}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETJson, types.ETJson}},
 	},
 	ast.LE: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETReal, types.ETReal}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDecimal, types.ETDecimal}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETString, types.ETString}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDatetime, types.ETDatetime}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDuration, types.ETDuration}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETJson, types.ETJson}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETReal, types.ETReal}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDecimal, types.ETDecimal}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETString, types.ETString}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDatetime, types.ETDatetime}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDuration, types.ETDuration}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETJson, types.ETJson}},
 	},
 	ast.GT: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETReal, types.ETReal}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDecimal, types.ETDecimal}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETString, types.ETString}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDatetime, types.ETDatetime}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDuration, types.ETDuration}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETJson, types.ETJson}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETReal, types.ETReal}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDecimal, types.ETDecimal}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETString, types.ETString}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDatetime, types.ETDatetime}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDuration, types.ETDuration}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETJson, types.ETJson}},
 	},
 	ast.GE: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETReal, types.ETReal}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDecimal, types.ETDecimal}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETString, types.ETString}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDatetime, types.ETDatetime}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDuration, types.ETDuration}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETJson, types.ETJson}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETReal, types.ETReal}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDecimal, types.ETDecimal}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETString, types.ETString}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDatetime, types.ETDatetime}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDuration, types.ETDuration}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETJson, types.ETJson}},
 	},
 	ast.EQ: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETReal, types.ETReal}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDecimal, types.ETDecimal}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETString, types.ETString}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDatetime, types.ETDatetime}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDuration, types.ETDuration}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETJson, types.ETJson}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETReal, types.ETReal}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDecimal, types.ETDecimal}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETString, types.ETString}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDatetime, types.ETDatetime}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDuration, types.ETDuration}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETJson, types.ETJson}},
 	},
 	ast.NE: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETReal, types.ETReal}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDecimal, types.ETDecimal}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETString, types.ETString}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDatetime, types.ETDatetime}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDuration, types.ETDuration}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETJson, types.ETJson}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETReal, types.ETReal}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDecimal, types.ETDecimal}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETString, types.ETString}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDatetime, types.ETDatetime}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDuration, types.ETDuration}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETJson, types.ETJson}},
 	},
 	ast.NullEQ: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETReal, types.ETReal}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDecimal, types.ETDecimal}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETString, types.ETString}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDatetime, types.ETDatetime}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDuration, types.ETDuration}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETJson, types.ETJson}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETReal, types.ETReal}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDecimal, types.ETDecimal}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETString, types.ETString}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDatetime, types.ETDatetime}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDuration, types.ETDuration}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETJson, types.ETJson}},
 	},
 	ast.Coalesce: {
 
 		{
-			retEvalType:   types.ETInt,
-			childrenTypes: []types.EvalType{types.ETInt, types.ETInt, types.ETInt},
+			retEvalType:   types.CausetEDN,
+			childrenTypes: []types.EvalType{types.CausetEDN, types.CausetEDN, types.CausetEDN},
 			geners: []dataGenerator{
-				gener{*newDefaultGener(0.2, types.ETInt)},
-				gener{*newDefaultGener(0.2, types.ETInt)},
-				gener{*newDefaultGener(0.2, types.ETInt)},
+				gener{*newDefaultGener(0.2, types.CausetEDN)},
+				gener{*newDefaultGener(0.2, types.CausetEDN)},
+				gener{*newDefaultGener(0.2, types.CausetEDN)},
 			},
 		},
 

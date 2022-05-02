@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ package plugin
 import (
 	"context"
 
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
 )
 
 // GeneralEvent presents MilevaDB generate event.
@@ -82,11 +82,11 @@ type AuditManifest struct {
 	// return error will ignore and close current connection.
 	OnConnectionEvent func(ctx context.Context, event ConnectionEvent, info *variable.ConnectionInfo) error
 	// OnGeneralEvent will be called during MilevaDB execution.
-	OnGeneralEvent func(ctx context.Context, sctx *variable.StochastikVars, event GeneralEvent, cmd string)
+	OnGeneralEvent func(ctx context.Context, sctx *variable.Stochaseinstein_dbars, event GeneralEvent, cmd string)
 	// OnGlobalVariableEvent will be called when Change GlobalVariable.
-	OnGlobalVariableEvent func(ctx context.Context, sctx *variable.StochastikVars, varName, varValue string)
+	OnGlobalVariableEvent func(ctx context.Context, sctx *variable.Stochaseinstein_dbars, varName, varValue string)
 	// OnParseEvent will be called around parse logic.
-	OnParseEvent func(ctx context.Context, sctx *variable.StochastikVars, event ParseEvent) error
+	OnParseEvent func(ctx context.Context, sctx *variable.Stochaseinstein_dbars, event ParseEvent) error
 }
 
 type (

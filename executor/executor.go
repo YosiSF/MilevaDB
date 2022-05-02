@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,37 +27,37 @@ import (
 
 	"github.com/cznic/mathutil"
 	"github.com/opentracing/opentracing-go"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block/blocks"
+	"github.com/whtcorpsinc/MilevaDB-Prod/blockcodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri/infosync"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/privilege"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/admin"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/disk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/execdetails"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/memory"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/auth"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/block/blocks"
-	"github.com/whtcorpsinc/milevadb/blockcodec"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/meta"
-	"github.com/whtcorpsinc/milevadb/meta/autoid"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/petri/infosync"
-	"github.com/whtcorpsinc/milevadb/planner"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/privilege"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/admin"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/disk"
-	"github.com/whtcorpsinc/milevadb/soliton/execdetails"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/memory"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
 	"go.uber.org/zap"
 )
 
@@ -209,13 +209,13 @@ func newBaseExecutor(ctx stochastikctx.Context, schemaReplicant *expression.Sche
 		ctx:             ctx,
 		id:              id,
 		schemaReplicant: schemaReplicant,
-		initCap:         ctx.GetStochastikVars().InitChunkSize,
-		maxChunkSize:    ctx.GetStochastikVars().MaxChunkSize,
+		initCap:         ctx.GetStochaseinstein_dbars().InitChunkSize,
+		maxChunkSize:    ctx.GetStochaseinstein_dbars().MaxChunkSize,
 	}
-	if ctx.GetStochastikVars().StmtCtx.RuntimeStatsDefCausl != nil {
+	if ctx.GetStochaseinstein_dbars().StmtCtx.RuntimeStatsDefCausl != nil {
 		if e.id > 0 {
 			e.runtimeStats = &execdetails.BasicRuntimeStats{}
-			e.ctx.GetStochastikVars().StmtCtx.RuntimeStatsDefCausl.RegisterStats(id, e.runtimeStats)
+			e.ctx.GetStochaseinstein_dbars().StmtCtx.RuntimeStatsDefCausl.RegisterStats(id, e.runtimeStats)
 		}
 	}
 	if schemaReplicant != nil {
@@ -253,7 +253,7 @@ func Next(ctx context.Context, e Executor, req *chunk.Chunk) error {
 		start := time.Now()
 		defer func() { base.runtimeStats.Record(time.Since(start), req.NumEvents()) }()
 	}
-	sessVars := base.ctx.GetStochastikVars()
+	sessVars := base.ctx.GetStochaseinstein_dbars()
 	if atomic.LoadUint32(&sessVars.Killed) == 1 {
 		return ErrQueryInterrupted
 	}
@@ -936,17 +936,17 @@ func (e *SelectLockExec) Next(ctx context.Context, req *chunk.Chunk) error {
 		}
 		return nil
 	}
-	lockWaitTime := e.ctx.GetStochastikVars().LockWaitTimeout
+	lockWaitTime := e.ctx.GetStochaseinstein_dbars().LockWaitTimeout
 	if e.Lock.LockType == ast.SelectLockForUFIDelateNoWait {
 		lockWaitTime = ekv.LockNoWait
 	} else if e.Lock.LockType == ast.SelectLockForUFIDelateWaitN {
 		lockWaitTime = int64(e.Lock.WaitSec) * 1000
 	}
 
-	return doLockKeys(ctx, e.ctx, newLockCtx(e.ctx.GetStochastikVars(), lockWaitTime), e.keys...)
+	return doLockKeys(ctx, e.ctx, newLockCtx(e.ctx.GetStochaseinstein_dbars(), lockWaitTime), e.keys...)
 }
 
-func newLockCtx(seVars *variable.StochastikVars, lockWaitTime int64) *ekv.LockCtx {
+func newLockCtx(seVars *variable.Stochaseinstein_dbars, lockWaitTime int64) *ekv.LockCtx {
 	return &ekv.LockCtx{
 		Killed:                &seVars.Killed,
 		ForUFIDelateTS:        seVars.TxnCtx.GetForUFIDelateTS(),
@@ -964,9 +964,9 @@ func newLockCtx(seVars *variable.StochastikVars, lockWaitTime int64) *ekv.LockCt
 // locked by others. used for (select for uFIDelate nowait) situation
 // except 0 means alwaysWait 1 means nowait
 func doLockKeys(ctx context.Context, se stochastikctx.Context, lockCtx *ekv.LockCtx, keys ...ekv.Key) error {
-	sctx := se.GetStochastikVars().StmtCtx
+	sctx := se.GetStochaseinstein_dbars().StmtCtx
 	if !sctx.InUFIDelateStmt && !sctx.InDeleteStmt {
-		atomic.StoreUint32(&se.GetStochastikVars().TxnCtx.ForUFIDelate, 1)
+		atomic.StoreUint32(&se.GetStochaseinstein_dbars().TxnCtx.ForUFIDelate, 1)
 	}
 	// Lock keys only once when finished fetching all results.
 	txn, err := se.Txn(true)
@@ -1089,7 +1089,7 @@ func init() {
 	// So we assign a function implemented in the executor package to the plan package to avoid the dependency cycle.
 	plannercore.EvalSubqueryFirstEvent = func(ctx context.Context, p plannercore.PhysicalPlan, is schemareplicant.SchemaReplicant, sctx stochastikctx.Context) ([]types.Causet, error) {
 		defer func(begin time.Time) {
-			s := sctx.GetStochastikVars()
+			s := sctx.GetStochaseinstein_dbars()
 			s.RewritePhaseInfo.PreprocessSubQueries++
 			s.RewritePhaseInfo.DurationPreprocessSubQuery += time.Since(begin)
 		}(time.Now())
@@ -1181,7 +1181,7 @@ func (e *SelectionExec) Open(ctx context.Context) error {
 
 func (e *SelectionExec) open(ctx context.Context) error {
 	e.memTracker = memory.NewTracker(e.id, -1)
-	e.memTracker.AttachTo(e.ctx.GetStochastikVars().StmtCtx.MemTracker)
+	e.memTracker.AttachTo(e.ctx.GetStochaseinstein_dbars().StmtCtx.MemTracker)
 	e.childResult = newFirstChunk(e.children[0])
 	e.memTracker.Consume(e.childResult.MemoryUsage())
 	e.batched = expression.Vectorizable(e.filters)
@@ -1533,7 +1533,7 @@ func (e *UnionExec) Close() error {
 // ResetContextOfStmt resets the StmtContext and stochastik variables.
 // Before every execution, we must clear statement context.
 func ResetContextOfStmt(ctx stochastikctx.Context, s ast.StmtNode) (err error) {
-	vars := ctx.GetStochastikVars()
+	vars := ctx.GetStochaseinstein_dbars()
 	sc := &stmtctx.StatementContext{
 		TimeZone:    vars.Location(),
 		MemTracker:  memory.NewTracker(memory.LabelForALLEGROSQLText, vars.MemQuotaQuery),
@@ -1547,13 +1547,13 @@ func ResetContextOfStmt(ctx stochastikctx.Context, s ast.StmtNode) (err error) {
 	}
 	switch globalConfig.OOMCausetAction {
 	case config.OOMCausetActionCancel:
-		action := &memory.PanicOnExceed{ConnID: ctx.GetStochastikVars().ConnectionID}
+		action := &memory.PanicOnExceed{ConnID: ctx.GetStochaseinstein_dbars().ConnectionID}
 		action.SetLogHook(petri.GetPetri(ctx).ExpensiveQueryHandle().LogOnQueryExceedMemQuota)
 		sc.MemTracker.SetSuperCowOrNoCausetOnExceed(action)
 	case config.OOMCausetActionLog:
 		fallthrough
 	default:
-		action := &memory.RepLogCausetOnExceed{ConnID: ctx.GetStochastikVars().ConnectionID}
+		action := &memory.RepLogCausetOnExceed{ConnID: ctx.GetStochaseinstein_dbars().ConnectionID}
 		action.SetLogHook(petri.GetPetri(ctx).ExpensiveQueryHandle().LogOnQueryExceedMemQuota)
 		sc.MemTracker.SetSuperCowOrNoCausetOnExceed(action)
 	}
@@ -1677,7 +1677,7 @@ func ResetContextOfStmt(ctx stochastikctx.Context, s ast.StmtNode) (err error) {
 }
 
 // ResetUFIDelateStmtCtx resets statement context for UFIDelateStmt.
-func ResetUFIDelateStmtCtx(sc *stmtctx.StatementContext, stmt *ast.UFIDelateStmt, vars *variable.StochastikVars) {
+func ResetUFIDelateStmtCtx(sc *stmtctx.StatementContext, stmt *ast.UFIDelateStmt, vars *variable.Stochaseinstein_dbars) {
 	sc.InUFIDelateStmt = true
 	sc.DupKeyAsWarning = stmt.IgnoreErr
 	sc.BadNullAsWarning = !vars.StrictALLEGROSQLMode || stmt.IgnoreErr

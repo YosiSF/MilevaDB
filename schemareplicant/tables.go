@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,21 +27,21 @@ import (
 	"github.com/whtcorpsinc/BerolinaSQL/charset"
 	"github.com/whtcorpsinc/BerolinaSQL/perceptron"
 	"github.com/whtcorpsinc/BerolinaSQL/terror"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causet"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri/infosync"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/FIDelapi"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/execdetails"
+	"github.com/whtcorpsinc/MilevaDB-Prod/spacetime/autoid"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/ekvproto/pkg/spacetimepb"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/causet"
-	"github.com/whtcorpsinc/milevadb/causetstore/einsteindb"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/petri/infosync"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/FIDelapi"
-	"github.com/whtcorpsinc/milevadb/soliton/execdetails"
-	"github.com/whtcorpsinc/milevadb/spacetime/autoid"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 const (
@@ -68,8 +68,8 @@ const (
 	// BlockKeyDeferredCauset is the string constant of KEY_COLUMN_USAGE.
 	BlockKeyDeferredCauset = "KEY_COLUMN_USAGE"
 	blockReferConst        = "REFERENTIAL_CONSTRAINTS"
-	// BlockStochastikVar is the string constant of SESSION_VARIABLES.
-	BlockStochastikVar = "SESSION_VARIABLES"
+	// BlockStochaseinstein_dbar is the string constant of SESSION_VARIABLES.
+	BlockStochaseinstein_dbar = "SESSION_VARIABLES"
 	blockPlugins       = "PLUGINS"
 	// BlockConstraints is the string constant of TABLE_CONSTRAINTS.
 	BlockConstraints = "TABLE_CONSTRAINTS"
@@ -167,7 +167,7 @@ var blockIDMap = map[string]int64{
 	BlockPartitions:               autoid.InformationSchemaDBID + 11,
 	BlockKeyDeferredCauset:        autoid.InformationSchemaDBID + 12,
 	blockReferConst:               autoid.InformationSchemaDBID + 13,
-	BlockStochastikVar:            autoid.InformationSchemaDBID + 14,
+	BlockStochaseinstein_dbar:            autoid.InformationSchemaDBID + 14,
 	blockPlugins:                  autoid.InformationSchemaDBID + 15,
 	BlockConstraints:              autoid.InformationSchemaDBID + 16,
 	blockTriggers:                 autoid.InformationSchemaDBID + 17,
@@ -428,7 +428,7 @@ var referConstDefCauss = []defCausumnInfo{
 }
 
 // See http://dev.allegrosql.com/doc/refman/5.7/en/variables-causet.html
-var stochastikVarDefCauss = []defCausumnInfo{
+var stochaseinstein_dbarDefCauss = []defCausumnInfo{
 	{name: "VARIABLE_NAME", tp: allegrosql.TypeVarchar, size: 64},
 	{name: "VARIABLE_VALUE", tp: allegrosql.TypeVarchar, size: 1024},
 }
@@ -1502,7 +1502,7 @@ var blockNameToDeferredCausets = map[string][]defCausumnInfo{
 	BlockPartitions:               partitionsDefCauss,
 	BlockKeyDeferredCauset:        keyDeferredCausetUsageDefCauss,
 	blockReferConst:               referConstDefCauss,
-	BlockStochastikVar:            stochastikVarDefCauss,
+	BlockStochaseinstein_dbar:            stochaseinstein_dbarDefCauss,
 	blockPlugins:                  pluginsDefCauss,
 	BlockConstraints:              blockConstraintsDefCauss,
 	blockTriggers:                 blockTriggersDefCauss,

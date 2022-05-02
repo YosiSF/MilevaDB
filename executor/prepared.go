@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,22 +19,22 @@ import (
 	"sort"
 	"time"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/hint"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/sqlexec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	driver "github.com/whtcorpsinc/MilevaDB-Prod/types/berolinaAllegroSQL_driver"
 	"github.com/whtcorpsinc/berolinaAllegroSQL"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/log"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/planner"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/hint"
-	"github.com/whtcorpsinc/milevadb/soliton/sqlexec"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
-	driver "github.com/whtcorpsinc/milevadb/types/berolinaAllegroSQL_driver"
 	"go.uber.org/zap"
 )
 
@@ -101,7 +101,7 @@ func NewPrepareExec(ctx stochastikctx.Context, is schemareplicant.SchemaReplican
 
 // Next implements the Executor Next interface.
 func (e *PrepareExec) Next(ctx context.Context, req *chunk.Chunk) error {
-	vars := e.ctx.GetStochastikVars()
+	vars := e.ctx.GetStochaseinstein_dbars()
 	if e.ID != 0 {
 		// Must be the case when we retry a prepare.
 		// Make sure it is idempotent.
@@ -123,7 +123,7 @@ func (e *PrepareExec) Next(ctx context.Context, req *chunk.Chunk) error {
 		var warns []error
 		stmts, warns, err = p.Parse(e.sqlText, charset, defCauslation)
 		for _, warn := range warns {
-			e.ctx.GetStochastikVars().StmtCtx.AppendWarning(soliton.SyntaxWarn(warn))
+			e.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(soliton.SyntaxWarn(warn))
 		}
 	}
 	if err != nil {
@@ -177,7 +177,7 @@ func (e *PrepareExec) Next(ctx context.Context, req *chunk.Chunk) error {
 	if !plannercore.PreparedPlanCacheEnabled() {
 		prepared.UseCache = false
 	} else {
-		if !e.ctx.GetStochastikVars().UseDynamicPartitionPrune() {
+		if !e.ctx.GetStochaseinstein_dbars().UseDynamicPartitionPrune() {
 			prepared.UseCache = plannercore.Cacheable(stmt, e.is)
 		} else {
 			prepared.UseCache = plannercore.Cacheable(stmt, nil)
@@ -191,8 +191,8 @@ func (e *PrepareExec) Next(ctx context.Context, req *chunk.Chunk) error {
 		param.InExecute = false
 	}
 	var p plannercore.Plan
-	e.ctx.GetStochastikVars().PlanID = 0
-	e.ctx.GetStochastikVars().PlanDeferredCausetID = 0
+	e.ctx.GetStochaseinstein_dbars().PlanID = 0
+	e.ctx.GetStochaseinstein_dbars().PlanDeferredCausetID = 0
 	destBuilder := plannercore.NewPlanBuilder(e.ctx, e.is, &hint.BlockHintProcessor{})
 	p, err = destBuilder.Build(ctx, stmt)
 	if err != nil {
@@ -210,8 +210,8 @@ func (e *PrepareExec) Next(ctx context.Context, req *chunk.Chunk) error {
 
 	normalized, digest := berolinaAllegroSQL.NormalizeDigest(prepared.Stmt.Text())
 	preparedObj := &plannercore.CachedPrepareStmt{
-		PreparedAst:   prepared,
-		VisitInfos:    destBuilder.GetVisitInfo(),
+		PreparedAst:          prepared,
+		VisitInfos:           destBuilder.GetVisitInfo(),
 		NormalizedALLEGROSQL: normalized,
 		ALLEGROSQLDigest:     digest,
 	}
@@ -259,7 +259,7 @@ func (e *ExecuteExec) Build(b *executorBuilder) error {
 		return errors.Trace(b.err)
 	}
 	e.stmtExec = stmtExec
-	if e.ctx.GetStochastikVars().StmtCtx.Priority == allegrosql.NoPriority {
+	if e.ctx.GetStochaseinstein_dbars().StmtCtx.Priority == allegrosql.NoPriority {
 		e.lowerPriority = needLowerPriority(e.plan)
 	}
 	return nil
@@ -274,7 +274,7 @@ type DeallocateExec struct {
 
 // Next implements the Executor Next interface.
 func (e *DeallocateExec) Next(ctx context.Context, req *chunk.Chunk) error {
-	vars := e.ctx.GetStochastikVars()
+	vars := e.ctx.GetStochaseinstein_dbars()
 	id, ok := vars.PreparedStmtNameToID[e.Name]
 	if !ok {
 		return errors.Trace(plannercore.ErrStmtNotFound)
@@ -300,7 +300,7 @@ func CompileExecutePreparedStmt(ctx context.Context, sctx stochastikctx.Context,
 	ID uint32, args []types.Causet) (sqlexec.Statement, error) {
 	startTime := time.Now()
 	defer func() {
-		sctx.GetStochastikVars().DurationCompile = time.Since(startTime)
+		sctx.GetStochaseinstein_dbars().DurationCompile = time.Since(startTime)
 	}()
 	execStmt := &ast.ExecuteStmt{ExecID: ID}
 	if err := ResetContextOfStmt(sctx, execStmt); err != nil {
@@ -314,19 +314,19 @@ func CompileExecutePreparedStmt(ctx context.Context, sctx stochastikctx.Context,
 	}
 
 	stmt := &ExecStmt{
-		GoCtx:       ctx,
-		SchemaReplicant:  is,
-		Plan:        execPlan,
-		StmtNode:    execStmt,
-		Ctx:         sctx,
-		OutputNames: names,
+		GoCtx:           ctx,
+		SchemaReplicant: is,
+		Plan:            execPlan,
+		StmtNode:        execStmt,
+		Ctx:             sctx,
+		OutputNames:     names,
 	}
-	if preparedPointer, ok := sctx.GetStochastikVars().PreparedStmts[ID]; ok {
+	if preparedPointer, ok := sctx.GetStochaseinstein_dbars().PreparedStmts[ID]; ok {
 		preparedObj, ok := preparedPointer.(*plannercore.CachedPrepareStmt)
 		if !ok {
 			return nil, errors.Errorf("invalid CachedPrepareStmt type")
 		}
-		stmtCtx := sctx.GetStochastikVars().StmtCtx
+		stmtCtx := sctx.GetStochaseinstein_dbars().StmtCtx
 		stmt.Text = preparedObj.PreparedAst.Stmt.Text()
 		stmtCtx.OriginalALLEGROSQL = stmt.Text
 		stmtCtx.InitALLEGROSQLDigest(preparedObj.NormalizedALLEGROSQL, preparedObj.ALLEGROSQLDigest)

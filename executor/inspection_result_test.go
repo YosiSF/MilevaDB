@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,14 +18,14 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastik"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/stochastik"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 var _ = SerialSuites(&inspectionResultSuite{&testClusterBlockBase{}})
@@ -158,23 +158,23 @@ func (s *inspectionResultSuite) TestInspectionResult(c *C) {
 		rs, err := tk.Se.Execute(ctx, cs.allegrosql)
 		c.Assert(err, IsNil)
 		result := tk.ResultSetToResultWithCtx(ctx, rs[0], Commentf("ALLEGROALLEGROSQL: %v", cs.allegrosql))
-		warnings := tk.Se.GetStochastikVars().StmtCtx.GetWarnings()
+		warnings := tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 		c.Assert(len(warnings), Equals, 0, Commentf("expected no warning, got: %+v", warnings))
 		result.Check(testkit.Events(cs.rows...))
 	}
 }
 
 func (s *inspectionResultSuite) parseTime(c *C, se stochastik.Stochastik, str string) types.Time {
-	t, err := types.ParseTime(se.GetStochastikVars().StmtCtx, str, allegrosql.TypeDatetime, types.MaxFsp)
+	t, err := types.ParseTime(se.GetStochaseinstein_dbars().StmtCtx, str, allegrosql.TypeDatetime, types.MaxFsp)
 	c.Assert(err, IsNil)
 	return t
 }
 
 func (s *inspectionResultSuite) tearDownForInspection(c *C) {
-	fpName := "github.com/whtcorpsinc/milevadb/executor/mockMergeMockInspectionBlocks"
+	fpName := "github.com/whtcorpsinc/MilevaDB-Prod/executor/mockMergeMockInspectionBlocks"
 	c.Assert(failpoint.Disable(fpName), IsNil)
 
-	fpName2 := "github.com/whtcorpsinc/milevadb/executor/mockMetricsBlockData"
+	fpName2 := "github.com/whtcorpsinc/MilevaDB-Prod/executor/mockMetricsBlockData"
 	c.Assert(failpoint.Disable(fpName2), IsNil)
 }
 
@@ -209,11 +209,11 @@ func (s *inspectionResultSuite) setupForInspection(c *C, mockData map[string][][
 			},
 		}
 	}
-	fpName := "github.com/whtcorpsinc/milevadb/executor/mockMergeMockInspectionBlocks"
+	fpName := "github.com/whtcorpsinc/MilevaDB-Prod/executor/mockMergeMockInspectionBlocks"
 	c.Assert(failpoint.Enable(fpName, "return"), IsNil)
 
 	// Mock for metric block data.
-	fpName2 := "github.com/whtcorpsinc/milevadb/executor/mockMetricsBlockData"
+	fpName2 := "github.com/whtcorpsinc/MilevaDB-Prod/executor/mockMetricsBlockData"
 	c.Assert(failpoint.Enable(fpName2, "return"), IsNil)
 
 	ctx := context.WithValue(context.Background(), "__mockInspectionBlocks", configurations)
@@ -273,7 +273,7 @@ func (s *inspectionResultSuite) TestThresholdCheckInspection(c *C) {
 	rs, err := tk.Se.Execute(ctx, "select /*+ time_range('2020-02-12 10:35:00','2020-02-12 10:37:00') */ item, type, instance,status_address, value, reference, details from information_schema.inspection_result where rule='threshold-check' order by item")
 	c.Assert(err, IsNil)
 	result := tk.ResultSetToResultWithCtx(ctx, rs[0], Commentf("execute inspect ALLEGROALLEGROSQL failed"))
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(0), Commentf("unexpected warnings: %+v", tk.Se.GetStochastikVars().StmtCtx.GetWarnings()))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(0), Commentf("unexpected warnings: %+v", tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()))
 	result.Check(testkit.Events(
 		"apply-cpu einsteindb einsteindb-0 einsteindb-0s 10.00 < 1.60, config: raftstore.apply-pool-size=2 the 'apply-cpu' max cpu-usage of einsteindb-0s einsteindb is too high",
 		"interlock-high-cpu einsteindb einsteindb-0 einsteindb-0s 20.00 < 3.60, config: readpool.interlock.high-concurrency=4 the 'interlock-high-cpu' max cpu-usage of einsteindb-0s einsteindb is too high",
@@ -310,14 +310,14 @@ func (s *inspectionResultSuite) TestThresholdCheckInspection(c *C) {
 	rs, err = tk.Se.Execute(ctx, "select /*+ time_range('2020-02-12 10:35:00','2020-02-12 10:37:00') */ item, type, instance,status_address, value, reference from information_schema.inspection_result where rule='threshold-check' order by item")
 	c.Assert(err, IsNil)
 	result = tk.ResultSetToResultWithCtx(ctx, rs[0], Commentf("execute inspect ALLEGROALLEGROSQL failed"))
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(0), Commentf("unexpected warnings: %+v", tk.Se.GetStochastikVars().StmtCtx.GetWarnings()))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(0), Commentf("unexpected warnings: %+v", tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()))
 	result.Check(testkit.Events("grpc-cpu einsteindb einsteindb-0 einsteindb-0s 7.42 < 7.20, config: server.grpc-concurrency=8"))
 }
 
 func (s *inspectionResultSuite) TestThresholdCheckInspection2(c *C) {
 	tk := testkit.NewTestKitWithInit(c, s.causetstore)
 	datetime := func(s string) types.Time {
-		t, err := types.ParseTime(tk.Se.GetStochastikVars().StmtCtx, s, allegrosql.TypeDatetime, types.MaxFsp)
+		t, err := types.ParseTime(tk.Se.GetStochaseinstein_dbars().StmtCtx, s, allegrosql.TypeDatetime, types.MaxFsp)
 		c.Assert(err, IsNil)
 		return t
 	}
@@ -377,7 +377,7 @@ func (s *inspectionResultSuite) TestThresholdCheckInspection2(c *C) {
 	rs, err := tk.Se.Execute(ctx, "select /*+ time_range('2020-02-12 10:35:00','2020-02-12 10:37:00') */ item, type, instance, status_address, value, reference, details from information_schema.inspection_result where rule='threshold-check' order by item")
 	c.Assert(err, IsNil)
 	result := tk.ResultSetToResultWithCtx(ctx, rs[0], Commentf("execute inspect ALLEGROALLEGROSQL failed"))
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(0), Commentf("unexpected warnings: %+v", tk.Se.GetStochastikVars().StmtCtx.GetWarnings()))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(0), Commentf("unexpected warnings: %+v", tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()))
 	result.Check(testkit.Events(
 		"data-block-cache-hit einsteindb einsteindb-0 einsteindb-0s 0.790 > 0.800 min data-block-cache-hit rate of einsteindb-0s einsteindb is too low",
 		"filter-block-cache-hit einsteindb einsteindb-0 einsteindb-0s 0.930 > 0.950 min filter-block-cache-hit rate of einsteindb-0s einsteindb is too low",
@@ -399,7 +399,7 @@ func (s *inspectionResultSuite) TestThresholdCheckInspection2(c *C) {
 func (s *inspectionResultSuite) TestThresholdCheckInspection3(c *C) {
 	tk := testkit.NewTestKitWithInit(c, s.causetstore)
 	datetime := func(s string) types.Time {
-		t, err := types.ParseTime(tk.Se.GetStochastikVars().StmtCtx, s, allegrosql.TypeDatetime, types.MaxFsp)
+		t, err := types.ParseTime(tk.Se.GetStochaseinstein_dbars().StmtCtx, s, allegrosql.TypeDatetime, types.MaxFsp)
 		c.Assert(err, IsNil)
 		return t
 	}
@@ -440,7 +440,7 @@ func (s *inspectionResultSuite) TestThresholdCheckInspection3(c *C) {
 		order by item`)
 	c.Assert(err, IsNil)
 	result := tk.ResultSetToResultWithCtx(ctx, rs[0], Commentf("execute inspect ALLEGROALLEGROSQL failed"))
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(0), Commentf("unexpected warnings: %+v", tk.Se.GetStochastikVars().StmtCtx.GetWarnings()))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(0), Commentf("unexpected warnings: %+v", tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()))
 	result.Check(testkit.Events(
 		"leader-drop einsteindb einsteindb-2 einsteindb-2s 10000 <= 50 einsteindb-2 einsteindb has too many leader-drop around time 2020-02-14 05:21:00.000000, leader count from 10000 drop to 0",
 		"leader-drop einsteindb einsteindb-0 einsteindb-0s 5000 <= 50 einsteindb-0 einsteindb has too many leader-drop around time 2020-02-14 05:21:00.000000, leader count from 10000 drop to 5000",
@@ -465,7 +465,7 @@ func (s *inspectionResultSuite) TestCriticalErrorInspection(c *C) {
 	for _, s := range testServers {
 		servers = append(servers, strings.Join([]string{s.typ, s.address, s.address}, ","))
 	}
-	fpName2 := "github.com/whtcorpsinc/milevadb/executor/mockClusterLogServerInfo"
+	fpName2 := "github.com/whtcorpsinc/MilevaDB-Prod/executor/mockClusterLogServerInfo"
 	fpExpr := strings.Join(servers, ";")
 	c.Assert(failpoint.Enable(fpName2, fmt.Sprintf(`return("%s")`, fpExpr)), IsNil)
 	defer func() { c.Assert(failpoint.Disable(fpName2), IsNil) }()
@@ -543,7 +543,7 @@ func (s *inspectionResultSuite) TestCriticalErrorInspection(c *C) {
 	rs, err := tk.Se.Execute(ctx, "select /*+ time_range('2020-02-12 10:35:00','2020-02-12 10:37:00') */ item, instance,status_address, value, details from information_schema.inspection_result where rule='critical-error'")
 	c.Assert(err, IsNil)
 	result := tk.ResultSetToResultWithCtx(ctx, rs[0], Commentf("execute inspect ALLEGROALLEGROSQL failed"))
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(0), Commentf("unexpected warnings: %+v", tk.Se.GetStochastikVars().StmtCtx.GetWarnings()))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(0), Commentf("unexpected warnings: %+v", tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()))
 	result.Check(testkit.Events(
 		"server-down einsteindb-0 einsteindb-0s  einsteindb einsteindb-0s disconnect with prometheus around time '2020-02-12 10:36:00.000000'",
 		"server-down milevadb-1 milevadb-1s  milevadb milevadb-1s disconnect with prometheus around time '2020-02-12 10:37:00.000000'",
@@ -574,7 +574,7 @@ func (s *inspectionResultSuite) TestCriticalErrorInspection(c *C) {
 func (s *inspectionResultSuite) TestNodeLoadInspection(c *C) {
 	tk := testkit.NewTestKitWithInit(c, s.causetstore)
 	datetime := func(s string) types.Time {
-		t, err := types.ParseTime(tk.Se.GetStochastikVars().StmtCtx, s, allegrosql.TypeDatetime, types.MaxFsp)
+		t, err := types.ParseTime(tk.Se.GetStochaseinstein_dbars().StmtCtx, s, allegrosql.TypeDatetime, types.MaxFsp)
 		c.Assert(err, IsNil)
 		return t
 	}
@@ -633,7 +633,7 @@ func (s *inspectionResultSuite) TestNodeLoadInspection(c *C) {
 		where rule='node-load' order by item, value`)
 	c.Assert(err, IsNil)
 	result := tk.ResultSetToResultWithCtx(ctx, rs[0], Commentf("execute inspect ALLEGROALLEGROSQL failed"))
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(0), Commentf("unexpected warnings: %+v", tk.Se.GetStochastikVars().StmtCtx.GetWarnings()))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(0), Commentf("unexpected warnings: %+v", tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()))
 	result.Check(testkit.Events(
 		"cpu-load1 node node-0 28.1 < 28.0 cpu-load1 should less than (cpu_logical_cores * 0.7)",
 		"cpu-load15 node node-1 14.1 < 14.0 cpu-load15 should less than (cpu_logical_cores * 0.7)",
@@ -648,7 +648,7 @@ func (s *inspectionResultSuite) TestNodeLoadInspection(c *C) {
 func (s *inspectionResultSuite) TestConfigCheckOfStorageBlockCacheSize(c *C) {
 	tk := testkit.NewTestKitWithInit(c, s.causetstore)
 	datetime := func(s string) types.Time {
-		t, err := types.ParseTime(tk.Se.GetStochastikVars().StmtCtx, s, allegrosql.TypeDatetime, types.MaxFsp)
+		t, err := types.ParseTime(tk.Se.GetStochaseinstein_dbars().StmtCtx, s, allegrosql.TypeDatetime, types.MaxFsp)
 		c.Assert(err, IsNil)
 		return t
 	}
@@ -678,7 +678,7 @@ func (s *inspectionResultSuite) TestConfigCheckOfStorageBlockCacheSize(c *C) {
 	rs, err := tk.Se.Execute(ctx, "select  /*+ time_range('2020-02-14 04:20:00','2020-02-14 05:23:00') */ * from information_schema.inspection_result where rule='config' and item='storage.block-cache.capacity' order by value")
 	c.Assert(err, IsNil)
 	result := tk.ResultSetToResultWithCtx(ctx, rs[0], Commentf("execute inspect ALLEGROALLEGROSQL failed"))
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(0), Commentf("unexpected warnings: %+v", tk.Se.GetStochastikVars().StmtCtx.GetWarnings()))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(0), Commentf("unexpected warnings: %+v", tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()))
 	result.Check(testkit.Events(
 		"config storage.block-cache.capacity einsteindb 192.168.3.34  1099511627776 < 24159191040 warning There are 1 EinsteinDB server in 192.168.3.34 node, the total 'storage.block-cache.capacity' of EinsteinDB is more than (0.45 * total node memory)",
 		"config storage.block-cache.capacity einsteindb 192.168.3.33  32212254720 < 24159191040 warning There are 2 EinsteinDB server in 192.168.3.33 node, the total 'storage.block-cache.capacity' of EinsteinDB is more than (0.45 * total node memory)",

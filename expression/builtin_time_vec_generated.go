@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ package expression
 import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
 )
 
 func (b *builtinAddDatetimeAndDurationSig) vecEvalTime(input *chunk.Chunk, result *chunk.DeferredCauset) error {
@@ -61,7 +61,7 @@ func (b *builtinAddDatetimeAndDurationSig) vecEvalTime(input *chunk.Chunk, resul
 
 		// calculate
 
-		output, err := arg0.Add(b.ctx.GetStochastikVars().StmtCtx, types.Duration{Duration: arg1, Fsp: -1})
+		output, err := arg0.Add(b.ctx.GetStochaseinstein_dbars().StmtCtx, types.Duration{Duration: arg1, Fsp: -1})
 
 		if err != nil {
 			return err
@@ -120,7 +120,7 @@ func (b *builtinAddDatetimeAndStringSig) vecEvalTime(input *chunk.Chunk, result 
 			result.SetNull(i, true) // fixed: true
 			continue
 		}
-		sc := b.ctx.GetStochastikVars().StmtCtx
+		sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 		arg1Duration, err := types.ParseDuration(sc, arg1, types.GetFsp(arg1))
 		if err != nil {
 			if terror.ErrorEqual(err, types.ErrTruncatedWrongVal) {
@@ -246,7 +246,7 @@ func (b *builtinAddDurationAndStringSig) vecEvalDuration(input *chunk.Chunk, res
 			result.SetNull(i, true) // fixed: true
 			continue
 		}
-		sc := b.ctx.GetStochastikVars().StmtCtx
+		sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 		arg1Duration, err := types.ParseDuration(sc, arg1, types.GetFsp(arg1))
 		if err != nil {
 			if terror.ErrorEqual(err, types.ErrTruncatedWrongVal) {
@@ -314,7 +314,7 @@ func (b *builtinAddStringAndDurationSig) vecEvalString(input *chunk.Chunk, resul
 
 		// calculate
 
-		sc := b.ctx.GetStochastikVars().StmtCtx
+		sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 		fsp1 := int8(b.args[1].GetType().Decimal)
 		arg1Duration := types.Duration{Duration: arg1, Fsp: fsp1}
 		var output string
@@ -398,7 +398,7 @@ func (b *builtinAddStringAndStringSig) vecEvalString(input *chunk.Chunk, result 
 
 		// calculate
 
-		sc := b.ctx.GetStochastikVars().StmtCtx
+		sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 		arg1Duration, err := types.ParseDuration(sc, arg1, getFsp4TimeAddSub(arg1))
 		if err != nil {
 			if terror.ErrorEqual(err, types.ErrTruncatedWrongVal) {
@@ -552,7 +552,7 @@ func (b *builtinAddDateAndStringSig) vecEvalString(input *chunk.Chunk, result *c
 			result.AppendNull() // fixed: false
 			continue
 		}
-		sc := b.ctx.GetStochastikVars().StmtCtx
+		sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 		arg1Duration, err := types.ParseDuration(sc, arg1, getFsp4TimeAddSub(arg1))
 		if err != nil {
 			if terror.ErrorEqual(err, types.ErrTruncatedWrongVal) {
@@ -662,7 +662,7 @@ func (b *builtinSubDatetimeAndDurationSig) vecEvalTime(input *chunk.Chunk, resul
 
 		// calculate
 
-		sc := b.ctx.GetStochastikVars().StmtCtx
+		sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 		arg1Duration := types.Duration{Duration: arg1, Fsp: -1}
 		arg1time, err := arg1Duration.ConvertToTime(sc, allegrosql.TypeDatetime)
 		if err != nil {
@@ -728,7 +728,7 @@ func (b *builtinSubDatetimeAndStringSig) vecEvalTime(input *chunk.Chunk, result 
 			result.SetNull(i, true) // fixed: true
 			continue
 		}
-		sc := b.ctx.GetStochastikVars().StmtCtx
+		sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 		arg1Duration, err := types.ParseDuration(sc, arg1, types.GetFsp(arg1))
 		if err != nil {
 			if terror.ErrorEqual(err, types.ErrTruncatedWrongVal) {
@@ -858,7 +858,7 @@ func (b *builtinSubDurationAndStringSig) vecEvalDuration(input *chunk.Chunk, res
 			result.SetNull(i, true) // fixed: true
 			continue
 		}
-		sc := b.ctx.GetStochastikVars().StmtCtx
+		sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 		arg1Duration, err := types.ParseDuration(sc, arg1, types.GetFsp(arg1))
 		if err != nil {
 			if terror.ErrorEqual(err, types.ErrTruncatedWrongVal) {
@@ -926,7 +926,7 @@ func (b *builtinSubStringAndDurationSig) vecEvalString(input *chunk.Chunk, resul
 
 		// calculate
 
-		sc := b.ctx.GetStochastikVars().StmtCtx
+		sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 		fsp1 := int8(b.args[1].GetType().Decimal)
 		arg1Duration := types.Duration{Duration: arg1, Fsp: fsp1}
 		var output string
@@ -1010,7 +1010,7 @@ func (b *builtinSubStringAndStringSig) vecEvalString(input *chunk.Chunk, result 
 
 		// calculate
 
-		sc := b.ctx.GetStochastikVars().StmtCtx
+		sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 		arg1Duration, err := types.ParseDuration(sc, arg1, getFsp4TimeAddSub(arg1))
 		if err != nil {
 			if terror.ErrorEqual(err, types.ErrTruncatedWrongVal) {
@@ -1164,7 +1164,7 @@ func (b *builtinSubDateAndStringSig) vecEvalString(input *chunk.Chunk, result *c
 			result.AppendNull() // fixed: false
 			continue
 		}
-		sc := b.ctx.GetStochastikVars().StmtCtx
+		sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 		arg1Duration, err := types.ParseDuration(sc, arg1, getFsp4TimeAddSub(arg1))
 		if err != nil {
 			if terror.ErrorEqual(err, types.ErrTruncatedWrongVal) {
@@ -1270,7 +1270,7 @@ func (b *builtinTimeStringTimeDiffSig) vecEvalDuration(input *chunk.Chunk, resul
 
 	result.MergeNulls(buf0, buf1)
 	arg0 := buf0.Times()
-	stmtCtx := b.ctx.GetStochastikVars().StmtCtx
+	stmtCtx := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	for i := 0; i < n; i++ {
 		if result.IsNull(i) {
 			continue
@@ -1325,7 +1325,7 @@ func (b *builtinDurationStringTimeDiffSig) vecEvalDuration(input *chunk.Chunk, r
 		lhs types.Duration
 		rhs types.Duration
 	)
-	stmtCtx := b.ctx.GetStochastikVars().StmtCtx
+	stmtCtx := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	for i := 0; i < n; i++ {
 		if result.IsNull(i) {
 			continue
@@ -1430,7 +1430,7 @@ func (b *builtinStringTimeTimeDiffSig) vecEvalDuration(input *chunk.Chunk, resul
 
 	result.MergeNulls(buf0, buf1)
 	arg1 := buf1.Times()
-	stmtCtx := b.ctx.GetStochastikVars().StmtCtx
+	stmtCtx := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	for i := 0; i < n; i++ {
 		if result.IsNull(i) {
 			continue
@@ -1485,7 +1485,7 @@ func (b *builtinStringDurationTimeDiffSig) vecEvalDuration(input *chunk.Chunk, r
 		lhs types.Duration
 		rhs types.Duration
 	)
-	stmtCtx := b.ctx.GetStochastikVars().StmtCtx
+	stmtCtx := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	for i := 0; i < n; i++ {
 		if result.IsNull(i) {
 			continue
@@ -1541,7 +1541,7 @@ func (b *builtinStringStringTimeDiffSig) vecEvalDuration(input *chunk.Chunk, res
 	}
 
 	result.MergeNulls(buf0, buf1)
-	stmtCtx := b.ctx.GetStochastikVars().StmtCtx
+	stmtCtx := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	for i := 0; i < n; i++ {
 		if result.IsNull(i) {
 			continue
@@ -1609,7 +1609,7 @@ func (b *builtinTimeTimeTimeDiffSig) vecEvalDuration(input *chunk.Chunk, result 
 	result.MergeNulls(buf0, buf1)
 	arg0 := buf0.Times()
 	arg1 := buf1.Times()
-	stmtCtx := b.ctx.GetStochastikVars().StmtCtx
+	stmtCtx := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	for i := 0; i < n; i++ {
 		if result.IsNull(i) {
 			continue

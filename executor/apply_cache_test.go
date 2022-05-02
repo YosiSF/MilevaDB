@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,11 +17,11 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 var _ = SerialSuites(&testApplyCacheSuite{})
@@ -31,7 +31,7 @@ type testApplyCacheSuite struct {
 
 func (s *testApplyCacheSuite) TestApplyCache(c *C) {
 	ctx := mock.NewContext()
-	ctx.GetStochastikVars().NestedLoopJoinCacheCapacity = 100
+	ctx.GetStochaseinstein_dbars().NestedLoopJoinCacheCapacity = 100
 	applyCache, err := newApplyCache(ctx)
 	c.Assert(err, IsNil)
 

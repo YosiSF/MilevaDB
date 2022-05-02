@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/defCauslate"
-	"github.com/whtcorpsinc/milevadb/soliton/solitonutil"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/defCauslate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 func (s *testEvaluatorSuite) TestLike(c *C) {
@@ -47,7 +47,7 @@ func (s *testEvaluatorSuite) TestLike(c *C) {
 	for _, tt := range tests {
 		commentf := Commentf(`for input = "%s", pattern = "%s"`, tt.input, tt.pattern)
 		fc := funcs[ast.Like]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(tt.input, tt.pattern, 0)))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(tt.input, tt.pattern, 0)))
 		c.Assert(err, IsNil, commentf)
 		r, err := evalBuiltinFuncConcurrent(f, chunk.Event{})
 		c.Assert(err, IsNil, commentf)
@@ -94,7 +94,7 @@ func (s *testEvaluatorSerialSuites) TestCILike(c *C) {
 	for _, tt := range tests {
 		commentf := Commentf(`for input = "%s", pattern = "%s"`, tt.input, tt.pattern)
 		fc := funcs[ast.Like]
-		inputs := s.datumsToConstants(types.MakeCausets(tt.input, tt.pattern, 0))
+		inputs := s.datumsToCouplingConstantWithRadixs(types.MakeCausets(tt.input, tt.pattern, 0))
 		f, err := fc.getFunction(s.ctx, inputs)
 		c.Assert(err, IsNil, commentf)
 		f.setDefCauslator(defCauslate.GetDefCauslator("utf8mb4_general_ci"))
@@ -106,7 +106,7 @@ func (s *testEvaluatorSerialSuites) TestCILike(c *C) {
 	for _, tt := range tests {
 		commentf := Commentf(`for input = "%s", pattern = "%s"`, tt.input, tt.pattern)
 		fc := funcs[ast.Like]
-		inputs := s.datumsToConstants(types.MakeCausets(tt.input, tt.pattern, 0))
+		inputs := s.datumsToCouplingConstantWithRadixs(types.MakeCausets(tt.input, tt.pattern, 0))
 		f, err := fc.getFunction(s.ctx, inputs)
 		c.Assert(err, IsNil, commentf)
 		f.setDefCauslator(defCauslate.GetDefCauslator("utf8mb4_unicode_ci"))
@@ -139,7 +139,7 @@ func (s *testEvaluatorSuite) TestRegexp(c *C) {
 	}
 	for _, tt := range tests {
 		fc := funcs[ast.Regexp]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(tt.input, tt.pattern)))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(tt.input, tt.pattern)))
 		c.Assert(err, IsNil)
 		match, err := evalBuiltinFunc(f, chunk.Event{})
 		if tt.err == nil {

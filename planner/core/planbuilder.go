@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,6 +21,28 @@ import (
 	"strings"
 	"time"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/dbs"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/property"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	util2 "github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	utilberolinaAllegroSQL "github.com/whtcorpsinc/MilevaDB-Prod/soliton/berolinaAllegroSQL"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/hint"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/ranger"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/set"
+	"github.com/whtcorpsinc/MilevaDB-Prod/statistics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	driver "github.com/whtcorpsinc/MilevaDB-Prod/types/berolinaAllegroSQL_driver"
 	"github.com/whtcorpsinc/berolinaAllegroSQL"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
@@ -28,31 +50,9 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/opcode"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/causetstore/einsteindb"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/dbs"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/planner/property"
-	"github.com/whtcorpsinc/milevadb/planner/soliton"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	util2 "github.com/whtcorpsinc/milevadb/soliton"
-	utilberolinaAllegroSQL "github.com/whtcorpsinc/milevadb/soliton/berolinaAllegroSQL"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/hint"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/ranger"
-	"github.com/whtcorpsinc/milevadb/soliton/set"
-	"github.com/whtcorpsinc/milevadb/statistics"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
-	driver "github.com/whtcorpsinc/milevadb/types/berolinaAllegroSQL_driver"
 
 	"github.com/cznic/mathutil"
-	"github.com/whtcorpsinc/milevadb/block/blocks"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block/blocks"
 	"go.uber.org/zap"
 )
 
@@ -155,7 +155,7 @@ func blockNames2HintBlockInfo(ctx stochastikctx.Context, hintName string, hintBl
 		return nil
 	}
 	hintBlockInfos := make([]hintBlockInfo, 0, len(hintBlocks))
-	defaultDBName := perceptron.NewCIStr(ctx.GetStochastikVars().CurrentDB)
+	defaultDBName := perceptron.NewCIStr(ctx.GetStochaseinstein_dbars().CurrentDB)
 	isInapplicable := false
 	for _, hintBlock := range hintBlocks {
 		blockInfo := hintBlockInfo{
@@ -176,7 +176,7 @@ func blockNames2HintBlockInfo(ctx stochastikctx.Context, hintName string, hintBl
 		hintBlockInfos = append(hintBlockInfos, blockInfo)
 	}
 	if isInapplicable {
-		ctx.GetStochastikVars().StmtCtx.AppendWarning(
+		ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(
 			errors.New(fmt.Sprintf("Optimizer Hint %s is inapplicable on specified partitions",
 				restore2JoinHint(hintName, hintBlockInfos))))
 		return nil
@@ -542,9 +542,9 @@ func (b *PlanBuilder) popSelectOffset() {
 // NewPlanBuilder creates a new PlanBuilder.
 func NewPlanBuilder(sctx stochastikctx.Context, is schemareplicant.SchemaReplicant, processor *hint.BlockHintProcessor) *PlanBuilder {
 	if processor == nil {
-		sctx.GetStochastikVars().PlannerSelectBlockAsName = nil
+		sctx.GetStochaseinstein_dbars().PlannerSelectBlockAsName = nil
 	} else {
-		sctx.GetStochastikVars().PlannerSelectBlockAsName = make([]ast.HintBlock, processor.MaxSelectStmtOffset()+1)
+		sctx.GetStochaseinstein_dbars().PlannerSelectBlockAsName = make([]ast.HintBlock, processor.MaxSelectStmtOffset()+1)
 	}
 	return &PlanBuilder{
 		ctx:           sctx,
@@ -669,7 +669,7 @@ func (b *PlanBuilder) buildDo(ctx context.Context, v *ast.DoStmt) (Plan, error) 
 		p = np
 		proj.Exprs = append(proj.Exprs, expr)
 		schemaReplicant.Append(&expression.DeferredCauset{
-			UniqueID: b.ctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+			UniqueID: b.ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 			RetType:  expr.GetType(),
 		})
 	}
@@ -695,7 +695,7 @@ func (b *PlanBuilder) buildSet(ctx context.Context, v *ast.SetStmt) (Plan, error
 		if _, ok := vars.Value.(*ast.DefaultExpr); !ok {
 			if cn, ok2 := vars.Value.(*ast.DeferredCausetNameExpr); ok2 && cn.Name.Block.L == "" {
 				// Convert column name expression to string value expression.
-				char, col := b.ctx.GetStochastikVars().GetCharsetInfo()
+				char, col := b.ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 				vars.Value = ast.NewValueExpr(cn.Name.Name.O, char, col)
 			}
 			mockBlockPlan := LogicalBlockDual{}.Init(b.ctx, b.getSelectOffset())
@@ -708,7 +708,7 @@ func (b *PlanBuilder) buildSet(ctx context.Context, v *ast.SetStmt) (Plan, error
 			assign.IsDefault = true
 		}
 		if vars.ExtendValue != nil {
-			assign.ExtendValue = &expression.Constant{
+			assign.ExtendValue = &expression.CouplingConstantWithRadix{
 				Value:   vars.ExtendValue.(*driver.ValueExpr).Causet,
 				RetType: &vars.ExtendValue.(*driver.ValueExpr).Type,
 			}
@@ -723,7 +723,7 @@ func (b *PlanBuilder) buildDropBindPlan(v *ast.DropBindingStmt) (Plan, error) {
 		ALLEGROSQLBindOp:    OpALLEGROSQLBindDrop,
 		NormdOrigALLEGROSQL: berolinaAllegroSQL.Normalize(v.OriginSel.Text()),
 		IsGlobal:            v.GlobalSINTERLOCKe,
-		EDB:                 utilberolinaAllegroSQL.GetDefaultDB(v.OriginSel, b.ctx.GetStochastikVars().CurrentDB),
+		EDB:                 utilberolinaAllegroSQL.GetDefaultDB(v.OriginSel, b.ctx.GetStochaseinstein_dbars().CurrentDB),
 	}
 	if v.HintedSel != nil {
 		p.BindALLEGROSQL = v.HintedSel.Text()
@@ -733,14 +733,14 @@ func (b *PlanBuilder) buildDropBindPlan(v *ast.DropBindingStmt) (Plan, error) {
 }
 
 func (b *PlanBuilder) buildCreateBindPlan(v *ast.CreateBindingStmt) (Plan, error) {
-	charSet, collation := b.ctx.GetStochastikVars().GetCharsetInfo()
+	charSet, collation := b.ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 	p := &ALLEGROSQLBindPlan{
 		ALLEGROSQLBindOp:    OpALLEGROSQLBindCreate,
 		NormdOrigALLEGROSQL: berolinaAllegroSQL.Normalize(v.OriginSel.Text()),
 		BindALLEGROSQL:      v.HintedSel.Text(),
 		IsGlobal:            v.GlobalSINTERLOCKe,
 		BindStmt:            v.HintedSel,
-		EDB:                 utilberolinaAllegroSQL.GetDefaultDB(v.OriginSel, b.ctx.GetStochastikVars().CurrentDB),
+		EDB:                 utilberolinaAllegroSQL.GetDefaultDB(v.OriginSel, b.ctx.GetStochaseinstein_dbars().CurrentDB),
 		Charset:             charSet,
 		DefCauslation:       collation,
 	}
@@ -844,7 +844,7 @@ func getPossibleAccessPaths(ctx stochastikctx.Context, blockHints *blockHintInfo
 		publicPaths = append(publicPaths, genTiFlashPath(tblInfo, false))
 		publicPaths = append(publicPaths, genTiFlashPath(tblInfo, true))
 	}
-	optimizerUseInvisibleIndexes := ctx.GetStochastikVars().OptimizerUseInvisibleIndexes
+	optimizerUseInvisibleIndexes := ctx.GetStochaseinstein_dbars().OptimizerUseInvisibleIndexes
 	for _, index := range tblInfo.Indices {
 		if index.State == perceptron.StatePublic {
 			// Filter out invisible index, because they are not visible for optimizer
@@ -873,7 +873,7 @@ func getPossibleAccessPaths(ctx stochastikctx.Context, blockHints *blockHintInfo
 		}
 	}
 
-	_, isolationReadEnginesHasEinsteinDB := ctx.GetStochastikVars().GetIsolationReadEngines()[ekv.EinsteinDB]
+	_, isolationReadEnginesHasEinsteinDB := ctx.GetStochaseinstein_dbars().GetIsolationReadEngines()[ekv.EinsteinDB]
 	for i, hint := range indexHints {
 		if hint.HintSINTERLOCKe != ast.HintForScan {
 			continue
@@ -883,12 +883,12 @@ func getPossibleAccessPaths(ctx stochastikctx.Context, blockHints *blockHintInfo
 
 		if !isolationReadEnginesHasEinsteinDB {
 			if hint.IndexNames != nil {
-				engineVals, _ := ctx.GetStochastikVars().GetSystemVar(variable.MilevaDBIsolationReadEngines)
+				engineVals, _ := ctx.GetStochaseinstein_dbars().GetSystemVar(variable.MilevaDBIsolationReadEngines)
 				err := errors.New(fmt.Sprintf("MilevaDB doesn't support index in the isolation read engines(value: '%v')", engineVals))
 				if i < indexHintsLen {
 					return nil, err
 				}
-				ctx.GetStochastikVars().StmtCtx.AppendWarning(err)
+				ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(err)
 			}
 			continue
 		}
@@ -910,7 +910,7 @@ func getPossibleAccessPaths(ctx stochastikctx.Context, blockHints *blockHintInfo
 				if i < indexHintsLen {
 					return nil, err
 				}
-				ctx.GetStochastikVars().StmtCtx.AppendWarning(err)
+				ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(err)
 				continue
 			}
 			if hint.HintType == ast.HintIgnore {
@@ -945,7 +945,7 @@ func filterPathByIsolationRead(ctx stochastikctx.Context, paths []*soliton.Acces
 	if dbName.L == allegrosql.SystemDB {
 		return paths, nil
 	}
-	isolationReadEngines := ctx.GetStochastikVars().GetIsolationReadEngines()
+	isolationReadEngines := ctx.GetStochaseinstein_dbars().GetIsolationReadEngines()
 	availableEngine := map[ekv.StoreType]struct{}{}
 	var availableEngineStr string
 	for i := len(paths) - 1; i >= 0; i-- {
@@ -962,7 +962,7 @@ func filterPathByIsolationRead(ctx stochastikctx.Context, paths []*soliton.Acces
 	}
 	var err error
 	if len(paths) == 0 {
-		engineVals, _ := ctx.GetStochastikVars().GetSystemVar(variable.MilevaDBIsolationReadEngines)
+		engineVals, _ := ctx.GetStochaseinstein_dbars().GetSystemVar(variable.MilevaDBIsolationReadEngines)
 		err = ErrInternal.GenWithStackByArgs(fmt.Sprintf("Can not find access path matching '%v'(value: '%v'). Available values are '%v'.",
 			variable.MilevaDBIsolationReadEngines, engineVals, availableEngineStr))
 	}
@@ -997,7 +997,7 @@ func (b *PlanBuilder) buildPrepare(x *ast.PrepareStmt) Plan {
 		Name: x.Name,
 	}
 	if x.ALLEGROSQLVar != nil {
-		if v, ok := b.ctx.GetStochastikVars().Users[strings.ToLower(x.ALLEGROSQLVar.Name)]; ok {
+		if v, ok := b.ctx.GetStochaseinstein_dbars().Users[strings.ToLower(x.ALLEGROSQLVar.Name)]; ok {
 			p.ALLEGROSQLText = v.GetString()
 		} else {
 			p.ALLEGROSQLText = "NULL"
@@ -1041,7 +1041,7 @@ func (b *PlanBuilder) buildAdmin(ctx context.Context, as *ast.AdminStmt) (Plan, 
 		p := LogicalShowDBSJobs{JobNumber: as.JobNumber}.Init(b.ctx)
 		p.setSchemaAndNames(buildShowDBSJobsFields())
 		for _, col := range p.schemaReplicant.DeferredCausets {
-			col.UniqueID = b.ctx.GetStochastikVars().AllocPlanDeferredCausetID()
+			col.UniqueID = b.ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID()
 		}
 		ret = p
 		if as.Where != nil {
@@ -1166,7 +1166,7 @@ func (b *PlanBuilder) buildPhysicalIndexLookUpReader(ctx context.Context, dbName
 	if err != nil {
 		return nil, err
 	}
-	extraInfo, extraDefCaus, hasExtraDefCaus := tryGetPkExtraDeferredCauset(b.ctx.GetStochastikVars(), tblInfo)
+	extraInfo, extraDefCaus, hasExtraDefCaus := tryGetPkExtraDeferredCauset(b.ctx.GetStochaseinstein_dbars(), tblInfo)
 	pkHandleInfo, pkHandleDefCaus, hasPkIsHandle := tryGetPkHandleDefCaus(tblInfo, fullExprDefCauss)
 	commonInfos, commonDefCauss, hasCommonDefCauss := tryGetCommonHandleDefCauss(tbl, fullExprDefCauss)
 	idxDefCausInfos := getIndexDeferredCausetInfos(tblInfo, idx)
@@ -1278,7 +1278,7 @@ func getPhysicalID(t block.Block) (physicalID int64, isPartition bool) {
 	return tblInfo.ID, false
 }
 
-func tryGetPkExtraDeferredCauset(sv *variable.StochastikVars, tblInfo *perceptron.BlockInfo) (*perceptron.DeferredCausetInfo, *expression.DeferredCauset, bool) {
+func tryGetPkExtraDeferredCauset(sv *variable.Stochaseinstein_dbars, tblInfo *perceptron.BlockInfo) (*perceptron.DeferredCausetInfo, *expression.DeferredCauset, bool) {
 	if tblInfo.IsCommonHandle || tblInfo.PKIsHandle {
 		return nil, nil, false
 	}
@@ -1418,7 +1418,7 @@ func (b *PlanBuilder) buildChecHoTTexSchema(tn *ast.BlockName, indexName string)
 			})
 			schemaReplicant.Append(&expression.DeferredCauset{
 				RetType:  &col.FieldType,
-				UniqueID: b.ctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+				UniqueID: b.ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 				ID:       col.ID})
 		}
 		names = append(names, &types.FieldName{
@@ -1428,7 +1428,7 @@ func (b *PlanBuilder) buildChecHoTTexSchema(tn *ast.BlockName, indexName string)
 		})
 		schemaReplicant.Append(&expression.DeferredCauset{
 			RetType:  types.NewFieldType(allegrosql.TypeLonglong),
-			UniqueID: b.ctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+			UniqueID: b.ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 			ID:       -1,
 		})
 	}
@@ -1486,7 +1486,7 @@ func BuildHandleDefCaussForAnalyze(ctx stochastikctx.Context, tblInfo *perceptro
 			tblInfo: tblInfo,
 			idxInfo: pkIdx,
 			columns: columns,
-			sc:      ctx.GetStochastikVars().StmtCtx,
+			sc:      ctx.GetStochaseinstein_dbars().StmtCtx,
 		}
 	}
 	return handleDefCauss
@@ -1666,11 +1666,11 @@ func handleAnalyzeOptions(opts []ast.AnalyzeOpt) (map[ast.AnalyzeOptionType]uint
 
 func (b *PlanBuilder) buildAnalyze(as *ast.AnalyzeBlockStmt) (Plan, error) {
 	// If enable fast analyze, the storage must be einsteindb.CausetStorage.
-	if _, isEinsteinDBStorage := b.ctx.GetStore().(einsteindb.CausetStorage); !isEinsteinDBStorage && b.ctx.GetStochastikVars().EnableFastAnalyze {
+	if _, isEinsteinDBStorage := b.ctx.GetStore().(einsteindb.CausetStorage); !isEinsteinDBStorage && b.ctx.GetStochaseinstein_dbars().EnableFastAnalyze {
 		return nil, errors.Errorf("Only support fast analyze in einsteindb storage.")
 	}
 	for _, tbl := range as.BlockNames {
-		user := b.ctx.GetStochastikVars().User
+		user := b.ctx.GetStochaseinstein_dbars().User
 		var insertErr, selectErr error
 		if user != nil {
 			insertErr = ErrBlockaccessDenied.GenWithStackByArgs("INSERT", user.AuthUsername, user.AuthHostname, tbl.Name.O)
@@ -1911,7 +1911,7 @@ func (b *PlanBuilder) buildShow(ctx context.Context, show *ast.ShowStmt) (Plan, 
 			return nil, ErrNoDB
 		}
 	case ast.ShowCreateBlock, ast.ShowCreateSequence:
-		user := b.ctx.GetStochastikVars().User
+		user := b.ctx.GetStochaseinstein_dbars().User
 		var err error
 		if user != nil {
 			err = ErrBlockaccessDenied.GenWithStackByArgs("SHOW", user.AuthUsername, user.AuthHostname, show.Block.Name.L)
@@ -1933,7 +1933,7 @@ func (b *PlanBuilder) buildShow(ctx context.Context, show *ast.ShowStmt) (Plan, 
 		b.visitInfo = appendVisitInfo(b.visitInfo, allegrosql.SelectPriv, show.Block.Schema.L, show.Block.Name.L, "", ErrPrivilegeCheckFail)
 		return p, nil
 	case ast.ShowStatsBuckets, ast.ShowStatsHistograms, ast.ShowStatsMeta, ast.ShowStatsHealthy:
-		user := b.ctx.GetStochastikVars().User
+		user := b.ctx.GetStochaseinstein_dbars().User
 		var err error
 		if user != nil {
 			err = ErrDBaccessDenied.GenWithStackByArgs(user.AuthUsername, user.AuthHostname, allegrosql.SystemDB)
@@ -1944,7 +1944,7 @@ func (b *PlanBuilder) buildShow(ctx context.Context, show *ast.ShowStmt) (Plan, 
 	p.SetSchema(schemaReplicant)
 	p.names = names
 	for _, col := range p.schemaReplicant.DeferredCausets {
-		col.UniqueID = b.ctx.GetStochastikVars().AllocPlanDeferredCausetID()
+		col.UniqueID = b.ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID()
 	}
 	var err error
 	var np LogicalPlan
@@ -1972,7 +1972,7 @@ func (b *PlanBuilder) buildShow(ctx context.Context, show *ast.ShowStmt) (Plan, 
 		for _, col := range p.schemaReplicant.DeferredCausets {
 			proj.Exprs = append(proj.Exprs, col)
 			newDefCaus := col.Clone().(*expression.DeferredCauset)
-			newDefCaus.UniqueID = b.ctx.GetStochastikVars().AllocPlanDeferredCausetID()
+			newDefCaus.UniqueID = b.ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID()
 			schemaReplicant.Append(newDefCaus)
 		}
 		proj.SetSchema(schemaReplicant)
@@ -2006,7 +2006,7 @@ func (b *PlanBuilder) buildSimple(node ast.StmtNode) (Plan, error) {
 		err := ErrSpecificAccessDenied.GenWithStackByArgs("CREATE USER")
 		b.visitInfo = appendVisitInfo(b.visitInfo, allegrosql.CreateUserPriv, "", "", "", err)
 	case *ast.GrantStmt:
-		if b.ctx.GetStochastikVars().CurrentDB == "" && raw.Level.DBName == "" {
+		if b.ctx.GetStochaseinstein_dbars().CurrentDB == "" && raw.Level.DBName == "" {
 			if raw.Level.Level == ast.GrantLevelBlock {
 				return nil, ErrNoDB
 			}
@@ -2027,7 +2027,7 @@ func (b *PlanBuilder) buildSimple(node ast.StmtNode) (Plan, error) {
 		sm := b.ctx.GetStochastikManager()
 		if sm != nil {
 			if pi, ok := sm.GetProcessInfo(raw.ConnectionID); ok {
-				loginUser := b.ctx.GetStochastikVars().User
+				loginUser := b.ctx.GetStochaseinstein_dbars().User
 				if pi.User != loginUser.Username {
 					b.visitInfo = appendVisitInfo(b.visitInfo, allegrosql.SuperPriv, "", "", "", nil)
 				}
@@ -2041,7 +2041,7 @@ func (b *PlanBuilder) buildSimple(node ast.StmtNode) (Plan, error) {
 		b.visitInfo = appendVisitInfo(b.visitInfo, allegrosql.ShutdownPriv, "", "", "", nil)
 	case *ast.CreateStatisticsStmt:
 		var selectErr, insertErr error
-		user := b.ctx.GetStochastikVars().User
+		user := b.ctx.GetStochaseinstein_dbars().User
 		if user != nil {
 			selectErr = ErrBlockaccessDenied.GenWithStackByArgs("CREATE STATISTICS", user.AuthUsername,
 				user.AuthHostname, raw.Block.Name.L)
@@ -2054,7 +2054,7 @@ func (b *PlanBuilder) buildSimple(node ast.StmtNode) (Plan, error) {
 			"stats_extended", "", insertErr)
 	case *ast.DropStatisticsStmt:
 		var err error
-		user := b.ctx.GetStochastikVars().User
+		user := b.ctx.GetStochaseinstein_dbars().User
 		if user != nil {
 			err = ErrBlockaccessDenied.GenWithStackByArgs("DROP STATISTICS", user.AuthUsername,
 				user.AuthHostname, "stats_extended")
@@ -2071,7 +2071,7 @@ func collectVisitInfoFromRevokeStmt(sctx stochastikctx.Context, vi []visitInfo, 
 	dbName := stmt.Level.DBName
 	blockName := stmt.Level.BlockName
 	if dbName == "" {
-		dbName = sctx.GetStochastikVars().CurrentDB
+		dbName = sctx.GetStochaseinstein_dbars().CurrentDB
 	}
 	vi = appendVisitInfo(vi, allegrosql.GrantPriv, dbName, blockName, "", nil)
 
@@ -2104,7 +2104,7 @@ func collectVisitInfoFromGrantStmt(sctx stochastikctx.Context, vi []visitInfo, s
 	dbName := stmt.Level.DBName
 	blockName := stmt.Level.BlockName
 	if dbName == "" {
-		dbName = sctx.GetStochastikVars().CurrentDB
+		dbName = sctx.GetStochaseinstein_dbars().CurrentDB
 	}
 	vi = appendVisitInfo(vi, allegrosql.GrantPriv, dbName, blockName, "", nil)
 
@@ -2131,7 +2131,7 @@ func collectVisitInfoFromGrantStmt(sctx stochastikctx.Context, vi []visitInfo, s
 	return vi
 }
 
-func (b *PlanBuilder) getDefaultValue(col *block.DeferredCauset) (*expression.Constant, error) {
+func (b *PlanBuilder) getDefaultValue(col *block.DeferredCauset) (*expression.CouplingConstantWithRadix, error) {
 	var (
 		value types.Causet
 		err   error
@@ -2144,10 +2144,10 @@ func (b *PlanBuilder) getDefaultValue(col *block.DeferredCauset) (*expression.Co
 	if err != nil {
 		return nil, err
 	}
-	return &expression.Constant{Value: value, RetType: &col.FieldType}, nil
+	return &expression.CouplingConstantWithRadix{Value: value, RetType: &col.FieldType}, nil
 }
 
-func (b *PlanBuilder) findDefaultValue(defcaus []*block.DeferredCauset, name *ast.DeferredCausetName) (*expression.Constant, error) {
+func (b *PlanBuilder) findDefaultValue(defcaus []*block.DeferredCauset, name *ast.DeferredCausetName) (*expression.CouplingConstantWithRadix, error) {
 	for _, col := range defcaus {
 		if col.Name.L == name.Name.L {
 			return b.getDefaultValue(col)
@@ -2252,9 +2252,9 @@ func (b *PlanBuilder) buildInsert(ctx context.Context, insert *ast.InsertStmt) (
 	}
 
 	var authErr error
-	if b.ctx.GetStochastikVars().User != nil {
-		authErr = ErrBlockaccessDenied.GenWithStackByArgs("INSERT", b.ctx.GetStochastikVars().User.AuthUsername,
-			b.ctx.GetStochastikVars().User.AuthHostname, blockInfo.Name.L)
+	if b.ctx.GetStochaseinstein_dbars().User != nil {
+		authErr = ErrBlockaccessDenied.GenWithStackByArgs("INSERT", b.ctx.GetStochaseinstein_dbars().User.AuthUsername,
+			b.ctx.GetStochaseinstein_dbars().User.AuthHostname, blockInfo.Name.L)
 	}
 
 	b.visitInfo = appendVisitInfo(b.visitInfo, allegrosql.InsertPriv, tn.DBInfo.Name.L,
@@ -2417,7 +2417,7 @@ func (b *PlanBuilder) buildSetValuesOfInsert(ctx context.Context, insert *ast.In
 		}
 	}
 
-	insertPlan.AllAssignmentsAreConstant = true
+	insertPlan.AllAssignmentsAreCouplingConstantWithRadix = true
 	for i, assign := range insert.Setlist {
 		defaultExpr := extractDefaultExpr(assign.Expr)
 		if defaultExpr != nil {
@@ -2441,9 +2441,9 @@ func (b *PlanBuilder) buildSetValuesOfInsert(ctx context.Context, insert *ast.In
 		if err != nil {
 			return err
 		}
-		if insertPlan.AllAssignmentsAreConstant {
-			_, isConstant := expr.(*expression.Constant)
-			insertPlan.AllAssignmentsAreConstant = isConstant
+		if insertPlan.AllAssignmentsAreCouplingConstantWithRadix {
+			_, isCouplingConstantWithRadix := expr.(*expression.CouplingConstantWithRadix)
+			insertPlan.AllAssignmentsAreCouplingConstantWithRadix = isCouplingConstantWithRadix
 		}
 
 		insertPlan.SetList = append(insertPlan.SetList, &expression.Assignment{
@@ -2472,7 +2472,7 @@ func (b *PlanBuilder) buildValuesListOfInsert(ctx context.Context, insert *ast.I
 		}
 	}
 
-	insertPlan.AllAssignmentsAreConstant = true
+	insertPlan.AllAssignmentsAreCouplingConstantWithRadix = true
 	totalBlockDefCauss := insertPlan.Block.DefCauss()
 	for i, valuesItem := range insert.Lists {
 		// The length of all the value_list should be the same.
@@ -2504,7 +2504,7 @@ func (b *PlanBuilder) buildValuesListOfInsert(ctx context.Context, insert *ast.I
 					expr, err = b.getDefaultValue(affectedValuesDefCauss[j])
 				}
 			case *driver.ValueExpr:
-				expr = &expression.Constant{
+				expr = &expression.CouplingConstantWithRadix{
 					Value:   x.Causet,
 					RetType: &x.Type,
 				}
@@ -2520,9 +2520,9 @@ func (b *PlanBuilder) buildValuesListOfInsert(ctx context.Context, insert *ast.I
 			if err != nil {
 				return err
 			}
-			if insertPlan.AllAssignmentsAreConstant {
-				_, isConstant := expr.(*expression.Constant)
-				insertPlan.AllAssignmentsAreConstant = isConstant
+			if insertPlan.AllAssignmentsAreCouplingConstantWithRadix {
+				_, isCouplingConstantWithRadix := expr.(*expression.CouplingConstantWithRadix)
+				insertPlan.AllAssignmentsAreCouplingConstantWithRadix = isCouplingConstantWithRadix
 			}
 			// Note: For INSERT, REPLACE, and UFIDelATE, if a generated column is inserted into, replaced, or uFIDelated explicitly, the only permitted value is DEFAULT.
 			// see https://dev.allegrosql.com/doc/refman/8.0/en/create-block-generated-columns.html
@@ -2592,7 +2592,7 @@ func (b *PlanBuilder) buildSelectPlanOfInsert(ctx context.Context, insert *ast.I
 	}
 	for i := range schema4NewRow.DeferredCausets {
 		if schema4NewRow.DeferredCausets[i] == nil {
-			schema4NewRow.DeferredCausets[i] = &expression.DeferredCauset{UniqueID: insertPlan.ctx.GetStochastikVars().AllocPlanDeferredCausetID()}
+			schema4NewRow.DeferredCausets[i] = &expression.DeferredCauset{UniqueID: insertPlan.ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID()}
 			names4NewRow[i] = types.EmptyName
 		}
 	}
@@ -2614,7 +2614,7 @@ func (b *PlanBuilder) buildLoadData(ctx context.Context, ld *ast.LoadDataStmt) (
 		DeferredCausetAssignments:  ld.DeferredCausetAssignments,
 		DeferredCausetsAndUserVars: ld.DeferredCausetsAndUserVars,
 	}
-	user := b.ctx.GetStochastikVars().User
+	user := b.ctx.GetStochaseinstein_dbars().User
 	var insertErr error
 	if user != nil {
 		insertErr = ErrBlockaccessDenied.GenWithStackByArgs("INSERT", user.AuthUsername, user.AuthHostname, p.Block.Name.O)
@@ -2623,7 +2623,7 @@ func (b *PlanBuilder) buildLoadData(ctx context.Context, ld *ast.LoadDataStmt) (
 	blockInfo := p.Block.BlockInfo
 	blockInPlan, ok := b.is.BlockByID(blockInfo.ID)
 	if !ok {
-		EDB := b.ctx.GetStochastikVars().CurrentDB
+		EDB := b.ctx.GetStochaseinstein_dbars().CurrentDB
 		return nil, schemareplicant.ErrBlockNotExists.GenWithStackByArgs(EDB, blockInfo.Name.O)
 	}
 	schemaReplicant, names, err := expression.BlockInfo2SchemaAndNames(b.ctx, perceptron.NewCIStr(""), blockInfo)
@@ -2753,7 +2753,7 @@ func (b *PlanBuilder) convertValue(valueItem ast.ExprNode, mockBlockPlan Logical
 	var expr expression.Expression
 	switch x := valueItem.(type) {
 	case *driver.ValueExpr:
-		expr = &expression.Constant{
+		expr = &expression.CouplingConstantWithRadix{
 			Value:   x.Causet,
 			RetType: &x.Type,
 		}
@@ -2763,7 +2763,7 @@ func (b *PlanBuilder) convertValue(valueItem ast.ExprNode, mockBlockPlan Logical
 			return d, err
 		}
 	}
-	constant, ok := expr.(*expression.Constant)
+	constant, ok := expr.(*expression.CouplingConstantWithRadix)
 	if !ok {
 		return d, errors.New("Expect constant values")
 	}
@@ -2771,7 +2771,7 @@ func (b *PlanBuilder) convertValue(valueItem ast.ExprNode, mockBlockPlan Logical
 	if err != nil {
 		return d, err
 	}
-	d, err = value.ConvertTo(b.ctx.GetStochastikVars().StmtCtx, &col.FieldType)
+	d, err = value.ConvertTo(b.ctx.GetStochaseinstein_dbars().StmtCtx, &col.FieldType)
 	if err != nil {
 		if !types.ErrTruncated.Equal(err) && !types.ErrTruncatedWrongVal.Equal(err) {
 			return d, err
@@ -2888,79 +2888,79 @@ func (b *PlanBuilder) buildDBS(ctx context.Context, node ast.DBSNode) (Plan, err
 	switch v := node.(type) {
 	case *ast.AlterDatabaseStmt:
 		if v.AlterDefaultDatabase {
-			v.Name = b.ctx.GetStochastikVars().CurrentDB
+			v.Name = b.ctx.GetStochaseinstein_dbars().CurrentDB
 		}
 		if v.Name == "" {
 			return nil, ErrNoDB
 		}
-		if b.ctx.GetStochastikVars().User != nil {
-			authErr = ErrDBaccessDenied.GenWithStackByArgs("ALTER", b.ctx.GetStochastikVars().User.AuthUsername,
-				b.ctx.GetStochastikVars().User.AuthHostname, v.Name)
+		if b.ctx.GetStochaseinstein_dbars().User != nil {
+			authErr = ErrDBaccessDenied.GenWithStackByArgs("ALTER", b.ctx.GetStochaseinstein_dbars().User.AuthUsername,
+				b.ctx.GetStochaseinstein_dbars().User.AuthHostname, v.Name)
 		}
 		b.visitInfo = appendVisitInfo(b.visitInfo, allegrosql.AlterPriv, v.Name, "", "", authErr)
 	case *ast.AlterBlockStmt:
-		if b.ctx.GetStochastikVars().User != nil {
-			authErr = ErrBlockaccessDenied.GenWithStackByArgs("ALTER", b.ctx.GetStochastikVars().User.AuthUsername,
-				b.ctx.GetStochastikVars().User.AuthHostname, v.Block.Name.L)
+		if b.ctx.GetStochaseinstein_dbars().User != nil {
+			authErr = ErrBlockaccessDenied.GenWithStackByArgs("ALTER", b.ctx.GetStochaseinstein_dbars().User.AuthUsername,
+				b.ctx.GetStochaseinstein_dbars().User.AuthHostname, v.Block.Name.L)
 		}
 		b.visitInfo = appendVisitInfo(b.visitInfo, allegrosql.AlterPriv, v.Block.Schema.L,
 			v.Block.Name.L, "", authErr)
 		for _, spec := range v.Specs {
 			if spec.Tp == ast.AlterBlockRenameBlock || spec.Tp == ast.AlterBlockExchangePartition {
-				if b.ctx.GetStochastikVars().User != nil {
-					authErr = ErrBlockaccessDenied.GenWithStackByArgs("DROP", b.ctx.GetStochastikVars().User.AuthUsername,
-						b.ctx.GetStochastikVars().User.AuthHostname, v.Block.Name.L)
+				if b.ctx.GetStochaseinstein_dbars().User != nil {
+					authErr = ErrBlockaccessDenied.GenWithStackByArgs("DROP", b.ctx.GetStochaseinstein_dbars().User.AuthUsername,
+						b.ctx.GetStochaseinstein_dbars().User.AuthHostname, v.Block.Name.L)
 				}
 				b.visitInfo = appendVisitInfo(b.visitInfo, allegrosql.DropPriv, v.Block.Schema.L,
 					v.Block.Name.L, "", authErr)
 
-				if b.ctx.GetStochastikVars().User != nil {
-					authErr = ErrBlockaccessDenied.GenWithStackByArgs("CREATE", b.ctx.GetStochastikVars().User.AuthUsername,
-						b.ctx.GetStochastikVars().User.AuthHostname, spec.NewBlock.Name.L)
+				if b.ctx.GetStochaseinstein_dbars().User != nil {
+					authErr = ErrBlockaccessDenied.GenWithStackByArgs("CREATE", b.ctx.GetStochaseinstein_dbars().User.AuthUsername,
+						b.ctx.GetStochaseinstein_dbars().User.AuthHostname, spec.NewBlock.Name.L)
 				}
 				b.visitInfo = appendVisitInfo(b.visitInfo, allegrosql.CreatePriv, spec.NewBlock.Schema.L,
 					spec.NewBlock.Name.L, "", authErr)
 
-				if b.ctx.GetStochastikVars().User != nil {
-					authErr = ErrBlockaccessDenied.GenWithStackByArgs("INSERT", b.ctx.GetStochastikVars().User.AuthUsername,
-						b.ctx.GetStochastikVars().User.AuthHostname, spec.NewBlock.Name.L)
+				if b.ctx.GetStochaseinstein_dbars().User != nil {
+					authErr = ErrBlockaccessDenied.GenWithStackByArgs("INSERT", b.ctx.GetStochaseinstein_dbars().User.AuthUsername,
+						b.ctx.GetStochaseinstein_dbars().User.AuthHostname, spec.NewBlock.Name.L)
 				}
 				b.visitInfo = appendVisitInfo(b.visitInfo, allegrosql.InsertPriv, spec.NewBlock.Schema.L,
 					spec.NewBlock.Name.L, "", authErr)
 			} else if spec.Tp == ast.AlterBlockDropPartition {
-				if b.ctx.GetStochastikVars().User != nil {
-					authErr = ErrBlockaccessDenied.GenWithStackByArgs("DROP", b.ctx.GetStochastikVars().User.AuthUsername,
-						b.ctx.GetStochastikVars().User.AuthHostname, v.Block.Name.L)
+				if b.ctx.GetStochaseinstein_dbars().User != nil {
+					authErr = ErrBlockaccessDenied.GenWithStackByArgs("DROP", b.ctx.GetStochaseinstein_dbars().User.AuthUsername,
+						b.ctx.GetStochaseinstein_dbars().User.AuthHostname, v.Block.Name.L)
 				}
 				b.visitInfo = appendVisitInfo(b.visitInfo, allegrosql.DropPriv, v.Block.Schema.L,
 					v.Block.Name.L, "", authErr)
 			}
 		}
 	case *ast.CreateDatabaseStmt:
-		if b.ctx.GetStochastikVars().User != nil {
-			authErr = ErrDBaccessDenied.GenWithStackByArgs(b.ctx.GetStochastikVars().User.AuthUsername,
-				b.ctx.GetStochastikVars().User.AuthHostname, v.Name)
+		if b.ctx.GetStochaseinstein_dbars().User != nil {
+			authErr = ErrDBaccessDenied.GenWithStackByArgs(b.ctx.GetStochaseinstein_dbars().User.AuthUsername,
+				b.ctx.GetStochaseinstein_dbars().User.AuthHostname, v.Name)
 		}
 		b.visitInfo = appendVisitInfo(b.visitInfo, allegrosql.CreatePriv, v.Name,
 			"", "", authErr)
 	case *ast.CreateIndexStmt:
-		if b.ctx.GetStochastikVars().User != nil {
-			authErr = ErrBlockaccessDenied.GenWithStackByArgs("INDEX", b.ctx.GetStochastikVars().User.AuthUsername,
-				b.ctx.GetStochastikVars().User.AuthHostname, v.Block.Name.L)
+		if b.ctx.GetStochaseinstein_dbars().User != nil {
+			authErr = ErrBlockaccessDenied.GenWithStackByArgs("INDEX", b.ctx.GetStochaseinstein_dbars().User.AuthUsername,
+				b.ctx.GetStochaseinstein_dbars().User.AuthHostname, v.Block.Name.L)
 		}
 		b.visitInfo = appendVisitInfo(b.visitInfo, allegrosql.IndexPriv, v.Block.Schema.L,
 			v.Block.Name.L, "", authErr)
 	case *ast.CreateBlockStmt:
-		if b.ctx.GetStochastikVars().User != nil {
-			authErr = ErrBlockaccessDenied.GenWithStackByArgs("CREATE", b.ctx.GetStochastikVars().User.AuthUsername,
-				b.ctx.GetStochastikVars().User.AuthHostname, v.Block.Name.L)
+		if b.ctx.GetStochaseinstein_dbars().User != nil {
+			authErr = ErrBlockaccessDenied.GenWithStackByArgs("CREATE", b.ctx.GetStochaseinstein_dbars().User.AuthUsername,
+				b.ctx.GetStochaseinstein_dbars().User.AuthHostname, v.Block.Name.L)
 		}
 		b.visitInfo = appendVisitInfo(b.visitInfo, allegrosql.CreatePriv, v.Block.Schema.L,
 			v.Block.Name.L, "", authErr)
 		if v.ReferBlock != nil {
-			if b.ctx.GetStochastikVars().User != nil {
-				authErr = ErrBlockaccessDenied.GenWithStackByArgs("CREATE", b.ctx.GetStochastikVars().User.AuthUsername,
-					b.ctx.GetStochastikVars().User.AuthHostname, v.ReferBlock.Name.L)
+			if b.ctx.GetStochaseinstein_dbars().User != nil {
+				authErr = ErrBlockaccessDenied.GenWithStackByArgs("CREATE", b.ctx.GetStochaseinstein_dbars().User.AuthUsername,
+					b.ctx.GetStochaseinstein_dbars().User.AuthHostname, v.ReferBlock.Name.L)
 			}
 			b.visitInfo = appendVisitInfo(b.visitInfo, allegrosql.SelectPriv, v.ReferBlock.Schema.L,
 				v.ReferBlock.Name.L, "", authErr)
@@ -2992,91 +2992,91 @@ func (b *PlanBuilder) buildDBS(ctx context.Context, node ast.DBSNode) (Plan, err
 		if len(v.DefCauss) != schemaReplicant.Len() {
 			return nil, dbs.ErrViewWrongList
 		}
-		if b.ctx.GetStochastikVars().User != nil {
-			authErr = ErrBlockaccessDenied.GenWithStackByArgs("CREATE VIEW", b.ctx.GetStochastikVars().User.AuthUsername,
-				b.ctx.GetStochastikVars().User.AuthHostname, v.ViewName.Name.L)
+		if b.ctx.GetStochaseinstein_dbars().User != nil {
+			authErr = ErrBlockaccessDenied.GenWithStackByArgs("CREATE VIEW", b.ctx.GetStochaseinstein_dbars().User.AuthUsername,
+				b.ctx.GetStochaseinstein_dbars().User.AuthHostname, v.ViewName.Name.L)
 		}
 		b.visitInfo = appendVisitInfo(b.visitInfo, allegrosql.CreateViewPriv, v.ViewName.Schema.L,
 			v.ViewName.Name.L, "", authErr)
-		if v.Definer.CurrentUser && b.ctx.GetStochastikVars().User != nil {
-			v.Definer = b.ctx.GetStochastikVars().User
+		if v.Definer.CurrentUser && b.ctx.GetStochaseinstein_dbars().User != nil {
+			v.Definer = b.ctx.GetStochaseinstein_dbars().User
 		}
-		if b.ctx.GetStochastikVars().User != nil && v.Definer.String() != b.ctx.GetStochastikVars().User.String() {
+		if b.ctx.GetStochaseinstein_dbars().User != nil && v.Definer.String() != b.ctx.GetStochaseinstein_dbars().User.String() {
 			err = ErrSpecificAccessDenied.GenWithStackByArgs("SUPER")
 			b.visitInfo = appendVisitInfo(b.visitInfo, allegrosql.SuperPriv, "",
 				"", "", err)
 		}
 	case *ast.CreateSequenceStmt:
-		if b.ctx.GetStochastikVars().User != nil {
-			authErr = ErrBlockaccessDenied.GenWithStackByArgs("CREATE", b.ctx.GetStochastikVars().User.AuthUsername,
-				b.ctx.GetStochastikVars().User.AuthHostname, v.Name.Name.L)
+		if b.ctx.GetStochaseinstein_dbars().User != nil {
+			authErr = ErrBlockaccessDenied.GenWithStackByArgs("CREATE", b.ctx.GetStochaseinstein_dbars().User.AuthUsername,
+				b.ctx.GetStochaseinstein_dbars().User.AuthHostname, v.Name.Name.L)
 		}
 		b.visitInfo = appendVisitInfo(b.visitInfo, allegrosql.CreatePriv, v.Name.Schema.L,
 			v.Name.Name.L, "", authErr)
 	case *ast.DroFIDelatabaseStmt:
-		if b.ctx.GetStochastikVars().User != nil {
-			authErr = ErrDBaccessDenied.GenWithStackByArgs(b.ctx.GetStochastikVars().User.AuthUsername,
-				b.ctx.GetStochastikVars().User.AuthHostname, v.Name)
+		if b.ctx.GetStochaseinstein_dbars().User != nil {
+			authErr = ErrDBaccessDenied.GenWithStackByArgs(b.ctx.GetStochaseinstein_dbars().User.AuthUsername,
+				b.ctx.GetStochaseinstein_dbars().User.AuthHostname, v.Name)
 		}
 		b.visitInfo = appendVisitInfo(b.visitInfo, allegrosql.DropPriv, v.Name,
 			"", "", authErr)
 	case *ast.DropIndexStmt:
-		if b.ctx.GetStochastikVars().User != nil {
-			authErr = ErrBlockaccessDenied.GenWithStackByArgs("INDEx", b.ctx.GetStochastikVars().User.AuthUsername,
-				b.ctx.GetStochastikVars().User.AuthHostname, v.Block.Name.L)
+		if b.ctx.GetStochaseinstein_dbars().User != nil {
+			authErr = ErrBlockaccessDenied.GenWithStackByArgs("INDEx", b.ctx.GetStochaseinstein_dbars().User.AuthUsername,
+				b.ctx.GetStochaseinstein_dbars().User.AuthHostname, v.Block.Name.L)
 		}
 		b.visitInfo = appendVisitInfo(b.visitInfo, allegrosql.IndexPriv, v.Block.Schema.L,
 			v.Block.Name.L, "", authErr)
 	case *ast.DropBlockStmt:
 		for _, blockVal := range v.Blocks {
-			if b.ctx.GetStochastikVars().User != nil {
-				authErr = ErrBlockaccessDenied.GenWithStackByArgs("DROP", b.ctx.GetStochastikVars().User.AuthUsername,
-					b.ctx.GetStochastikVars().User.AuthHostname, blockVal.Name.L)
+			if b.ctx.GetStochaseinstein_dbars().User != nil {
+				authErr = ErrBlockaccessDenied.GenWithStackByArgs("DROP", b.ctx.GetStochaseinstein_dbars().User.AuthUsername,
+					b.ctx.GetStochaseinstein_dbars().User.AuthHostname, blockVal.Name.L)
 			}
 			b.visitInfo = appendVisitInfo(b.visitInfo, allegrosql.DropPriv, blockVal.Schema.L,
 				blockVal.Name.L, "", authErr)
 		}
 	case *ast.DropSequenceStmt:
 		for _, sequence := range v.Sequences {
-			if b.ctx.GetStochastikVars().User != nil {
-				authErr = ErrBlockaccessDenied.GenWithStackByArgs("DROP", b.ctx.GetStochastikVars().User.AuthUsername,
-					b.ctx.GetStochastikVars().User.AuthHostname, sequence.Name.L)
+			if b.ctx.GetStochaseinstein_dbars().User != nil {
+				authErr = ErrBlockaccessDenied.GenWithStackByArgs("DROP", b.ctx.GetStochaseinstein_dbars().User.AuthUsername,
+					b.ctx.GetStochaseinstein_dbars().User.AuthHostname, sequence.Name.L)
 			}
 			b.visitInfo = appendVisitInfo(b.visitInfo, allegrosql.DropPriv, sequence.Schema.L,
 				sequence.Name.L, "", authErr)
 		}
 	case *ast.TruncateBlockStmt:
-		if b.ctx.GetStochastikVars().User != nil {
-			authErr = ErrBlockaccessDenied.GenWithStackByArgs("DROP", b.ctx.GetStochastikVars().User.AuthUsername,
-				b.ctx.GetStochastikVars().User.AuthHostname, v.Block.Name.L)
+		if b.ctx.GetStochaseinstein_dbars().User != nil {
+			authErr = ErrBlockaccessDenied.GenWithStackByArgs("DROP", b.ctx.GetStochaseinstein_dbars().User.AuthUsername,
+				b.ctx.GetStochaseinstein_dbars().User.AuthHostname, v.Block.Name.L)
 		}
 		b.visitInfo = appendVisitInfo(b.visitInfo, allegrosql.DropPriv, v.Block.Schema.L,
 			v.Block.Name.L, "", authErr)
 	case *ast.RenameBlockStmt:
-		if b.ctx.GetStochastikVars().User != nil {
-			authErr = ErrBlockaccessDenied.GenWithStackByArgs("ALTER", b.ctx.GetStochastikVars().User.AuthUsername,
-				b.ctx.GetStochastikVars().User.AuthHostname, v.OldBlock.Name.L)
+		if b.ctx.GetStochaseinstein_dbars().User != nil {
+			authErr = ErrBlockaccessDenied.GenWithStackByArgs("ALTER", b.ctx.GetStochaseinstein_dbars().User.AuthUsername,
+				b.ctx.GetStochaseinstein_dbars().User.AuthHostname, v.OldBlock.Name.L)
 		}
 		b.visitInfo = appendVisitInfo(b.visitInfo, allegrosql.AlterPriv, v.OldBlock.Schema.L,
 			v.OldBlock.Name.L, "", authErr)
 
-		if b.ctx.GetStochastikVars().User != nil {
-			authErr = ErrBlockaccessDenied.GenWithStackByArgs("DROP", b.ctx.GetStochastikVars().User.AuthUsername,
-				b.ctx.GetStochastikVars().User.AuthHostname, v.OldBlock.Name.L)
+		if b.ctx.GetStochaseinstein_dbars().User != nil {
+			authErr = ErrBlockaccessDenied.GenWithStackByArgs("DROP", b.ctx.GetStochaseinstein_dbars().User.AuthUsername,
+				b.ctx.GetStochaseinstein_dbars().User.AuthHostname, v.OldBlock.Name.L)
 		}
 		b.visitInfo = appendVisitInfo(b.visitInfo, allegrosql.DropPriv, v.OldBlock.Schema.L,
 			v.OldBlock.Name.L, "", authErr)
 
-		if b.ctx.GetStochastikVars().User != nil {
-			authErr = ErrBlockaccessDenied.GenWithStackByArgs("CREATE", b.ctx.GetStochastikVars().User.AuthUsername,
-				b.ctx.GetStochastikVars().User.AuthHostname, v.NewBlock.Name.L)
+		if b.ctx.GetStochaseinstein_dbars().User != nil {
+			authErr = ErrBlockaccessDenied.GenWithStackByArgs("CREATE", b.ctx.GetStochaseinstein_dbars().User.AuthUsername,
+				b.ctx.GetStochaseinstein_dbars().User.AuthHostname, v.NewBlock.Name.L)
 		}
 		b.visitInfo = appendVisitInfo(b.visitInfo, allegrosql.CreatePriv, v.NewBlock.Schema.L,
 			v.NewBlock.Name.L, "", authErr)
 
-		if b.ctx.GetStochastikVars().User != nil {
-			authErr = ErrBlockaccessDenied.GenWithStackByArgs("INSERT", b.ctx.GetStochastikVars().User.AuthUsername,
-				b.ctx.GetStochastikVars().User.AuthHostname, v.NewBlock.Name.L)
+		if b.ctx.GetStochaseinstein_dbars().User != nil {
+			authErr = ErrBlockaccessDenied.GenWithStackByArgs("INSERT", b.ctx.GetStochaseinstein_dbars().User.AuthUsername,
+				b.ctx.GetStochaseinstein_dbars().User.AuthHostname, v.NewBlock.Name.L)
 		}
 		b.visitInfo = appendVisitInfo(b.visitInfo, allegrosql.InsertPriv, v.NewBlock.Schema.L,
 			v.NewBlock.Name.L, "", authErr)
@@ -3156,9 +3156,9 @@ func (b *PlanBuilder) buildExplainFor(explainFor *ast.ExplainForStmt) (Plan, err
 	if !ok {
 		return nil, ErrNoSuchThread.GenWithStackByArgs(explainFor.ConnectionID)
 	}
-	if b.ctx.GetStochastikVars() != nil && b.ctx.GetStochastikVars().User != nil {
-		if b.ctx.GetStochastikVars().User.Username != processInfo.User {
-			err := ErrAccessDenied.GenWithStackByArgs(b.ctx.GetStochastikVars().User.Username, b.ctx.GetStochastikVars().User.Hostname)
+	if b.ctx.GetStochaseinstein_dbars() != nil && b.ctx.GetStochaseinstein_dbars().User != nil {
+		if b.ctx.GetStochaseinstein_dbars().User.Username != processInfo.User {
+			err := ErrAccessDenied.GenWithStackByArgs(b.ctx.GetStochaseinstein_dbars().User.Username, b.ctx.GetStochaseinstein_dbars().User.Hostname)
 			// Different from MyALLEGROSQL's behavior and document.
 			b.visitInfo = appendVisitInfo(b.visitInfo, allegrosql.SuperPriv, "", "", "", err)
 		}

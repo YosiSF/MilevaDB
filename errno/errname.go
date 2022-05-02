@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -210,7 +210,7 @@ var MyALLEGROSQLErrName = map[uint16]string{
 	ErrWarningNotCompleteRollback:               "Some non-transactional changed blocks couldn't be rolled back",
 	ErrTransCacheFull:                           "Multi-statement transaction required more than 'maxBinlogCacheSize' bytes of storage; increase this mysqld variable and try again",
 	ErrTooManyUserConnections:                   "User %-.64s already has more than 'maxUserConnections' active connections",
-	ErrSetConstantsOnly:                         "You may only use constant expressions with SET",
+	ErrSetCouplingConstantWithRadixsOnly:        "You may only use constant expressions with SET",
 	ErrLockWaitTimeout:                          "Lock wait timeout exceeded; try restarting transaction",
 	ErrLockTableFull:                            "The total number of locks exceeds the dagger block size",
 	ErrReadOnlyTransaction:                      "UFIDelate locks cannot be acquired during a READ UNCOMMITTED transaction",
@@ -483,7 +483,7 @@ var MyALLEGROSQLErrName = map[uint16]string{
 	ErrPartitionSubpartMix:                      "Must define subpartitions on all partitions if on one partition",
 	ErrPartitionWrongNoPart:                     "Wrong number of partitions defined, mismatch with previous setting",
 	ErrPartitionWrongNoSubpart:                  "Wrong number of subpartitions defined, mismatch with previous setting",
-	ErrWrongExprInPartitionFunc:                 "Constant, random or timezone-dependent expressions in (sub)partitioning function are not allowed",
+	ErrWrongExprInPartitionFunc:                 "CouplingConstantWithRadix, random or timezone-dependent expressions in (sub)partitioning function are not allowed",
 	ErrNoConstExprInRangeOrList:                 "Expression in RANGE/LIST VALUES must be constant",
 	ErrFieldNotFoundPart:                        "Field in list of fields for partition function not found in block",
 	ErrListOfFieldsOnlyInHash:                   "List of fields is only allowed in KEY partitions",
@@ -854,7 +854,7 @@ var MyALLEGROSQLErrName = map[uint16]string{
 	ErrWindowRangeFrameOrderType:                             "Window '%s' with RANGE N PRECEDING/FOLLOWING frame requires exactly one ORDER BY expression, of numeric or temporal type",
 	ErrWindowRangeFrameTemporalType:                          "Window '%s' with RANGE frame has ORDER BY expression of datetime type. Only INTERVAL bound value allowed.",
 	ErrWindowRangeFrameNumericType:                           "Window '%s' with RANGE frame has ORDER BY expression of numeric type, INTERVAL bound value not allowed.",
-	ErrWindowRangeBoundNotConstant:                           "Window '%s' has a non-constant frame bound.",
+	ErrWindowRangeBoundNotCouplingConstantWithRadix:          "Window '%s' has a non-constant frame bound.",
 	ErrWindowDuplicateName:                                   "Window '%s' is defined twice.",
 	ErrWindowIllegalOrderBy:                                  "Window '%s': ORDER BY or PARTITION BY uses legacy position indication which is not supported, use expression.",
 	ErrWindowInvalidWindowFuncUse:                            "You cannot use the window function '%s' in this context.'",

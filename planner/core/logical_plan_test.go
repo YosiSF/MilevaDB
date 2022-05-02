@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,6 +20,15 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/property"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/hint"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testleak"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
 	"github.com/whtcorpsinc/berolinaAllegroSQL"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
@@ -27,15 +36,6 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/planner/property"
-	"github.com/whtcorpsinc/milevadb/planner/soliton"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton/hint"
-	"github.com/whtcorpsinc/milevadb/soliton/solitonutil"
-	"github.com/whtcorpsinc/milevadb/soliton/testleak"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
 )
 
 var _ = Suite(&testPlanSuite{})
@@ -59,7 +59,7 @@ type testPlanSuite struct {
 func (s *testPlanSuite) SetUpSuite(c *C) {
 	s.is = schemareplicant.MockSchemaReplicant([]*perceptron.BlockInfo{MockSignedBlock(), MockUnsignedBlock(), MockView()})
 	s.ctx = MockContext()
-	s.ctx.GetStochastikVars().EnableWindowFunction = true
+	s.ctx.GetStochaseinstein_dbars().EnableWindowFunction = true
 	s.berolinaAllegroSQL = berolinaAllegroSQL.New()
 	s.berolinaAllegroSQL.EnableWindowFunc(true)
 
@@ -281,12 +281,12 @@ func (s *testPlanSuite) TestDeriveNotNullConds(c *C) {
 }
 
 func buildLogicPlan4GroupBy(s *testPlanSuite, c *C, allegrosql string) (Plan, error) {
-	sqlMode := s.ctx.GetStochastikVars().ALLEGROSQLMode
+	sqlMode := s.ctx.GetStochaseinstein_dbars().ALLEGROSQLMode
 	mockedBlockInfo := MockSignedBlock()
 	// mock the block info here for later use
 	// enable only full group by
-	s.ctx.GetStochastikVars().ALLEGROSQLMode = sqlMode | allegrosql.ModeOnlyFullGroupBy
-	defer func() { s.ctx.GetStochastikVars().ALLEGROSQLMode = sqlMode }() // restore it
+	s.ctx.GetStochaseinstein_dbars().ALLEGROSQLMode = sqlMode | allegrosql.ModeOnlyFullGroupBy
+	defer func() { s.ctx.GetStochaseinstein_dbars().ALLEGROSQLMode = sqlMode }() // restore it
 	comment := Commentf("for %s", allegrosql)
 	stmt, err := s.ParseOneStmt(allegrosql, "", "")
 	c.Assert(err, IsNil, comment)
@@ -466,7 +466,7 @@ func (s *testPlanSuite) TestPlanBuilder(c *C) {
 		stmt, err := s.ParseOneStmt(ca, "", "")
 		c.Assert(err, IsNil, comment)
 
-		s.ctx.GetStochastikVars().SetHashJoinConcurrency(1)
+		s.ctx.GetStochaseinstein_dbars().SetHashJoinConcurrency(1)
 		Preprocess(s.ctx, stmt, s.is)
 		p, _, err := BuildLogicalPlan(ctx, s.ctx, stmt, s.is)
 		c.Assert(err, IsNil)
@@ -510,7 +510,7 @@ func (s *testPlanSuite) TestEagerAggregation(c *C) {
 	var output []string
 	s.testData.GetTestCases(c, &input, &output)
 	ctx := context.Background()
-	s.ctx.GetStochastikVars().AllowAggPushDown = true
+	s.ctx.GetStochaseinstein_dbars().AllowAggPushDown = true
 	for ith, tt := range input {
 		comment := Commentf("for %s", tt)
 		stmt, err := s.ParseOneStmt(tt, "", "")
@@ -525,7 +525,7 @@ func (s *testPlanSuite) TestEagerAggregation(c *C) {
 		})
 		c.Assert(ToString(p), Equals, output[ith], Commentf("for %s %d", tt, ith))
 	}
-	s.ctx.GetStochastikVars().AllowAggPushDown = false
+	s.ctx.GetStochaseinstein_dbars().AllowAggPushDown = false
 }
 
 func (s *testPlanSuite) TestDeferredCausetPruning(c *C) {
@@ -1086,7 +1086,7 @@ func (s *testPlanSuite) TestVisitInfo(c *C) {
 		c.Assert(err, IsNil, comment)
 		Preprocess(s.ctx, stmt, s.is)
 		builder := NewPlanBuilder(MockContext(), s.is, &hint.BlockHintProcessor{})
-		builder.ctx.GetStochastikVars().SetHashJoinConcurrency(1)
+		builder.ctx.GetStochaseinstein_dbars().SetHashJoinConcurrency(1)
 		_, err = builder.Build(context.TODO(), stmt)
 		c.Assert(err, IsNil, comment)
 
@@ -1247,7 +1247,7 @@ func (s *testPlanSuite) TestNameResolver(c *C) {
 		comment := Commentf("for %s", t.allegrosql)
 		stmt, err := s.ParseOneStmt(t.allegrosql, "", "")
 		c.Assert(err, IsNil, comment)
-		s.ctx.GetStochastikVars().SetHashJoinConcurrency(1)
+		s.ctx.GetStochaseinstein_dbars().SetHashJoinConcurrency(1)
 
 		_, _, err = BuildLogicalPlan(ctx, s.ctx, stmt, s.is)
 		if t.err == "" {
@@ -1382,7 +1382,7 @@ func (s *testPlanSuite) optimize(ctx context.Context, allegrosql string) (Physic
 
 	sctx := MockContext()
 	for k, v := range s.optimizeVars {
-		if err = sctx.GetStochastikVars().SetSystemVar(k, v); err != nil {
+		if err = sctx.GetStochaseinstein_dbars().SetSystemVar(k, v); err != nil {
 			return nil, nil, err
 		}
 	}
@@ -1537,16 +1537,16 @@ func (s *testPlanSuite) TestFastPlanContextBlocks(c *C) {
 		stmt, err := s.ParseOneStmt(tt.allegrosql, "", "")
 		c.Assert(err, IsNil)
 		Preprocess(s.ctx, stmt, s.is)
-		s.ctx.GetStochastikVars().StmtCtx.Blocks = nil
+		s.ctx.GetStochaseinstein_dbars().StmtCtx.Blocks = nil
 		p := TryFastPlan(s.ctx, stmt)
 		if tt.fastPlan {
 			c.Assert(p, NotNil)
-			c.Assert(len(s.ctx.GetStochastikVars().StmtCtx.Blocks), Equals, 1)
-			c.Assert(s.ctx.GetStochastikVars().StmtCtx.Blocks[0].Block, Equals, "t")
-			c.Assert(s.ctx.GetStochastikVars().StmtCtx.Blocks[0].EDB, Equals, "test")
+			c.Assert(len(s.ctx.GetStochaseinstein_dbars().StmtCtx.Blocks), Equals, 1)
+			c.Assert(s.ctx.GetStochaseinstein_dbars().StmtCtx.Blocks[0].Block, Equals, "t")
+			c.Assert(s.ctx.GetStochaseinstein_dbars().StmtCtx.Blocks[0].EDB, Equals, "test")
 		} else {
 			c.Assert(p, IsNil)
-			c.Assert(len(s.ctx.GetStochastikVars().StmtCtx.Blocks), Equals, 0)
+			c.Assert(len(s.ctx.GetStochaseinstein_dbars().StmtCtx.Blocks), Equals, 0)
 		}
 	}
 }

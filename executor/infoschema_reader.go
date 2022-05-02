@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,40 +26,40 @@ import (
 	"time"
 
 	"github.com/cznic/mathutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/helper"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri/infosync"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/privilege"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/FIDelapi"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/defCauslate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/set"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/sqlexec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/stmtsummary"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/stringutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/statistics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	binaryJson "github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/charset"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/causetstore/einsteindb"
-	"github.com/whtcorpsinc/milevadb/causetstore/helper"
-	"github.com/whtcorpsinc/milevadb/meta/autoid"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/petri/infosync"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/privilege"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/FIDelapi"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/defCauslate"
-	"github.com/whtcorpsinc/milevadb/soliton/set"
-	"github.com/whtcorpsinc/milevadb/soliton/sqlexec"
-	"github.com/whtcorpsinc/milevadb/soliton/stmtsummary"
-	"github.com/whtcorpsinc/milevadb/soliton/stringutil"
-	"github.com/whtcorpsinc/milevadb/statistics"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
-	binaryJson "github.com/whtcorpsinc/milevadb/types/json"
 	"go.etcd.io/etcd/clientv3"
 )
 
 type memblockRetriever struct {
 	dummyCloser
 	block       *perceptron.BlockInfo
-	defCausumns     []*perceptron.DeferredCausetInfo
+	defCausumns []*perceptron.DeferredCausetInfo
 	rows        [][]types.Causet
 	rowIdx      int
 	retrieved   bool
@@ -125,8 +125,8 @@ func (e *memblockRetriever) retrieve(ctx context.Context, sctx stochastikctx.Con
 			err = e.setDataForMilevaDBHotRegions(sctx)
 		case schemareplicant.BlockConstraints:
 			e.setDataFromBlockConstraints(sctx, dbs)
-		case schemareplicant.BlockStochastikVar:
-			err = e.setDataFromStochastikVar(sctx)
+		case schemareplicant.BlockStochaseinstein_dbar:
+			err = e.setDataFromStochaseinstein_dbar(sctx)
 		case schemareplicant.BlockMilevaDBServersInfo:
 			err = e.setDataForServersInfo()
 		case schemareplicant.BlockTiFlashReplica:
@@ -231,10 +231,10 @@ func getDataAndIndexLength(info *perceptron.BlockInfo, physicalID int64, rowCoun
 }
 
 type statsCache struct {
-	mu         sync.RWMutex
-	modifyTime time.Time
-	blockEvents  map[int64]uint64
-	defCausLength  map[blockHistID]uint64
+	mu            sync.RWMutex
+	modifyTime    time.Time
+	blockEvents   map[int64]uint64
+	defCausLength map[blockHistID]uint64
 }
 
 var blockStatsCache = &statsCache{}
@@ -297,14 +297,14 @@ func (e *memblockRetriever) setDataFromSchemata(ctx stochastikctx.Context, schem
 			defCauslation = schemaReplicant.DefCauslate // Overwrite default
 		}
 
-		if checker != nil && !checker.RequestVerification(ctx.GetStochastikVars().ActiveRoles, schemaReplicant.Name.L, "", "", allegrosql.AllPrivMask) {
+		if checker != nil && !checker.RequestVerification(ctx.GetStochaseinstein_dbars().ActiveRoles, schemaReplicant.Name.L, "", "", allegrosql.AllPrivMask) {
 			continue
 		}
 		record := types.MakeCausets(
 			schemareplicant.CatalogVal, // CATALOG_NAME
-			schemaReplicant.Name.O,         // SCHEMA_NAME
-			charset,               // DEFAULT_CHARACTER_SET_NAME
-			defCauslation,             // DEFAULT_COLLATION_NAME
+			schemaReplicant.Name.O,     // SCHEMA_NAME
+			charset,                    // DEFAULT_CHARACTER_SET_NAME
+			defCauslation,              // DEFAULT_COLLATION_NAME
 			nil,
 		)
 		rows = append(rows, record)
@@ -316,7 +316,7 @@ func (e *memblockRetriever) setDataForStatistics(ctx stochastikctx.Context, sche
 	checker := privilege.GetPrivilegeManager(ctx)
 	for _, schemaReplicant := range schemas {
 		for _, block := range schemaReplicant.Blocks {
-			if checker != nil && !checker.RequestVerification(ctx.GetStochastikVars().ActiveRoles, schemaReplicant.Name.L, block.Name.L, "", allegrosql.AllPrivMask) {
+			if checker != nil && !checker.RequestVerification(ctx.GetStochaseinstein_dbars().ActiveRoles, schemaReplicant.Name.L, block.Name.L, "", allegrosql.AllPrivMask) {
 				continue
 			}
 			e.setDataForStatisticsInBlock(schemaReplicant, block)
@@ -331,23 +331,23 @@ func (e *memblockRetriever) setDataForStatisticsInBlock(schemaReplicant *percept
 			if allegrosql.HasPriKeyFlag(defCaus.Flag) {
 				record := types.MakeCausets(
 					schemareplicant.CatalogVal, // TABLE_CATALOG
-					schemaReplicant.Name.O,         // TABLE_SCHEMA
-					block.Name.O,          // TABLE_NAME
-					"0",                   // NON_UNIQUE
-					schemaReplicant.Name.O,         // INDEX_SCHEMA
-					"PRIMARY",             // INDEX_NAME
-					1,                     // SEQ_IN_INDEX
-					defCaus.Name.O,            // COLUMN_NAME
-					"A",                   // COLLATION
-					0,                     // CARDINALITY
-					nil,                   // SUB_PART
-					nil,                   // PACKED
-					"",                    // NULLABLE
-					"BTREE",               // INDEX_TYPE
-					"",                    // COMMENT
-					"",                    // INDEX_COMMENT
-					"YES",                 // IS_VISIBLE
-					nil,                   // Expression
+					schemaReplicant.Name.O,     // TABLE_SCHEMA
+					block.Name.O,               // TABLE_NAME
+					"0",                        // NON_UNIQUE
+					schemaReplicant.Name.O,     // INDEX_SCHEMA
+					"PRIMARY",                  // INDEX_NAME
+					1,                          // SEQ_IN_INDEX
+					defCaus.Name.O,             // COLUMN_NAME
+					"A",                        // COLLATION
+					0,                          // CARDINALITY
+					nil,                        // SUB_PART
+					nil,                        // PACKED
+					"",                         // NULLABLE
+					"BTREE",                    // INDEX_TYPE
+					"",                         // COMMENT
+					"",                         // INDEX_COMMENT
+					"YES",                      // IS_VISIBLE
+					nil,                        // Expression
 				)
 				rows = append(rows, record)
 			}
@@ -385,23 +385,23 @@ func (e *memblockRetriever) setDataForStatisticsInBlock(schemaReplicant *percept
 
 			record := types.MakeCausets(
 				schemareplicant.CatalogVal, // TABLE_CATALOG
-				schemaReplicant.Name.O,         // TABLE_SCHEMA
-				block.Name.O,          // TABLE_NAME
-				nonUnique,             // NON_UNIQUE
-				schemaReplicant.Name.O,         // INDEX_SCHEMA
-				index.Name.O,          // INDEX_NAME
-				i+1,                   // SEQ_IN_INDEX
-				defCausName,               // COLUMN_NAME
-				"A",                   // COLLATION
-				0,                     // CARDINALITY
-				nil,                   // SUB_PART
-				nil,                   // PACKED
-				nullable,              // NULLABLE
-				"BTREE",               // INDEX_TYPE
-				"",                    // COMMENT
-				"",                    // INDEX_COMMENT
-				visible,               // IS_VISIBLE
-				expression,            // Expression
+				schemaReplicant.Name.O,     // TABLE_SCHEMA
+				block.Name.O,               // TABLE_NAME
+				nonUnique,                  // NON_UNIQUE
+				schemaReplicant.Name.O,     // INDEX_SCHEMA
+				index.Name.O,               // INDEX_NAME
+				i+1,                        // SEQ_IN_INDEX
+				defCausName,                // COLUMN_NAME
+				"A",                        // COLLATION
+				0,                          // CARDINALITY
+				nil,                        // SUB_PART
+				nil,                        // PACKED
+				nullable,                   // NULLABLE
+				"BTREE",                    // INDEX_TYPE
+				"",                         // COMMENT
+				"",                         // INDEX_COMMENT
+				visible,                    // IS_VISIBLE
+				expression,                 // Expression
 			)
 			rows = append(rows, record)
 		}
@@ -433,7 +433,7 @@ func (e *memblockRetriever) setDataFromBlocks(ctx stochastikctx.Context, schemas
 				continue
 			}
 
-			if checker != nil && !checker.RequestVerification(ctx.GetStochastikVars().ActiveRoles, schemaReplicant.Name.L, block.Name.L, "", allegrosql.AllPrivMask) {
+			if checker != nil && !checker.RequestVerification(ctx.GetStochaseinstein_dbars().ActiveRoles, schemaReplicant.Name.L, block.Name.L, "", allegrosql.AllPrivMask) {
 				continue
 			}
 			pkType := "NON-CLUSTERED"
@@ -478,57 +478,57 @@ func (e *memblockRetriever) setDataFromBlocks(ctx stochastikctx.Context, schemas
 				shardingInfo := schemareplicant.GetShardingInfo(schemaReplicant, block)
 				record := types.MakeCausets(
 					schemareplicant.CatalogVal, // TABLE_CATALOG
-					schemaReplicant.Name.O,         // TABLE_SCHEMA
-					block.Name.O,          // TABLE_NAME
-					blockType,             // TABLE_TYPE
-					"InnoDB",              // ENGINE
-					uint64(10),            // VERSION
-					"Compact",             // ROW_FORMAT
-					rowCount,              // TABLE_ROWS
-					avgEventLength,          // AVG_ROW_LENGTH
-					dataLength,            // DATA_LENGTH
-					uint64(0),             // MAX_DATA_LENGTH
-					indexLength,           // INDEX_LENGTH
-					uint64(0),             // DATA_FREE
-					autoIncID,             // AUTO_INCREMENT
-					createTime,            // CREATE_TIME
-					nil,                   // UFIDelATE_TIME
-					nil,                   // CHECK_TIME
-					defCauslation,             // TABLE_COLLATION
-					nil,                   // CHECKSUM
-					createOptions,         // CREATE_OPTIONS
-					block.Comment,         // TABLE_COMMENT
-					block.ID,              // MilevaDB_TABLE_ID
-					shardingInfo,          // MilevaDB_ROW_ID_SHARDING_INFO
-					pkType,                // MilevaDB_PK_TYPE
+					schemaReplicant.Name.O,     // TABLE_SCHEMA
+					block.Name.O,               // TABLE_NAME
+					blockType,                  // TABLE_TYPE
+					"InnoDB",                   // ENGINE
+					uint64(10),                 // VERSION
+					"Compact",                  // ROW_FORMAT
+					rowCount,                   // TABLE_ROWS
+					avgEventLength,             // AVG_ROW_LENGTH
+					dataLength,                 // DATA_LENGTH
+					uint64(0),                  // MAX_DATA_LENGTH
+					indexLength,                // INDEX_LENGTH
+					uint64(0),                  // DATA_FREE
+					autoIncID,                  // AUTO_INCREMENT
+					createTime,                 // CREATE_TIME
+					nil,                        // UFIDelATE_TIME
+					nil,                        // CHECK_TIME
+					defCauslation,              // TABLE_COLLATION
+					nil,                        // CHECKSUM
+					createOptions,              // CREATE_OPTIONS
+					block.Comment,              // TABLE_COMMENT
+					block.ID,                   // MilevaDB_TABLE_ID
+					shardingInfo,               // MilevaDB_ROW_ID_SHARDING_INFO
+					pkType,                     // MilevaDB_PK_TYPE
 				)
 				rows = append(rows, record)
 			} else {
 				record := types.MakeCausets(
 					schemareplicant.CatalogVal, // TABLE_CATALOG
-					schemaReplicant.Name.O,         // TABLE_SCHEMA
-					block.Name.O,          // TABLE_NAME
-					"VIEW",                // TABLE_TYPE
-					nil,                   // ENGINE
-					nil,                   // VERSION
-					nil,                   // ROW_FORMAT
-					nil,                   // TABLE_ROWS
-					nil,                   // AVG_ROW_LENGTH
-					nil,                   // DATA_LENGTH
-					nil,                   // MAX_DATA_LENGTH
-					nil,                   // INDEX_LENGTH
-					nil,                   // DATA_FREE
-					nil,                   // AUTO_INCREMENT
-					createTime,            // CREATE_TIME
-					nil,                   // UFIDelATE_TIME
-					nil,                   // CHECK_TIME
-					nil,                   // TABLE_COLLATION
-					nil,                   // CHECKSUM
-					nil,                   // CREATE_OPTIONS
-					"VIEW",                // TABLE_COMMENT
-					block.ID,              // MilevaDB_TABLE_ID
-					nil,                   // MilevaDB_ROW_ID_SHARDING_INFO
-					pkType,                // MilevaDB_PK_TYPE
+					schemaReplicant.Name.O,     // TABLE_SCHEMA
+					block.Name.O,               // TABLE_NAME
+					"VIEW",                     // TABLE_TYPE
+					nil,                        // ENGINE
+					nil,                        // VERSION
+					nil,                        // ROW_FORMAT
+					nil,                        // TABLE_ROWS
+					nil,                        // AVG_ROW_LENGTH
+					nil,                        // DATA_LENGTH
+					nil,                        // MAX_DATA_LENGTH
+					nil,                        // INDEX_LENGTH
+					nil,                        // DATA_FREE
+					nil,                        // AUTO_INCREMENT
+					createTime,                 // CREATE_TIME
+					nil,                        // UFIDelATE_TIME
+					nil,                        // CHECK_TIME
+					nil,                        // TABLE_COLLATION
+					nil,                        // CHECKSUM
+					nil,                        // CREATE_OPTIONS
+					"VIEW",                     // TABLE_COMMENT
+					block.ID,                   // MilevaDB_TABLE_ID
+					nil,                        // MilevaDB_ROW_ID_SHARDING_INFO
+					pkType,                     // MilevaDB_PK_TYPE
 				)
 				rows = append(rows, record)
 			}
@@ -547,7 +547,7 @@ func (e *hugeMemBlockRetriever) setDataForDeferredCausets(ctx stochastikctx.Cont
 		for e.tblIdx < len(schemaReplicant.Blocks) {
 			block := schemaReplicant.Blocks[e.tblIdx]
 			e.tblIdx++
-			if checker != nil && !checker.RequestVerification(ctx.GetStochastikVars().ActiveRoles, schemaReplicant.Name.L, block.Name.L, "", allegrosql.AllPrivMask) {
+			if checker != nil && !checker.RequestVerification(ctx.GetStochaseinstein_dbars().ActiveRoles, schemaReplicant.Name.L, block.Name.L, "", allegrosql.AllPrivMask) {
 				continue
 			}
 
@@ -620,27 +620,27 @@ func (e *hugeMemBlockRetriever) dataForDeferredCausetsInBlock(schemaReplicant *p
 			defCausumnDefault = fmt.Sprintf("%v", defCausumnDesc.DefaultValue)
 		}
 		record := types.MakeCausets(
-			schemareplicant.CatalogVal,                // TABLE_CATALOG
-			schemaReplicant.Name.O,                        // TABLE_SCHEMA
-			tbl.Name.O,                           // TABLE_NAME
-			defCaus.Name.O,                           // COLUMN_NAME
-			i+1,                                  // ORIGINAL_POSITION
-			defCausumnDefault,                        // COLUMN_DEFAULT
-			defCausumnDesc.Null,                      // IS_NULLABLE
+			schemareplicant.CatalogVal, // TABLE_CATALOG
+			schemaReplicant.Name.O,     // TABLE_SCHEMA
+			tbl.Name.O,                 // TABLE_NAME
+			defCaus.Name.O,             // COLUMN_NAME
+			i+1,                        // ORIGINAL_POSITION
+			defCausumnDefault,          // COLUMN_DEFAULT
+			defCausumnDesc.Null,        // IS_NULLABLE
 			types.TypeToStr(defCaus.Tp, defCaus.Charset), // DATA_TYPE
 			charMaxLen,                           // CHARACTER_MAXIMUM_LENGTH
 			charOctLen,                           // CHARACTER_OCTET_LENGTH
 			numericPrecision,                     // NUMERIC_PRECISION
 			numericScale,                         // NUMERIC_SCALE
 			datetimePrecision,                    // DATETIME_PRECISION
-			defCausumnDesc.Charset,                   // CHARACTER_SET_NAME
-			defCausumnDesc.DefCauslation,                 // COLLATION_NAME
-			defCausumnType,                           // COLUMN_TYPE
-			defCausumnDesc.Key,                       // COLUMN_KEY
-			defCausumnDesc.Extra,                     // EXTRA
-			"select,insert,uFIDelate,references",    // PRIVILEGES
-			defCausumnDesc.Comment,                   // COLUMN_COMMENT
-			defCaus.GeneratedExprString,              // GENERATION_EXPRESSION
+			defCausumnDesc.Charset,               // CHARACTER_SET_NAME
+			defCausumnDesc.DefCauslation,         // COLLATION_NAME
+			defCausumnType,                       // COLUMN_TYPE
+			defCausumnDesc.Key,                   // COLUMN_KEY
+			defCausumnDesc.Extra,                 // EXTRA
+			"select,insert,uFIDelate,references", // PRIVILEGES
+			defCausumnDesc.Comment,               // COLUMN_COMMENT
+			defCaus.GeneratedExprString,          // GENERATION_EXPRESSION
 		)
 		e.rows = append(e.rows, record)
 	}
@@ -656,7 +656,7 @@ func (e *memblockRetriever) setDataFromPartitions(ctx stochastikctx.Context, sch
 	createTimeTp := allegrosql.TypeDatetime
 	for _, schemaReplicant := range schemas {
 		for _, block := range schemaReplicant.Blocks {
-			if checker != nil && !checker.RequestVerification(ctx.GetStochastikVars().ActiveRoles, schemaReplicant.Name.L, block.Name.L, "", allegrosql.SelectPriv) {
+			if checker != nil && !checker.RequestVerification(ctx.GetStochaseinstein_dbars().ActiveRoles, schemaReplicant.Name.L, block.Name.L, "", allegrosql.SelectPriv) {
 				continue
 			}
 			createTime := types.NewTime(types.FromGoTime(block.GetUFIDelateTime()), createTimeTp, types.DefaultFsp)
@@ -671,30 +671,30 @@ func (e *memblockRetriever) setDataFromPartitions(ctx stochastikctx.Context, sch
 				}
 				record := types.MakeCausets(
 					schemareplicant.CatalogVal, // TABLE_CATALOG
-					schemaReplicant.Name.O,         // TABLE_SCHEMA
-					block.Name.O,          // TABLE_NAME
-					nil,                   // PARTITION_NAME
-					nil,                   // SUBPARTITION_NAME
-					nil,                   // PARTITION_ORDINAL_POSITION
-					nil,                   // SUBPARTITION_ORDINAL_POSITION
-					nil,                   // PARTITION_METHOD
-					nil,                   // SUBPARTITION_METHOD
-					nil,                   // PARTITION_EXPRESSION
-					nil,                   // SUBPARTITION_EXPRESSION
-					nil,                   // PARTITION_DESCRIPTION
-					rowCount,              // TABLE_ROWS
-					avgEventLength,          // AVG_ROW_LENGTH
-					dataLength,            // DATA_LENGTH
-					nil,                   // MAX_DATA_LENGTH
-					indexLength,           // INDEX_LENGTH
-					nil,                   // DATA_FREE
-					createTime,            // CREATE_TIME
-					nil,                   // UFIDelATE_TIME
-					nil,                   // CHECK_TIME
-					nil,                   // CHECKSUM
-					nil,                   // PARTITION_COMMENT
-					nil,                   // NODEGROUP
-					nil,                   // TABLESPACE_NAME
+					schemaReplicant.Name.O,     // TABLE_SCHEMA
+					block.Name.O,               // TABLE_NAME
+					nil,                        // PARTITION_NAME
+					nil,                        // SUBPARTITION_NAME
+					nil,                        // PARTITION_ORDINAL_POSITION
+					nil,                        // SUBPARTITION_ORDINAL_POSITION
+					nil,                        // PARTITION_METHOD
+					nil,                        // SUBPARTITION_METHOD
+					nil,                        // PARTITION_EXPRESSION
+					nil,                        // SUBPARTITION_EXPRESSION
+					nil,                        // PARTITION_DESCRIPTION
+					rowCount,                   // TABLE_ROWS
+					avgEventLength,             // AVG_ROW_LENGTH
+					dataLength,                 // DATA_LENGTH
+					nil,                        // MAX_DATA_LENGTH
+					indexLength,                // INDEX_LENGTH
+					nil,                        // DATA_FREE
+					createTime,                 // CREATE_TIME
+					nil,                        // UFIDelATE_TIME
+					nil,                        // CHECK_TIME
+					nil,                        // CHECKSUM
+					nil,                        // PARTITION_COMMENT
+					nil,                        // NODEGROUP
+					nil,                        // TABLESPACE_NAME
 				)
 				rows = append(rows, record)
 			} else {
@@ -721,30 +721,30 @@ func (e *memblockRetriever) setDataFromPartitions(ctx stochastikctx.Context, sch
 
 					record := types.MakeCausets(
 						schemareplicant.CatalogVal, // TABLE_CATALOG
-						schemaReplicant.Name.O,         // TABLE_SCHEMA
-						block.Name.O,          // TABLE_NAME
-						pi.Name.O,             // PARTITION_NAME
-						nil,                   // SUBPARTITION_NAME
-						i+1,                   // PARTITION_ORDINAL_POSITION
-						nil,                   // SUBPARTITION_ORDINAL_POSITION
-						partitionMethod,       // PARTITION_METHOD
-						nil,                   // SUBPARTITION_METHOD
-						partitionExpr,         // PARTITION_EXPRESSION
-						nil,                   // SUBPARTITION_EXPRESSION
-						partitionDesc,         // PARTITION_DESCRIPTION
-						rowCount,              // TABLE_ROWS
-						avgEventLength,          // AVG_ROW_LENGTH
-						dataLength,            // DATA_LENGTH
-						uint64(0),             // MAX_DATA_LENGTH
-						indexLength,           // INDEX_LENGTH
-						uint64(0),             // DATA_FREE
-						createTime,            // CREATE_TIME
-						nil,                   // UFIDelATE_TIME
-						nil,                   // CHECK_TIME
-						nil,                   // CHECKSUM
-						pi.Comment,            // PARTITION_COMMENT
-						nil,                   // NODEGROUP
-						nil,                   // TABLESPACE_NAME
+						schemaReplicant.Name.O,     // TABLE_SCHEMA
+						block.Name.O,               // TABLE_NAME
+						pi.Name.O,                  // PARTITION_NAME
+						nil,                        // SUBPARTITION_NAME
+						i+1,                        // PARTITION_ORDINAL_POSITION
+						nil,                        // SUBPARTITION_ORDINAL_POSITION
+						partitionMethod,            // PARTITION_METHOD
+						nil,                        // SUBPARTITION_METHOD
+						partitionExpr,              // PARTITION_EXPRESSION
+						nil,                        // SUBPARTITION_EXPRESSION
+						partitionDesc,              // PARTITION_DESCRIPTION
+						rowCount,                   // TABLE_ROWS
+						avgEventLength,             // AVG_ROW_LENGTH
+						dataLength,                 // DATA_LENGTH
+						uint64(0),                  // MAX_DATA_LENGTH
+						indexLength,                // INDEX_LENGTH
+						uint64(0),                  // DATA_FREE
+						createTime,                 // CREATE_TIME
+						nil,                        // UFIDelATE_TIME
+						nil,                        // CHECK_TIME
+						nil,                        // CHECKSUM
+						pi.Comment,                 // PARTITION_COMMENT
+						nil,                        // NODEGROUP
+						nil,                        // TABLESPACE_NAME
 					)
 					rows = append(rows, record)
 				}
@@ -760,7 +760,7 @@ func (e *memblockRetriever) setDataFromIndexes(ctx stochastikctx.Context, schema
 	var rows [][]types.Causet
 	for _, schemaReplicant := range schemas {
 		for _, tb := range schemaReplicant.Blocks {
-			if checker != nil && !checker.RequestVerification(ctx.GetStochastikVars().ActiveRoles, schemaReplicant.Name.L, tb.Name.L, "", allegrosql.AllPrivMask) {
+			if checker != nil && !checker.RequestVerification(ctx.GetStochaseinstein_dbars().ActiveRoles, schemaReplicant.Name.L, tb.Name.L, "", allegrosql.AllPrivMask) {
 				continue
 			}
 
@@ -774,16 +774,16 @@ func (e *memblockRetriever) setDataFromIndexes(ctx stochastikctx.Context, schema
 				}
 				record := types.MakeCausets(
 					schemaReplicant.Name.O, // TABLE_SCHEMA
-					tb.Name.O,     // TABLE_NAME
-					0,             // NON_UNIQUE
-					"PRIMARY",     // KEY_NAME
-					1,             // SEQ_IN_INDEX
-					pkDefCaus.Name.O,  // COLUMN_NAME
-					nil,           // SUB_PART
-					"",            // INDEX_COMMENT
-					nil,           // Expression
-					0,             // INDEX_ID
-					"YES",         // IS_VISIBLE
+					tb.Name.O,              // TABLE_NAME
+					0,                      // NON_UNIQUE
+					"PRIMARY",              // KEY_NAME
+					1,                      // SEQ_IN_INDEX
+					pkDefCaus.Name.O,       // COLUMN_NAME
+					nil,                    // SUB_PART
+					"",                     // INDEX_COMMENT
+					nil,                    // Expression
+					0,                      // INDEX_ID
+					"YES",                  // IS_VISIBLE
 				)
 				rows = append(rows, record)
 			}
@@ -813,17 +813,17 @@ func (e *memblockRetriever) setDataFromIndexes(ctx stochastikctx.Context, schema
 						visible = "NO"
 					}
 					record := types.MakeCausets(
-						schemaReplicant.Name.O,   // TABLE_SCHEMA
-						tb.Name.O,       // TABLE_NAME
-						nonUniq,         // NON_UNIQUE
-						idxInfo.Name.O,  // KEY_NAME
-						i+1,             // SEQ_IN_INDEX
-						defCausName,         // COLUMN_NAME
-						subPart,         // SUB_PART
-						idxInfo.Comment, // INDEX_COMMENT
-						expression,      // Expression
-						idxInfo.ID,      // INDEX_ID
-						visible,         // IS_VISIBLE
+						schemaReplicant.Name.O, // TABLE_SCHEMA
+						tb.Name.O,              // TABLE_NAME
+						nonUniq,                // NON_UNIQUE
+						idxInfo.Name.O,         // KEY_NAME
+						i+1,                    // SEQ_IN_INDEX
+						defCausName,            // COLUMN_NAME
+						subPart,                // SUB_PART
+						idxInfo.Comment,        // INDEX_COMMENT
+						expression,             // Expression
+						idxInfo.ID,             // INDEX_ID
+						visible,                // IS_VISIBLE
 					)
 					rows = append(rows, record)
 				}
@@ -849,12 +849,12 @@ func (e *memblockRetriever) setDataFromViews(ctx stochastikctx.Context, schemas 
 			if charset == "" {
 				charset = allegrosql.DefaultCharset
 			}
-			if checker != nil && !checker.RequestVerification(ctx.GetStochastikVars().ActiveRoles, schemaReplicant.Name.L, block.Name.L, "", allegrosql.AllPrivMask) {
+			if checker != nil && !checker.RequestVerification(ctx.GetStochaseinstein_dbars().ActiveRoles, schemaReplicant.Name.L, block.Name.L, "", allegrosql.AllPrivMask) {
 				continue
 			}
 			record := types.MakeCausets(
-				schemareplicant.CatalogVal,           // TABLE_CATALOG
-				schemaReplicant.Name.O,                   // TABLE_SCHEMA
+				schemareplicant.CatalogVal,      // TABLE_CATALOG
+				schemaReplicant.Name.O,          // TABLE_SCHEMA
 				block.Name.O,                    // TABLE_NAME
 				block.View.SelectStmt,           // VIEW_DEFINITION
 				block.View.CheckOption.String(), // CHECK_OPTION
@@ -862,7 +862,7 @@ func (e *memblockRetriever) setDataFromViews(ctx stochastikctx.Context, schemas 
 				block.View.Definer.String(),     // DEFINER
 				block.View.Security.String(),    // SECURITY_TYPE
 				charset,                         // CHARACTER_SET_CLIENT
-				defCauslation,                       // COLLATION_CONNECTION
+				defCauslation,                   // COLLATION_CONNECTION
 			)
 			rows = append(rows, record)
 		}
@@ -876,7 +876,7 @@ func (e *memblockRetriever) dataForEinsteinDBStoreStatus(ctx stochastikctx.Conte
 		return errors.New("Information about EinsteinDB causetstore status can be gotten only when the storage is EinsteinDB")
 	}
 	einsteindbHelper := &helper.Helper{
-		CausetStore:       einsteindbStore,
+		CausetStore: einsteindbStore,
 		RegionCache: einsteindbStore.GetRegionCache(),
 	}
 	storesStat, err := einsteindbHelper.GetStoresStat()
@@ -938,7 +938,7 @@ func (e *DBSJobsReaderExec) Open(ctx context.Context) error {
 		return err
 	}
 	e.DBSJobRetriever.is = e.is
-	e.activeRoles = e.ctx.GetStochastikVars().ActiveRoles
+	e.activeRoles = e.ctx.GetStochaseinstein_dbars().ActiveRoles
 	err = e.DBSJobRetriever.initial(txn)
 	if err != nil {
 		return err
@@ -1066,7 +1066,7 @@ func (e *memblockRetriever) setDataFromKeyDeferredCausetUsage(ctx stochastikctx.
 	rows := make([][]types.Causet, 0, len(schemas)) // The capacity is not accurate, but it is not a big problem.
 	for _, schemaReplicant := range schemas {
 		for _, block := range schemaReplicant.Blocks {
-			if checker != nil && !checker.RequestVerification(ctx.GetStochastikVars().ActiveRoles, schemaReplicant.Name.L, block.Name.L, "", allegrosql.AllPrivMask) {
+			if checker != nil && !checker.RequestVerification(ctx.GetStochaseinstein_dbars().ActiveRoles, schemaReplicant.Name.L, block.Name.L, "", allegrosql.AllPrivMask) {
 				continue
 			}
 			rs := keyDeferredCausetUsageInBlock(schemaReplicant, block)
@@ -1092,10 +1092,10 @@ func (e *memblockRetriever) setDataForProcessList(ctx stochastikctx.Context) {
 		return
 	}
 
-	loginUser := ctx.GetStochastikVars().User
+	loginUser := ctx.GetStochaseinstein_dbars().User
 	var hasProcessPriv bool
 	if pm := privilege.GetPrivilegeManager(ctx); pm != nil {
-		if pm.RequestVerification(ctx.GetStochastikVars().ActiveRoles, "", "", "", allegrosql.ProcessPriv) {
+		if pm.RequestVerification(ctx.GetStochaseinstein_dbars().ActiveRoles, "", "", "", allegrosql.ProcessPriv) {
 			hasProcessPriv = true
 		}
 	}
@@ -1110,7 +1110,7 @@ func (e *memblockRetriever) setDataForProcessList(ctx stochastikctx.Context) {
 			continue
 		}
 
-		rows := pi.ToEvent(ctx.GetStochastikVars().StmtCtx.TimeZone)
+		rows := pi.ToEvent(ctx.GetStochaseinstein_dbars().StmtCtx.TimeZone)
 		record := types.MakeCausets(rows...)
 		records = append(records, record)
 	}
@@ -1132,8 +1132,8 @@ func (e *memblockRetriever) setDataForMetricBlocks(ctx stochastikctx.Context) {
 	for _, name := range blocks {
 		schemaReplicant := schemareplicant.MetricBlockMap[name]
 		record := types.MakeCausets(
-			name,                             // METRICS_NAME
-			schemaReplicant.PromQL,                    // PROMQL
+			name,                   // METRICS_NAME
+			schemaReplicant.PromQL, // PROMQL
 			strings.Join(schemaReplicant.Labels, ","), // LABELS
 			schemaReplicant.Quantile,                  // QUANTILE
 			schemaReplicant.Comment,                   // COMMENT
@@ -1150,17 +1150,17 @@ func keyDeferredCausetUsageInBlock(schemaReplicant *perceptron.DBInfo, block *pe
 			if allegrosql.HasPriKeyFlag(defCaus.Flag) {
 				record := types.MakeCausets(
 					schemareplicant.CatalogVal,        // CONSTRAINT_CATALOG
-					schemaReplicant.Name.O,                // CONSTRAINT_SCHEMA
+					schemaReplicant.Name.O,            // CONSTRAINT_SCHEMA
 					schemareplicant.PrimaryConstraint, // CONSTRAINT_NAME
 					schemareplicant.CatalogVal,        // TABLE_CATALOG
-					schemaReplicant.Name.O,                // TABLE_SCHEMA
-					block.Name.O,                 // TABLE_NAME
-					defCaus.Name.O,                   // COLUMN_NAME
-					1,                            // ORDINAL_POSITION
-					1,                            // POSITION_IN_UNIQUE_CONSTRAINT
-					nil,                          // REFERENCED_TABLE_SCHEMA
-					nil,                          // REFERENCED_TABLE_NAME
-					nil,                          // REFERENCED_COLUMN_NAME
+					schemaReplicant.Name.O,            // TABLE_SCHEMA
+					block.Name.O,                      // TABLE_NAME
+					defCaus.Name.O,                    // COLUMN_NAME
+					1,                                 // ORDINAL_POSITION
+					1,                                 // POSITION_IN_UNIQUE_CONSTRAINT
+					nil,                               // REFERENCED_TABLE_SCHEMA
+					nil,                               // REFERENCED_TABLE_NAME
+					nil,                               // REFERENCED_COLUMN_NAME
 				)
 				rows = append(rows, record)
 				break
@@ -1185,17 +1185,17 @@ func keyDeferredCausetUsageInBlock(schemaReplicant *perceptron.DBInfo, block *pe
 			defCaus := nameToDefCaus[key.Name.L]
 			record := types.MakeCausets(
 				schemareplicant.CatalogVal, // CONSTRAINT_CATALOG
-				schemaReplicant.Name.O,         // CONSTRAINT_SCHEMA
-				idxName,               // CONSTRAINT_NAME
+				schemaReplicant.Name.O,     // CONSTRAINT_SCHEMA
+				idxName,                    // CONSTRAINT_NAME
 				schemareplicant.CatalogVal, // TABLE_CATALOG
-				schemaReplicant.Name.O,         // TABLE_SCHEMA
-				block.Name.O,          // TABLE_NAME
-				defCaus.Name.O,            // COLUMN_NAME
-				i+1,                   // ORDINAL_POSITION,
-				nil,                   // POSITION_IN_UNIQUE_CONSTRAINT
-				nil,                   // REFERENCED_TABLE_SCHEMA
-				nil,                   // REFERENCED_TABLE_NAME
-				nil,                   // REFERENCED_COLUMN_NAME
+				schemaReplicant.Name.O,     // TABLE_SCHEMA
+				block.Name.O,               // TABLE_NAME
+				defCaus.Name.O,             // COLUMN_NAME
+				i+1,                        // ORDINAL_POSITION,
+				nil,                        // POSITION_IN_UNIQUE_CONSTRAINT
+				nil,                        // REFERENCED_TABLE_SCHEMA
+				nil,                        // REFERENCED_TABLE_NAME
+				nil,                        // REFERENCED_COLUMN_NAME
 			)
 			rows = append(rows, record)
 		}
@@ -1209,17 +1209,17 @@ func keyDeferredCausetUsageInBlock(schemaReplicant *perceptron.DBInfo, block *pe
 			defCaus := nameToDefCaus[key.L]
 			record := types.MakeCausets(
 				schemareplicant.CatalogVal, // CONSTRAINT_CATALOG
-				schemaReplicant.Name.O,         // CONSTRAINT_SCHEMA
-				fk.Name.O,             // CONSTRAINT_NAME
+				schemaReplicant.Name.O,     // CONSTRAINT_SCHEMA
+				fk.Name.O,                  // CONSTRAINT_NAME
 				schemareplicant.CatalogVal, // TABLE_CATALOG
-				schemaReplicant.Name.O,         // TABLE_SCHEMA
-				block.Name.O,          // TABLE_NAME
-				defCaus.Name.O,            // COLUMN_NAME
-				i+1,                   // ORDINAL_POSITION,
-				1,                     // POSITION_IN_UNIQUE_CONSTRAINT
-				schemaReplicant.Name.O,         // REFERENCED_TABLE_SCHEMA
-				fk.RefBlock.O,         // REFERENCED_TABLE_NAME
-				fkRefDefCaus,              // REFERENCED_COLUMN_NAME
+				schemaReplicant.Name.O,     // TABLE_SCHEMA
+				block.Name.O,               // TABLE_NAME
+				defCaus.Name.O,             // COLUMN_NAME
+				i+1,                        // ORDINAL_POSITION,
+				1,                          // POSITION_IN_UNIQUE_CONSTRAINT
+				schemaReplicant.Name.O,     // REFERENCED_TABLE_SCHEMA
+				fk.RefBlock.O,              // REFERENCED_TABLE_NAME
+				fkRefDefCaus,               // REFERENCED_COLUMN_NAME
 			)
 			rows = append(rows, record)
 		}
@@ -1233,14 +1233,14 @@ func (e *memblockRetriever) setDataForEinsteinDBRegionStatus(ctx stochastikctx.C
 		return errors.New("Information about EinsteinDB region status can be gotten only when the storage is EinsteinDB")
 	}
 	einsteindbHelper := &helper.Helper{
-		CausetStore:       einsteindbStore,
+		CausetStore: einsteindbStore,
 		RegionCache: einsteindbStore.GetRegionCache(),
 	}
 	regionsInfo, err := einsteindbHelper.GetRegionsInfo()
 	if err != nil {
 		return err
 	}
-	allSchemas := ctx.GetStochastikVars().TxnCtx.SchemaReplicant.(schemareplicant.SchemaReplicant).AllSchemas()
+	allSchemas := ctx.GetStochaseinstein_dbars().TxnCtx.SchemaReplicant.(schemareplicant.SchemaReplicant).AllSchemas()
 	blockInfos := einsteindbHelper.GetRegionsBlockInfo(regionsInfo, allSchemas)
 	for _, region := range regionsInfo.Regions {
 		blockList := blockInfos[region.ID]
@@ -1290,7 +1290,7 @@ func (e *memblockRetriever) setDataForEinsteinDBRegionPeers(ctx stochastikctx.Co
 		return errors.New("Information about EinsteinDB region status can be gotten only when the storage is EinsteinDB")
 	}
 	einsteindbHelper := &helper.Helper{
-		CausetStore:       einsteindbStore,
+		CausetStore: einsteindbStore,
 		RegionCache: einsteindbStore.GetRegionCache(),
 	}
 	regionsInfo, err := einsteindbHelper.GetRegionsInfo()
@@ -1352,9 +1352,9 @@ func (e *memblockRetriever) setDataForMilevaDBHotRegions(ctx stochastikctx.Conte
 	if !ok {
 		return errors.New("Information about hot region can be gotten only when the storage is EinsteinDB")
 	}
-	allSchemas := ctx.GetStochastikVars().TxnCtx.SchemaReplicant.(schemareplicant.SchemaReplicant).AllSchemas()
+	allSchemas := ctx.GetStochaseinstein_dbars().TxnCtx.SchemaReplicant.(schemareplicant.SchemaReplicant).AllSchemas()
 	einsteindbHelper := &helper.Helper{
-		CausetStore:       einsteindbStore,
+		CausetStore: einsteindbStore,
 		RegionCache: einsteindbStore.GetRegionCache(),
 	}
 	metrics, err := einsteindbHelper.ScrapeHotInfo(FIDelapi.HotRead, allSchemas)
@@ -1405,17 +1405,17 @@ func (e *memblockRetriever) setDataFromBlockConstraints(ctx stochastikctx.Contex
 	var rows [][]types.Causet
 	for _, schemaReplicant := range schemas {
 		for _, tbl := range schemaReplicant.Blocks {
-			if checker != nil && !checker.RequestVerification(ctx.GetStochastikVars().ActiveRoles, schemaReplicant.Name.L, tbl.Name.L, "", allegrosql.AllPrivMask) {
+			if checker != nil && !checker.RequestVerification(ctx.GetStochaseinstein_dbars().ActiveRoles, schemaReplicant.Name.L, tbl.Name.L, "", allegrosql.AllPrivMask) {
 				continue
 			}
 
 			if tbl.PKIsHandle {
 				record := types.MakeCausets(
 					schemareplicant.CatalogVal,     // CONSTRAINT_CATALOG
-					schemaReplicant.Name.O,             // CONSTRAINT_SCHEMA
+					schemaReplicant.Name.O,         // CONSTRAINT_SCHEMA
 					allegrosql.PrimaryKeyName,      // CONSTRAINT_NAME
-					schemaReplicant.Name.O,             // TABLE_SCHEMA
-					tbl.Name.O,                // TABLE_NAME
+					schemaReplicant.Name.O,         // TABLE_SCHEMA
+					tbl.Name.O,                     // TABLE_NAME
 					schemareplicant.PrimaryKeyType, // CONSTRAINT_TYPE
 				)
 				rows = append(rows, record)
@@ -1435,11 +1435,11 @@ func (e *memblockRetriever) setDataFromBlockConstraints(ctx stochastikctx.Contex
 				}
 				record := types.MakeCausets(
 					schemareplicant.CatalogVal, // CONSTRAINT_CATALOG
-					schemaReplicant.Name.O,         // CONSTRAINT_SCHEMA
-					cname,                 // CONSTRAINT_NAME
-					schemaReplicant.Name.O,         // TABLE_SCHEMA
-					tbl.Name.O,            // TABLE_NAME
-					ctype,                 // CONSTRAINT_TYPE
+					schemaReplicant.Name.O,     // CONSTRAINT_SCHEMA
+					cname,                      // CONSTRAINT_NAME
+					schemaReplicant.Name.O,     // TABLE_SCHEMA
+					tbl.Name.O,                 // TABLE_NAME
+					ctype,                      // CONSTRAINT_TYPE
 				)
 				rows = append(rows, record)
 			}
@@ -1451,15 +1451,15 @@ func (e *memblockRetriever) setDataFromBlockConstraints(ctx stochastikctx.Contex
 // blockStorageStatsRetriever is used to read slow log data.
 type blockStorageStatsRetriever struct {
 	dummyCloser
-	block         *perceptron.BlockInfo
-	outputDefCauss    []*perceptron.DeferredCausetInfo
-	retrieved     bool
-	initialized   bool
-	extractor     *plannercore.BlockStorageStatsExtractor
-	initialBlocks []*initialBlock
-	curBlock      int
-	helper        *helper.Helper
-	stats         helper.FIDelRegionStats
+	block          *perceptron.BlockInfo
+	outputDefCauss []*perceptron.DeferredCausetInfo
+	retrieved      bool
+	initialized    bool
+	extractor      *plannercore.BlockStorageStatsExtractor
+	initialBlocks  []*initialBlock
+	curBlock       int
+	helper         *helper.Helper
+	stats          helper.FIDelRegionStats
 }
 
 func (e *blockStorageStatsRetriever) retrieve(ctx context.Context, sctx stochastikctx.Context) ([][]types.Causet, error) {
@@ -1563,7 +1563,7 @@ func (e *blockStorageStatsRetriever) setDataForBlockStorageStats(ctx stochastikc
 		peerCount := len(e.stats.StorePeerCount)
 
 		record := types.MakeCausets(
-			block.EDB,            // TABLE_SCHEMA
+			block.EDB,           // TABLE_SCHEMA
 			block.Name.O,        // TABLE_NAME
 			blockID,             // TABLE_ID
 			peerCount,           // TABLE_PEER_COUNT
@@ -1579,13 +1579,13 @@ func (e *blockStorageStatsRetriever) setDataForBlockStorageStats(ctx stochastikc
 	return rows, nil
 }
 
-func (e *memblockRetriever) setDataFromStochastikVar(ctx stochastikctx.Context) error {
+func (e *memblockRetriever) setDataFromStochaseinstein_dbar(ctx stochastikctx.Context) error {
 	var rows [][]types.Causet
 	var err error
-	stochastikVars := ctx.GetStochastikVars()
+	stochaseinstein_dbars := ctx.GetStochaseinstein_dbars()
 	for _, v := range variable.SysVars {
 		var value string
-		value, err = variable.GetStochastikSystemVar(stochastikVars, v.Name)
+		value, err = variable.GetStochastikSystemVar(stochaseinstein_dbars, v.Name)
 		if err != nil {
 			return err
 		}
@@ -1607,13 +1607,13 @@ func dataForAnalyzeStatusHelper(sctx stochastikctx.Context) (rows [][]types.Caus
 		} else {
 			startTime = types.NewTime(types.FromGoTime(job.StartTime), allegrosql.TypeDatetime, 0)
 		}
-		if checker == nil || checker.RequestVerification(sctx.GetStochastikVars().ActiveRoles, job.DBName, job.BlockName, "", allegrosql.AllPrivMask) {
+		if checker == nil || checker.RequestVerification(sctx.GetStochaseinstein_dbars().ActiveRoles, job.DBName, job.BlockName, "", allegrosql.AllPrivMask) {
 			rows = append(rows, types.MakeCausets(
 				job.DBName,        // TABLE_SCHEMA
 				job.BlockName,     // TABLE_NAME
 				job.PartitionName, // PARTITION_NAME
 				job.JobInfo,       // JOB_INFO
-				job.EventCount,      // ROW_COUNT
+				job.EventCount,    // ROW_COUNT
 				startTime,         // START_TIME
 				job.State,         // STATE
 			))
@@ -1630,7 +1630,7 @@ func (e *memblockRetriever) setDataForAnalyzeStatus(sctx stochastikctx.Context) 
 
 // setDataForPseudoProfiling returns pseudo data for block profiling when system variable `profiling` is set to `ON`.
 func (e *memblockRetriever) setDataForPseudoProfiling(sctx stochastikctx.Context) {
-	if v, ok := sctx.GetStochastikVars().GetSystemVar("profiling"); ok && variable.MilevaDBOptOn(v) {
+	if v, ok := sctx.GetStochaseinstein_dbars().GetSystemVar("profiling"); ok && variable.MilevaDBOptOn(v) {
 		event := types.MakeCausets(
 			0,                      // QUERY_ID
 			0,                      // SEQ
@@ -1687,21 +1687,21 @@ func (e *memblockRetriever) setDataFromSequences(ctx stochastikctx.Context, sche
 			if !block.IsSequence() {
 				continue
 			}
-			if checker != nil && !checker.RequestVerification(ctx.GetStochastikVars().ActiveRoles, schemaReplicant.Name.L, block.Name.L, "", allegrosql.AllPrivMask) {
+			if checker != nil && !checker.RequestVerification(ctx.GetStochaseinstein_dbars().ActiveRoles, schemaReplicant.Name.L, block.Name.L, "", allegrosql.AllPrivMask) {
 				continue
 			}
 			record := types.MakeCausets(
-				schemareplicant.CatalogVal,     // TABLE_CATALOG
-				schemaReplicant.Name.O,             // TABLE_SCHEMA
-				block.Name.O,              // TABLE_NAME
-				block.Sequence.Cache,      // Cache
-				block.Sequence.CacheValue, // CACHE_VALUE
-				block.Sequence.Cycle,      // CYCLE
-				block.Sequence.Increment,  // INCREMENT
-				block.Sequence.MaxValue,   // MAXVALUE
-				block.Sequence.MinValue,   // MINVALUE
-				block.Sequence.Start,      // START
-				block.Sequence.Comment,    // COMMENT
+				schemareplicant.CatalogVal, // TABLE_CATALOG
+				schemaReplicant.Name.O,     // TABLE_SCHEMA
+				block.Name.O,               // TABLE_NAME
+				block.Sequence.Cache,       // Cache
+				block.Sequence.CacheValue,  // CACHE_VALUE
+				block.Sequence.Cycle,       // CYCLE
+				block.Sequence.Increment,   // INCREMENT
+				block.Sequence.MaxValue,    // MAXVALUE
+				block.Sequence.MinValue,    // MINVALUE
+				block.Sequence.Start,       // START
+				block.Sequence.Comment,     // COMMENT
 			)
 			rows = append(rows, record)
 		}
@@ -1714,7 +1714,7 @@ func (e *memblockRetriever) dataForBlockTiFlashReplica(ctx stochastikctx.Context
 	var rows [][]types.Causet
 	progressMap, err := infosync.GetTiFlashBlockSyncProgress(context.Background())
 	if err != nil {
-		ctx.GetStochastikVars().StmtCtx.AppendWarning(err)
+		ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(err)
 	}
 	for _, schemaReplicant := range schemas {
 		for _, tbl := range schemaReplicant.Blocks {
@@ -1738,7 +1738,7 @@ func (e *memblockRetriever) dataForBlockTiFlashReplica(ctx stochastikctx.Context
 				}
 			}
 			record := types.MakeCausets(
-				schemaReplicant.Name.O,                   // TABLE_SCHEMA
+				schemaReplicant.Name.O,          // TABLE_SCHEMA
 				tbl.Name.O,                      // TABLE_NAME
 				tbl.ID,                          // TABLE_ID
 				int64(tbl.TiFlashReplica.Count), // REPLICA_COUNT
@@ -1754,7 +1754,7 @@ func (e *memblockRetriever) dataForBlockTiFlashReplica(ctx stochastikctx.Context
 }
 
 func (e *memblockRetriever) setDataForStatementsSummary(ctx stochastikctx.Context, blockName string) error {
-	user := ctx.GetStochastikVars().User
+	user := ctx.GetStochaseinstein_dbars().User
 	isSuper := false
 	if pm := privilege.GetPrivilegeManager(ctx); pm != nil {
 		isSuper = pm.RequestVerificationWithUser("", "", "", allegrosql.SuperPriv, user)
@@ -1782,7 +1782,7 @@ func (e *memblockRetriever) setDataForStatementsSummary(ctx stochastikctx.Contex
 type hugeMemBlockRetriever struct {
 	dummyCloser
 	block       *perceptron.BlockInfo
-	defCausumns     []*perceptron.DeferredCausetInfo
+	defCausumns []*perceptron.DeferredCausetInfo
 	retrieved   bool
 	initialized bool
 	rows        [][]types.Causet
@@ -1837,15 +1837,15 @@ func adjustDeferredCausets(input [][]types.Causet, outDeferredCausets []*percept
 // TiFlashSystemBlockRetriever is used to read system block from tiflash.
 type TiFlashSystemBlockRetriever struct {
 	dummyCloser
-	block         *perceptron.BlockInfo
-	outputDefCauss    []*perceptron.DeferredCausetInfo
-	instanceCount int
-	instanceIdx   int
-	instanceInfos []tiflashInstanceInfo
-	rowIdx        int
-	retrieved     bool
-	initialized   bool
-	extractor     *plannercore.TiFlashSystemBlockExtractor
+	block          *perceptron.BlockInfo
+	outputDefCauss []*perceptron.DeferredCausetInfo
+	instanceCount  int
+	instanceIdx    int
+	instanceInfos  []tiflashInstanceInfo
+	rowIdx         int
+	retrieved      bool
+	initialized    bool
+	extractor      *plannercore.TiFlashSystemBlockExtractor
 }
 
 func (e *TiFlashSystemBlockRetriever) retrieve(ctx context.Context, sctx stochastikctx.Context) ([][]types.Causet, error) {
@@ -1911,7 +1911,7 @@ func (e *TiFlashSystemBlockRetriever) initialize(sctx stochastikctx.Context, tif
 					}
 					_, err = soliton.InternalHTTPClient().Do(req)
 					if err != nil {
-						sctx.GetStochastikVars().StmtCtx.AppendWarning(err)
+						sctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(err)
 						continue
 					}
 					e.instanceInfos = append(e.instanceInfos, tiflashInstanceInfo{

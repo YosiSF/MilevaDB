@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/whtcorpsinc/milevadb/plugin"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/plugin"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
 )
 
 // Validate implements MilevaDB plugin's Validate SPI.
@@ -41,7 +41,7 @@ func OnShutdown(ctx context.Context, manifest *plugin.Manifest) error {
 }
 
 // OnGeneralEvent implements MilevaDB Audit plugin's OnGeneralEvent SPI.
-func OnGeneralEvent(ctx context.Context, sctx *variable.StochastikVars, event plugin.GeneralEvent, cmd string) {
+func OnGeneralEvent(ctx context.Context, sctx *variable.Stochaseinstein_dbars, event plugin.GeneralEvent, cmd string) {
 	fmt.Println("conn_ip_example notifiy called")
 	fmt.Println("variable test: ", variable.GetSysVar("conn_ip_example_test_variable").Value)
 	fmt.Printf("new connection by %s\n", ctx.Value("ip"))

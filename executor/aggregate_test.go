@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@ package executor_test
 import (
 	"fmt"
 
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/errors"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/soliton/solitonutil"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
 )
 
 type testSuiteAgg struct {
@@ -557,21 +557,21 @@ func (s *testSuiteAgg) TestGroupConcatAggr(c *C) {
 		tk.MustExec(fmt.Sprintf("set stochastik group_concat_max_len=%v", maxLen))
 		result = tk.MustQuery("select group_concat(id ORDER BY name desc, id asc SEPARATOR '--') from test;")
 		result.Check(testkit.Events(expected[:maxLen]))
-		c.Assert(tk.Se.GetStochastikVars().StmtCtx.GetWarnings(), HasLen, 1)
+		c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings(), HasLen, 1)
 	}
 	expected = "1--2--1--1--3--3"
 	for maxLen := 4; maxLen < len(expected); maxLen++ {
 		tk.MustExec(fmt.Sprintf("set stochastik group_concat_max_len=%v", maxLen))
 		result = tk.MustQuery("select group_concat(id ORDER BY name asc, id desc SEPARATOR '--') from test;")
 		result.Check(testkit.Events(expected[:maxLen]))
-		c.Assert(tk.Se.GetStochastikVars().StmtCtx.GetWarnings(), HasLen, 1)
+		c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings(), HasLen, 1)
 	}
 	expected = "500,200,30,20,10"
 	for maxLen := 4; maxLen < len(expected); maxLen++ {
 		tk.MustExec(fmt.Sprintf("set stochastik group_concat_max_len=%v", maxLen))
 		result = tk.MustQuery("select group_concat(distinct name order by name desc) from test;")
 		result.Check(testkit.Events(expected[:maxLen]))
-		c.Assert(tk.Se.GetStochastikVars().StmtCtx.GetWarnings(), HasLen, 1)
+		c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings(), HasLen, 1)
 	}
 
 	tk.MustExec(fmt.Sprintf("set stochastik group_concat_max_len=%v", 1024))
@@ -1032,7 +1032,7 @@ func (s *testSuiteAgg) TestIssue10608(c *C) {
 
 func (s *testSuiteAgg) TestIssue12759HashAggCalledByApply(c *C) {
 	tk := testkit.NewTestKitWithInit(c, s.causetstore)
-	tk.Se.GetStochastikVars().SetHashAggFinalConcurrency(4)
+	tk.Se.GetStochaseinstein_dbars().SetHashAggFinalConcurrency(4)
 	tk.MustExec(`insert into allegrosql.opt_rule_blacklist value("decorrelate");`)
 	defer func() {
 		tk.MustExec(`delete from allegrosql.opt_rule_blacklist where name = "decorrelate";`)
@@ -1065,21 +1065,21 @@ func (s *testSuiteAgg) TestPR15242ShallowINTERLOCKy(c *C) {
 	tk.MustExec(`insert into t values ('{"id": 1,"score":233}');`)
 	tk.MustExec(`insert into t values ('{"id": 2,"score":233}');`)
 	tk.MustExec(`insert into t values ('{"id": 3,"score":233}');`)
-	tk.Se.GetStochastikVars().MaxChunkSize = 2
+	tk.Se.GetStochaseinstein_dbars().MaxChunkSize = 2
 	tk.MustQuery(`select max(JSON_EXTRACT(a, '$.score')) as max_score,JSON_EXTRACT(a,'$.id') as id from t group by id order by id;`).Check(testkit.Events("233 1", "233 2", "233 3"))
 
 }
 
 func (s *testSuiteAgg) TestIssue15690(c *C) {
 	tk := testkit.NewTestKitWithInit(c, s.causetstore)
-	tk.Se.GetStochastikVars().MaxChunkSize = 2
+	tk.Se.GetStochaseinstein_dbars().MaxChunkSize = 2
 	// check for INT type
 	tk.MustExec(`drop block if exists t;`)
 	tk.MustExec(`create block t(a int);`)
 	tk.MustExec(`insert into t values(null),(null);`)
 	tk.MustExec(`insert into t values(0),(2),(2),(4),(8);`)
 	tk.MustQuery(`select /*+ stream_agg() */ distinct * from t;`).Check(testkit.Events("<nil>", "0", "2", "4", "8"))
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(0))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(0))
 
 	// check for FLOAT type
 	tk.MustExec(`drop block if exists t;`)
@@ -1087,7 +1087,7 @@ func (s *testSuiteAgg) TestIssue15690(c *C) {
 	tk.MustExec(`insert into t values(null),(null),(null),(null);`)
 	tk.MustExec(`insert into t values(1.1),(1.1);`)
 	tk.MustQuery(`select /*+ stream_agg() */ distinct * from t;`).Check(testkit.Events("<nil>", "1.1"))
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(0))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(0))
 
 	// check for DECIMAL type
 	tk.MustExec(`drop block if exists t;`)
@@ -1095,7 +1095,7 @@ func (s *testSuiteAgg) TestIssue15690(c *C) {
 	tk.MustExec(`insert into t values(null),(null),(null);`)
 	tk.MustExec(`insert into t values(1.1),(2.2),(2.2);`)
 	tk.MustQuery(`select /*+ stream_agg() */ distinct * from t;`).Check(testkit.Events("<nil>", "1.1", "2.2"))
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(0))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(0))
 
 	// check for DATETIME type
 	tk.MustExec(`drop block if exists t;`)
@@ -1103,14 +1103,14 @@ func (s *testSuiteAgg) TestIssue15690(c *C) {
 	tk.MustExec(`insert into t values(null);`)
 	tk.MustExec(`insert into t values("2020-03-20 21:50:00"),("2020-03-20 21:50:01"), ("2020-03-20 21:50:00");`)
 	tk.MustQuery(`select /*+ stream_agg() */ distinct * from t;`).Check(testkit.Events("<nil>", "2020-03-20 21:50:00", "2020-03-20 21:50:01"))
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(0))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(0))
 
 	// check for JSON type
 	tk.MustExec(`drop block if exists t;`)
 	tk.MustExec(`create block t(a json);`)
 	tk.MustExec(`insert into t values(null),(null),(null),(null);`)
 	tk.MustQuery(`select /*+ stream_agg() */ distinct * from t;`).Check(testkit.Events("<nil>"))
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(0))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(0))
 
 	// check for char type
 	tk.MustExec(`drop block if exists t;`)
@@ -1118,12 +1118,12 @@ func (s *testSuiteAgg) TestIssue15690(c *C) {
 	tk.MustExec(`insert into t values(null),(null),(null),(null);`)
 	tk.MustExec(`insert into t values('a'),('b');`)
 	tk.MustQuery(`select /*+ stream_agg() */ distinct * from t;`).Check(testkit.Events("<nil>", "a", "b"))
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(0))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(0))
 }
 
 func (s *testSuiteAgg) TestIssue15958(c *C) {
 	tk := testkit.NewTestKitWithInit(c, s.causetstore)
-	tk.Se.GetStochastikVars().MaxChunkSize = 2
+	tk.Se.GetStochaseinstein_dbars().MaxChunkSize = 2
 	tk.MustExec(`drop block if exists t;`)
 	tk.MustExec(`create block t(y year);`)
 	tk.MustExec(`insert into t values (2020), (2000), (2050);`)

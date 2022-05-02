@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,14 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package ekv
+package MilevaDB
 
 import (
 	"strings"
 
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
-	allegrosql "github.com/whtcorpsinc/milevadb/errno"
-	"github.com/whtcorpsinc/milevadb/soliton/redact"
+	allegrosql "github.com/whtcorpsinc/MilevaDB-Prod/errno"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/redact"
 )
 
 // TxnRetryableMark is used to uniform the commit error messages which could retry the transaction.

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,12 +24,12 @@ import (
 	"path/filepath"
 	"text/template"
 
-	. "github.com/whtcorpsinc/milevadb/expression/generator/helper"
+	. "github.com/whtcorpsinc/MilevaDB-Prod/expression/generator/helper"
 )
 
 var addOrSubTime = template.Must(template.New("").Parse(`
 {{ if eq $.FuncName "AddTime" }}
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -49,8 +49,8 @@ package expression
 import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
 )
 {{ end }}
 {{ define "SetNull" }}{{if .Output.Fixed}}result.SetNull(i, true){{else}}result.AppendNull(){{end}} // fixed: {{.Output.Fixed }}{{ end }}
@@ -60,7 +60,7 @@ import (
 			{{ template "SetNull" . }}
 			continue
 		}{{ end }}
-		sc := b.ctx.GetStochastikVars().StmtCtx
+		sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 		arg1Duration, err := types.ParseDuration(sc, arg1, {{if eq .Output.TypeName "String"}}getFsp4TimeAddSub{{else}}types.GetFsp{{end}}(arg1))
 		if err != nil {
 			if terror.ErrorEqual(err, types.ErrTruncatedWrongVal) {
@@ -169,9 +169,9 @@ func (b *{{.SigName}}) vecEval{{ .Output.TypeName }}(input *chunk.Chunk, result 
 		// calculate
 	{{ if or (eq .SigName "builtinAddDatetimeAndDurationSig") (eq .SigName "builtinSubDatetimeAndDurationSig") }}
 		{{ if eq $.FuncName "AddTime" }}
-		output, err := arg0.Add(b.ctx.GetStochastikVars().StmtCtx, types.Duration{Duration: arg1, Fsp: -1})
+		output, err := arg0.Add(b.ctx.GetStochaseinstein_dbars().StmtCtx, types.Duration{Duration: arg1, Fsp: -1})
 		{{ else }}
-		sc := b.ctx.GetStochastikVars().StmtCtx
+		sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 		arg1Duration := types.Duration{Duration: arg1, Fsp: -1}
 		arg1time, err := arg1Duration.ConvertToTime(sc, allegrosql.TypeDatetime)
 		if err != nil {
@@ -193,7 +193,7 @@ func (b *{{.SigName}}) vecEval{{ .Output.TypeName }}(input *chunk.Chunk, result 
 			result.SetNull(i, true) // fixed: true
 			continue
 		}
-		sc := b.ctx.GetStochastikVars().StmtCtx
+		sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 		arg1Duration, err := types.ParseDuration(sc, arg1, types.GetFsp(arg1))
 		if err != nil {
 			if terror.ErrorEqual(err, types.ErrTruncatedWrongVal) {
@@ -239,7 +239,7 @@ func (b *{{.SigName}}) vecEval{{ .Output.TypeName }}(input *chunk.Chunk, result 
 		}
 		{{ end }}
 	{{ else if or (eq .SigName "builtinAddStringAndDurationSig") (eq .SigName "builtinSubStringAndDurationSig") }}
-		sc := b.ctx.GetStochastikVars().StmtCtx
+		sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 		fsp1 := int8(b.args[1].GetType().Decimal)
 		arg1Duration := types.Duration{Duration: arg1, Fsp: fsp1}
 		var output string
@@ -411,7 +411,7 @@ func (b *{{.SigName}}) vecEvalDuration(input *chunk.Chunk, result *chunk.Deferre
 			)
 		{{- end }}
 		{{- if or (or $AIsString $BIsString) (and $AIsTime $BIsTime) }}
-			stmtCtx := b.ctx.GetStochastikVars().StmtCtx
+			stmtCtx := b.ctx.GetStochaseinstein_dbars().StmtCtx
 		{{- end }}
 	for i:=0; i<n ; i++{
 		if result.IsNull(i) {
@@ -625,7 +625,7 @@ var testFileFuncs = template.FuncMap{
 }
 
 var testFile = template.Must(template.New("").Funcs(testFileFuncs).Parse(`
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -649,7 +649,7 @@ import (
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 type gener struct {
@@ -694,7 +694,7 @@ func (g gener) gen() interface{} {
 						newDefaultGener(0.2, types.ET{{$sig.TypeB.ETName}}),
 					{{- end }}
 				},
-				constants: []*Constant{nil, nil, {Value: types.NewStringCauset("{{$unit}}"), RetType: types.NewFieldType(allegrosql.TypeString)}},
+				constants: []*CouplingConstantWithRadix{nil, nil, {Value: types.NewStringCauset("{{$unit}}"), RetType: types.NewFieldType(allegrosql.TypeString)}},
 				chunkSize: 128,
 			},
 		{{- end }}

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,18 +18,18 @@ import (
 	"strings"
 
 	"github.com/opentracing/opentracing-go"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block/blocks"
+	"github.com/whtcorpsinc/MilevaDB-Prod/blockcodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/codec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/memory"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/block/blocks"
-	"github.com/whtcorpsinc/milevadb/blockcodec"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/meta/autoid"
-	"github.com/whtcorpsinc/milevadb/soliton/codec"
-	"github.com/whtcorpsinc/milevadb/soliton/memory"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 var (
@@ -59,7 +59,7 @@ func uFIDelateRecord(ctx context.Context, sctx stochastikctx.Context, h ekv.Hand
 	}
 	memUsageOfTxnState := txn.Size()
 	defer memTracker.Consume(int64(txn.Size() - memUsageOfTxnState))
-	sc := sctx.GetStochastikVars().StmtCtx
+	sc := sctx.GetStochaseinstein_dbars().StmtCtx
 	changed, handleChanged := false, false
 	// onUFIDelateSpecified is for "UFIDelATE SET ts_field = old_value", the
 	// timestamp field is explicitly set, but not changed in fact.
@@ -125,7 +125,7 @@ func uFIDelateRecord(ctx context.Context, sctx stochastikctx.Context, h ekv.Hand
 					pkDts = append(pkDts, newData[idxDefCaus.Offset])
 				}
 				blockcodec.TruncateIndexValues(t.Meta(), pkIdx, pkDts)
-				handleBytes, err := codec.EncodeKey(sctx.GetStochastikVars().StmtCtx, nil, pkDts...)
+				handleBytes, err := codec.EncodeKey(sctx.GetStochaseinstein_dbars().StmtCtx, nil, pkDts...)
 				if err != nil {
 					return false, err
 				}
@@ -147,7 +147,7 @@ func uFIDelateRecord(ctx context.Context, sctx stochastikctx.Context, h ekv.Hand
 	// If no changes, nothing to do, return directly.
 	if !changed {
 		// See https://dev.allegrosql.com/doc/refman/5.7/en/allegrosql-real-connect.html  CLIENT_FOUND_ROWS
-		if sctx.GetStochastikVars().ClientCapability&allegrosql.ClientFoundEvents > 0 {
+		if sctx.GetStochaseinstein_dbars().ClientCapability&allegrosql.ClientFoundEvents > 0 {
 			sc.AddAffectedEvents(1)
 		}
 
@@ -161,7 +161,7 @@ func uFIDelateRecord(ctx context.Context, sctx stochastikctx.Context, h ekv.Hand
 		}
 
 		unchangedEventKey := blockcodec.EncodeEventKeyWithHandle(physicalID, h)
-		txnCtx := sctx.GetStochastikVars().TxnCtx
+		txnCtx := sctx.GetStochaseinstein_dbars().TxnCtx
 		if txnCtx.IsPessimistic {
 			txnCtx.AddUnchangedEventKey(unchangedEventKey)
 		}

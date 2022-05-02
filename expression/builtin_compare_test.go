@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,9 +21,9 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 )
 
 func (s *testEvaluatorSuite) TestCompareFunctionWithRefine(c *C) {
@@ -133,7 +133,7 @@ func (s *testEvaluatorSuite) TestCompare(c *C) {
 	}
 
 	for _, t := range tests {
-		bf, err := funcs[t.funcName].getFunction(s.ctx, s.primitiveValsToConstants([]interface{}{t.arg0, t.arg1}))
+		bf, err := funcs[t.funcName].getFunction(s.ctx, s.primitiveValsToCouplingConstantWithRadixs([]interface{}{t.arg0, t.arg1}))
 		c.Assert(err, IsNil)
 		args := bf.getArgs()
 		c.Assert(args[0].GetType().Tp, Equals, t.tp)
@@ -145,7 +145,7 @@ func (s *testEvaluatorSuite) TestCompare(c *C) {
 	}
 
 	// test <non-const decimal expression> <cmp> <const string expression>
-	decimalDefCaus, stringCon := &DeferredCauset{RetType: types.NewFieldType(allegrosql.TypeNewDecimal)}, &Constant{RetType: types.NewFieldType(allegrosql.TypeVarchar)}
+	decimalDefCaus, stringCon := &DeferredCauset{RetType: types.NewFieldType(allegrosql.TypeNewDecimal)}, &CouplingConstantWithRadix{RetType: types.NewFieldType(allegrosql.TypeVarchar)}
 	bf, err := funcs[ast.LT].getFunction(s.ctx, []Expression{decimalDefCaus, stringCon})
 	c.Assert(err, IsNil)
 	args := bf.getArgs()
@@ -183,7 +183,7 @@ func (s *testEvaluatorSuite) TestCoalesce(c *C) {
 	}
 
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.Coalesce, s.primitiveValsToConstants(t.args)...)
+		f, err := newFunctionForTest(s.ctx, ast.Coalesce, s.primitiveValsToCouplingConstantWithRadixs(t.args)...)
 		c.Assert(err, IsNil)
 
 		d, err := f.Eval(chunk.Event{})
@@ -205,7 +205,7 @@ func (s *testEvaluatorSuite) TestCoalesce(c *C) {
 }
 
 func (s *testEvaluatorSuite) TestIntervalFunc(c *C) {
-	sc := s.ctx.GetStochastikVars().StmtCtx
+	sc := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	origin := sc.IgnoreTruncate
 	sc.IgnoreTruncate = true
 	defer func() {
@@ -244,7 +244,7 @@ func (s *testEvaluatorSuite) TestIntervalFunc(c *C) {
 		{types.MakeCausets("9007199254740992", "9007199254740993"), 1, false},
 	} {
 		fc := funcs[ast.Interval]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t.args))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t.args))
 		c.Assert(err, IsNil)
 		if t.getErr {
 			v, err := evalBuiltinFunc(f, chunk.Event{})
@@ -259,7 +259,7 @@ func (s *testEvaluatorSuite) TestIntervalFunc(c *C) {
 }
 
 func (s *testEvaluatorSuite) TestGreatestLeastFuncs(c *C) {
-	sc := s.ctx.GetStochastikVars().StmtCtx
+	sc := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	originIgnoreTruncate := sc.IgnoreTruncate
 	sc.IgnoreTruncate = true
 	defer func() {
@@ -318,7 +318,7 @@ func (s *testEvaluatorSuite) TestGreatestLeastFuncs(c *C) {
 			nil, nil, false, true,
 		},
 	} {
-		f0, err := newFunctionForTest(s.ctx, ast.Greatest, s.primitiveValsToConstants(t.args)...)
+		f0, err := newFunctionForTest(s.ctx, ast.Greatest, s.primitiveValsToCouplingConstantWithRadixs(t.args)...)
 		c.Assert(err, IsNil)
 		d, err := f0.Eval(chunk.Event{})
 		if t.getErr {
@@ -332,7 +332,7 @@ func (s *testEvaluatorSuite) TestGreatestLeastFuncs(c *C) {
 			}
 		}
 
-		f1, err := newFunctionForTest(s.ctx, ast.Least, s.primitiveValsToConstants(t.args)...)
+		f1, err := newFunctionForTest(s.ctx, ast.Least, s.primitiveValsToCouplingConstantWithRadixs(t.args)...)
 		c.Assert(err, IsNil)
 		d, err = f1.Eval(chunk.Event{})
 		if t.getErr {

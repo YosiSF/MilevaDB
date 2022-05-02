@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,13 +19,13 @@ import (
 	"strings"
 
 	"github.com/cznic/mathutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/charset"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 // baseFuncDesc describes an function signature, only used in planner.
@@ -315,7 +315,7 @@ func (a *baseFuncDesc) WrapCastForAggArgs(ctx stochastikctx.Context) {
 	}
 	var castFunc func(ctx stochastikctx.Context, expr expression.Expression) expression.Expression
 	switch retTp := a.RetTp; retTp.EvalType() {
-	case types.ETInt:
+	case types.CausetEDN:
 		castFunc = expression.WrapWithCastAsInt
 	case types.ETReal:
 		castFunc = expression.WrapWithCastAsReal

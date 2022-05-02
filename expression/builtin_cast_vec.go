@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,14 +19,14 @@ import (
 	"strings"
 
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 )
 
 func (b *builtinCastIntAsDurationSig) vecEvalDuration(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumRows()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -46,7 +46,7 @@ func (b *builtinCastIntAsDurationSig) vecEvalDuration(input *chunk.Chunk, result
 		dur, err := types.NumberToDuration(i64s[i], int8(b.tp.Decimal))
 		if err != nil {
 			if types.ErrOverflow.Equal(err) {
-				err = b.ctx.GetStochastikVars().StmtCtx.HandleOverflow(err, err)
+				err = b.ctx.GetStochaseinstein_dbars().StmtCtx.HandleOverflow(err, err)
 			}
 			if err != nil {
 				return err
@@ -86,7 +86,7 @@ func (b *builtinCastIntAsIntSig) vectorized() bool {
 
 func (b *builtinCastIntAsRealSig) vecEvalReal(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumRows()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -212,7 +212,7 @@ func (b *builtinCastRealAsStringSig) vecEvalString(input *chunk.Chunk, result *c
 	var res string
 	f64s := buf.Float64s()
 	result.ReserveString(n)
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	for i, v := range f64s {
 		if buf.IsNull(i) {
 			result.AppendNull()
@@ -250,7 +250,7 @@ func (b *builtinCastDecimalAsStringSig) vecEvalString(input *chunk.Chunk, result
 		return err
 	}
 
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	vas := buf.Decimals()
 	result.ReserveString(n)
 	for i, v := range vas {
@@ -294,7 +294,7 @@ func (b *builtinCastTimeAsDecimalSig) vecEvalDecimal(input *chunk.Chunk, result 
 	result.MergeNulls(buf)
 	times := buf.Times()
 	decs := result.Decimals()
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	dec := new(types.MyDecimal)
 	for i := 0; i < n; i++ {
 		if result.IsNull(i) {
@@ -358,7 +358,7 @@ func (b *builtinCastIntAsTimeSig) vectorized() bool {
 
 func (b *builtinCastIntAsTimeSig) vecEvalTime(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumRows()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -371,7 +371,7 @@ func (b *builtinCastIntAsTimeSig) vecEvalTime(input *chunk.Chunk, result *chunk.
 	result.MergeNulls(buf)
 	times := result.Times()
 	i64s := buf.Int64s()
-	stmt := b.ctx.GetStochastikVars().StmtCtx
+	stmt := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	fsp := int8(b.tp.Decimal)
 	for i := 0; i < n; i++ {
 		if buf.IsNull(i) {
@@ -439,7 +439,7 @@ func (b *builtinCastJSONAsRealSig) vecEvalReal(input *chunk.Chunk, result *chunk
 	result.ResizeFloat64(n, false)
 	result.MergeNulls(buf)
 	f64s := result.Float64s()
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	for i := 0; i < n; i++ {
 		if result.IsNull(i) {
 			continue
@@ -470,7 +470,7 @@ func (b *builtinCastJSONAsTimeSig) vecEvalTime(input *chunk.Chunk, result *chunk
 	result.ResizeTime(n, false)
 	result.MergeNulls(buf)
 	times := result.Times()
-	stmtCtx := b.ctx.GetStochastikVars().StmtCtx
+	stmtCtx := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	fsp := int8(b.tp.Decimal)
 	for i := 0; i < n; i++ {
 		if result.IsNull(i) {
@@ -516,7 +516,7 @@ func (b *builtinCastRealAsTimeSig) vecEvalTime(input *chunk.Chunk, result *chunk
 	result.MergeNulls(buf)
 	times := result.Times()
 	f64s := buf.Float64s()
-	stmt := b.ctx.GetStochastikVars().StmtCtx
+	stmt := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	fsp := int8(b.tp.Decimal)
 	for i := 0; i < n; i++ {
 		if buf.IsNull(i) {
@@ -555,7 +555,7 @@ func (b *builtinCastDecimalAsDecimalSig) vecEvalDecimal(input *chunk.Chunk, resu
 
 	n := input.NumRows()
 	decs := result.Decimals()
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	conditionUnionAndUnsigned := b.inUnion && allegrosql.HasUnsignedFlag(b.tp.Flag)
 	dec := new(types.MyDecimal)
 	for i := 0; i < n; i++ {
@@ -595,7 +595,7 @@ func (b *builtinCastDurationAsTimeSig) vecEvalTime(input *chunk.Chunk, result *c
 	var duration types.Duration
 	ds := buf.GoDurations()
 	times := result.Times()
-	stmtCtx := b.ctx.GetStochastikVars().StmtCtx
+	stmtCtx := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	fsp := int8(b.tp.Decimal)
 	for i := 0; i < n; i++ {
 		if result.IsNull(i) {
@@ -627,7 +627,7 @@ func (b *builtinCastIntAsStringSig) vectorized() bool {
 
 func (b *builtinCastIntAsStringSig) vecEvalString(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumRows()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -650,7 +650,7 @@ func (b *builtinCastIntAsStringSig) vecEvalString(input *chunk.Chunk, result *ch
 		} else {
 			str = strconv.FormatUint(uint64(i64s[i]), 10)
 		}
-		str, err = types.ProduceStrWithSpecifiedTp(str, b.tp, b.ctx.GetStochastikVars().StmtCtx, false)
+		str, err = types.ProduceStrWithSpecifiedTp(str, b.tp, b.ctx.GetStochaseinstein_dbars().StmtCtx, false)
 		if err != nil {
 			return err
 		}
@@ -699,12 +699,12 @@ func (b *builtinCastRealAsIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.D
 			i64s[i] = 0
 		} else {
 			var uintVal uint64
-			sc := b.ctx.GetStochastikVars().StmtCtx
+			sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 			uintVal, err = types.ConvertFloatToUint(sc, f64s[i], types.IntergerUnsignedUpperBound(allegrosql.TypeLonglong), allegrosql.TypeLonglong)
 			i64s[i] = int64(uintVal)
 		}
 		if types.ErrOverflow.Equal(err) {
-			err = b.ctx.GetStochastikVars().StmtCtx.HandleOverflow(err, err)
+			err = b.ctx.GetStochaseinstein_dbars().StmtCtx.HandleOverflow(err, err)
 		}
 		if err != nil {
 			return err
@@ -738,7 +738,7 @@ func (b *builtinCastTimeAsRealSig) vecEvalReal(input *chunk.Chunk, result *chunk
 		f64, err := times[i].ToNumber().ToFloat64()
 		if err != nil {
 			if types.ErrOverflow.Equal(err) {
-				err = b.ctx.GetStochastikVars().StmtCtx.HandleOverflow(err, err)
+				err = b.ctx.GetStochaseinstein_dbars().StmtCtx.HandleOverflow(err, err)
 			}
 			if err != nil {
 				return err
@@ -819,7 +819,7 @@ func (b *builtinCastRealAsDecimalSig) vecEvalDecimal(input *chunk.Chunk, result 
 			if err = resdecimal[i].FromFloat64(bufreal[i]); err != nil {
 				if types.ErrOverflow.Equal(err) {
 					warnErr := types.ErrTruncatedWrongVal.GenWithStackByArgs("DECIMAL", b.args[0])
-					err = b.ctx.GetStochastikVars().StmtCtx.HandleOverflow(err, warnErr)
+					err = b.ctx.GetStochaseinstein_dbars().StmtCtx.HandleOverflow(err, warnErr)
 				} else if types.ErrTruncated.Equal(err) {
 					// This behavior is consistent with MyALLEGROSQL.
 					err = nil
@@ -829,7 +829,7 @@ func (b *builtinCastRealAsDecimalSig) vecEvalDecimal(input *chunk.Chunk, result 
 				}
 			}
 		}
-		dec, err := types.ProduceDecWithSpecifiedTp(&resdecimal[i], b.tp, b.ctx.GetStochastikVars().StmtCtx)
+		dec, err := types.ProduceDecWithSpecifiedTp(&resdecimal[i], b.tp, b.ctx.GetStochaseinstein_dbars().StmtCtx)
 		if err != nil {
 			return err
 		}
@@ -857,7 +857,7 @@ func (b *builtinCastStringAsIntSig) vecEvalInt(input *chunk.Chunk, result *chunk
 		return err
 	}
 	result.MergeNulls(buf)
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	i64s := result.Int64s()
 	isUnsigned := allegrosql.HasUnsignedFlag(b.tp.Flag)
 	unionUnsigned := isUnsigned && b.inUnion
@@ -916,10 +916,10 @@ func (b *builtinCastStringAsDurationSig) vecEvalDuration(input *chunk.Chunk, res
 		if result.IsNull(i) {
 			continue
 		}
-		dur, err := types.ParseDuration(b.ctx.GetStochastikVars().StmtCtx, buf.GetString(i), int8(b.tp.Decimal))
+		dur, err := types.ParseDuration(b.ctx.GetStochaseinstein_dbars().StmtCtx, buf.GetString(i), int8(b.tp.Decimal))
 		if err != nil {
 			if types.ErrTruncatedWrongVal.Equal(err) {
-				err = b.ctx.GetStochastikVars().StmtCtx.HandleTruncate(err)
+				err = b.ctx.GetStochaseinstein_dbars().StmtCtx.HandleTruncate(err)
 			}
 			if err != nil {
 				return err
@@ -953,7 +953,7 @@ func (b *builtinCastDurationAsDecimalSig) vecEvalDecimal(input *chunk.Chunk, res
 	d64s := result.Decimals()
 	var duration types.Duration
 	ds := buf.GoDurations()
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	fsp := int8(b.args[0].GetType().Decimal)
 	if fsp, err = types.CheckFsp(int(fsp)); err != nil {
 		return err
@@ -979,7 +979,7 @@ func (b *builtinCastIntAsDecimalSig) vectorized() bool {
 
 func (b *builtinCastIntAsDecimalSig) vecEvalDecimal(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumRows()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -994,7 +994,7 @@ func (b *builtinCastIntAsDecimalSig) vecEvalDecimal(input *chunk.Chunk, result *
 	result.ResizeDecimal(n, false)
 	result.MergeNulls(buf)
 	decs := result.Decimals()
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	dec := new(types.MyDecimal)
 	for i := 0; i < n; i++ {
 		if result.IsNull(i) {
@@ -1025,7 +1025,7 @@ func (b *builtinCastIntAsJSONSig) vectorized() bool {
 
 func (b *builtinCastIntAsJSONSig) vecEvalJSON(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumRows()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -1155,7 +1155,7 @@ func (b *builtinCastJSONAsIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.D
 	result.ResizeInt64(n, false)
 	result.MergeNulls(buf)
 	i64s := result.Int64s()
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	for i := 0; i < n; i++ {
 		if result.IsNull(i) {
 			continue
@@ -1190,7 +1190,7 @@ func (b *builtinCastRealAsDurationSig) vecEvalDuration(input *chunk.Chunk, resul
 		if result.IsNull(i) {
 			continue
 		}
-		dur, err := types.ParseDuration(b.ctx.GetStochastikVars().StmtCtx, strconv.FormatFloat(f64s[i], 'f', -1, 64), int8(b.tp.Decimal))
+		dur, err := types.ParseDuration(b.ctx.GetStochaseinstein_dbars().StmtCtx, strconv.FormatFloat(f64s[i], 'f', -1, 64), int8(b.tp.Decimal))
 		if err != nil {
 			return err
 		}
@@ -1280,7 +1280,7 @@ func (b *builtinCastDurationAsStringSig) vecEvalString(input *chunk.Chunk, resul
 
 	var res string
 	var isNull bool
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	result.ReserveString(n)
 	for i := 0; i < n; i++ {
 		if buf.IsNull(i) {
@@ -1337,7 +1337,7 @@ func (b *builtinCastDecimalAsRealSig) vecEvalReal(input *chunk.Chunk, result *ch
 		res, err := d[i].ToFloat64()
 		if err != nil {
 			if types.ErrOverflow.Equal(err) {
-				err = b.ctx.GetStochastikVars().StmtCtx.HandleOverflow(err, err)
+				err = b.ctx.GetStochaseinstein_dbars().StmtCtx.HandleOverflow(err, err)
 			}
 			if err != nil {
 				return err
@@ -1369,7 +1369,7 @@ func (b *builtinCastDecimalAsTimeSig) vecEvalTime(input *chunk.Chunk, result *ch
 	result.MergeNulls(buf)
 	times := result.Times()
 	decimals := buf.Decimals()
-	stmt := b.ctx.GetStochastikVars().StmtCtx
+	stmt := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	fsp := int8(b.tp.Decimal)
 	for i := 0; i < n; i++ {
 		if buf.IsNull(i) {
@@ -1411,7 +1411,7 @@ func (b *builtinCastTimeAsIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.D
 	result.MergeNulls(buf)
 	times := buf.Times()
 	i64s := result.Int64s()
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	for i := 0; i < n; i++ {
 		if result.IsNull(i) {
 			continue
@@ -1439,7 +1439,7 @@ func (b *builtinCastTimeAsTimeSig) vecEvalTime(input *chunk.Chunk, result *chunk
 	}
 
 	times := result.Times()
-	stmt := b.ctx.GetStochastikVars().StmtCtx
+	stmt := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	fsp := int8(b.tp.Decimal)
 	for i := 0; i < n; i++ {
 		if result.IsNull(i) {
@@ -1484,7 +1484,7 @@ func (b *builtinCastTimeAsStringSig) vecEvalString(input *chunk.Chunk, result *c
 
 	var res string
 	var isNull bool
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	vas := buf.Times()
 	result.ReserveString(n)
 	for i, v := range vas {
@@ -1523,7 +1523,7 @@ func (b *builtinCastJSONAsDecimalSig) vecEvalDecimal(input *chunk.Chunk, result 
 	if err = b.args[0].VecEvalJSON(b.ctx, input, buf); err != nil {
 		return err
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	result.ResizeDecimal(n, false)
 	result.MergeNulls(buf)
 	res := result.Decimals()
@@ -1565,7 +1565,7 @@ func (b *builtinCastStringAsRealSig) vecEvalReal(input *chunk.Chunk, result *chu
 	result.ResizeFloat64(n, false)
 	result.MergeNulls(buf)
 	ret := result.Float64s()
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 
 	for i := 0; i < n; i++ {
 		if result.IsNull(i) {
@@ -1607,7 +1607,7 @@ func (b *builtinCastStringAsDecimalSig) vecEvalDecimal(input *chunk.Chunk, resul
 	result.ResizeDecimal(n, false)
 	result.MergeNulls(buf)
 	res := result.Decimals()
-	stmtCtx := b.ctx.GetStochastikVars().StmtCtx
+	stmtCtx := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	for i := 0; i < n; i++ {
 		if result.IsNull(i) {
 			continue
@@ -1647,7 +1647,7 @@ func (b *builtinCastStringAsTimeSig) vecEvalTime(input *chunk.Chunk, result *chu
 	result.ResizeTime(n, false)
 	result.MergeNulls(buf)
 	times := result.Times()
-	stmtCtx := b.ctx.GetStochastikVars().StmtCtx
+	stmtCtx := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	fsp := int8(b.tp.Decimal)
 	for i := 0; i < n; i++ {
 		if result.IsNull(i) {
@@ -1713,7 +1713,7 @@ func (b *builtinCastDecimalAsIntSig) vecEvalInt(input *chunk.Chunk, result *chun
 
 		if types.ErrOverflow.Equal(err) {
 			warnErr := types.ErrTruncatedWrongVal.GenWithStackByArgs("DECIMAL", d64s[i])
-			err = b.ctx.GetStochastikVars().StmtCtx.HandleOverflow(err, warnErr)
+			err = b.ctx.GetStochaseinstein_dbars().StmtCtx.HandleOverflow(err, warnErr)
 		}
 
 		if err != nil {
@@ -1746,10 +1746,10 @@ func (b *builtinCastDecimalAsDurationSig) vecEvalDuration(input *chunk.Chunk, re
 		if result.IsNull(i) {
 			continue
 		}
-		dur, err := types.ParseDuration(b.ctx.GetStochastikVars().StmtCtx, string(args[i].ToString()), int8(b.tp.Decimal))
+		dur, err := types.ParseDuration(b.ctx.GetStochaseinstein_dbars().StmtCtx, string(args[i].ToString()), int8(b.tp.Decimal))
 		if err != nil {
 			if types.ErrTruncatedWrongVal.Equal(err) {
-				err = b.ctx.GetStochastikVars().StmtCtx.HandleTruncate(err)
+				err = b.ctx.GetStochaseinstein_dbars().StmtCtx.HandleTruncate(err)
 			}
 			if err != nil {
 				return err
@@ -1781,7 +1781,7 @@ func (b *builtinCastStringAsStringSig) vecEvalString(input *chunk.Chunk, result 
 
 	var res string
 	var isNull bool
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	result.ReserveString(n)
 	for i := 0; i < n; i++ {
 		if buf.IsNull(i) {
@@ -1820,7 +1820,7 @@ func (b *builtinCastJSONAsDurationSig) vecEvalDuration(input *chunk.Chunk, resul
 		return err
 	}
 
-	ctx := b.ctx.GetStochastikVars().StmtCtx
+	ctx := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	result.ResizeGoDuration(n, false)
 	result.MergeNulls(buf)
 	var dur types.Duration

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/whtcorpsinc/milevadb/plugin"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/plugin"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
 )
 
 func TestExportManifest(t *testing.T) {
@@ -36,7 +36,7 @@ func TestExportManifest(t *testing.T) {
 				return nil
 			},
 		},
-		OnGeneralEvent: func(ctx context.Context, sctx *variable.StochastikVars, event plugin.GeneralEvent, cmd string) {
+		OnGeneralEvent: func(ctx context.Context, sctx *variable.Stochaseinstein_dbars, event plugin.GeneralEvent, cmd string) {
 			callRecorder.NotifyEventCalled = true
 		},
 	}

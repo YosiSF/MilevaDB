@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,10 +25,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/dbs/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/owner"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/dbs/soliton"
-	"github.com/whtcorpsinc/milevadb/owner"
 	"go.etcd.io/etcd/integration"
 )
 
@@ -87,8 +87,8 @@ func TestTopology(t *testing.T) {
 
 	cli := clus.RandClient()
 
-	failpoint.Enable("github.com/whtcorpsinc/milevadb/petri/infosync/mockServerInfo", "return(true)")
-	defer failpoint.Disable("github.com/whtcorpsinc/milevadb/petri/infosync/mockServerInfo")
+	failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/petri/infosync/mockServerInfo", "return(true)")
+	defer failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/petri/infosync/mockServerInfo")
 
 	info, err := GlobalInfoSyncerInit(ctx, currentID, cli, false)
 	if err != nil {

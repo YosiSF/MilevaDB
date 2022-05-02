@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,15 +22,15 @@ import (
 	"strings"
 	"time"
 
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/failpoint"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 func parseLog(retriever *slowQueryRetriever, sctx stochastikctx.Context, reader *bufio.Reader) ([][]types.Causet, error) {
@@ -73,15 +73,15 @@ func (s *testExecSerialSuite) TestParseSlowLogPanic(c *C) {
 # Prev_stmt: uFIDelate t set i = 1;
 use test;
 select * from t;`
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/executor/errorMockParseSlowLogPanic", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/executor/errorMockParseSlowLogPanic", `return(true)`), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/executor/errorMockParseSlowLogPanic"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/executor/errorMockParseSlowLogPanic"), IsNil)
 	}()
 	reader := bufio.NewReader(bytes.NewBufferString(slowLogStr))
 	loc, err := time.LoadLocation("Asia/Shanghai")
 	c.Assert(err, IsNil)
 	sctx := mock.NewContext()
-	sctx.GetStochastikVars().TimeZone = loc
+	sctx.GetStochaseinstein_dbars().TimeZone = loc
 	_, err = parseSlowLog(sctx, reader)
 	c.Assert(err, NotNil)
 	c.Assert(err.Error(), Equals, "panic test")
@@ -112,7 +112,7 @@ select * from t;`
 	loc, err := time.LoadLocation("Asia/Shanghai")
 	c.Assert(err, IsNil)
 	ctx := mock.NewContext()
-	ctx.GetStochastikVars().TimeZone = loc
+	ctx.GetStochaseinstein_dbars().TimeZone = loc
 	rows, err := parseSlowLog(ctx, reader)
 	c.Assert(err, IsNil)
 	c.Assert(len(rows), Equals, 1)
@@ -173,7 +173,7 @@ select * from t;
 	reader = bufio.NewReader(slowLog)
 	_, err = parseSlowLog(ctx, reader)
 	c.Assert(err, IsNil)
-	warnings := ctx.GetStochastikVars().StmtCtx.GetWarnings()
+	warnings := ctx.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 	c.Assert(warnings, HasLen, 1)
 	c.Assert(warnings[0].Err.Error(), Equals, "Parse slow log at line 2 failed. Field: `Succ`, error: strconv.ParseBool: parsing \"abc\": invalid syntax")
 }
@@ -183,7 +183,7 @@ func (s *testExecSerialSuite) TestParseSlowLogFileSerial(c *C) {
 	loc, err := time.LoadLocation("Asia/Shanghai")
 	c.Assert(err, IsNil)
 	ctx := mock.NewContext()
-	ctx.GetStochastikVars().TimeZone = loc
+	ctx.GetStochaseinstein_dbars().TimeZone = loc
 	// test for bufio.Scanner: token too long.
 	slowLog := bytes.NewBufferString(
 		`# Time: 2020-04-28T15:24:04.309074+08:00
@@ -251,7 +251,7 @@ select * from t;`)
 	loc, err := time.LoadLocation("Asia/Shanghai")
 	c.Assert(err, IsNil)
 	ctx := mock.NewContext()
-	ctx.GetStochastikVars().TimeZone = loc
+	ctx.GetStochaseinstein_dbars().TimeZone = loc
 	_, err = parseSlowLog(ctx, scanner)
 	c.Assert(err, IsNil)
 
@@ -264,7 +264,7 @@ select * from t;`)
 	scanner = bufio.NewReader(slowLog)
 	_, err = parseSlowLog(ctx, scanner)
 	c.Assert(err, IsNil)
-	warnings := ctx.GetStochastikVars().StmtCtx.GetWarnings()
+	warnings := ctx.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 	c.Assert(warnings, HasLen, 1)
 	c.Assert(warnings[0].Err.Error(), Equals, "Parse slow log at line 2 failed. Field: `Txn_start_ts`, error: strconv.ParseUint: parsing \"405888132465033227#\": invalid syntax")
 
@@ -401,8 +401,8 @@ select 7;`
 	loc, err := time.LoadLocation("Asia/Shanghai")
 	c.Assert(err, IsNil)
 	sctx := mock.NewContext()
-	sctx.GetStochastikVars().TimeZone = loc
-	sctx.GetStochastikVars().SlowQueryFile = fileName3
+	sctx.GetStochaseinstein_dbars().TimeZone = loc
+	sctx.GetStochaseinstein_dbars().SlowQueryFile = fileName3
 	for i, cas := range cases {
 		extractor := &plannercore.SlowQueryExtractor{Enable: (len(cas.startTime) > 0 && len(cas.endTime) > 0)}
 		if extractor.Enable {

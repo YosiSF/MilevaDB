@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,33 +32,33 @@ import (
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/block/blocks"
-	"github.com/whtcorpsinc/milevadb/blockcodec"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore/cluster"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/dbs"
-	testdbsutil "github.com/whtcorpsinc/milevadb/dbs/solitonutil"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/errno"
-	"github.com/whtcorpsinc/milevadb/executor"
-	"github.com/whtcorpsinc/milevadb/meta"
-	"github.com/whtcorpsinc/milevadb/meta/autoid"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton/admin"
-	"github.com/whtcorpsinc/milevadb/soliton/codec"
-	"github.com/whtcorpsinc/milevadb/soliton/defCauslate"
-	"github.com/whtcorpsinc/milevadb/soliton/israce"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/soliton/petriutil"
-	"github.com/whtcorpsinc/milevadb/soliton/rowcodec"
-	"github.com/whtcorpsinc/milevadb/soliton/solitonutil"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/stochastik"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block/blocks"
+	"github.com/whtcorpsinc/MilevaDB-Prod/blockcodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore/cluster"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/dbs"
+	testdbsutil "github.com/whtcorpsinc/MilevaDB-Prod/dbs/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/errno"
+	"github.com/whtcorpsinc/MilevaDB-Prod/executor"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/admin"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/codec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/defCauslate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/israce"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/petriutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/rowcodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastik"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 const (
@@ -1773,7 +1773,7 @@ func (s *testDBSuite5) TestAlterPrimaryKey(c *C) {
 	sqlMode := r.Rows()[0][0].(string)
 	tk.MustExec("set @@sql_mode=''")
 	tk.MustExec("alter block test_add_pk add primary key(a) comment " + invalidComment)
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(1))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(1))
 	tk.MustQuery("show warnings").Check(solitonutil.RowsWithSep("|", "Warning|1688|Comment for index 'PRIMARY' is too long (max = 1024)"))
 	tk.MustExec("set @@sql_mode= '" + sqlMode + "'")
 	tk.MustExec("alter block test_add_pk drop primary key")
@@ -1829,7 +1829,7 @@ func checkGlobalIndexRow(c *C, ctx stochastikctx.Context, tblInfo *perceptron.Bl
 	pid int64, idxVals []types.Causet, rowVals []types.Causet) {
 	ctx.NewTxn(context.Background())
 	txn, err := ctx.Txn(true)
-	sc := ctx.GetStochastikVars().StmtCtx
+	sc := ctx.GetStochaseinstein_dbars().StmtCtx
 	c.Assert(err, IsNil)
 
 	tblDefCausMap := make(map[int64]*types.FieldType, len(tblInfo.DeferredCausets))
@@ -2077,7 +2077,7 @@ LOOP:
 		func(_ ekv.Handle, data []types.Causet, defcaus []*block.DeferredCauset) (bool, error) {
 			i++
 			// c4 must be -1 or > 0
-			v, err1 := data[3].ToInt64(ctx.GetStochastikVars().StmtCtx)
+			v, err1 := data[3].ToInt64(ctx.GetStochaseinstein_dbars().StmtCtx)
 			c.Assert(err1, IsNil)
 			if v == -1 {
 				j++
@@ -2472,8 +2472,8 @@ func (s *testSerialDBSuite) TestCreateBlockWithLike2(c *C) {
 	checkTbl2()
 
 	// Test for block has tiflash  replica.
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/schemareplicant/mockTiFlashStoreCount", `return(true)`), IsNil)
-	defer failpoint.Disable("github.com/whtcorpsinc/milevadb/schemareplicant/mockTiFlashStoreCount")
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant/mockTiFlashStoreCount", `return(true)`), IsNil)
+	defer failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant/mockTiFlashStoreCount")
 
 	s.dom.DBS().(dbs.DBSForTest).SetHook(originalHook)
 	tk.MustExec("drop block if exists t1,t2;")
@@ -2605,9 +2605,9 @@ func (s *testSerialDBSuite) TestRepairBlock(c *C) {
 	config.UFIDelateGlobal(func(conf *config.Config) {
 		conf.AlterPrimaryKey = true
 	})
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/schemareplicant/repairFetchCreateBlock", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant/repairFetchCreateBlock", `return(true)`), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/schemareplicant/repairFetchCreateBlock"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant/repairFetchCreateBlock"), IsNil)
 	}()
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustExec("use test")
@@ -2757,9 +2757,9 @@ func turnRepairModeAndInit(on bool) {
 }
 
 func (s *testSerialDBSuite) TestRepairBlockWithPartition(c *C) {
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/schemareplicant/repairFetchCreateBlock", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant/repairFetchCreateBlock", `return(true)`), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/schemareplicant/repairFetchCreateBlock"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant/repairFetchCreateBlock"), IsNil)
 	}()
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustExec("use test")
@@ -3078,8 +3078,8 @@ func (s *testSerialDBSuite) TestTruncateBlock(c *C) {
 	c.Assert(hasOldBlockData, IsFalse)
 
 	// Test for truncate block should clear the tiflash available status.
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/schemareplicant/mockTiFlashStoreCount", `return(true)`), IsNil)
-	defer failpoint.Disable("github.com/whtcorpsinc/milevadb/schemareplicant/mockTiFlashStoreCount")
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant/mockTiFlashStoreCount", `return(true)`), IsNil)
+	defer failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant/mockTiFlashStoreCount")
 
 	tk.MustExec("drop block if exists t1;")
 	tk.MustExec("create block t1 (a int);")
@@ -3407,22 +3407,22 @@ func (s *testDBSuite4) TestComment(c *C) {
 
 	tk.MustExec("set @@sql_mode=''")
 	tk.MustExec("create block ct1 (c int, d int, e int, key (c) comment '" + invalidComment + "')")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(1))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(1))
 	tk.MustQuery("show warnings").Check(solitonutil.RowsWithSep("|", "Warning|1688|Comment for index 'c' is too long (max = 1024)"))
 	tk.MustExec("create index i1 on ct1 (d) comment '" + invalidComment + "b" + "'")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(1))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(1))
 	tk.MustQuery("show warnings").Check(solitonutil.RowsWithSep("|", "Warning|1688|Comment for index 'i1' is too long (max = 1024)"))
 	tk.MustExec("alter block ct1 add key (e) comment '" + invalidComment + "'")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(1))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(1))
 	tk.MustQuery("show warnings").Check(solitonutil.RowsWithSep("|", "Warning|1688|Comment for index 'e' is too long (max = 1024)"))
 
 	tk.MustExec("drop block if exists ct, ct1")
 }
 
 func (s *testSerialDBSuite) TestRebaseAutoID(c *C) {
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/meta/autoid/mockAutoIDChange", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid/mockAutoIDChange", `return(true)`), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/meta/autoid/mockAutoIDChange"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid/mockAutoIDChange"), IsNil)
 	}()
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustExec("use " + s.schemaName)
@@ -3707,12 +3707,12 @@ func (s *testDBSuite5) TestModifyDeferredCausetRollBack(c *C) {
 func (s *testSerialDBSuite) TestModifyDeferredCausetNullToNotNullWithChangingVal2(c *C) {
 	tk := testkit.NewTestKitWithInit(c, s.causetstore)
 
-	enableChangeDeferredCausetType := tk.Se.GetStochastikVars().EnableChangeDeferredCausetType
-	tk.Se.GetStochastikVars().EnableChangeDeferredCausetType = true
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/dbs/mockInsertValueAfterCheckNull", `return("insert into test.tt values (NULL, NULL)")`), IsNil)
+	enableChangeDeferredCausetType := tk.Se.GetStochaseinstein_dbars().EnableChangeDeferredCausetType
+	tk.Se.GetStochaseinstein_dbars().EnableChangeDeferredCausetType = true
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/mockInsertValueAfterCheckNull", `return("insert into test.tt values (NULL, NULL)")`), IsNil)
 	defer func() {
-		tk.Se.GetStochastikVars().EnableChangeDeferredCausetType = enableChangeDeferredCausetType
-		failpoint.Disable("github.com/whtcorpsinc/milevadb/dbs/mockInsertValueAfterCheckNull")
+		tk.Se.GetStochaseinstein_dbars().EnableChangeDeferredCausetType = enableChangeDeferredCausetType
+		failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/mockInsertValueAfterCheckNull")
 	}()
 
 	tk.MustExec(`create block tt (a bigint, b int, unique index idx(a));`)
@@ -3762,10 +3762,10 @@ func testModifyDeferredCausetNullToNotNull(c *C, s *testDBSuite, enableChangeDef
 	s.mustExec(tk, c, "create block t1 (c1 int, c2 int);")
 
 	if enableChangeDeferredCausetType {
-		enableChangeDeferredCausetType := tk.Se.GetStochastikVars().EnableChangeDeferredCausetType
-		tk.Se.GetStochastikVars().EnableChangeDeferredCausetType = true
+		enableChangeDeferredCausetType := tk.Se.GetStochaseinstein_dbars().EnableChangeDeferredCausetType
+		tk.Se.GetStochaseinstein_dbars().EnableChangeDeferredCausetType = true
 		defer func() {
-			tk.Se.GetStochastikVars().EnableChangeDeferredCausetType = enableChangeDeferredCausetType
+			tk.Se.GetStochaseinstein_dbars().EnableChangeDeferredCausetType = enableChangeDeferredCausetType
 		}()
 	}
 
@@ -4023,7 +4023,7 @@ func (s *testDBSuite4) TestIfNotExists(c *C) {
 	s.mustExec(tk, c, allegrosql)
 	tk.MustGetErrCode(allegrosql, errno.ErrDupFieldName)
 	s.mustExec(tk, c, "alter block t1 add defCausumn if not exists b int")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(1))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(1))
 	tk.MustQuery("show warnings").Check(solitonutil.RowsWithSep("|", "Note|1060|Duplicate defCausumn name 'b'"))
 
 	// ADD INDEX
@@ -4031,14 +4031,14 @@ func (s *testDBSuite4) TestIfNotExists(c *C) {
 	s.mustExec(tk, c, allegrosql)
 	tk.MustGetErrCode(allegrosql, errno.ErrDupKeyName)
 	s.mustExec(tk, c, "alter block t1 add index if not exists idx_b (b)")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(1))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(1))
 	tk.MustQuery("show warnings").Check(solitonutil.RowsWithSep("|", "Note|1061|index already exist idx_b"))
 
 	// CREATE INDEX
 	allegrosql = "create index idx_b on t1 (b)"
 	tk.MustGetErrCode(allegrosql, errno.ErrDupKeyName)
 	s.mustExec(tk, c, "create index if not exists idx_b on t1 (b)")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(1))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(1))
 	tk.MustQuery("show warnings").Check(solitonutil.RowsWithSep("|", "Note|1061|index already exist idx_b"))
 
 	// ADD PARTITION
@@ -4048,7 +4048,7 @@ func (s *testDBSuite4) TestIfNotExists(c *C) {
 	s.mustExec(tk, c, allegrosql)
 	tk.MustGetErrCode(allegrosql, errno.ErrSameNamePartition)
 	s.mustExec(tk, c, "alter block t2 add partition if not exists (partition p2 values less than (30))")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(1))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(1))
 	tk.MustQuery("show warnings").Check(solitonutil.RowsWithSep("|", "Note|1517|Duplicate partition name p2"))
 }
 
@@ -4063,14 +4063,14 @@ func (s *testDBSuite4) TestIfExists(c *C) {
 	s.mustExec(tk, c, allegrosql)
 	tk.MustGetErrCode(allegrosql, errno.ErrCantDropFieldOrKey)
 	s.mustExec(tk, c, "alter block t1 drop defCausumn if exists b") // only `a` exists now
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(1))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(1))
 	tk.MustQuery("show warnings").Check(solitonutil.RowsWithSep("|", "Note|1091|defCausumn b doesn't exist"))
 
 	// CHANGE COLUMN
 	allegrosql = "alter block t1 change defCausumn b c int"
 	tk.MustGetErrCode(allegrosql, errno.ErrBadField)
 	s.mustExec(tk, c, "alter block t1 change defCausumn if exists b c int")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(1))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(1))
 	tk.MustQuery("show warnings").Check(solitonutil.RowsWithSep("|", "Note|1054|Unknown defCausumn 'b' in 't1'"))
 	s.mustExec(tk, c, "alter block t1 change defCausumn if exists a c int") // only `c` exists now
 
@@ -4078,7 +4078,7 @@ func (s *testDBSuite4) TestIfExists(c *C) {
 	allegrosql = "alter block t1 modify defCausumn a bigint"
 	tk.MustGetErrCode(allegrosql, errno.ErrBadField)
 	s.mustExec(tk, c, "alter block t1 modify defCausumn if exists a bigint")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(1))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(1))
 	tk.MustQuery("show warnings").Check(solitonutil.RowsWithSep("|", "Note|1054|Unknown defCausumn 'a' in 't1'"))
 	s.mustExec(tk, c, "alter block t1 modify defCausumn if exists c bigint") // only `c` exists now
 
@@ -4088,7 +4088,7 @@ func (s *testDBSuite4) TestIfExists(c *C) {
 	s.mustExec(tk, c, allegrosql)
 	tk.MustGetErrCode(allegrosql, errno.ErrCantDropFieldOrKey)
 	s.mustExec(tk, c, "alter block t1 drop index if exists idx_c")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(1))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(1))
 	tk.MustQuery("show warnings").Check(solitonutil.RowsWithSep("|", "Note|1091|index idx_c doesn't exist"))
 
 	// DROP PARTITION
@@ -4098,7 +4098,7 @@ func (s *testDBSuite4) TestIfExists(c *C) {
 	s.mustExec(tk, c, allegrosql)
 	tk.MustGetErrCode(allegrosql, errno.ErrDropPartitionNonExistent)
 	s.mustExec(tk, c, "alter block t2 drop partition if exists p1")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(1))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(1))
 	tk.MustQuery("show warnings").Check(solitonutil.RowsWithSep("|", "Note|1507|Error in list of partitions to p1"))
 }
 
@@ -4120,7 +4120,7 @@ func testAddIndexForGeneratedDeferredCauset(tk *testkit.TestKit, s *testSerialDB
 		c.Assert(strings.EqualFold(idx.Meta().Name.L, "idx_c2"), IsFalse)
 	}
 	// NOTE: this test case contains a bug, it should be uncommented after the bug is fixed.
-	// TODO: Fix bug https://github.com/whtcorpsinc/milevadb/issues/12181
+	// TODO: Fix bug https://github.com/whtcorpsinc/MilevaDB-Prod/issues/12181
 	//s.mustExec(c, "delete from t where y = 2155")
 	//s.mustExec(c, "alter block t add index idx_y(y1)")
 	//s.mustExec(c, "alter block t drop index idx_y")
@@ -4373,7 +4373,7 @@ func (s *testSerialDBSuite) TestModifyDeferredCausetCharset(c *C) {
 }
 
 func (s *testSerialDBSuite) TestSetBlockFlashReplica(c *C) {
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/schemareplicant/mockTiFlashStoreCount", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant/mockTiFlashStoreCount", `return(true)`), IsNil)
 
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustExec("use test_db")
@@ -4464,7 +4464,7 @@ func (s *testSerialDBSuite) TestSetBlockFlashReplica(c *C) {
 	t, dbInfo = is.FindBlockByPartitionID(t.Meta().ID)
 	c.Assert(t, IsNil)
 	c.Assert(dbInfo, IsNil)
-	failpoint.Disable("github.com/whtcorpsinc/milevadb/schemareplicant/mockTiFlashStoreCount")
+	failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant/mockTiFlashStoreCount")
 
 	// Test for set replica count more than the tiflash causetstore count.
 	s.mustExec(tk, c, "drop block if exists t_flash;")
@@ -4475,9 +4475,9 @@ func (s *testSerialDBSuite) TestSetBlockFlashReplica(c *C) {
 }
 
 func (s *testSerialDBSuite) TestAlterShardRowIDBits(c *C) {
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/meta/autoid/mockAutoIDChange", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid/mockAutoIDChange", `return(true)`), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/meta/autoid/mockAutoIDChange"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid/mockAutoIDChange"), IsNil)
 	}()
 
 	tk := testkit.NewTestKit(c, s.causetstore)
@@ -4644,8 +4644,8 @@ func (s *testDBSuite2) TestWriteLocal(c *C) {
 }
 
 func (s *testSerialDBSuite) TestSkipSchemaChecker(c *C) {
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/schemareplicant/mockTiFlashStoreCount", `return(true)`), IsNil)
-	defer failpoint.Disable("github.com/whtcorpsinc/milevadb/schemareplicant/mockTiFlashStoreCount")
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant/mockTiFlashStoreCount", `return(true)`), IsNil)
+	defer failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant/mockTiFlashStoreCount")
 
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustExec("use test")
@@ -5045,7 +5045,7 @@ func checkBlockLock(c *C, se stochastik.Stochastik, dbName, blockName string, lo
 		c.Assert(tb.Meta().Lock.State, Equals, perceptron.BlockLockStatePublic)
 		c.Assert(len(tb.Meta().Lock.Stochastiks) == 1, IsTrue)
 		c.Assert(tb.Meta().Lock.Stochastiks[0].ServerID, Equals, dom.DBS().GetID())
-		c.Assert(tb.Meta().Lock.Stochastiks[0].StochastikID, Equals, se.GetStochastikVars().ConnectionID)
+		c.Assert(tb.Meta().Lock.Stochastiks[0].StochastikID, Equals, se.GetStochaseinstein_dbars().ConnectionID)
 	} else {
 		c.Assert(tb.Meta().Lock, IsNil)
 	}
@@ -5087,7 +5087,7 @@ func (s *testDBSuite4) TestDeferredCausetCheck(c *C) {
 	tk.MustExec("drop block if exists defCausumn_check")
 	tk.MustExec("create block defCausumn_check (pk int primary key, a int check (a > 1))")
 	defer tk.MustExec("drop block if exists defCausumn_check")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(1))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(1))
 	tk.MustQuery("show warnings").Check(solitonutil.RowsWithSep("|", "Warning|8231|DeferredCauset check is not supported"))
 }
 
@@ -5098,7 +5098,7 @@ func (s *testDBSuite5) TestAlterCheck(c *C) {
 	tk.MustExec("create block alter_check (pk int primary key)")
 	defer tk.MustExec("drop block if exists alter_check")
 	tk.MustExec("alter block alter_check alter check crcn ENFORCED")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(1))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(1))
 	tk.MustQuery("show warnings").Check(solitonutil.RowsWithSep("|", "Warning|8231|ALTER CHECK is not supported"))
 }
 
@@ -5109,7 +5109,7 @@ func (s *testDBSuite6) TestDropCheck(c *C) {
 	tk.MustExec("create block drop_check (pk int primary key)")
 	defer tk.MustExec("drop block if exists drop_check")
 	tk.MustExec("alter block drop_check drop check crcn")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(1))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(1))
 	tk.MustQuery("show warnings").Check(solitonutil.RowsWithSep("|", "Warning|8231|DROP CHECK is not supported"))
 }
 
@@ -5120,7 +5120,7 @@ func (s *testDBSuite7) TestAddConstraintCheck(c *C) {
 	tk.MustExec("create block add_constraint_check (pk int primary key, a int)")
 	defer tk.MustExec("drop block if exists add_constraint_check")
 	tk.MustExec("alter block add_constraint_check add constraint crn check (a > 1)")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(1))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(1))
 	tk.MustQuery("show warnings").Check(solitonutil.RowsWithSep("|", "Warning|8231|ADD CONSTRAINT CHECK is not supported"))
 }
 
@@ -5131,14 +5131,14 @@ func (s *testDBSuite6) TestAlterOrderBy(c *C) {
 
 	// Test order by with primary key
 	tk.MustExec("alter block ob order by c")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(1))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(1))
 	tk.MustQuery("show warnings").Check(solitonutil.RowsWithSep("|", "Warning|1105|ORDER BY ignored as there is a user-defined clustered index in the block 'ob'"))
 
 	// Test order by with no primary key
 	tk.MustExec("drop block if exists ob")
 	tk.MustExec("create block ob (c int default 1, c1 int default 1, KEY cl(c1))")
 	tk.MustExec("alter block ob order by c")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(0))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(0))
 	tk.MustExec("drop block if exists ob")
 }
 
@@ -5165,9 +5165,9 @@ func (s *testSerialDBSuite) TestDBSJobErrorCount(c *C) {
 		Args:       []interface{}{schemaReplicant.ID, newBlockName},
 	}
 
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/dbs/mockErrEntrySizeTooLarge", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/mockErrEntrySizeTooLarge", `return(true)`), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/dbs/mockErrEntrySizeTooLarge"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/mockErrEntrySizeTooLarge"), IsNil)
 	}()
 
 	txn, err := s.causetstore.Begin()
@@ -5207,12 +5207,12 @@ func (s *testDBSuite1) TestAlterBlockWithValidation(c *C) {
 
 	// Test for alter block with validation.
 	tk.MustExec("alter block t1 with validation")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(1))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(1))
 	tk.MustQuery("show warnings").Check(solitonutil.RowsWithSep("|", "Warning|8200|ALTER TABLE WITH VALIDATION is currently unsupported"))
 
 	// Test for alter block without validation.
 	tk.MustExec("alter block t1 without validation")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(1))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(1))
 	tk.MustQuery("show warnings").Check(solitonutil.RowsWithSep("|", "Warning|8200|ALTER TABLE WITHOUT VALIDATION is currently unsupported"))
 }
 
@@ -5410,9 +5410,9 @@ func (s *testSerialDBSuite) TestCommitTxnWithIndexChange(c *C) {
 
 // TestAddIndexFailOnCaseWhenCanExit is used to close #19325.
 func (s *testSerialDBSuite) TestAddIndexFailOnCaseWhenCanExit(c *C) {
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/dbs/MockCaseWhenParseFailure", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/MockCaseWhenParseFailure", `return(true)`), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/dbs/MockCaseWhenParseFailure"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/MockCaseWhenParseFailure"), IsNil)
 	}()
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustExec("use test")

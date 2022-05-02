@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,21 +16,21 @@ package executor_test
 import (
 	"context"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/executor"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastik"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/auth"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/executor"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/soliton/solitonutil"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/stochastik"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
 )
 
 func (s *testSuite3) TestCharsetDatabase(c *C) {
@@ -152,7 +152,7 @@ func (s *testSuite3) TestTransaction(c *C) {
 }
 
 func inTxn(ctx stochastikctx.Context) bool {
-	return (ctx.GetStochastikVars().Status & allegrosql.ServerStatusInTrans) > 0
+	return (ctx.GetStochaseinstein_dbars().Status & allegrosql.ServerStatusInTrans) > 0
 }
 
 func (s *testSuite6) TestRole(c *C) {
@@ -202,12 +202,12 @@ func (s *testSuite6) TestRole(c *C) {
 	c.Check(err, NotNil)
 
 	// Test grant role for current_user();
-	stochastikVars := tk.Se.GetStochastikVars()
-	originUser := stochastikVars.User
-	stochastikVars.User = &auth.UserIdentity{Username: "root", Hostname: "localhost", AuthUsername: "root", AuthHostname: "%"}
+	stochaseinstein_dbars := tk.Se.GetStochaseinstein_dbars()
+	originUser := stochaseinstein_dbars.User
+	stochaseinstein_dbars.User = &auth.UserIdentity{Username: "root", Hostname: "localhost", AuthUsername: "root", AuthHostname: "%"}
 	tk.MustExec("grant 'r_1'@'localhost' to current_user();")
 	tk.MustExec("revoke 'r_1'@'localhost' from 'root'@'%';")
-	stochastikVars.User = originUser
+	stochaseinstein_dbars.User = originUser
 
 	result = tk.MustQuery(`SELECT FROM_USER FROM allegrosql.role_edges WHERE TO_USER="r_3" and TO_HOST="localhost"`)
 	result.Check(nil)
@@ -243,7 +243,7 @@ func (s *testSuite6) TestRole(c *C) {
 	tk.MustExec(dropRoleALLEGROSQL)
 
 	ctx := tk.Se.(stochastikctx.Context)
-	ctx.GetStochastikVars().User = &auth.UserIdentity{Username: "test1", Hostname: "localhost"}
+	ctx.GetStochaseinstein_dbars().User = &auth.UserIdentity{Username: "test1", Hostname: "localhost"}
 	c.Assert(tk.ExecToErr("SET ROLE role1, role2"), NotNil)
 	tk.MustExec("SET ROLE ALL")
 	tk.MustExec("SET ROLE ALL EXCEPT role1, role2")
@@ -403,7 +403,7 @@ func (s *testSuite7) TestUser(c *C) {
 	tk.Se, err = stochastik.CreateStochastik4Test(s.causetstore)
 	c.Check(err, IsNil)
 	ctx := tk.Se.(stochastikctx.Context)
-	ctx.GetStochastikVars().User = &auth.UserIdentity{Username: "test1", Hostname: "localhost", AuthHostname: "localhost"}
+	ctx.GetStochaseinstein_dbars().User = &auth.UserIdentity{Username: "test1", Hostname: "localhost", AuthHostname: "localhost"}
 	tk.MustExec(alterUserALLEGROSQL)
 	result = tk.MustQuery(`SELECT authentication_string FROM allegrosql.User WHERE User="test1" and Host="localhost"`)
 	result.Check(testkit.Events(auth.EncodePassword("1")))
@@ -487,12 +487,12 @@ func (s *testSuite3) TestSetPwd(c *C) {
 	tk.Se, err = stochastik.CreateStochastik4Test(s.causetstore)
 	c.Check(err, IsNil)
 	ctx := tk.Se.(stochastikctx.Context)
-	ctx.GetStochastikVars().User = &auth.UserIdentity{Username: "testpwd1", Hostname: "localhost", AuthUsername: "testpwd1", AuthHostname: "localhost"}
+	ctx.GetStochaseinstein_dbars().User = &auth.UserIdentity{Username: "testpwd1", Hostname: "localhost", AuthUsername: "testpwd1", AuthHostname: "localhost"}
 	// Stochastik user doesn't exist.
 	_, err = tk.Exec(setPwdALLEGROSQL)
 	c.Check(terror.ErrorEqual(err, executor.ErrPasswordNoMatch), IsTrue, Commentf("err %v", err))
 	// normal
-	ctx.GetStochastikVars().User = &auth.UserIdentity{Username: "testpwd", Hostname: "localhost", AuthUsername: "testpwd", AuthHostname: "localhost"}
+	ctx.GetStochaseinstein_dbars().User = &auth.UserIdentity{Username: "testpwd", Hostname: "localhost", AuthUsername: "testpwd", AuthHostname: "localhost"}
 	tk.MustExec(setPwdALLEGROSQL)
 	result = tk.MustQuery(`SELECT authentication_string FROM allegrosql.User WHERE User="testpwd" and Host="localhost"`)
 	result.Check(testkit.Events(auth.EncodePassword("pwd")))
@@ -647,7 +647,7 @@ func (s *testSuite3) TestStmtAutoNewTxn(c *C) {
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustExec("use test")
 
-	// Fix issue https://github.com/whtcorpsinc/milevadb/issues/10705
+	// Fix issue https://github.com/whtcorpsinc/MilevaDB-Prod/issues/10705
 	tk.MustExec("begin")
 	tk.MustExec("create user 'xxx'@'%';")
 	tk.MustExec("grant all privileges on *.* to 'xxx'@'%';")

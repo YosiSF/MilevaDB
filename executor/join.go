@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,21 +23,21 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/bitmap"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/codec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/disk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/execdetails"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/memory"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/expression"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/bitmap"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/codec"
-	"github.com/whtcorpsinc/milevadb/soliton/disk"
-	"github.com/whtcorpsinc/milevadb/soliton/execdetails"
-	"github.com/whtcorpsinc/milevadb/soliton/memory"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 var (
@@ -160,10 +160,10 @@ func (e *HashJoinExec) Open(ctx context.Context) error {
 
 	e.prepared = false
 	e.memTracker = memory.NewTracker(e.id, -1)
-	e.memTracker.AttachTo(e.ctx.GetStochastikVars().StmtCtx.MemTracker)
+	e.memTracker.AttachTo(e.ctx.GetStochaseinstein_dbars().StmtCtx.MemTracker)
 
 	e.diskTracker = disk.NewTracker(e.id, -1)
-	e.diskTracker.AttachTo(e.ctx.GetStochastikVars().StmtCtx.DiskTracker)
+	e.diskTracker.AttachTo(e.ctx.GetStochaseinstein_dbars().StmtCtx.DiskTracker)
 
 	e.closeCh = make(chan struct{})
 	e.finished.CausetStore(false)
@@ -179,7 +179,7 @@ func (e *HashJoinExec) Open(ctx context.Context) error {
 		e.stats = &hashJoinRuntimeStats{
 			concurrent: cap(e.joiners),
 		}
-		e.ctx.GetStochastikVars().StmtCtx.RuntimeStatsDefCausl.RegisterStats(e.id, e.stats)
+		e.ctx.GetStochaseinstein_dbars().StmtCtx.RuntimeStatsDefCausl.RegisterStats(e.id, e.stats)
 	}
 	return nil
 }
@@ -264,7 +264,7 @@ func (e *HashJoinExec) fetchBuildSideEvents(ctx context.Context, chkCh chan<- *c
 		if e.finished.Load().(bool) {
 			return
 		}
-		chk := chunk.NewChunkWithCapacity(e.buildSideExec.base().retFieldTypes, e.ctx.GetStochastikVars().MaxChunkSize)
+		chk := chunk.NewChunkWithCapacity(e.buildSideExec.base().retFieldTypes, e.ctx.GetStochaseinstein_dbars().MaxChunkSize)
 		err = Next(ctx, e.buildSideExec, chk)
 		if err != nil {
 			e.buildFinished <- errors.Trace(err)
@@ -733,7 +733,7 @@ func (e *HashJoinExec) buildHashBlockForList(buildSideResultCh <-chan *chunk.Chu
 				defer actionSpill.(*chunk.SpillDiskCausetAction).WaitForTest()
 			}
 		})
-		e.ctx.GetStochastikVars().StmtCtx.MemTracker.FallbackOldAndSetNewCausetAction(actionSpill)
+		e.ctx.GetStochaseinstein_dbars().StmtCtx.MemTracker.FallbackOldAndSetNewCausetAction(actionSpill)
 	}
 	for chk := range buildSideResultCh {
 		if e.finished.Load().(bool) {
@@ -805,7 +805,7 @@ func (e *NestedLoopApplyExec) Close() error {
 	e.memTracker = nil
 	if e.runtimeStats != nil {
 		runtimeStats := newJoinRuntimeStats()
-		e.ctx.GetStochastikVars().StmtCtx.RuntimeStatsDefCausl.RegisterStats(e.id, runtimeStats)
+		e.ctx.GetStochaseinstein_dbars().StmtCtx.RuntimeStatsDefCausl.RegisterStats(e.id, runtimeStats)
 		if e.canUseCache {
 			var hitRatio float64
 			if e.cacheAccessCounter > 0 {
@@ -832,7 +832,7 @@ func (e *NestedLoopApplyExec) Open(ctx context.Context) error {
 	e.innerList = chunk.NewList(retTypes(e.innerExec), e.initCap, e.maxChunkSize)
 
 	e.memTracker = memory.NewTracker(e.id, -1)
-	e.memTracker.AttachTo(e.ctx.GetStochastikVars().StmtCtx.MemTracker)
+	e.memTracker.AttachTo(e.ctx.GetStochaseinstein_dbars().StmtCtx.MemTracker)
 
 	e.innerList.GetMemTracker().SetLabel(memory.LabelForInnerList)
 	e.innerList.GetMemTracker().AttachTo(e.memTracker)
@@ -935,7 +935,7 @@ func (e *NestedLoopApplyExec) Next(ctx context.Context, req *chunk.Chunk) (err e
 				var key []byte
 				for _, defCaus := range e.outerSchema {
 					*defCaus.Data = e.outerEvent.GetCauset(defCaus.Index, defCaus.RetType)
-					key, err = codec.EncodeKey(e.ctx.GetStochastikVars().StmtCtx, key, *defCaus.Data)
+					key, err = codec.EncodeKey(e.ctx.GetStochaseinstein_dbars().StmtCtx, key, *defCaus.Data)
 					if err != nil {
 						return err
 					}

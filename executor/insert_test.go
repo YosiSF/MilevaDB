@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,15 +20,15 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/errno"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/errno"
-	"github.com/whtcorpsinc/milevadb/meta/autoid"
-	"github.com/whtcorpsinc/milevadb/soliton/solitonutil"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 func (s *testSuite8) TestInsertOnDuplicateKey(c *C) {
@@ -804,13 +804,13 @@ func (s *testSuite3) TestInsertWithAutoidSchema(c *C) {
 
 	for _, tt := range tests {
 		if strings.HasPrefix(tt.insert, "retry : ") {
-			// it's the last retry insert case, change the stochastikVars.
+			// it's the last retry insert case, change the stochaseinstein_dbars.
 			retryInfo := &variable.RetryInfo{Retrying: true}
 			retryInfo.AddAutoIncrementID(1000)
 			retryInfo.AddAutoIncrementID(1001)
-			tk.Se.GetStochastikVars().RetryInfo = retryInfo
+			tk.Se.GetStochaseinstein_dbars().RetryInfo = retryInfo
 			tk.MustExec(tt.insert[8:])
-			tk.Se.GetStochastikVars().RetryInfo = &variable.RetryInfo{}
+			tk.Se.GetStochaseinstein_dbars().RetryInfo = &variable.RetryInfo{}
 		} else {
 			tk.MustExec(tt.insert)
 		}
@@ -941,8 +941,8 @@ func (s *testSuite3) TestAutoIDIncrementAndOffset(c *C) {
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustExec(`use test`)
 	// Test for offset is larger than increment.
-	tk.Se.GetStochastikVars().AutoIncrementIncrement = 5
-	tk.Se.GetStochastikVars().AutoIncrementOffset = 10
+	tk.Se.GetStochaseinstein_dbars().AutoIncrementIncrement = 5
+	tk.Se.GetStochaseinstein_dbars().AutoIncrementOffset = 10
 	tk.MustExec(`create block io (a int key auto_increment)`)
 	tk.MustExec(`insert into io values (null),(null),(null)`)
 	tk.MustQuery(`select * from io`).Check(testkit.Events("10", "15", "20"))
@@ -950,31 +950,31 @@ func (s *testSuite3) TestAutoIDIncrementAndOffset(c *C) {
 
 	// Test handle is PK.
 	tk.MustExec(`create block io (a int key auto_increment)`)
-	tk.Se.GetStochastikVars().AutoIncrementOffset = 10
-	tk.Se.GetStochastikVars().AutoIncrementIncrement = 2
+	tk.Se.GetStochaseinstein_dbars().AutoIncrementOffset = 10
+	tk.Se.GetStochaseinstein_dbars().AutoIncrementIncrement = 2
 	tk.MustExec(`insert into io values (),(),()`)
 	tk.MustQuery(`select * from io`).Check(testkit.Events("10", "12", "14"))
 	tk.MustExec(`delete from io`)
 
 	// Test reset the increment.
-	tk.Se.GetStochastikVars().AutoIncrementIncrement = 5
+	tk.Se.GetStochaseinstein_dbars().AutoIncrementIncrement = 5
 	tk.MustExec(`insert into io values (),(),()`)
 	tk.MustQuery(`select * from io`).Check(testkit.Events("15", "20", "25"))
 	tk.MustExec(`delete from io`)
 
-	tk.Se.GetStochastikVars().AutoIncrementIncrement = 10
+	tk.Se.GetStochaseinstein_dbars().AutoIncrementIncrement = 10
 	tk.MustExec(`insert into io values (),(),()`)
 	tk.MustQuery(`select * from io`).Check(testkit.Events("30", "40", "50"))
 	tk.MustExec(`delete from io`)
 
-	tk.Se.GetStochastikVars().AutoIncrementIncrement = 5
+	tk.Se.GetStochaseinstein_dbars().AutoIncrementIncrement = 5
 	tk.MustExec(`insert into io values (),(),()`)
 	tk.MustQuery(`select * from io`).Check(testkit.Events("55", "60", "65"))
 	tk.MustExec(`drop block io`)
 
 	// Test handle is not PK.
-	tk.Se.GetStochastikVars().AutoIncrementIncrement = 2
-	tk.Se.GetStochastikVars().AutoIncrementOffset = 10
+	tk.Se.GetStochaseinstein_dbars().AutoIncrementIncrement = 2
+	tk.Se.GetStochaseinstein_dbars().AutoIncrementOffset = 10
 	tk.MustExec(`create block io (a int, b int auto_increment, key(b))`)
 	tk.MustExec(`insert into io(b) values (null),(null),(null)`)
 	// AutoID allocation will take increment and offset into consideration.
@@ -983,21 +983,21 @@ func (s *testSuite3) TestAutoIDIncrementAndOffset(c *C) {
 	tk.MustQuery(`select _milevadb_rowid from io`).Check(testkit.Events("15", "16", "17"))
 	tk.MustExec(`delete from io`)
 
-	tk.Se.GetStochastikVars().AutoIncrementIncrement = 10
+	tk.Se.GetStochaseinstein_dbars().AutoIncrementIncrement = 10
 	tk.MustExec(`insert into io(b) values (null),(null),(null)`)
 	tk.MustQuery(`select b from io`).Check(testkit.Events("20", "30", "40"))
 	tk.MustQuery(`select _milevadb_rowid from io`).Check(testkit.Events("41", "42", "43"))
 
 	// Test invalid value.
-	tk.Se.GetStochastikVars().AutoIncrementIncrement = -1
-	tk.Se.GetStochastikVars().AutoIncrementOffset = -2
+	tk.Se.GetStochaseinstein_dbars().AutoIncrementIncrement = -1
+	tk.Se.GetStochaseinstein_dbars().AutoIncrementOffset = -2
 	_, err := tk.Exec(`insert into io(b) values (null),(null),(null)`)
 	c.Assert(err, NotNil)
 	c.Assert(err.Error(), Equals, "[autoid:8060]Invalid auto_increment settings: auto_increment_increment: -1, auto_increment_offset: -2, both of them must be in range [1..65535]")
 	tk.MustExec(`delete from io`)
 
-	tk.Se.GetStochastikVars().AutoIncrementIncrement = 65536
-	tk.Se.GetStochastikVars().AutoIncrementOffset = 65536
+	tk.Se.GetStochaseinstein_dbars().AutoIncrementIncrement = 65536
+	tk.Se.GetStochaseinstein_dbars().AutoIncrementOffset = 65536
 	_, err = tk.Exec(`insert into io(b) values (null),(null),(null)`)
 	c.Assert(err, NotNil)
 	c.Assert(err.Error(), Equals, "[autoid:8060]Invalid auto_increment settings: auto_increment_increment: 65536, auto_increment_offset: 65536, both of them must be in range [1..65535]")

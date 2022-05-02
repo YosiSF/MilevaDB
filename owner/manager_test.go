@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,13 +20,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore"
+	. "github.com/whtcorpsinc/MilevaDB-Prod/dbs"
+	"github.com/whtcorpsinc/MilevaDB-Prod/owner"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore"
-	. "github.com/whtcorpsinc/milevadb/dbs"
-	"github.com/whtcorpsinc/milevadb/owner"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
 	"go.etcd.io/etcd/clientv3"
 	"go.etcd.io/etcd/clientv3/concurrency"
 	"go.etcd.io/etcd/integration"

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,16 +16,16 @@ package executor_test
 import (
 	"context"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/executor"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/set"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/executor"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton/set"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 var _ = SerialSuites(&inspectionSummarySuite{})
@@ -63,12 +63,12 @@ func (s *inspectionSummarySuite) TestValidInspectionSummaryMemrules(c *C) {
 func (s *inspectionSummarySuite) TestInspectionSummary(c *C) {
 	tk := testkit.NewTestKitWithInit(c, s.causetstore)
 
-	fpName := "github.com/whtcorpsinc/milevadb/executor/mockMetricsBlockData"
+	fpName := "github.com/whtcorpsinc/MilevaDB-Prod/executor/mockMetricsBlockData"
 	c.Assert(failpoint.Enable(fpName, "return"), IsNil)
 	defer func() { c.Assert(failpoint.Disable(fpName), IsNil) }()
 
 	datetime := func(s string) types.Time {
-		t, err := types.ParseTime(tk.Se.GetStochastikVars().StmtCtx, s, allegrosql.TypeDatetime, types.MaxFsp)
+		t, err := types.ParseTime(tk.Se.GetStochaseinstein_dbars().StmtCtx, s, allegrosql.TypeDatetime, types.MaxFsp)
 		c.Assert(err, IsNil)
 		return t
 	}
@@ -99,7 +99,7 @@ func (s *inspectionSummarySuite) TestInspectionSummary(c *C) {
 	rs, err := tk.Se.Execute(ctx, "select * from information_schema.inspection_summary where rule='query-summary' and metrics_name in ('milevadb_qps', 'milevadb_query_duration')")
 	c.Assert(err, IsNil)
 	result := tk.ResultSetToResultWithCtx(ctx, rs[0], Commentf("execute inspect ALLEGROALLEGROSQL failed"))
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(0), Commentf("unexpected warnings: %+v", tk.Se.GetStochastikVars().StmtCtx.GetWarnings()))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(0), Commentf("unexpected warnings: %+v", tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()))
 	result.Check(testkit.Events(
 		"query-summary einsteindb-0 milevadb_query_duration Select 0.99 0 0 0 The quantile of MilevaDB query durations(second)",
 		"query-summary einsteindb-1 milevadb_query_duration UFIDelate 0.99 2 1 3 The quantile of MilevaDB query durations(second)",
@@ -113,7 +113,7 @@ func (s *inspectionSummarySuite) TestInspectionSummary(c *C) {
 	rs, err = tk.Se.Execute(ctx, "select * from information_schema.inspection_summary where metrics_name = 'milevadb_qps'")
 	c.Assert(err, IsNil)
 	result = tk.ResultSetToResultWithCtx(ctx, rs[0], Commentf("execute inspect ALLEGROALLEGROSQL failed"))
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(0), Commentf("unexpected warnings: %+v", tk.Se.GetStochastikVars().StmtCtx.GetWarnings()))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(0), Commentf("unexpected warnings: %+v", tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()))
 	result.Check(testkit.Events(
 		"query-summary milevadb-0 milevadb_qps Query, Error <nil> 1 1 1 MilevaDB query processing numbers per second",
 		"query-summary milevadb-0 milevadb_qps Query, OK <nil> 0 0 0 MilevaDB query processing numbers per second",

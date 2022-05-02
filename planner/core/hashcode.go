@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import (
 	"encoding/binary"
 	"sort"
 
-	"github.com/whtcorpsinc/milevadb/soliton/plancodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/plancodec"
 )
 
 func encodeIntAsUint32(result []byte, value int) []byte {
@@ -46,7 +46,7 @@ func (p *LogicalProjection) HashCode() []byte {
 	result = encodeIntAsUint32(result, p.SelectBlockOffset())
 	result = encodeIntAsUint32(result, len(p.Exprs))
 	for _, expr := range p.Exprs {
-		exprHashCode := expr.HashCode(p.ctx.GetStochastikVars().StmtCtx)
+		exprHashCode := expr.HashCode(p.ctx.GetStochaseinstein_dbars().StmtCtx)
 		result = encodeIntAsUint32(result, len(exprHashCode))
 		result = append(result, exprHashCode...)
 	}
@@ -75,7 +75,7 @@ func (p *LogicalSelection) HashCode() []byte {
 
 	condHashCodes := make([][]byte, len(p.Conditions))
 	for i, expr := range p.Conditions {
-		condHashCodes[i] = expr.HashCode(p.ctx.GetStochastikVars().StmtCtx)
+		condHashCodes[i] = expr.HashCode(p.ctx.GetStochaseinstein_dbars().StmtCtx)
 	}
 	// Sort the conditions, so `a > 1 and a < 100` can equal to `a < 100 and a > 1`.
 	sort.Slice(condHashCodes, func(i, j int) bool { return bytes.Compare(condHashCodes[i], condHashCodes[j]) < 0 })

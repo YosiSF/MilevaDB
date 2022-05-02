@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,10 +25,10 @@ import (
 	"path/filepath"
 	"text/template"
 
-	. "github.com/whtcorpsinc/milevadb/expression/generator/helper"
+	. "github.com/whtcorpsinc/MilevaDB-Prod/expression/generator/helper"
 )
 
-const header = `// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+const header = `MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -49,8 +49,8 @@ package expression
 const newLine = "\n"
 
 const builtinStringImports = `import (
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
 )
 `
 
@@ -118,13 +118,13 @@ import (
 
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 var vecGeneratedBuiltinStringCases = map[string][]vecExprBenchCase{
 	ast.Field: {
 {{ range . }}
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ET{{ .ETName }}, types.ET{{ .ETName }}, types.ET{{ .ETName }}, types.ET{{ .ETName }}}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ET{{ .ETName }}, types.ET{{ .ETName }}, types.ET{{ .ETName }}, types.ET{{ .ETName }}}},
 {{ end }}
 	},
 }

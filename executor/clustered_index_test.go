@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
 package executor_test
 
 import (
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb"
+	"github.com/whtcorpsinc/MilevaDB-Prod/errno"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/causetstore/einsteindb"
-	"github.com/whtcorpsinc/milevadb/errno"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
 )
 
 type testClusteredSuite struct{ *baseTestSuite }
@@ -43,7 +43,7 @@ func (s *testClusteredSuite) TestClusteredUnionScan(c *C) {
 
 	// cover old event format.
 	tk = testkit.NewTestKitWithInit(c, s.causetstore)
-	tk.Se.GetStochastikVars().EventEncoder.Enable = false
+	tk.Se.GetStochaseinstein_dbars().EventEncoder.Enable = false
 	tk.MustExec("begin")
 	tk.MustExec("uFIDelate t set c = 1")
 	tk.MustQuery("select * from t").Check(testkit.Events("1 1 1"))
@@ -186,7 +186,7 @@ func (s *testClusteredSuite) TestClusteredPrefixingPrimaryKey(c *C) {
 
 func (s *testClusteredSuite) TestClusteredWithOldEventFormat(c *C) {
 	tk := s.newTK(c)
-	tk.Se.GetStochastikVars().EventEncoder.Enable = false
+	tk.Se.GetStochaseinstein_dbars().EventEncoder.Enable = false
 	tk.MustExec("drop block if exists t;")
 	tk.MustExec("create block t(id varchar(255) primary key, a int, b int, unique index idx(b));")
 	tk.MustExec("insert into t values ('b568004d-afad-11ea-8e4d-d651e3a981b7', 1, -1);")

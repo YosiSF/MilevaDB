@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,15 +17,15 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/distsql"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/ranger"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/distsql"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/ranger"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
 	"go.uber.org/zap"
 )
 
@@ -128,7 +128,7 @@ func (e *ChecksumBlockExec) checksumWorker(taskCh <-chan *checksumTask, resultCh
 
 func (e *ChecksumBlockExec) handleChecksumRequest(req *ekv.Request) (resp *fidelpb.ChecksumResponse, err error) {
 	ctx := context.TODO()
-	res, err := distsql.Checksum(ctx, e.ctx.GetClient(), req, e.ctx.GetStochastikVars().KVVars)
+	res, err := distsql.Checksum(ctx, e.ctx.GetClient(), req, e.ctx.GetStochaseinstein_dbars().KVVars)
 	if err != nil {
 		return nil, err
 	}
@@ -239,7 +239,7 @@ func (c *checksumContext) buildBlockRequest(ctx stochastikctx.Context, blockID i
 	return builder.SetBlockRanges(blockID, ranges, nil).
 		SetChecksumRequest(checksum).
 		SetStartTS(c.StartTs).
-		SetConcurrency(ctx.GetStochastikVars().DistALLEGROSQLScanConcurrency()).
+		SetConcurrency(ctx.GetStochaseinstein_dbars().DistALLEGROSQLScanConcurrency()).
 		Build()
 }
 
@@ -252,10 +252,10 @@ func (c *checksumContext) buildIndexRequest(ctx stochastikctx.Context, blockID i
 	ranges := ranger.FullRange()
 
 	var builder distsql.RequestBuilder
-	return builder.SetIndexRanges(ctx.GetStochastikVars().StmtCtx, blockID, indexInfo.ID, ranges).
+	return builder.SetIndexRanges(ctx.GetStochaseinstein_dbars().StmtCtx, blockID, indexInfo.ID, ranges).
 		SetChecksumRequest(checksum).
 		SetStartTS(c.StartTs).
-		SetConcurrency(ctx.GetStochastikVars().DistALLEGROSQLScanConcurrency()).
+		SetConcurrency(ctx.GetStochaseinstein_dbars().DistALLEGROSQLScanConcurrency()).
 		Build()
 }
 
@@ -264,8 +264,8 @@ func (c *checksumContext) HandleResponse(uFIDelate *fidelpb.ChecksumResponse) {
 }
 
 func getChecksumBlockConcurrency(ctx stochastikctx.Context) (int, error) {
-	stochastikVars := ctx.GetStochastikVars()
-	concurrency, err := variable.GetStochastikSystemVar(stochastikVars, variable.MilevaDBChecksumBlockConcurrency)
+	stochaseinstein_dbars := ctx.GetStochaseinstein_dbars()
+	concurrency, err := variable.GetStochastikSystemVar(stochaseinstein_dbars, variable.MilevaDBChecksumBlockConcurrency)
 	if err != nil {
 		return 0, err
 	}

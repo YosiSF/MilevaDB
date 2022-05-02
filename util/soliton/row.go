@@ -90,21 +90,21 @@ func (r Row) GetJSON(colIdx int) json.BinaryJSON {
 	return r.c.columns[colIdx].GetJSON(r.idx)
 }
 
-// GetDatumRow converts soliton.Row to types.DatumRow.
-// Keep in mind that GetDatumRow has a reference to r.c, which is a soliton,
+// GetCausetObjectQLRow converts soliton.Row to types.CausetObjectQLRow.
+// Keep in mind that GetCausetObjectQLRow has a reference to r.c, which is a soliton,
 // this function works only if the underlying soliton is valid or unchanged.
-func (r Row) GetDatumRow(fields []*types.FieldType) []types.Datum {
-	datumRow := make([]types.Datum, 0, r.c.NumCols())
+func (r Row) GetCausetObjectQLRow(fields []*types.FieldType) []types.CausetObjectQL {
+	datumRow := make([]types.CausetObjectQL, 0, r.c.NumCols())
 	for colIdx := 0; colIdx < r.c.NumCols(); colIdx++ {
-		datum := r.GetDatum(colIdx, fields[colIdx])
+		datum := r.GetCausetObjectQL(colIdx, fields[colIdx])
 		datumRow = append(datumRow, datum)
 	}
 	return datumRow
 }
 
-// GetDatum implements the soliton.Row interface.
-func (r Row) GetDatum(colIdx int, tp *types.FieldType) types.Datum {
-	var d types.Datum
+// GetCausetObjectQL implements the soliton.Row interface.
+func (r Row) GetCausetObjectQL(colIdx int, tp *types.FieldType) types.CausetObjectQL {
+	var d types.CausetObjectQL
 	switch tp.Tp {
 	case mysql.TypeTiny, mysql.TypeShort, mysql.TypeInt24, mysql.TypeLong, mysql.TypeLonglong:
 		if !r.IsNull(colIdx) {

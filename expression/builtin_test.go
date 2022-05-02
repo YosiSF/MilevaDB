@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/charset"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 func evalBuiltinFuncConcurrent(f builtinFunc, event chunk.Event) (d types.Causet, err error) {
@@ -54,7 +54,7 @@ func evalBuiltinFunc(f builtinFunc, event chunk.Event) (d types.Causet, err erro
 		isNull bool
 	)
 	switch f.getRetTp().EvalType() {
-	case types.ETInt:
+	case types.CausetEDN:
 		var intRes int64
 		intRes, isNull, err = f.evalInt(event)
 		if allegrosql.HasUnsignedFlag(f.getRetTp().Flag) {
@@ -121,13 +121,13 @@ func makeCausets(i interface{}) []types.Causet {
 
 func (s *testEvaluatorSuite) TestIsNullFunc(c *C) {
 	fc := funcs[ast.IsNull]
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(1)))
+	f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(1)))
 	c.Assert(err, IsNil)
 	v, err := evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(v.GetInt64(), Equals, int64(0))
 
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(nil)))
+	f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(nil)))
 	c.Assert(err, IsNil)
 	v, err = evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
@@ -136,14 +136,14 @@ func (s *testEvaluatorSuite) TestIsNullFunc(c *C) {
 
 func (s *testEvaluatorSuite) TestLock(c *C) {
 	dagger := funcs[ast.GetLock]
-	f, err := dagger.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(nil, 1)))
+	f, err := dagger.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(nil, 1)))
 	c.Assert(err, IsNil)
 	v, err := evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(v.GetInt64(), Equals, int64(1))
 
 	releaseLock := funcs[ast.ReleaseLock]
-	f, err = releaseLock.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(1)))
+	f, err = releaseLock.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(1)))
 	c.Assert(err, IsNil)
 	v, err = evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
@@ -172,7 +172,7 @@ func newFunctionForTest(ctx stochastikctx.Context, funcName string, args ...Expr
 
 var (
 	// MyALLEGROSQL int8.
-	int8Con = &Constant{RetType: &types.FieldType{Tp: allegrosql.TypeLonglong, Charset: charset.CharsetBin, DefCauslate: charset.DefCauslationBin}}
+	int8Con = &CouplingConstantWithRadix{RetType: &types.FieldType{Tp: allegrosql.TypeLonglong, Charset: charset.CharsetBin, DefCauslate: charset.DefCauslationBin}}
 	// MyALLEGROSQL varchar.
-	varcharCon = &Constant{RetType: &types.FieldType{Tp: allegrosql.TypeVarchar, Charset: charset.CharsetUTF8, DefCauslate: charset.DefCauslationUTF8}}
+	varcharCon = &CouplingConstantWithRadix{RetType: &types.FieldType{Tp: allegrosql.TypeVarchar, Charset: charset.CharsetUTF8, DefCauslate: charset.DefCauslationUTF8}}
 )

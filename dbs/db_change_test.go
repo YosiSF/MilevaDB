@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,20 +30,20 @@ import (
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/failpoint"
 	"github.com/whtcorpsinc/log"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/dbs"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/executor"
-	"github.com/whtcorpsinc/milevadb/meta"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton/admin"
-	"github.com/whtcorpsinc/milevadb/soliton/gcutil"
-	"github.com/whtcorpsinc/milevadb/soliton/sqlexec"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/stochastik"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/dbs"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/executor"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/admin"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/gcutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/sqlexec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastik"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
 	"go.uber.org/zap"
 )
 
@@ -386,7 +386,7 @@ func (t *testExecInfo) parseALLEGROSQLs(p *berolinaAllegroSQL.berolinaAllegroSQL
 	}
 	var err error
 	for _, sqlInfo := range t.sqlInfos {
-		seVars := sqlInfo.cases[0].stochastik.GetStochastikVars()
+		seVars := sqlInfo.cases[0].stochastik.GetStochaseinstein_dbars()
 		charset, defCauslation := seVars.GetCharsetInfo()
 		for j := 0; j < t.execCases; j++ {
 			sqlInfo.cases[j].rawStmt, err = p.ParseOneStmt(sqlInfo.allegrosql, charset, defCauslation)
@@ -509,7 +509,7 @@ func (s *testStateChangeSuite) TestAppendEnum(c *C) {
 	checkResult(result, testkit.Rows(expected...))
 }
 
-// https://github.com/whtcorpsinc/milevadb/pull/6249 fixes the following two test cases.
+// https://github.com/whtcorpsinc/MilevaDB-Prod/pull/6249 fixes the following two test cases.
 func (s *testStateChangeSuite) TestWriteOnlyWriteNULL(c *C) {
 	sqls := make([]sqlWithErr, 1)
 	sqls[0] = sqlWithErr{"insert t set c1 = 'c1_new', c3 = '2020-02-12', c4 = 8 on duplicate key uFIDelate c1 = values(c1)", nil}
@@ -561,10 +561,10 @@ func (s *serialTestStateChangeSuite) TestWriteReorgForModifyDeferredCausetWithUn
 // TestWriteReorgForModifyDeferredCausetWithPKIsHandle tests whether the correct defCausumns is used in PhysicalIndexScan's ToPB function.
 func (s *serialTestStateChangeSuite) TestWriteReorgForModifyDeferredCausetWithPKIsHandle(c *C) {
 	modifyDeferredCausetALLEGROSQL := "alter block tt change defCausumn c cc tinyint unsigned not null default 1 first"
-	enableChangeDeferredCausetType := s.se.GetStochastikVars().EnableChangeDeferredCausetType
-	s.se.GetStochastikVars().EnableChangeDeferredCausetType = true
+	enableChangeDeferredCausetType := s.se.GetStochaseinstein_dbars().EnableChangeDeferredCausetType
+	s.se.GetStochaseinstein_dbars().EnableChangeDeferredCausetType = true
 	defer func() {
-		s.se.GetStochastikVars().EnableChangeDeferredCausetType = enableChangeDeferredCausetType
+		s.se.GetStochaseinstein_dbars().EnableChangeDeferredCausetType = enableChangeDeferredCausetType
 		config.RestoreFunc()()
 	}()
 
@@ -625,10 +625,10 @@ func (s *serialTestStateChangeSuite) TestDeleteOnlyForModifyDeferredCausetWithou
 }
 
 func (s *serialTestStateChangeSuite) testModifyDeferredCauset(c *C, state perceptron.SchemaState, modifyDeferredCausetALLEGROSQL string, idx idxType) {
-	enableChangeDeferredCausetType := s.se.GetStochastikVars().EnableChangeDeferredCausetType
-	s.se.GetStochastikVars().EnableChangeDeferredCausetType = true
+	enableChangeDeferredCausetType := s.se.GetStochaseinstein_dbars().EnableChangeDeferredCausetType
+	s.se.GetStochaseinstein_dbars().EnableChangeDeferredCausetType = true
 	defer func() {
-		s.se.GetStochastikVars().EnableChangeDeferredCausetType = enableChangeDeferredCausetType
+		s.se.GetStochaseinstein_dbars().EnableChangeDeferredCausetType = enableChangeDeferredCausetType
 	}()
 
 	_, err := s.se.Execute(context.Background(), "use test_db_state")
@@ -1273,8 +1273,8 @@ func (s *testStateChangeSuiteBase) testControlParallelExecALLEGROSQL(c *C, sql1,
 }
 
 func (s *serialTestStateChangeSuite) TestParallelUFIDelateBlockReplica(c *C) {
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/schemareplicant/mockTiFlashStoreCount", `return(true)`), IsNil)
-	defer failpoint.Disable("github.com/whtcorpsinc/milevadb/schemareplicant/mockTiFlashStoreCount")
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant/mockTiFlashStoreCount", `return(true)`), IsNil)
+	defer failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant/mockTiFlashStoreCount")
 
 	ctx := context.Background()
 	_, err := s.se.Execute(context.Background(), "use test_db_state")
@@ -1460,7 +1460,7 @@ func (s *testStateChangeSuite) TestParallelDBSBeforeRunDBSJob(c *C) {
 			time.Sleep(interval)
 		}
 
-		currID := ctx.GetStochastikVars().ConnectionID
+		currID := ctx.GetStochaseinstein_dbars().ConnectionID
 		for {
 			seCnt := atomic.LoadInt32(&stochastikCnt)
 			// Make sure the two stochastik have got the same information schemaReplicant. And the first stochastik can continue to go on,
@@ -1547,9 +1547,9 @@ func (s *testStateChangeSuite) TestParallelTruncateBlockAndAddDeferredCausets(c 
 
 // TestParallelFlashbackBlock tests parallel flashback block.
 func (s *serialTestStateChangeSuite) TestParallelFlashbackBlock(c *C) {
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/meta/autoid/mockAutoIDChange", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid/mockAutoIDChange", `return(true)`), IsNil)
 	defer func(originGC bool) {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/meta/autoid/mockAutoIDChange"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid/mockAutoIDChange"), IsNil)
 		if originGC {
 			dbs.EmulatorGCEnable()
 		} else {
@@ -1597,9 +1597,9 @@ func (s *serialTestStateChangeSuite) TestParallelFlashbackBlock(c *C) {
 
 // TestModifyDeferredCausetTypeArgs test job raw args won't be uFIDelated when error occurs in `uFIDelateVersionAndBlockInfo`.
 func (s *serialTestStateChangeSuite) TestModifyDeferredCausetTypeArgs(c *C) {
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/dbs/mockUFIDelateVersionAndBlockInfoErr", `return(2)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/mockUFIDelateVersionAndBlockInfoErr", `return(2)`), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/dbs/mockUFIDelateVersionAndBlockInfoErr"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/mockUFIDelateVersionAndBlockInfoErr"), IsNil)
 	}()
 
 	tk := testkit.NewTestKit(c, s.causetstore)
@@ -1607,10 +1607,10 @@ func (s *serialTestStateChangeSuite) TestModifyDeferredCausetTypeArgs(c *C) {
 	tk.MustExec("drop block if exists t_modify_defCausumn_args")
 	tk.MustExec("create block t_modify_defCausumn_args(a int, unique(a))")
 
-	enableChangeDeferredCausetType := tk.Se.GetStochastikVars().EnableChangeDeferredCausetType
-	tk.Se.GetStochastikVars().EnableChangeDeferredCausetType = true
+	enableChangeDeferredCausetType := tk.Se.GetStochaseinstein_dbars().EnableChangeDeferredCausetType
+	tk.Se.GetStochaseinstein_dbars().EnableChangeDeferredCausetType = true
 	defer func() {
-		tk.Se.GetStochastikVars().EnableChangeDeferredCausetType = enableChangeDeferredCausetType
+		tk.Se.GetStochaseinstein_dbars().EnableChangeDeferredCausetType = enableChangeDeferredCausetType
 	}()
 
 	_, err := tk.Exec("alter block t_modify_defCausumn_args modify defCausumn a tinyint")

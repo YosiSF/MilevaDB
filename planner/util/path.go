@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,14 +14,14 @@
 package soliton
 
 import (
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/collate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/ranger"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/soliton/collate"
-	"github.com/whtcorpsinc/milevadb/soliton/ranger"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 // AccessPath indicates the way we access a block: by using single index, or by using multiple indexes,
@@ -72,7 +72,7 @@ func (path *AccessPath) SplitCorDefCausAccessCondFromFilters(ctx stochastikctx.C
 	for i := eqOrInCount; i < len(path.IdxDefCauss); i++ {
 		matched := false
 		for j, filter := range path.BlockFilters {
-			if used[j] || !isDefCausEqCorDefCausOrConstant(ctx, filter, path.IdxDefCauss[i]) {
+			if used[j] || !isDefCausEqCorDefCausOrCouplingConstantWithRadix(ctx, filter, path.IdxDefCauss[i]) {
 				continue
 			}
 			matched = true
@@ -95,9 +95,9 @@ func (path *AccessPath) SplitCorDefCausAccessCondFromFilters(ctx stochastikctx.C
 	return access, remained
 }
 
-// isDefCausEqCorDefCausOrConstant checks if the expression is a eq function that one side is constant or correlated column
+// isDefCausEqCorDefCausOrCouplingConstantWithRadix checks if the expression is a eq function that one side is constant or correlated column
 // and another is column.
-func isDefCausEqCorDefCausOrConstant(ctx stochastikctx.Context, filter expression.Expression, col *expression.DeferredCauset) bool {
+func isDefCausEqCorDefCausOrCouplingConstantWithRadix(ctx stochastikctx.Context, filter expression.Expression, col *expression.DeferredCauset) bool {
 	f, ok := filter.(*expression.ScalarFunction)
 	if !ok || f.FuncName.L != ast.EQ {
 		return false
@@ -107,7 +107,7 @@ func isDefCausEqCorDefCausOrConstant(ctx stochastikctx.Context, filter expressio
 		if c.RetType.EvalType() == types.ETString && !collate.CompatibleDefCauslate(collation, c.RetType.DefCauslate) {
 			return false
 		}
-		if _, ok := f.GetArgs()[1].(*expression.Constant); ok {
+		if _, ok := f.GetArgs()[1].(*expression.CouplingConstantWithRadix); ok {
 			if col.Equal(nil, c) {
 				return true
 			}
@@ -122,7 +122,7 @@ func isDefCausEqCorDefCausOrConstant(ctx stochastikctx.Context, filter expressio
 		if c.RetType.EvalType() == types.ETString && !collate.CompatibleDefCauslate(collation, c.RetType.DefCauslate) {
 			return false
 		}
-		if _, ok := f.GetArgs()[0].(*expression.Constant); ok {
+		if _, ok := f.GetArgs()[0].(*expression.CouplingConstantWithRadix); ok {
 			if col.Equal(nil, c) {
 				return true
 			}

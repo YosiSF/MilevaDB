@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@ import (
 
 	"github.com/whtcorpsinc/berolinaAllegroSQL/charset"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/defCauslate"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/defCauslate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 var (
@@ -44,8 +44,8 @@ func (c *likeFunctionClass) getFunction(ctx stochastikctx.Context, args []Expres
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	argTp := []types.EvalType{types.ETString, types.ETString, types.ETInt}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, argTp...)
+	argTp := []types.EvalType{types.ETString, types.ETString, types.CausetEDN}
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, argTp...)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +91,7 @@ func (b *builtinLikeSig) evalInt(event chunk.Event) (int64, bool, error) {
 	memorization := func() {
 		if b.pattern == nil {
 			b.pattern = b.defCauslator().Pattern()
-			if b.args[1].ConstItem(b.ctx.GetStochastikVars().StmtCtx) && b.args[2].ConstItem(b.ctx.GetStochastikVars().StmtCtx) {
+			if b.args[1].ConstItem(b.ctx.GetStochaseinstein_dbars().StmtCtx) && b.args[2].ConstItem(b.ctx.GetStochaseinstein_dbars().StmtCtx) {
 				b.pattern.Compile(patternStr, byte(escape))
 				b.isMemorizedPattern = true
 			}
@@ -116,7 +116,7 @@ func (c *regexpFunctionClass) getFunction(ctx stochastikctx.Context, args []Expr
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETString, types.ETString)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETString, types.ETString)
 	if err != nil {
 		return nil, err
 	}

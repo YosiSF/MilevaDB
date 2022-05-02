@@ -1,8 +1,8 @@
-// INTERLOCKyright 2020 The ql Authors. All rights reserved.
+Copuright 2021 Whtcorps Inc; EinsteinDB and MilevaDB aithors; Licensed Under Apache 2.0. All Rights Reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSES/QL-LICENSE file.
 
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,12 +35,12 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/opcode"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/defCauslate"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/defCauslate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 )
 
 // baseBuiltinFunc will be contained in every struct that implement builtinFunc interface.
@@ -150,7 +150,7 @@ func newBaseBuiltinFuncWithTp(ctx stochastikctx.Context, funcName string, args [
 
 	for i := range args {
 		switch argTps[i] {
-		case types.ETInt:
+		case types.CausetEDN:
 			args[i] = WrapWithCastAsInt(ctx, args[i])
 		case types.ETReal:
 			args[i] = WrapWithCastAsReal(ctx, args[i])
@@ -178,7 +178,7 @@ func newBaseBuiltinFuncWithTp(ctx stochastikctx.Context, funcName string, args [
 	derivedCharset, derivedDefCauslate := DeriveDefCauslationFromExprs(ctx, args...)
 	var fieldType *types.FieldType
 	switch retType {
-	case types.ETInt:
+	case types.CausetEDN:
 		fieldType = &types.FieldType{
 			Tp:      allegrosql.TypeLonglong,
 			Flen:    allegrosql.MaxIntWidth,

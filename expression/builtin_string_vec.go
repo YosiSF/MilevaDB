@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,10 +25,10 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/charset"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/defCauslate"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/defCauslate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"golang.org/x/text/transform"
 )
 
@@ -61,7 +61,7 @@ func (b *builtinRepeatSig) vecEvalString(input *chunk.Chunk, result *chunk.Defer
 		return err
 	}
 
-	buf2, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf2, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -90,7 +90,7 @@ func (b *builtinRepeatSig) vecEvalString(input *chunk.Chunk, result *chunk.Defer
 		str := buf.GetString(i)
 		byteLength := len(str)
 		if uint64(byteLength)*uint64(num) > b.maxAllowedPacket {
-			b.ctx.GetStochastikVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("repeat", b.maxAllowedPacket))
+			b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("repeat", b.maxAllowedPacket))
 			result.AppendNull()
 			continue
 		}
@@ -168,7 +168,7 @@ func (b *builtinLeftUTF8Sig) vecEvalString(input *chunk.Chunk, result *chunk.Def
 		return err
 	}
 
-	buf2, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf2, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -213,7 +213,7 @@ func (b *builtinRightUTF8Sig) vecEvalString(input *chunk.Chunk, result *chunk.De
 		return err
 	}
 
-	buf2, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf2, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -252,7 +252,7 @@ func (b *builtinRightUTF8Sig) vectorized() bool {
 // See https://dev.allegrosql.com/doc/refman/5.7/en/string-functions.html#function_space
 func (b *builtinSpaceSig) vecEvalString(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -273,7 +273,7 @@ func (b *builtinSpaceSig) vecEvalString(input *chunk.Chunk, result *chunk.Deferr
 			num = 0
 		}
 		if uint64(num) > b.maxAllowedPacket {
-			b.ctx.GetStochastikVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("space", b.maxAllowedPacket))
+			b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("space", b.maxAllowedPacket))
 			result.AppendNull()
 			continue
 		}
@@ -343,7 +343,7 @@ func (b *builtinConcatSig) vecEvalString(input *chunk.Chunk, result *chunk.Defer
 			}
 			byteBuf = buf.GetBytes(i)
 			if uint64(len(strs[i])+len(byteBuf)) > b.maxAllowedPacket {
-				b.ctx.GetStochastikVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("concat", b.maxAllowedPacket))
+				b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("concat", b.maxAllowedPacket))
 				isNulls[i] = true
 				continue
 			}
@@ -525,7 +525,7 @@ func (b *builtinInsertSig) vecEvalString(input *chunk.Chunk, result *chunk.Defer
 	if err := b.args[0].VecEvalString(b.ctx, input, str); err != nil {
 		return err
 	}
-	pos, err := b.bufSlabPredictor.get(types.ETInt, n)
+	pos, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -533,7 +533,7 @@ func (b *builtinInsertSig) vecEvalString(input *chunk.Chunk, result *chunk.Defer
 	if err := b.args[1].VecEvalInt(b.ctx, input, pos); err != nil {
 		return err
 	}
-	length, err := b.bufSlabPredictor.get(types.ETInt, n)
+	length, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -570,7 +570,7 @@ func (b *builtinInsertSig) vecEvalString(input *chunk.Chunk, result *chunk.Defer
 		}
 		newstrI := newstr.GetString(i)
 		if uint64(strLength-lengthI+int64(len(newstrI))) > b.maxAllowedPacket {
-			b.ctx.GetStochastikVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("insert", b.maxAllowedPacket))
+			b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("insert", b.maxAllowedPacket))
 			result.AppendNull()
 			continue
 		}
@@ -631,7 +631,7 @@ func (b *builtinConcatWSSig) vecEvalString(input *chunk.Chunk, result *chunk.Def
 				targetLengths[i] += len(seps[i])
 			}
 			if uint64(targetLengths[i]) > b.maxAllowedPacket {
-				b.ctx.GetStochastikVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("concat_ws", b.maxAllowedPacket))
+				b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("concat_ws", b.maxAllowedPacket))
 				isNulls[i] = true
 				continue
 			}
@@ -719,7 +719,7 @@ func (b *builtinSubstringIndexSig) vecEvalString(input *chunk.Chunk, result *chu
 		return err
 	}
 
-	buf2, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf2, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -815,7 +815,7 @@ func (b *builtinExportSet3ArgSig) vectorized() bool {
 // See https://dev.allegrosql.com/doc/refman/5.7/en/string-functions.html#function_export-set
 func (b *builtinExportSet3ArgSig) vecEvalString(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	bits, err := b.bufSlabPredictor.get(types.ETInt, n)
+	bits, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -902,7 +902,7 @@ func (b *builtinLpadSig) vecEvalString(input *chunk.Chunk, result *chunk.Deferre
 	if err := b.args[0].VecEvalString(b.ctx, input, strBuf); err != nil {
 		return err
 	}
-	lenBuf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	lenBuf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -929,7 +929,7 @@ func (b *builtinLpadSig) vecEvalString(input *chunk.Chunk, result *chunk.Deferre
 		}
 		targetLength := int(i64s[i])
 		if uint64(targetLength) > b.maxAllowedPacket {
-			b.ctx.GetStochastikVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("lpad", b.maxAllowedPacket))
+			b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("lpad", b.maxAllowedPacket))
 			result.AppendNull()
 			continue
 		}
@@ -971,7 +971,7 @@ func (b *builtinLpadUTF8Sig) vecEvalString(input *chunk.Chunk, result *chunk.Def
 	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
 		return err
 	}
-	buf1, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf1, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -997,7 +997,7 @@ func (b *builtinLpadUTF8Sig) vecEvalString(input *chunk.Chunk, result *chunk.Def
 		}
 		targetLength := int(i64s[i])
 		if uint64(targetLength)*uint64(allegrosql.MaxBytesOfCharacter) > b.maxAllowedPacket {
-			b.ctx.GetStochastikVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("lpad", b.maxAllowedPacket))
+			b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("lpad", b.maxAllowedPacket))
 			result.AppendNull()
 			continue
 		}
@@ -1080,7 +1080,7 @@ func (b *builtinLeftSig) vecEvalString(input *chunk.Chunk, result *chunk.Deferre
 	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
 		return err
 	}
-	buf2, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf2, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -1296,7 +1296,7 @@ func (b *builtinExportSet4ArgSig) vectorized() bool {
 // See https://dev.allegrosql.com/doc/refman/5.7/en/string-functions.html#function_export-set
 func (b *builtinExportSet4ArgSig) vecEvalString(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	bits, err := b.bufSlabPredictor.get(types.ETInt, n)
+	bits, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -1357,7 +1357,7 @@ func (b *builtinRpadSig) vecEvalString(input *chunk.Chunk, result *chunk.Deferre
 	if err := b.args[0].VecEvalString(b.ctx, input, strBuf); err != nil {
 		return err
 	}
-	lenBuf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	lenBuf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -1384,7 +1384,7 @@ func (b *builtinRpadSig) vecEvalString(input *chunk.Chunk, result *chunk.Deferre
 		}
 		targetLength := int(i64s[i])
 		if uint64(targetLength) > b.maxAllowedPacket {
-			b.ctx.GetStochastikVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("rpad", b.maxAllowedPacket))
+			b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("rpad", b.maxAllowedPacket))
 			result.AppendNull()
 			continue
 		}
@@ -1417,7 +1417,7 @@ func (b *builtinFormatWithLocaleSig) vectorized() bool {
 func (b *builtinFormatWithLocaleSig) vecEvalString(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
 
-	dBuf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	dBuf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -1481,7 +1481,7 @@ func (b *builtinSubstring2ArgsSig) vecEvalString(input *chunk.Chunk, result *chu
 	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
 		return err
 	}
-	buf2, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf2, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -1531,7 +1531,7 @@ func (b *builtinSubstring2ArgsUTF8Sig) vecEvalString(input *chunk.Chunk, result 
 		return err
 	}
 
-	buf2, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf2, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -1711,7 +1711,7 @@ func (b *builtinEltSig) vectorized() bool {
 // See https://dev.allegrosql.com/doc/refman/5.7/en/string-functions.html#function_elt
 func (b *builtinEltSig) vecEvalString(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	buf0, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf0, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -1769,7 +1769,7 @@ func (b *builtinInsertUTF8Sig) vecEvalString(input *chunk.Chunk, result *chunk.D
 	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
 		return err
 	}
-	buf1, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf1, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -1777,7 +1777,7 @@ func (b *builtinInsertUTF8Sig) vecEvalString(input *chunk.Chunk, result *chunk.D
 	if err := b.args[1].VecEvalInt(b.ctx, input, buf1); err != nil {
 		return err
 	}
-	buf2, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf2, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -1821,7 +1821,7 @@ func (b *builtinInsertUTF8Sig) vecEvalString(input *chunk.Chunk, result *chunk.D
 		strHead := string(runes[0 : pos-1])
 		strTail := string(runes[pos+length-1:])
 		if uint64(len(strHead)+len(newstr)+len(strTail)) > b.maxAllowedPacket {
-			b.ctx.GetStochastikVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("insert", b.maxAllowedPacket))
+			b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("insert", b.maxAllowedPacket))
 			result.AppendNull()
 			continue
 		}
@@ -1838,7 +1838,7 @@ func (b *builtinExportSet5ArgSig) vectorized() bool {
 // See https://dev.allegrosql.com/doc/refman/5.7/en/string-functions.html#function_export-set
 func (b *builtinExportSet5ArgSig) vecEvalString(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	bits, err := b.bufSlabPredictor.get(types.ETInt, n)
+	bits, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -1870,7 +1870,7 @@ func (b *builtinExportSet5ArgSig) vecEvalString(input *chunk.Chunk, result *chun
 	if err := b.args[3].VecEvalString(b.ctx, input, separator); err != nil {
 		return err
 	}
-	numberOfBits, err := b.bufSlabPredictor.get(types.ETInt, n)
+	numberOfBits, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -1913,7 +1913,7 @@ func (b *builtinSubstring3ArgsUTF8Sig) vecEvalString(input *chunk.Chunk, result 
 		return err
 	}
 
-	buf1, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf1, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -1922,7 +1922,7 @@ func (b *builtinSubstring3ArgsUTF8Sig) vecEvalString(input *chunk.Chunk, result 
 		return err
 	}
 
-	buf2, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf2, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -1983,7 +1983,7 @@ func (b *builtinTrim3ArgsSig) vecEvalString(input *chunk.Chunk, result *chunk.De
 		return err
 	}
 	defer b.bufSlabPredictor.put(buf1)
-	buf2, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf2, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -2223,7 +2223,7 @@ func (b *builtinCharSig) vecEvalString(input *chunk.Chunk, result *chunk.Deferre
 	l := len(b.args)
 	buf := make([]*chunk.DeferredCauset, l-1)
 	for i := 0; i < len(b.args)-1; i++ {
-		te, err := b.bufSlabPredictor.get(types.ETInt, n)
+		te, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 		if err != nil {
 			return err
 		}
@@ -2318,7 +2318,7 @@ func (b *builtinMakeSetSig) vectorized() bool {
 // See https://dev.allegrosql.com/doc/refman/5.7/en/string-functions.html#function_make-set
 func (b *builtinMakeSetSig) vecEvalString(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	nr := input.NumEvents()
-	bitsBuf, err := b.bufSlabPredictor.get(types.ETInt, nr)
+	bitsBuf, err := b.bufSlabPredictor.get(types.CausetEDN, nr)
 	if err != nil {
 		return err
 	}
@@ -2366,7 +2366,7 @@ func (b *builtinOctIntSig) vectorized() bool {
 
 func (b *builtinOctIntSig) vecEvalString(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -2416,7 +2416,7 @@ func (b *builtinToBase64Sig) vecEvalString(input *chunk.Chunk, result *chunk.Def
 			result.AppendNull()
 			continue
 		} else if needEncodeLen > int(b.maxAllowedPacket) {
-			b.ctx.GetStochastikVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("to_base64", b.maxAllowedPacket))
+			b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("to_base64", b.maxAllowedPacket))
 			result.AppendNull()
 			continue
 		} else if b.tp.Flen == -1 || b.tp.Flen > allegrosql.MaxBlobWidth {
@@ -2480,7 +2480,7 @@ func (b *builtinRpadUTF8Sig) vecEvalString(input *chunk.Chunk, result *chunk.Def
 	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
 		return err
 	}
-	buf1, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf1, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -2506,7 +2506,7 @@ func (b *builtinRpadUTF8Sig) vecEvalString(input *chunk.Chunk, result *chunk.Def
 		}
 		targetLength := int(i64s[i])
 		if uint64(targetLength)*uint64(allegrosql.MaxBytesOfCharacter) > b.maxAllowedPacket {
-			b.ctx.GetStochastikVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("rpad", b.maxAllowedPacket))
+			b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("rpad", b.maxAllowedPacket))
 			result.AppendNull()
 			continue
 		}
@@ -2565,7 +2565,7 @@ func (b *builtinBinSig) vectorized() bool {
 
 func (b *builtinBinSig) vecEvalString(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -2595,7 +2595,7 @@ func (b *builtinFormatSig) vectorized() bool {
 func (b *builtinFormatSig) vecEvalString(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
 
-	dBuf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	dBuf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -2650,7 +2650,7 @@ func (b *builtinRightSig) vecEvalString(input *chunk.Chunk, result *chunk.Deferr
 	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
 		return err
 	}
-	buf2, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf2, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -2694,7 +2694,7 @@ func (b *builtinSubstring3ArgsSig) vecEvalString(input *chunk.Chunk, result *chu
 		return err
 	}
 
-	buf1, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf1, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -2703,7 +2703,7 @@ func (b *builtinSubstring3ArgsSig) vecEvalString(input *chunk.Chunk, result *chu
 		return err
 	}
 
-	buf2, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf2, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -2754,7 +2754,7 @@ func (b *builtinHexIntArgSig) vectorized() bool {
 
 func (b *builtinHexIntArgSig) vecEvalString(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -2803,7 +2803,7 @@ func (b *builtinFromBase64Sig) vecEvalString(input *chunk.Chunk, result *chunk.D
 			result.AppendNull()
 			continue
 		} else if needDecodeLen > int(b.maxAllowedPacket) {
-			b.ctx.GetStochastikVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("from_base64", b.maxAllowedPacket))
+			b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("from_base64", b.maxAllowedPacket))
 			result.AppendNull()
 			continue
 		}
@@ -2871,7 +2871,7 @@ func formatDecimal(sctx stochastikctx.Context, xBuf *chunk.DeferredCauset, dInt6
 			locale = "en_US"
 		} else if localeBuf.IsNull(i) {
 			// FORMAT(x, d, NULL)
-			sctx.GetStochastikVars().StmtCtx.AppendWarning(errUnknownLocale.GenWithStackByArgs("NULL"))
+			sctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errUnknownLocale.GenWithStackByArgs("NULL"))
 			locale = "en_US"
 		} else {
 			locale = localeBuf.GetString(i)
@@ -2912,7 +2912,7 @@ func formatReal(sctx stochastikctx.Context, xBuf *chunk.DeferredCauset, dInt64s 
 			locale = "en_US"
 		} else if localeBuf.IsNull(i) {
 			// FORMAT(x, d, NULL)
-			sctx.GetStochastikVars().StmtCtx.AppendWarning(errUnknownLocale.GenWithStackByArgs("NULL"))
+			sctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errUnknownLocale.GenWithStackByArgs("NULL"))
 			locale = "en_US"
 		} else {
 			locale = localeBuf.GetString(i)

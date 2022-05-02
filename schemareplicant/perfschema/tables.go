@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,16 +23,16 @@ import (
 
 	"github.com/whtcorpsinc/BerolinaSQL/perceptron"
 	"github.com/whtcorpsinc/BerolinaSQL/terror"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causet"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/profile"
+	"github.com/whtcorpsinc/MilevaDB-Prod/spacetime/autoid"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/causet"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/profile"
-	"github.com/whtcorpsinc/milevadb/spacetime/autoid"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 const (
@@ -306,7 +306,7 @@ func dataForRemoteProfile(ctx stochastikctx.Context, nodeType, uri string, isGor
 	for _, server := range servers {
 		statusAddr := server.StatusAddr
 		if len(statusAddr) == 0 {
-			ctx.GetStochastikVars().StmtCtx.AppendWarning(errors.Errorf("EinsteinDB node %s does not contain status address", server.Address))
+			ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errors.Errorf("EinsteinDB node %s does not contain status address", server.Address))
 			continue
 		}
 
@@ -359,7 +359,7 @@ func dataForRemoteProfile(ctx stochastikctx.Context, nodeType, uri string, isGor
 	var results []result
 	for result := range ch {
 		if result.err != nil {
-			ctx.GetStochastikVars().StmtCtx.AppendWarning(result.err)
+			ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(result.err)
 			continue
 		}
 		results = append(results, result)

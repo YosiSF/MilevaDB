@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,12 +23,12 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/meta"
-	"github.com/whtcorpsinc/milevadb/meta/autoid"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 var _ = Suite(&testTableSuite{})
@@ -226,7 +226,7 @@ func testLockTable(c *C, ctx stochastikctx.Context, d *dbs, newSchemaID int64, t
 		LockTables: []perceptron.TableLockTpInfo{{SchemaID: newSchemaID, TableID: tblInfo.ID, Tp: lockTp}},
 		StochastikInfo: perceptron.StochastikInfo{
 			ServerID:     d.GetID(),
-			StochastikID: ctx.GetStochastikVars().ConnectionID,
+			StochastikID: ctx.GetStochaseinstein_dbars().ConnectionID,
 		},
 	}
 	job := &perceptron.Job{
@@ -408,5 +408,5 @@ func (s *testTableSuite) TestTable(c *C) {
 	job = testLockTable(c, ctx, d, dbInfo1.ID, tblInfo, perceptron.TableLockWrite)
 	testCheckTableState(c, d, dbInfo1, tblInfo, perceptron.StatePublic)
 	testCheckJobDone(c, d, job, true)
-	checkTableLockedTest(c, d, dbInfo1, tblInfo, d.GetID(), ctx.GetStochastikVars().ConnectionID, perceptron.TableLockWrite)
+	checkTableLockedTest(c, d, dbInfo1, tblInfo, d.GetID(), ctx.GetStochaseinstein_dbars().ConnectionID, perceptron.TableLockWrite)
 }

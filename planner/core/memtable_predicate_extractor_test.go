@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,15 +19,15 @@ import (
 	"sort"
 	"time"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/hint"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/set"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastik"
 	"github.com/whtcorpsinc/berolinaAllegroSQL"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/petri"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/soliton/hint"
-	"github.com/whtcorpsinc/milevadb/soliton/set"
-	"github.com/whtcorpsinc/milevadb/stochastik"
 )
 
 var _ = Suite(&extractorSuite{})
@@ -646,7 +646,7 @@ func (s *extractorSuite) TestMetricBlockExtractor(c *C) {
 			quantiles:  []float64{0},
 		},
 	}
-	se.GetStochastikVars().StmtCtx.TimeZone = time.Local
+	se.GetStochaseinstein_dbars().StmtCtx.TimeZone = time.Local
 	for _, ca := range cases {
 		logicalMemBlock := s.getLogicalMemBlock(c, se, berolinaAllegroSQL, ca.allegrosql)
 		c.Assert(logicalMemBlock.Extractor, NotNil)

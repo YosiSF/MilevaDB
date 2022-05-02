@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@ package core
 import (
 	"context"
 
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
 )
 
 // extractJoinGroup extracts all the join nodes connected with continuous
@@ -73,7 +73,7 @@ func (s *joinReOrderSolver) optimizeRecursive(ctx stochastikctx.Context, p Logic
 			ctx:        ctx,
 			otherConds: otherConds,
 		}
-		if len(curJoinGroup) > ctx.GetStochastikVars().MilevaDBOptJoinReorderThreshold {
+		if len(curJoinGroup) > ctx.GetStochaseinstein_dbars().MilevaDBOptJoinReorderThreshold {
 			groupSolver := &joinReorderGreedySolver{
 				baseSingleGroupJoinOrderSolver: baseGroupSolver,
 				eqEdges:                        eqEdges,

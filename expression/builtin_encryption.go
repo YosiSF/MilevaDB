@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,11 +32,11 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/auth"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/encrypt"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/encrypt"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 var (
@@ -118,7 +118,7 @@ func (c *aesDecryptFunctionClass) getFunction(ctx stochastikctx.Context, args []
 	bf.tp.Flen = args[0].GetType().Flen // At most.
 	types.SetBinChsClnFlag(bf.tp)
 
-	blockMode, _ := ctx.GetStochastikVars().GetSystemVar(variable.BlockEncryptionMode)
+	blockMode, _ := ctx.GetStochaseinstein_dbars().GetSystemVar(variable.BlockEncryptionMode)
 	mode, exists := aesModes[strings.ToLower(blockMode)]
 	if !exists {
 		return nil, errors.Errorf("unsupported block encryption mode - %v", blockMode)
@@ -162,7 +162,7 @@ func (b *builtinAesDecryptSig) evalString(event chunk.Event) (string, bool, erro
 	}
 	if !b.ivRequired && len(b.args) == 3 {
 		// For modes that do not require init_vector, it is ignored and a warning is generated if it is specified.
-		b.ctx.GetStochastikVars().StmtCtx.AppendWarning(errWarnOptionIgnored.GenWithStackByArgs("IV"))
+		b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errWarnOptionIgnored.GenWithStackByArgs("IV"))
 	}
 
 	key := encrypt.DeriveKeyMyALLEGROSQL([]byte(keyStr), b.keySize)
@@ -252,7 +252,7 @@ func (c *aesEncryptFunctionClass) getFunction(ctx stochastikctx.Context, args []
 	bf.tp.Flen = aes.BlockSize * (args[0].GetType().Flen/aes.BlockSize + 1) // At most.
 	types.SetBinChsClnFlag(bf.tp)
 
-	blockMode, _ := ctx.GetStochastikVars().GetSystemVar(variable.BlockEncryptionMode)
+	blockMode, _ := ctx.GetStochaseinstein_dbars().GetSystemVar(variable.BlockEncryptionMode)
 	mode, exists := aesModes[strings.ToLower(blockMode)]
 	if !exists {
 		return nil, errors.Errorf("unsupported block encryption mode - %v", blockMode)
@@ -296,7 +296,7 @@ func (b *builtinAesEncryptSig) evalString(event chunk.Event) (string, bool, erro
 	}
 	if !b.ivRequired && len(b.args) == 3 {
 		// For modes that do not require init_vector, it is ignored and a warning is generated if it is specified.
-		b.ctx.GetStochastikVars().StmtCtx.AppendWarning(errWarnOptionIgnored.GenWithStackByArgs("IV"))
+		b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errWarnOptionIgnored.GenWithStackByArgs("IV"))
 	}
 
 	key := encrypt.DeriveKeyMyALLEGROSQL([]byte(keyStr), b.keySize)
@@ -535,7 +535,7 @@ func (b *builtinPasswordSig) evalString(event chunk.Event) (d string, isNull boo
 
 	// We should append a warning here because function "PASSWORD" is deprecated since MyALLEGROSQL 5.7.6.
 	// See https://dev.allegrosql.com/doc/refman/5.7/en/encryption-functions.html#function_password
-	b.ctx.GetStochastikVars().StmtCtx.AppendWarning(errDeprecatedSyntaxNoRememristed.GenWithStackByArgs("PASSWORD"))
+	b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errDeprecatedSyntaxNoRememristed.GenWithStackByArgs("PASSWORD"))
 
 	return auth.EncodePassword(pass), false, nil
 }
@@ -548,7 +548,7 @@ func (c *randomBytesFunctionClass) getFunction(ctx stochastikctx.Context, args [
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
@@ -599,7 +599,7 @@ func (c *md5FunctionClass) getFunction(ctx stochastikctx.Context, args []Express
 	if err != nil {
 		return nil, err
 	}
-	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochastikVars().GetCharsetInfo()
+	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 	bf.tp.Flen = 32
 	sig := &builtinMD5Sig{bf}
 	sig.setPbCode(fidelpb.ScalarFuncSig_MD5)
@@ -640,7 +640,7 @@ func (c *sha1FunctionClass) getFunction(ctx stochastikctx.Context, args []Expres
 	if err != nil {
 		return nil, err
 	}
-	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochastikVars().GetCharsetInfo()
+	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 	bf.tp.Flen = 40
 	sig := &builtinSHA1Sig{bf}
 	sig.setPbCode(fidelpb.ScalarFuncSig_SHA1)
@@ -681,11 +681,11 @@ func (c *sha2FunctionClass) getFunction(ctx stochastikctx.Context, args []Expres
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.ETString, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.ETString, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
-	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochastikVars().GetCharsetInfo()
+	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 	bf.tp.Flen = 128 // sha512
 	sig := &builtinSHA2Sig{bf}
 	sig.setPbCode(fidelpb.ScalarFuncSig_SHA2)
@@ -875,7 +875,7 @@ func (b *builtinUncompressSig) Clone() builtinFunc {
 // evalString evals UNCOMPRESS(compressed_string).
 // See https://dev.allegrosql.com/doc/refman/5.7/en/encryption-functions.html#function_uncompress
 func (b *builtinUncompressSig) evalString(event chunk.Event) (string, bool, error) {
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	payload, isNull, err := b.args[0].EvalString(b.ctx, event)
 	if isNull || err != nil {
 		return "", true, err
@@ -909,7 +909,7 @@ func (c *uncompressedLengthFunctionClass) getFunction(ctx stochastikctx.Context,
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETString)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETString)
 	if err != nil {
 		return nil, err
 	}
@@ -932,7 +932,7 @@ func (b *builtinUncompressedLengthSig) Clone() builtinFunc {
 // evalInt evals UNCOMPRESSED_LENGTH(str).
 // See https://dev.allegrosql.com/doc/refman/5.7/en/encryption-functions.html#function_uncompressed-length
 func (b *builtinUncompressedLengthSig) evalInt(event chunk.Event) (int64, bool, error) {
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	payload, isNull, err := b.args[0].EvalString(b.ctx, event)
 	if isNull || err != nil {
 		return 0, true, err

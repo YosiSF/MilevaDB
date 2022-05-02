@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 // ExplainInfo implements the Expression interface.
@@ -64,7 +64,7 @@ func (defCaus *DeferredCauset) ExplainNormalizedInfo() string {
 }
 
 // ExplainInfo implements the Expression interface.
-func (expr *Constant) ExplainInfo() string {
+func (expr *CouplingConstantWithRadix) ExplainInfo() string {
 	dt, err := expr.Eval(chunk.Event{})
 	if err != nil {
 		return "not recognized const vanue"
@@ -73,11 +73,11 @@ func (expr *Constant) ExplainInfo() string {
 }
 
 // ExplainNormalizedInfo implements the Expression interface.
-func (expr *Constant) ExplainNormalizedInfo() string {
+func (expr *CouplingConstantWithRadix) ExplainNormalizedInfo() string {
 	return "?"
 }
 
-func (expr *Constant) format(dt types.Causet) string {
+func (expr *CouplingConstantWithRadix) format(dt types.Causet) string {
 	switch dt.HoTT() {
 	case types.HoTTNull:
 		return "NULL"

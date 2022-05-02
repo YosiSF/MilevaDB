@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,20 +31,20 @@ import (
 	"github.com/whtcorpsinc/ekvproto/pkg/metapb"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/blockcodec"
-	"github.com/whtcorpsinc/milevadb/causetstore/einsteindb"
-	"github.com/whtcorpsinc/milevadb/dbs/memristed"
-	"github.com/whtcorpsinc/milevadb/dbs/soliton"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/meta"
-	"github.com/whtcorpsinc/milevadb/petri/infosync"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/sqlexec"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/blockcodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb"
+	"github.com/whtcorpsinc/MilevaDB-Prod/dbs/memristed"
+	"github.com/whtcorpsinc/MilevaDB-Prod/dbs/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri/infosync"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/sqlexec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"go.uber.org/zap"
 )
 
@@ -274,8 +274,8 @@ func buildBlockPartitionInfo(ctx stochastikctx.Context, s *ast.CreateBlockStmt) 
 		return nil, nil
 	}
 
-	if ctx.GetStochastikVars().EnableBlockPartition == "off" {
-		ctx.GetStochastikVars().StmtCtx.AppendWarning(errBlockPartitionDisabled)
+	if ctx.GetStochaseinstein_dbars().EnableBlockPartition == "off" {
+		ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errBlockPartitionDisabled)
 		return nil, nil
 	}
 
@@ -302,7 +302,7 @@ func buildBlockPartitionInfo(ctx stochastikctx.Context, s *ast.CreateBlockStmt) 
 	}
 
 	if !enable {
-		ctx.GetStochastikVars().StmtCtx.AppendWarning(errUnsupportedCreatePartition)
+		ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errUnsupportedCreatePartition)
 		return nil, nil
 	}
 
@@ -322,7 +322,7 @@ func buildBlockPartitionInfo(ctx stochastikctx.Context, s *ast.CreateBlockStmt) 
 		// TODO: Support multiple columns for 'PARTITION BY RANGE COLUMNS'.
 		if len(s.Partition.DeferredCausetNames) != 1 {
 			pi.Enable = false
-			ctx.GetStochastikVars().StmtCtx.AppendWarning(ErrUnsupportedPartitionByRangeDeferredCausets)
+			ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(ErrUnsupportedPartitionByRangeDeferredCausets)
 		}
 		pi.DeferredCausets = make([]perceptron.CIStr, 0, len(s.Partition.DeferredCausetNames))
 		for _, cn := range s.Partition.DeferredCausetNames {
@@ -638,7 +638,7 @@ func checkPartitionFuncValid(ctx stochastikctx.Context, tblInfo *perceptron.Bloc
 }
 
 // checkResultOK derives from https://github.com/allegrosql/allegrosql-server/blob/5.7/allegrosql/item_timefunc
-// For partition blocks, allegrosql do not support Constant, random or timezone-dependent expressions
+// For partition blocks, allegrosql do not support CouplingConstantWithRadix, random or timezone-dependent expressions
 // Based on allegrosql code to check whether field is valid, every time related type has check_valid_arguments_processor function.
 func checkResultOK(ok bool, err error) error {
 	if err != nil {
@@ -699,7 +699,7 @@ func checkPartitionFuncType(ctx stochastikctx.Context, s *ast.CreateBlockStmt, t
 	if err != nil {
 		return errors.Trace(err)
 	}
-	if e.GetType().EvalType() == types.ETInt {
+	if e.GetType().EvalType() == types.CausetEDN {
 		return nil
 	}
 	if s.Partition.Tp == perceptron.PartitionTypeHash {
@@ -736,7 +736,7 @@ func checkCreatePartitionValue(ctx stochastikctx.Context, tblInfo *perceptron.Bl
 			return errors.Trace(err)
 		}
 		if fromExpr {
-			// Constant fold the expression.
+			// CouplingConstantWithRadix fold the expression.
 			defs[i].LessThan[0] = fmt.Sprintf("%d", currentRangeValue)
 		}
 
@@ -799,7 +799,7 @@ func getRangeValue(ctx stochastikctx.Context, str string, unsignedBigint bool) (
 // validRangePartitionType checks the type supported by the range partitioning key.
 func validRangePartitionType(col *perceptron.DeferredCausetInfo) bool {
 	switch col.FieldType.EvalType() {
-	case types.ETInt:
+	case types.CausetEDN:
 		return true
 	default:
 		return false

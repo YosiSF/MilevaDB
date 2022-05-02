@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ package core
 import (
 	"context"
 
-	"github.com/whtcorpsinc/milevadb/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
 )
 
 // canProjectionBeEliminatedLoose checks whether a projection can be eliminated,
@@ -144,7 +144,7 @@ func (pe *projectionEliminator) eliminate(p LogicalPlan, replace map[string]*exp
 	if isProj {
 		if child, ok := p.Children()[0].(*LogicalProjection); ok && !ExprsHasSideEffects(child.Exprs) {
 			for i := range proj.Exprs {
-				proj.Exprs[i] = expression.FoldConstant(ReplaceDeferredCausetOfExpr(proj.Exprs[i], child, child.Schema()))
+				proj.Exprs[i] = expression.FoldCouplingConstantWithRadix(ReplaceDeferredCausetOfExpr(proj.Exprs[i], child, child.Schema()))
 			}
 			p.Children()[0] = child.Children()[0]
 		}

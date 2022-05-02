@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,26 +29,26 @@ import (
 	"github.com/whtcorpsinc/BerolinaSQL/auth"
 	"github.com/whtcorpsinc/BerolinaSQL/perceptron"
 	"github.com/whtcorpsinc/BerolinaSQL/terror"
+	causetembedded "github.com/whtcorpsinc/MilevaDB-Prod/causet/embedded"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/helper"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/server"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/FIDelapi"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/ekvcache"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/set"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testleak"
+	"github.com/whtcorpsinc/MilevaDB-Prod/spacetime/autoid"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastik"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/failpoint"
 	"github.com/whtcorpsinc/fn"
-	causetembedded "github.com/whtcorpsinc/milevadb/causet/embedded"
-	"github.com/whtcorpsinc/milevadb/causetstore/helper"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/server"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/FIDelapi"
-	"github.com/whtcorpsinc/milevadb/soliton/ekvcache"
-	"github.com/whtcorpsinc/milevadb/soliton/set"
-	"github.com/whtcorpsinc/milevadb/soliton/solitonutil"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/soliton/testleak"
-	"github.com/whtcorpsinc/milevadb/spacetime/autoid"
-	"github.com/whtcorpsinc/milevadb/stochastik"
 	"google.golang.org/grpc"
 )
 
@@ -280,7 +280,7 @@ func (s *testBlockSuite) TestschemaReplicantFieldValue(c *C) {
 		User:    "root",
 		Host:    "127.0.0.1",
 		Command: allegrosql.ComQuery,
-		StmtCtx: tk.Se.GetStochastikVars().StmtCtx,
+		StmtCtx: tk.Se.GetStochaseinstein_dbars().StmtCtx,
 	}
 	tk.Se.SetStochastikManager(sm)
 	tk.MustQuery("SELECT user,host,command FROM information_schema.processlist;").Check(testkit.Rows("root 127.0.0.1 Query"))
@@ -460,7 +460,7 @@ func (s *testBlockSuite) TestSomeBlocks(c *C) {
 		Digest:  "abc1",
 		State:   1,
 		Info:    "do something",
-		StmtCtx: tk.Se.GetStochastikVars().StmtCtx,
+		StmtCtx: tk.Se.GetStochaseinstein_dbars().StmtCtx,
 	}
 	sm.processInfoMap[2] = &soliton.ProcessInfo{
 		ID:      2,
@@ -471,7 +471,7 @@ func (s *testBlockSuite) TestSomeBlocks(c *C) {
 		Digest:  "abc2",
 		State:   2,
 		Info:    strings.Repeat("x", 101),
-		StmtCtx: tk.Se.GetStochastikVars().StmtCtx,
+		StmtCtx: tk.Se.GetStochaseinstein_dbars().StmtCtx,
 	}
 	tk.Se.SetStochastikManager(sm)
 	tk.MustQuery("select * from information_schema.PROCESSLIST order by ID;").Sort().Check(
@@ -499,7 +499,7 @@ func (s *testBlockSuite) TestSomeBlocks(c *C) {
 		Command: byte(1),
 		Digest:  "abc1",
 		State:   1,
-		StmtCtx: tk.Se.GetStochastikVars().StmtCtx,
+		StmtCtx: tk.Se.GetStochaseinstein_dbars().StmtCtx,
 	}
 	sm.processInfoMap[2] = &soliton.ProcessInfo{
 		ID:            2,
@@ -509,11 +509,11 @@ func (s *testBlockSuite) TestSomeBlocks(c *C) {
 		Digest:        "abc2",
 		State:         2,
 		Info:          strings.Repeat("x", 101),
-		StmtCtx:       tk.Se.GetStochastikVars().StmtCtx,
+		StmtCtx:       tk.Se.GetStochaseinstein_dbars().StmtCtx,
 		CurTxnStartTS: 410090409861578752,
 	}
 	tk.Se.SetStochastikManager(sm)
-	tk.Se.GetStochastikVars().TimeZone = time.UTC
+	tk.Se.GetStochaseinstein_dbars().TimeZone = time.UTC
 	tk.MustQuery("select * from information_schema.PROCESSLIST order by ID;").Check(
 		testkit.Rows(
 			fmt.Sprintf("1 user-1 localhost information_schema Quit 9223372036 %s %s abc1 0 ", "in transaction", "<nil>"),
@@ -695,7 +695,7 @@ func (s *testClusterBlockSuite) TestForClusterServerInfo(c *C) {
 	}
 
 	fpExpr := `return("` + strings.Join(instances, ";") + `")`
-	fpName := "github.com/whtcorpsinc/milevadb/schemareplicant/mockClusterInfo"
+	fpName := "github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant/mockClusterInfo"
 	c.Assert(failpoint.Enable(fpName, fpExpr), IsNil)
 	defer func() { c.Assert(failpoint.Disable(fpName), IsNil) }()
 
@@ -981,7 +981,7 @@ func (s *testBlockSuite) TestStmtSummaryBlock(c *C) {
 	).Check(testkit.Rows("<nil>"))
 
 	// Test SELECT.
-	const failpointName = "github.com/whtcorpsinc/milevadb/causet/embedded/mockCausetRowCount"
+	const failpointName = "github.com/whtcorpsinc/MilevaDB-Prod/causet/embedded/mockCausetRowCount"
 	c.Assert(failpoint.Enable(failpointName, "return(100)"), IsNil)
 	defer func() { c.Assert(failpoint.Disable(failpointName), IsNil) }()
 	tk.MustQuery("select * from t where a=2")

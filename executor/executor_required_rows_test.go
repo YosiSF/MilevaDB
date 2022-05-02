@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,21 +21,21 @@ import (
 	"time"
 
 	"github.com/cznic/mathutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression/aggregation"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/disk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/memory"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/expression/aggregation"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/planner/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/disk"
-	"github.com/whtcorpsinc/milevadb/soliton/memory"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
 )
 
 type requiredEventsDataSource struct {
@@ -123,7 +123,7 @@ func (r *requiredEventsDataSource) checkNumNextCalled() error {
 }
 
 func (s *testExecSuite) TestLimitRequiredEvents(c *C) {
-	maxChunkSize := defaultCtx().GetStochastikVars().MaxChunkSize
+	maxChunkSize := defaultCtx().GetStochaseinstein_dbars().MaxChunkSize
 	testCases := []struct {
 		totalEvents      int
 		limitOffset      int
@@ -182,7 +182,7 @@ func (s *testExecSuite) TestLimitRequiredEvents(c *C) {
 		c.Assert(exec.Open(ctx), IsNil)
 		chk := newFirstChunk(exec)
 		for i := range testCase.requiredEvents {
-			chk.SetRequiredEvents(testCase.requiredEvents[i], sctx.GetStochastikVars().MaxChunkSize)
+			chk.SetRequiredEvents(testCase.requiredEvents[i], sctx.GetStochaseinstein_dbars().MaxChunkSize)
 			c.Assert(exec.Next(ctx, chk), IsNil)
 			c.Assert(chk.NumEvents(), Equals, testCase.expectedEvents[i])
 		}
@@ -192,7 +192,7 @@ func (s *testExecSuite) TestLimitRequiredEvents(c *C) {
 }
 
 func buildLimitExec(ctx stochastikctx.Context, src Executor, offset, count int) Executor {
-	n := mathutil.Min(count, ctx.GetStochastikVars().MaxChunkSize)
+	n := mathutil.Min(count, ctx.GetStochaseinstein_dbars().MaxChunkSize)
 	base := newBaseExecutor(ctx, src.Schema(), 0, src)
 	base.initCap = n
 	limitExec := &LimitExec{
@@ -205,16 +205,16 @@ func buildLimitExec(ctx stochastikctx.Context, src Executor, offset, count int) 
 
 func defaultCtx() stochastikctx.Context {
 	ctx := mock.NewContext()
-	ctx.GetStochastikVars().InitChunkSize = variable.DefInitChunkSize
-	ctx.GetStochastikVars().MaxChunkSize = variable.DefMaxChunkSize
-	ctx.GetStochastikVars().StmtCtx.MemTracker = memory.NewTracker(-1, ctx.GetStochastikVars().MemQuotaQuery)
-	ctx.GetStochastikVars().StmtCtx.DiskTracker = disk.NewTracker(-1, -1)
-	ctx.GetStochastikVars().SnapshotTS = uint64(1)
+	ctx.GetStochaseinstein_dbars().InitChunkSize = variable.DefInitChunkSize
+	ctx.GetStochaseinstein_dbars().MaxChunkSize = variable.DefMaxChunkSize
+	ctx.GetStochaseinstein_dbars().StmtCtx.MemTracker = memory.NewTracker(-1, ctx.GetStochaseinstein_dbars().MemQuotaQuery)
+	ctx.GetStochaseinstein_dbars().StmtCtx.DiskTracker = disk.NewTracker(-1, -1)
+	ctx.GetStochaseinstein_dbars().SnapshotTS = uint64(1)
 	return ctx
 }
 
 func (s *testExecSuite) TestSortRequiredEvents(c *C) {
-	maxChunkSize := defaultCtx().GetStochastikVars().MaxChunkSize
+	maxChunkSize := defaultCtx().GetStochaseinstein_dbars().MaxChunkSize
 	testCases := []struct {
 		totalEvents      int
 		groupBy          []int
@@ -284,7 +284,7 @@ func buildSortExec(sctx stochastikctx.Context, byItems []*soliton.ByItems, src E
 }
 
 func (s *testExecSuite) TestTopNRequiredEvents(c *C) {
-	maxChunkSize := defaultCtx().GetStochastikVars().MaxChunkSize
+	maxChunkSize := defaultCtx().GetStochaseinstein_dbars().MaxChunkSize
 	testCases := []struct {
 		totalEvents      int
 		topNOffset       int
@@ -410,7 +410,7 @@ func (s *testExecSuite) TestSelectionRequiredEvents(c *C) {
 		}
 	}
 
-	maxChunkSize := defaultCtx().GetStochastikVars().MaxChunkSize
+	maxChunkSize := defaultCtx().GetStochaseinstein_dbars().MaxChunkSize
 	testCases := []struct {
 		totalEvents       int
 		filtersOfDefCaus1 int
@@ -454,7 +454,7 @@ func (s *testExecSuite) TestSelectionRequiredEvents(c *C) {
 		} else {
 			ds = newRequiredEventsDataSourceWithGenerator(sctx, testCase.totalEvents, testCase.expectedEventsDS, testCase.gen)
 			f, err := expression.NewFunction(
-				sctx, ast.EQ, types.NewFieldType(byte(types.ETInt)), ds.Schema().DeferredCausets[1], &expression.Constant{
+				sctx, ast.EQ, types.NewFieldType(byte(types.CausetEDN)), ds.Schema().DeferredCausets[1], &expression.CouplingConstantWithRadix{
 					Value:   types.NewCauset(testCase.filtersOfDefCaus1),
 					RetType: types.NewFieldType(allegrosql.TypeTiny),
 				})
@@ -482,7 +482,7 @@ func buildSelectionExec(ctx stochastikctx.Context, filters []expression.Expressi
 }
 
 func (s *testExecSuite) TestProjectionUnparallelRequiredEvents(c *C) {
-	maxChunkSize := defaultCtx().GetStochastikVars().MaxChunkSize
+	maxChunkSize := defaultCtx().GetStochaseinstein_dbars().MaxChunkSize
 	testCases := []struct {
 		totalEvents      int
 		requiredEvents   []int
@@ -534,7 +534,7 @@ func (s *testExecSuite) TestProjectionUnparallelRequiredEvents(c *C) {
 
 func (s *testExecSuite) TestProjectionParallelRequiredEvents(c *C) {
 	c.Skip("not sblock because of goroutine schedule")
-	maxChunkSize := defaultCtx().GetStochastikVars().MaxChunkSize
+	maxChunkSize := defaultCtx().GetStochaseinstein_dbars().MaxChunkSize
 	testCases := []struct {
 		totalEvents      int
 		numWorkers       int
@@ -620,7 +620,7 @@ func divGenerator(factor int) func(valType *types.FieldType) interface{} {
 }
 
 func (s *testExecSuite) TestStreamAggRequiredEvents(c *C) {
-	maxChunkSize := defaultCtx().GetStochastikVars().MaxChunkSize
+	maxChunkSize := defaultCtx().GetStochaseinstein_dbars().MaxChunkSize
 	testCases := []struct {
 		totalEvents      int
 		aggFunc          string
@@ -695,7 +695,7 @@ func (s *testExecSuite) TestMergeJoinRequiredEvents(c *C) {
 		ctx := defaultCtx()
 		required := make([]int, 100)
 		for i := range required {
-			required[i] = rand.Int()%ctx.GetStochastikVars().MaxChunkSize + 1
+			required[i] = rand.Int()%ctx.GetStochaseinstein_dbars().MaxChunkSize + 1
 		}
 		innerSrc := newRequiredEventsDataSourceWithGenerator(ctx, 1, nil, justReturn1)             // just return one event: (1, 1)
 		outerSrc := newRequiredEventsDataSourceWithGenerator(ctx, 10000000, required, justReturn1) // always return (1, 1)
@@ -704,7 +704,7 @@ func (s *testExecSuite) TestMergeJoinRequiredEvents(c *C) {
 
 		chk := newFirstChunk(exec)
 		for i := range required {
-			chk.SetRequiredEvents(required[i], ctx.GetStochastikVars().MaxChunkSize)
+			chk.SetRequiredEvents(required[i], ctx.GetStochaseinstein_dbars().MaxChunkSize)
 			c.Assert(exec.Next(context.Background(), chk), IsNil)
 		}
 		c.Assert(exec.Close(), IsNil)

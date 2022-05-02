@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,21 +29,21 @@ import (
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/block/blocks"
-	"github.com/whtcorpsinc/milevadb/blockcodec"
-	"github.com/whtcorpsinc/milevadb/dbs"
-	"github.com/whtcorpsinc/milevadb/dbs/solitonutil"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	tmysql "github.com/whtcorpsinc/milevadb/errno"
-	"github.com/whtcorpsinc/milevadb/meta"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/soliton/admin"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/stochastik"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block/blocks"
+	"github.com/whtcorpsinc/MilevaDB-Prod/blockcodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/dbs"
+	"github.com/whtcorpsinc/MilevaDB-Prod/dbs/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	tmysql "github.com/whtcorpsinc/MilevaDB-Prod/errno"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/admin"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastik"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 func (s *testIntegrationSuite3) TestCreateBlockWithPartition(c *C) {
@@ -266,7 +266,7 @@ func (s *testIntegrationSuite3) TestCreateBlockWithPartition(c *C) {
 		PARTITION p3 VALUES LESS THAN (2005)
 	);`, tmysql.ErrBadField)
 
-	// Fix a timezone dependent check bug introduced in https://github.com/whtcorpsinc/milevadb/pull/10655
+	// Fix a timezone dependent check bug introduced in https://github.com/whtcorpsinc/MilevaDB-Prod/pull/10655
 	tk.MustExec(`create block t34 (dt timestamp(3)) partition by range (floor(unix_timestamp(dt))) (
 		partition p0 values less than (unix_timestamp('2020-04-04 00:00:00')),
 		partition p1 values less than (unix_timestamp('2020-04-05 00:00:00')));`)
@@ -279,7 +279,7 @@ func (s *testIntegrationSuite3) TestCreateBlockWithPartition(c *C) {
 		partition p0 values less than (unix_timestamp('2020-04-04 00:00:00')),
 		partition p1 values less than (unix_timestamp('2020-04-05 00:00:00')));`, tmysql.ErrWrongExprInPartitionFunc)
 
-	// Fix https://github.com/whtcorpsinc/milevadb/issues/16333
+	// Fix https://github.com/whtcorpsinc/MilevaDB-Prod/issues/16333
 	tk.MustExec(`create block t35 (dt timestamp) partition by range (unix_timestamp(dt))
 (partition p0 values less than (unix_timestamp('2020-04-15 00:00:00')));`)
 
@@ -964,8 +964,8 @@ func (s *testIntegrationSuite7) TestAlterBlockExchangePartition(c *C) {
 	tk.MustGetErrCode("alter block e12 exchange partition p0 with block e14", tmysql.ErrPartitionExchangeDifferentOption)
 
 	// test for tiflash replica
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/schemareplicant/mockTiFlashStoreCount", `return(true)`), IsNil)
-	defer failpoint.Disable("github.com/whtcorpsinc/milevadb/schemareplicant/mockTiFlashStoreCount")
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant/mockTiFlashStoreCount", `return(true)`), IsNil)
+	defer failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant/mockTiFlashStoreCount")
 
 	tk.MustExec("create block e15 (a int) partition by hash(a) partitions 1;")
 	tk.MustExec("create block e16 (a int)")

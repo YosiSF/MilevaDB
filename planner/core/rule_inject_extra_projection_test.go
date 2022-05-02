@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@
 package core
 
 import (
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression/aggregation"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/expression/aggregation"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 var _ = Suite(&testInjectProjSuite{})
@@ -42,7 +42,7 @@ func (s *testInjectProjSuite) TestWrapCastForAggFuncs(c *C) {
 				for _, retType := range retTypes {
 					sctx := mock.NewContext()
 					aggFunc, err := aggregation.NewAggFuncDesc(sctx, name,
-						[]expression.Expression{&expression.Constant{Value: types.Causet{}, RetType: types.NewFieldType(retType)}},
+						[]expression.Expression{&expression.CouplingConstantWithRadix{Value: types.Causet{}, RetType: types.NewFieldType(retType)}},
 						hasDistinct)
 					c.Assert(err, IsNil)
 					aggFunc.Mode = mode

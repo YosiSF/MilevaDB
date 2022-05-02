@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,21 +17,21 @@ import (
 	"context"
 	"crypto/tls"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	plannerutil "github.com/whtcorpsinc/MilevaDB-Prod/planner/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/memory"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/ranger"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/auth"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/expression"
-	plannerutil "github.com/whtcorpsinc/milevadb/planner/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/memory"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/soliton/ranger"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 var _ = Suite(&testExecSuite{})
@@ -104,7 +104,7 @@ func (s *testExecSuite) TestShowProcessList(c *C) {
 	}
 	sctx := mock.NewContext()
 	sctx.SetStochastikManager(sm)
-	sctx.GetStochastikVars().User = &auth.UserIdentity{Username: "test"}
+	sctx.GetStochaseinstein_dbars().User = &auth.UserIdentity{Username: "test"}
 
 	// Compose executor.
 	e := &ShowExec{
@@ -260,14 +260,14 @@ func (s *testExecSerialSuite) TestSortSpillDisk(c *C) {
 		conf.OOMUseTmpStorage = true
 		conf.MemQuotaQuery = 1
 	})
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/executor/testSortedEventContainerSpill", "return(true)"), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/executor/testSortedEventContainerSpill", "return(true)"), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/executor/testSortedEventContainerSpill"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/executor/testSortedEventContainerSpill"), IsNil)
 	}()
 	ctx := mock.NewContext()
-	ctx.GetStochastikVars().InitChunkSize = variable.DefMaxChunkSize
-	ctx.GetStochastikVars().MaxChunkSize = variable.DefMaxChunkSize
-	ctx.GetStochastikVars().StmtCtx.MemTracker = memory.NewTracker(-1, -1)
+	ctx.GetStochaseinstein_dbars().InitChunkSize = variable.DefMaxChunkSize
+	ctx.GetStochaseinstein_dbars().MaxChunkSize = variable.DefMaxChunkSize
+	ctx.GetStochaseinstein_dbars().StmtCtx.MemTracker = memory.NewTracker(-1, -1)
 	cas := &sortCase{rows: 2048, orderByIdx: []int{0, 1}, ndvs: []int{0, 0}, ctx: ctx}
 	opt := mockDataSourceParameters{
 		schemaReplicant: expression.NewSchema(cas.defCausumns()...),
@@ -303,7 +303,7 @@ func (s *testExecSerialSuite) TestSortSpillDisk(c *C) {
 	err = exec.Close()
 	c.Assert(err, IsNil)
 
-	ctx.GetStochastikVars().StmtCtx.MemTracker = memory.NewTracker(-1, 1)
+	ctx.GetStochaseinstein_dbars().StmtCtx.MemTracker = memory.NewTracker(-1, 1)
 	dataSource.prepareChunks()
 	err = exec.Open(tmpCtx)
 	c.Assert(err, IsNil)
@@ -333,7 +333,7 @@ func (s *testExecSerialSuite) TestSortSpillDisk(c *C) {
 	err = exec.Close()
 	c.Assert(err, IsNil)
 
-	ctx.GetStochastikVars().StmtCtx.MemTracker = memory.NewTracker(-1, 24000)
+	ctx.GetStochaseinstein_dbars().StmtCtx.MemTracker = memory.NewTracker(-1, 24000)
 	dataSource.prepareChunks()
 	err = exec.Open(tmpCtx)
 	c.Assert(err, IsNil)
@@ -353,10 +353,10 @@ func (s *testExecSerialSuite) TestSortSpillDisk(c *C) {
 
 	// Test partition nums.
 	ctx = mock.NewContext()
-	ctx.GetStochastikVars().InitChunkSize = variable.DefMaxChunkSize
-	ctx.GetStochastikVars().MaxChunkSize = variable.DefMaxChunkSize
-	ctx.GetStochastikVars().StmtCtx.MemTracker = memory.NewTracker(-1, 16864*50)
-	ctx.GetStochastikVars().StmtCtx.MemTracker.Consume(16864 * 45)
+	ctx.GetStochaseinstein_dbars().InitChunkSize = variable.DefMaxChunkSize
+	ctx.GetStochaseinstein_dbars().MaxChunkSize = variable.DefMaxChunkSize
+	ctx.GetStochaseinstein_dbars().StmtCtx.MemTracker = memory.NewTracker(-1, 16864*50)
+	ctx.GetStochaseinstein_dbars().StmtCtx.MemTracker.Consume(16864 * 45)
 	cas = &sortCase{rows: 20480, orderByIdx: []int{0, 1}, ndvs: []int{0, 0}, ctx: ctx}
 	opt = mockDataSourceParameters{
 		schemaReplicant: expression.NewSchema(cas.defCausumns()...),

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,21 +18,21 @@ import (
 	"sort"
 
 	"github.com/opentracing/opentracing-go"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/distsql"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/memory"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/ranger"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/stringutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/statistics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/distsql"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/expression"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/memory"
-	"github.com/whtcorpsinc/milevadb/soliton/ranger"
-	"github.com/whtcorpsinc/milevadb/soliton/stringutil"
-	"github.com/whtcorpsinc/milevadb/statistics"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 // make sure `BlockReaderExecutor` implements `Executor`.
@@ -72,9 +72,9 @@ type BlockReaderExecutor struct {
 	ranges []*ranger.Range
 
 	// kvRanges are only use for union scan.
-	kvRanges []ekv.KeyRange
-	posetPosetDagPB    *fidelpb.PosetDagRequest
-	startTS  uint64
+	kvRanges        []ekv.KeyRange
+	posetPosetDagPB *fidelpb.PosetDagRequest
+	startTS         uint64
 	// defCausumns are only required by union scan and virtual defCausumn.
 	defCausumns []*perceptron.DeferredCausetInfo
 
@@ -114,7 +114,7 @@ func (e *BlockReaderExecutor) Open(ctx context.Context) error {
 	}
 
 	e.memTracker = memory.NewTracker(e.id, -1)
-	e.memTracker.AttachTo(e.ctx.GetStochastikVars().StmtCtx.MemTracker)
+	e.memTracker.AttachTo(e.ctx.GetStochaseinstein_dbars().StmtCtx.MemTracker)
 
 	var err error
 	if e.corDefCausInFilter {
@@ -139,7 +139,7 @@ func (e *BlockReaderExecutor) Open(ctx context.Context) error {
 		ts := e.plans[0].(*plannercore.PhysicalBlockScan)
 		access := ts.AccessCondition
 		pkTP := ts.Block.GetPkDefCausInfo().FieldType
-		e.ranges, err = ranger.BuildBlockRange(access, e.ctx.GetStochastikVars().StmtCtx, &pkTP)
+		e.ranges, err = ranger.BuildBlockRange(access, e.ctx.GetStochaseinstein_dbars().StmtCtx, &pkTP)
 		if err != nil {
 			return err
 		}
@@ -220,7 +220,7 @@ func (e *BlockReaderExecutor) buildResp(ctx context.Context, ranges []*ranger.Ra
 		}
 		reqBuilder = builder.SetKeyRanges(kvRange)
 	} else if e.block.Meta() != nil && e.block.Meta().IsCommonHandle {
-		reqBuilder = builder.SetCommonHandleRanges(e.ctx.GetStochastikVars().StmtCtx, getPhysicalBlockID(e.block), ranges)
+		reqBuilder = builder.SetCommonHandleRanges(e.ctx.GetStochaseinstein_dbars().StmtCtx, getPhysicalBlockID(e.block), ranges)
 	} else {
 		reqBuilder = builder.SetBlockRanges(getPhysicalBlockID(e.block), ranges, e.feedback)
 	}
@@ -230,7 +230,7 @@ func (e *BlockReaderExecutor) buildResp(ctx context.Context, ranges []*ranger.Ra
 		SetDesc(e.desc).
 		SetKeepOrder(e.keepOrder).
 		SetStreaming(e.streaming).
-		SetFromStochastikVars(e.ctx.GetStochastikVars()).
+		SetFromStochaseinstein_dbars(e.ctx.GetStochaseinstein_dbars()).
 		SetMemTracker(e.memTracker).
 		SetStoreType(e.storeType).
 		SetAllowBatchINTERLOCK(e.batchINTERLOCK).

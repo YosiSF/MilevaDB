@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,21 +25,21 @@ import (
 	"time"
 	"unsafe"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/codec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/execdetails"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/memory"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mvmap"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/ranger"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/expression"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/codec"
-	"github.com/whtcorpsinc/milevadb/soliton/execdetails"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/memory"
-	"github.com/whtcorpsinc/milevadb/soliton/mvmap"
-	"github.com/whtcorpsinc/milevadb/soliton/ranger"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/types"
 	"go.uber.org/zap"
 )
 
@@ -85,17 +85,17 @@ type IndexLookUpJoin struct {
 }
 
 type outerCtx struct {
-	rowTypes []*types.FieldType
-	keyDefCauss  []int
-	filter   expression.CNFExprs
+	rowTypes    []*types.FieldType
+	keyDefCauss []int
+	filter      expression.CNFExprs
 }
 
 type innerCtx struct {
-	readerBuilder *dataReaderBuilder
-	rowTypes      []*types.FieldType
-	keyDefCauss       []int
-	defCausLens       []int
-	hasPrefixDefCaus  bool
+	readerBuilder    *dataReaderBuilder
+	rowTypes         []*types.FieldType
+	keyDefCauss      []int
+	defCausLens      []int
+	hasPrefixDefCaus bool
 }
 
 type lookUpJoinTask struct {
@@ -140,10 +140,10 @@ type innerWorker struct {
 	ctx         stochastikctx.Context
 	executorChk *chunk.Chunk
 
-	indexRanges           []*ranger.Range
+	indexRanges               []*ranger.Range
 	nextDefCausCompareFilters *plannercore.DefCausWithCmpFuncManager
-	keyOff2IdxOff         []int
-	stats                 *innerWorkerRuntimeStats
+	keyOff2IdxOff             []int
+	stats                     *innerWorkerRuntimeStats
 }
 
 // Open implements the Executor interface.
@@ -175,18 +175,18 @@ func (e *IndexLookUpJoin) Open(ctx context.Context) error {
 		return err
 	}
 	e.memTracker = memory.NewTracker(e.id, -1)
-	e.memTracker.AttachTo(e.ctx.GetStochastikVars().StmtCtx.MemTracker)
+	e.memTracker.AttachTo(e.ctx.GetStochaseinstein_dbars().StmtCtx.MemTracker)
 	e.innerPtrBytes = make([][]byte, 0, 8)
 	if e.runtimeStats != nil {
 		e.stats = &indexLookUpJoinRuntimeStats{}
-		e.ctx.GetStochastikVars().StmtCtx.RuntimeStatsDefCausl.RegisterStats(e.id, e.stats)
+		e.ctx.GetStochaseinstein_dbars().StmtCtx.RuntimeStatsDefCausl.RegisterStats(e.id, e.stats)
 	}
 	e.startWorkers(ctx)
 	return nil
 }
 
 func (e *IndexLookUpJoin) startWorkers(ctx context.Context) {
-	concurrency := e.ctx.GetStochastikVars().IndexLookupJoinConcurrency()
+	concurrency := e.ctx.GetStochaseinstein_dbars().IndexLookupJoinConcurrency()
 	if e.stats != nil {
 		e.stats.concurrency = concurrency
 	}
@@ -211,7 +211,7 @@ func (e *IndexLookUpJoin) newOuterWorker(resultCh, innerCh chan *lookUpJoinTask)
 		resultCh:         resultCh,
 		innerCh:          innerCh,
 		batchSize:        32,
-		maxBatchSize:     e.ctx.GetStochastikVars().IndexJoinBatchSize,
+		maxBatchSize:     e.ctx.GetStochaseinstein_dbars().IndexJoinBatchSize,
 		parentMemTracker: e.memTracker,
 		lookup:           e,
 	}
@@ -240,13 +240,13 @@ func (e *IndexLookUpJoin) newInnerWorker(taskCh chan *lookUpJoinTask) *innerWork
 		stats:         innerStats,
 	}
 	if e.lastDefCausHelper != nil {
-		// nextCwf.TmpConstant needs to be reset for every individual
+		// nextCwf.TmpCouplingConstantWithRadix needs to be reset for every individual
 		// inner worker to avoid data race when the inner workers is running
 		// concurrently.
 		nextCwf := *e.lastDefCausHelper
-		nextCwf.TmpConstant = make([]*expression.Constant, len(e.lastDefCausHelper.TmpConstant))
-		for i := range e.lastDefCausHelper.TmpConstant {
-			nextCwf.TmpConstant[i] = &expression.Constant{RetType: nextCwf.TargetDefCaus.RetType}
+		nextCwf.TmpCouplingConstantWithRadix = make([]*expression.CouplingConstantWithRadix, len(e.lastDefCausHelper.TmpCouplingConstantWithRadix))
+		for i := range e.lastDefCausHelper.TmpCouplingConstantWithRadix {
+			nextCwf.TmpCouplingConstantWithRadix[i] = &expression.CouplingConstantWithRadix{RetType: nextCwf.TargetDefCaus.RetType}
 		}
 		iw.nextDefCausCompareFilters = &nextCwf
 	}
@@ -414,7 +414,7 @@ func (ow *outerWorker) buildTask(ctx context.Context) (*lookUpJoinTask, error) {
 			requiredEvents = parentRequired
 		}
 	}
-	maxChunkSize := ow.ctx.GetStochastikVars().MaxChunkSize
+	maxChunkSize := ow.ctx.GetStochaseinstein_dbars().MaxChunkSize
 	for requiredEvents > task.outerResult.Len() {
 		chk := chunk.NewChunkWithCapacity(ow.outerCtx.rowTypes, maxChunkSize)
 		chk = chk.SetRequiredEvents(requiredEvents, maxChunkSize)
@@ -492,8 +492,8 @@ func (iw *innerWorker) run(ctx context.Context, wg *sync.WaitGroup) {
 }
 
 type indexJoinLookUpContent struct {
-	keys []types.Causet
-	event  chunk.Event
+	keys  []types.Causet
+	event chunk.Event
 }
 
 func (iw *innerWorker) handleTask(ctx context.Context, task *lookUpJoinTask) error {
@@ -542,7 +542,7 @@ func (iw *innerWorker) constructLookupContent(task *lookUpJoinTask) ([]*indexJoi
 				continue
 			}
 			keyBuf = keyBuf[:0]
-			keyBuf, err = codec.EncodeKey(iw.ctx.GetStochastikVars().StmtCtx, keyBuf, dLookUpKey...)
+			keyBuf, err = codec.EncodeKey(iw.ctx.GetStochaseinstein_dbars().StmtCtx, keyBuf, dLookUpKey...)
 			if err != nil {
 				return nil, err
 			}
@@ -574,7 +574,7 @@ func (iw *innerWorker) constructCausetLookupKey(task *lookUpJoinTask, chkIdx, ro
 		return nil, nil
 	}
 	outerEvent := task.outerResult.GetChunk(chkIdx).GetEvent(rowIdx)
-	sc := iw.ctx.GetStochastikVars().StmtCtx
+	sc := iw.ctx.GetStochaseinstein_dbars().StmtCtx
 	keyLen := len(iw.keyDefCauss)
 	dLookupKey := make([]types.Causet, 0, keyLen)
 	for i, keyDefCaus := range iw.outerCtx.keyDefCauss {
@@ -614,7 +614,7 @@ func (iw *innerWorker) sortAndDedupLookUpContents(lookUpContents []*indexJoinLoo
 	if len(lookUpContents) < 2 {
 		return lookUpContents
 	}
-	sc := iw.ctx.GetStochastikVars().StmtCtx
+	sc := iw.ctx.GetStochaseinstein_dbars().StmtCtx
 	sort.Slice(lookUpContents, func(i, j int) bool {
 		cmp := compareEvent(sc, lookUpContents[i].keys, lookUpContents[j].keys)
 		if cmp != 0 || iw.nextDefCausCompareFilters == nil {
@@ -658,7 +658,7 @@ func (iw *innerWorker) fetchInnerResults(ctx context.Context, task *lookUpJoinTa
 		return err
 	}
 	defer terror.Call(innerExec.Close)
-	innerResult := chunk.NewList(retTypes(innerExec), iw.ctx.GetStochastikVars().MaxChunkSize, iw.ctx.GetStochastikVars().MaxChunkSize)
+	innerResult := chunk.NewList(retTypes(innerExec), iw.ctx.GetStochaseinstein_dbars().MaxChunkSize, iw.ctx.GetStochaseinstein_dbars().MaxChunkSize)
 	innerResult.GetMemTracker().SetLabel(memory.LabelForBuildSideResult)
 	innerResult.GetMemTracker().AttachTo(task.memTracker)
 	for {
@@ -702,7 +702,7 @@ func (iw *innerWorker) buildLookUpMap(task *lookUpJoinTask) error {
 			for _, keyDefCaus := range iw.keyDefCauss {
 				d := innerEvent.GetCauset(keyDefCaus, iw.rowTypes[keyDefCaus])
 				var err error
-				keyBuf, err = codec.EncodeKey(iw.ctx.GetStochastikVars().StmtCtx, keyBuf, d)
+				keyBuf, err = codec.EncodeKey(iw.ctx.GetStochaseinstein_dbars().StmtCtx, keyBuf, d)
 				if err != nil {
 					return err
 				}

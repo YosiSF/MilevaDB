@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 var (
@@ -62,8 +62,8 @@ func getDeferredCausets() []*expression.DeferredCauset {
 // close() must be called after next() to avoid goroutines leak
 func TestExplainAnalyzeInvokeNextAndClose(t *testing.T) {
 	ctx := mock.NewContext()
-	ctx.GetStochastikVars().InitChunkSize = variable.DefInitChunkSize
-	ctx.GetStochastikVars().MaxChunkSize = variable.DefMaxChunkSize
+	ctx.GetStochaseinstein_dbars().InitChunkSize = variable.DefInitChunkSize
+	ctx.GetStochaseinstein_dbars().MaxChunkSize = variable.DefMaxChunkSize
 	schemaReplicant := expression.NewSchema(getDeferredCausets()...)
 	baseExec := newBaseExecutor(ctx, schemaReplicant, 0)
 	explainExec := &ExplainExec{

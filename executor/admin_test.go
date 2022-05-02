@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,18 +18,18 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block/blocks"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	allegrosql "github.com/whtcorpsinc/MilevaDB-Prod/errno"
+	"github.com/whtcorpsinc/MilevaDB-Prod/executor"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/block/blocks"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	allegrosql "github.com/whtcorpsinc/milevadb/errno"
-	"github.com/whtcorpsinc/milevadb/executor"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/soliton/solitonutil"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 func (s *testSuite1) TestAdminChecHoTTexRange(c *C) {
@@ -115,7 +115,7 @@ func (s *testSuite5) TestAdminRecoverIndex(c *C) {
 	tblInfo := tbl.Meta()
 	idxInfo := tblInfo.FindIndexByName("c2")
 	indexOpr := blocks.NewIndex(tblInfo.ID, tblInfo, idxInfo)
-	sc := s.ctx.GetStochastikVars().StmtCtx
+	sc := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	txn, err := s.causetstore.Begin()
 	c.Assert(err, IsNil)
 	err = indexOpr.Delete(sc, txn, types.MakeCausets(1), ekv.IntHandle(1))
@@ -213,7 +213,7 @@ func (s *testSuite5) TestClusteredIndexAdminRecoverIndex(c *C) {
 	tblInfo := tbl.Meta()
 	idxInfo := tblInfo.FindIndexByName("idx")
 	indexOpr := blocks.NewIndex(tblInfo.ID, tblInfo, idxInfo)
-	sc := s.ctx.GetStochastikVars().StmtCtx
+	sc := s.ctx.GetStochaseinstein_dbars().StmtCtx
 
 	// Some index entries are missed.
 	txn, err := s.causetstore.Begin()
@@ -249,7 +249,7 @@ func (s *testSuite5) TestAdminRecoverPartitionBlockIndex(c *C) {
 	checkFunc := func(tbl block.Block, pid int64, idxValue int) {
 		idxInfo := tbl.Meta().FindIndexByName("c2")
 		indexOpr := blocks.NewIndex(pid, tbl.Meta(), idxInfo)
-		sc := s.ctx.GetStochastikVars().StmtCtx
+		sc := s.ctx.GetStochaseinstein_dbars().StmtCtx
 		txn, err := s.causetstore.Begin()
 		c.Assert(err, IsNil)
 		err = indexOpr.Delete(sc, txn, types.MakeCausets(idxValue), ekv.IntHandle(idxValue))
@@ -307,7 +307,7 @@ func (s *testSuite5) TestAdminRecoverIndex1(c *C) {
 	s.ctx.CausetStore = s.causetstore
 	dbName := perceptron.NewCIStr("test")
 	tblName := perceptron.NewCIStr("admin_test")
-	sc := s.ctx.GetStochastikVars().StmtCtx
+	sc := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	tk.MustExec("use test")
 	tk.MustExec("drop block if exists admin_test")
 	tk.MustExec("set @@milevadb_enable_clustered_index=0;")
@@ -717,9 +717,9 @@ func (s *testSuite3) TestAdminCheckPartitionBlockFailed(c *C) {
 	c.Assert(err, IsNil)
 	tblInfo := tbl.Meta()
 	idxInfo := tblInfo.Indices[0]
-	sc := s.ctx.GetStochastikVars().StmtCtx
-	tk.Se.GetStochastikVars().IndexLookupSize = 3
-	tk.Se.GetStochastikVars().MaxChunkSize = 3
+	sc := s.ctx.GetStochaseinstein_dbars().StmtCtx
+	tk.Se.GetStochaseinstein_dbars().IndexLookupSize = 3
+	tk.Se.GetStochaseinstein_dbars().MaxChunkSize = 3
 
 	// Reduce one event of index on partitions.
 	// Block count > index count.
@@ -815,9 +815,9 @@ func (s *testSuite5) TestAdminCheckBlockFailed(c *C) {
 	tblInfo := tbl.Meta()
 	idxInfo := tblInfo.Indices[1]
 	indexOpr := blocks.NewIndex(tblInfo.ID, tblInfo, idxInfo)
-	sc := s.ctx.GetStochastikVars().StmtCtx
-	tk.Se.GetStochastikVars().IndexLookupSize = 3
-	tk.Se.GetStochastikVars().MaxChunkSize = 3
+	sc := s.ctx.GetStochaseinstein_dbars().StmtCtx
+	tk.Se.GetStochaseinstein_dbars().IndexLookupSize = 3
+	tk.Se.GetStochaseinstein_dbars().MaxChunkSize = 3
 
 	// Reduce one event of index.
 	// Block count > index count.

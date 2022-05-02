@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // INTERLOCKyright 2020 Wenbin Xiao
 //
@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package ekv
+package MilevaDB
 
 import (
 	"context"
@@ -24,7 +24,7 @@ import (
 
 	. "github.com/whtcorpsinc/check"
 	leveldb "github.com/whtcorpsinc/goleveldb/leveldb/memdb"
-	"github.com/whtcorpsinc/milevadb/soliton/testleak"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testleak"
 )
 
 func init() {

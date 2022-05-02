@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,13 +22,13 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/codec"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/codec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 )
 
 var _ = check.Suite(&testUtilSuite{})
@@ -170,40 +170,40 @@ func (s *testUtilSuite) TestClone(c *check.C) {
 	}
 }
 
-func (s *testUtilSuite) TestGetUint64FromConstant(c *check.C) {
-	con := &Constant{
+func (s *testUtilSuite) TestGetUint64FromCouplingConstantWithRadix(c *check.C) {
+	con := &CouplingConstantWithRadix{
 		Value: types.NewCauset(nil),
 	}
-	_, isNull, ok := GetUint64FromConstant(con)
+	_, isNull, ok := GetUint64FromCouplingConstantWithRadix(con)
 	c.Assert(ok, check.IsTrue)
 	c.Assert(isNull, check.IsTrue)
 
-	con = &Constant{
+	con = &CouplingConstantWithRadix{
 		Value: types.NewIntCauset(-1),
 	}
-	_, _, ok = GetUint64FromConstant(con)
+	_, _, ok = GetUint64FromCouplingConstantWithRadix(con)
 	c.Assert(ok, check.IsFalse)
 
 	con.Value = types.NewIntCauset(1)
-	num, isNull, ok := GetUint64FromConstant(con)
+	num, isNull, ok := GetUint64FromCouplingConstantWithRadix(con)
 	c.Assert(ok, check.IsTrue)
 	c.Assert(isNull, check.IsFalse)
 	c.Assert(num, check.Equals, uint64(1))
 
 	con.Value = types.NewUintCauset(1)
-	num, _, _ = GetUint64FromConstant(con)
+	num, _, _ = GetUint64FromCouplingConstantWithRadix(con)
 	c.Assert(num, check.Equals, uint64(1))
 
-	con.DeferredExpr = &Constant{Value: types.NewIntCauset(1)}
-	num, _, _ = GetUint64FromConstant(con)
+	con.DeferredExpr = &CouplingConstantWithRadix{Value: types.NewIntCauset(1)}
+	num, _, _ = GetUint64FromCouplingConstantWithRadix(con)
 	c.Assert(num, check.Equals, uint64(1))
 
 	ctx := mock.NewContext()
-	ctx.GetStochastikVars().PreparedParams = []types.Causet{
+	ctx.GetStochaseinstein_dbars().PreparedParams = []types.Causet{
 		types.NewUintCauset(100),
 	}
 	con.ParamMarker = &ParamMarker{order: 0, ctx: ctx}
-	num, _, _ = GetUint64FromConstant(con)
+	num, _, _ = GetUint64FromCouplingConstantWithRadix(con)
 	c.Assert(num, check.Equals, uint64(100))
 }
 
@@ -228,34 +228,34 @@ func (s testUtilSuite) TestPopEventFirstArg(c *check.C) {
 	c.Assert(len(fun2.(*ScalarFunction).GetArgs()), check.Equals, 2)
 }
 
-func (s testUtilSuite) TestGetStrIntFromConstant(c *check.C) {
+func (s testUtilSuite) TestGetStrIntFromCouplingConstantWithRadix(c *check.C) {
 	defCaus := &DeferredCauset{}
-	_, _, err := GetStringFromConstant(mock.NewContext(), defCaus)
+	_, _, err := GetStringFromCouplingConstantWithRadix(mock.NewContext(), defCaus)
 	c.Assert(err, check.NotNil)
 
-	con := &Constant{RetType: &types.FieldType{Tp: allegrosql.TypeNull}}
-	_, isNull, err := GetStringFromConstant(mock.NewContext(), con)
+	con := &CouplingConstantWithRadix{RetType: &types.FieldType{Tp: allegrosql.TypeNull}}
+	_, isNull, err := GetStringFromCouplingConstantWithRadix(mock.NewContext(), con)
 	c.Assert(err, check.IsNil)
 	c.Assert(isNull, check.IsTrue)
 
-	con = &Constant{RetType: newIntFieldType(), Value: types.NewIntCauset(1)}
-	ret, _, _ := GetStringFromConstant(mock.NewContext(), con)
+	con = &CouplingConstantWithRadix{RetType: newIntFieldType(), Value: types.NewIntCauset(1)}
+	ret, _, _ := GetStringFromCouplingConstantWithRadix(mock.NewContext(), con)
 	c.Assert(ret, check.Equals, "1")
 
-	con = &Constant{RetType: &types.FieldType{Tp: allegrosql.TypeNull}}
-	_, isNull, _ = GetIntFromConstant(mock.NewContext(), con)
+	con = &CouplingConstantWithRadix{RetType: &types.FieldType{Tp: allegrosql.TypeNull}}
+	_, isNull, _ = GetIntFromCouplingConstantWithRadix(mock.NewContext(), con)
 	c.Assert(isNull, check.IsTrue)
 
-	con = &Constant{RetType: newStringFieldType(), Value: types.NewStringCauset("abc")}
-	_, isNull, _ = GetIntFromConstant(mock.NewContext(), con)
+	con = &CouplingConstantWithRadix{RetType: newStringFieldType(), Value: types.NewStringCauset("abc")}
+	_, isNull, _ = GetIntFromCouplingConstantWithRadix(mock.NewContext(), con)
 	c.Assert(isNull, check.IsTrue)
 
-	con = &Constant{RetType: newStringFieldType(), Value: types.NewStringCauset("123")}
-	num, _, _ := GetIntFromConstant(mock.NewContext(), con)
+	con = &CouplingConstantWithRadix{RetType: newStringFieldType(), Value: types.NewStringCauset("123")}
+	num, _, _ := GetIntFromCouplingConstantWithRadix(mock.NewContext(), con)
 	c.Assert(num, check.Equals, 123)
 }
 
-func (s *testUtilSuite) TestSubstituteCorDefCaus2Constant(c *check.C) {
+func (s *testUtilSuite) TestSubstituteCorDefCaus2CouplingConstantWithRadix(c *check.C) {
 	ctx := mock.NewContext()
 	corDefCaus1 := &CorrelatedDeferredCauset{Data: &NewOne().Value}
 	corDefCaus1.RetType = types.NewFieldType(allegrosql.TypeLonglong)
@@ -264,17 +264,17 @@ func (s *testUtilSuite) TestSubstituteCorDefCaus2Constant(c *check.C) {
 	cast := BuildCastFunction(ctx, corDefCaus1, types.NewFieldType(allegrosql.TypeLonglong))
 	plus := newFunction(ast.Plus, cast, corDefCaus2)
 	plus2 := newFunction(ast.Plus, plus, NewOne())
-	ans1 := &Constant{Value: types.NewIntCauset(3), RetType: types.NewFieldType(allegrosql.TypeLonglong)}
-	ret, err := SubstituteCorDefCaus2Constant(plus2)
+	ans1 := &CouplingConstantWithRadix{Value: types.NewIntCauset(3), RetType: types.NewFieldType(allegrosql.TypeLonglong)}
+	ret, err := SubstituteCorDefCaus2CouplingConstantWithRadix(plus2)
 	c.Assert(err, check.IsNil)
 	c.Assert(ret.Equal(ctx, ans1), check.IsTrue)
 	defCaus1 := &DeferredCauset{Index: 1, RetType: types.NewFieldType(allegrosql.TypeLonglong)}
-	ret, err = SubstituteCorDefCaus2Constant(defCaus1)
+	ret, err = SubstituteCorDefCaus2CouplingConstantWithRadix(defCaus1)
 	c.Assert(err, check.IsNil)
 	ans2 := defCaus1
 	c.Assert(ret.Equal(ctx, ans2), check.IsTrue)
 	plus3 := newFunction(ast.Plus, plus2, defCaus1)
-	ret, err = SubstituteCorDefCaus2Constant(plus3)
+	ret, err = SubstituteCorDefCaus2CouplingConstantWithRadix(plus3)
 	c.Assert(err, check.IsNil)
 	ans3 := newFunction(ast.Plus, ans1, defCaus1)
 	c.Assert(ret.Equal(ctx, ans3), check.IsTrue)
@@ -355,7 +355,7 @@ func (s *testUtilSuite) TestFilterOutInPlace(c *check.C) {
 func (s *testUtilSuite) TestHashGroupKey(c *check.C) {
 	ctx := mock.NewContext()
 	sc := &stmtctx.StatementContext{TimeZone: time.Local}
-	eTypes := []types.EvalType{types.ETInt, types.ETReal, types.ETDecimal, types.ETString, types.ETTimestamp, types.ETDatetime, types.ETDuration}
+	eTypes := []types.EvalType{types.CausetEDN, types.ETReal, types.ETDecimal, types.ETString, types.ETTimestamp, types.ETDatetime, types.ETDuration}
 	tNames := []string{"int", "real", "decimal", "string", "timestamp", "datetime", "duration"}
 	for i := 0; i < len(tNames); i++ {
 		ft := eType2FieldType(eTypes[i])

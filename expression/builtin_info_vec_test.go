@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,9 +21,9 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/blockcodec"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/blockcodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 type milevadbKeyGener struct {
@@ -56,7 +56,7 @@ var vecBuiltinInfoCases = map[string][]vecExprBenchCase{
 		{retEvalType: types.ETString, childrenTypes: []types.EvalType{}},
 	},
 	ast.FoundEvents: {
-		{retEvalType: types.ETInt},
+		{retEvalType: types.CausetEDN},
 	},
 	ast.Database: {
 		{retEvalType: types.ETString, childrenTypes: []types.EvalType{}},
@@ -69,43 +69,43 @@ var vecBuiltinInfoCases = map[string][]vecExprBenchCase{
 			retEvalType:   types.ETString,
 			childrenTypes: []types.EvalType{types.ETString},
 			geners: []dataGenerator{&milevadbKeyGener{
-				inner: newDefaultGener(0, types.ETInt),
+				inner: newDefaultGener(0, types.CausetEDN),
 			}},
 		},
 	},
 	ast.EventCount: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{}},
 	},
 	ast.CurrentRole: {
 		{retEvalType: types.ETString, childrenTypes: []types.EvalType{}},
 	},
 	ast.MilevaDBIsDBSOwner: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{}},
 	},
 	ast.ConnectionID: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{}},
 	},
 	ast.LastInsertId: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN}},
 	},
 	ast.Benchmark: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt, types.ETInt},
-			constants: []*Constant{{Value: types.NewIntCauset(10), RetType: types.NewFieldType(allegrosql.TypeLonglong)}, nil}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt, types.ETReal},
-			constants: []*Constant{{Value: types.NewIntCauset(11), RetType: types.NewFieldType(allegrosql.TypeLonglong)}, nil}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt, types.ETDecimal},
-			constants: []*Constant{{Value: types.NewIntCauset(12), RetType: types.NewFieldType(allegrosql.TypeLonglong)}, nil}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt, types.ETString},
-			constants: []*Constant{{Value: types.NewIntCauset(13), RetType: types.NewFieldType(allegrosql.TypeLonglong)}, nil}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt, types.ETDatetime},
-			constants: []*Constant{{Value: types.NewIntCauset(14), RetType: types.NewFieldType(allegrosql.TypeLonglong)}, nil}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt, types.ETTimestamp},
-			constants: []*Constant{{Value: types.NewIntCauset(15), RetType: types.NewFieldType(allegrosql.TypeLonglong)}, nil}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt, types.ETDuration},
-			constants: []*Constant{{Value: types.NewIntCauset(16), RetType: types.NewFieldType(allegrosql.TypeLonglong)}, nil}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt, types.ETJson},
-			constants: []*Constant{{Value: types.NewIntCauset(17), RetType: types.NewFieldType(allegrosql.TypeLonglong)}, nil}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN, types.CausetEDN},
+			constants: []*CouplingConstantWithRadix{{Value: types.NewIntCauset(10), RetType: types.NewFieldType(allegrosql.TypeLonglong)}, nil}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN, types.ETReal},
+			constants: []*CouplingConstantWithRadix{{Value: types.NewIntCauset(11), RetType: types.NewFieldType(allegrosql.TypeLonglong)}, nil}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN, types.ETDecimal},
+			constants: []*CouplingConstantWithRadix{{Value: types.NewIntCauset(12), RetType: types.NewFieldType(allegrosql.TypeLonglong)}, nil}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN, types.ETString},
+			constants: []*CouplingConstantWithRadix{{Value: types.NewIntCauset(13), RetType: types.NewFieldType(allegrosql.TypeLonglong)}, nil}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN, types.ETDatetime},
+			constants: []*CouplingConstantWithRadix{{Value: types.NewIntCauset(14), RetType: types.NewFieldType(allegrosql.TypeLonglong)}, nil}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN, types.ETTimestamp},
+			constants: []*CouplingConstantWithRadix{{Value: types.NewIntCauset(15), RetType: types.NewFieldType(allegrosql.TypeLonglong)}, nil}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN, types.ETDuration},
+			constants: []*CouplingConstantWithRadix{{Value: types.NewIntCauset(16), RetType: types.NewFieldType(allegrosql.TypeLonglong)}, nil}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN, types.ETJson},
+			constants: []*CouplingConstantWithRadix{{Value: types.NewIntCauset(17), RetType: types.NewFieldType(allegrosql.TypeLonglong)}, nil}},
 	},
 }
 

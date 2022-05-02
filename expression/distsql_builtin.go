@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,12 +23,12 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/soliton/codec"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/codec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 // PbTypeToFieldType converts fidelpb.FieldType to FieldType
@@ -49,7 +49,7 @@ func getSignatureByPB(ctx stochastikctx.Context, sigCode fidelpb.ScalarFuncSig, 
 	if err != nil {
 		return nil, err
 	}
-	valStr, _ := ctx.GetStochastikVars().GetSystemVar(variable.MaxAllowedPacket)
+	valStr, _ := ctx.GetStochaseinstein_dbars().GetSystemVar(variable.MaxAllowedPacket)
 	maxAllowedPacket, err := strconv.ParseUint(valStr, 10, 64)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -1050,7 +1050,7 @@ func getSignatureByPB(ctx stochastikctx.Context, sigCode fidelpb.ScalarFuncSig, 
 
 func newDistALLEGROSQLFunctionBySig(sc *stmtctx.StatementContext, sigCode fidelpb.ScalarFuncSig, tp *fidelpb.FieldType, args []Expression) (Expression, error) {
 	ctx := mock.NewContext()
-	ctx.GetStochastikVars().StmtCtx = sc
+	ctx.GetStochaseinstein_dbars().StmtCtx = sc
 	f, err := getSignatureByPB(ctx, sigCode, tp, args)
 	if err != nil {
 		return nil, err
@@ -1088,7 +1088,7 @@ func PBToExpr(expr *fidelpb.Expr, tps []*types.FieldType, sc *stmtctx.StatementC
 		}
 		return &DeferredCauset{Index: int(offset), RetType: tps[offset]}, nil
 	case fidelpb.ExprType_Null:
-		return &Constant{Value: types.Causet{}, RetType: types.NewFieldType(allegrosql.TypeNull)}, nil
+		return &CouplingConstantWithRadix{Value: types.Causet{}, RetType: types.NewFieldType(allegrosql.TypeNull)}, nil
 	case fidelpb.ExprType_Int64:
 		return convertInt(expr.Val)
 	case fidelpb.ExprType_Uint64:
@@ -1096,7 +1096,7 @@ func PBToExpr(expr *fidelpb.Expr, tps []*types.FieldType, sc *stmtctx.StatementC
 	case fidelpb.ExprType_String:
 		return convertString(expr.Val, expr.FieldType)
 	case fidelpb.ExprType_Bytes:
-		return &Constant{Value: types.NewBytesCauset(expr.Val), RetType: types.NewFieldType(allegrosql.TypeString)}, nil
+		return &CouplingConstantWithRadix{Value: types.NewBytesCauset(expr.Val), RetType: types.NewFieldType(allegrosql.TypeString)}, nil
 	case fidelpb.ExprType_Float32:
 		return convertFloat(expr.Val, true)
 	case fidelpb.ExprType_Float64:
@@ -1122,7 +1122,7 @@ func PBToExpr(expr *fidelpb.Expr, tps []*types.FieldType, sc *stmtctx.StatementC
 				return nil, err
 			}
 			if len(results) == 0 {
-				return &Constant{Value: types.NewCauset(false), RetType: types.NewFieldType(allegrosql.TypeLonglong)}, nil
+				return &CouplingConstantWithRadix{Value: types.NewCauset(false), RetType: types.NewFieldType(allegrosql.TypeLonglong)}, nil
 			}
 			args = append(args, results...)
 			continue
@@ -1141,7 +1141,7 @@ func PBToExpr(expr *fidelpb.Expr, tps []*types.FieldType, sc *stmtctx.StatementC
 	return sf, nil
 }
 
-func convertTime(data []byte, ftPB *fidelpb.FieldType, tz *time.Location) (*Constant, error) {
+func convertTime(data []byte, ftPB *fidelpb.FieldType, tz *time.Location) (*CouplingConstantWithRadix, error) {
 	ft := PbTypeToFieldType(ftPB)
 	_, v, err := codec.DecodeUint(data)
 	if err != nil {
@@ -1160,7 +1160,7 @@ func convertTime(data []byte, ftPB *fidelpb.FieldType, tz *time.Location) (*Cons
 			return nil, err
 		}
 	}
-	return &Constant{Value: types.NewTimeCauset(t), RetType: ft}, nil
+	return &CouplingConstantWithRadix{Value: types.NewTimeCauset(t), RetType: ft}, nil
 }
 
 func decodeValueList(data []byte) ([]Expression, error) {
@@ -1173,38 +1173,38 @@ func decodeValueList(data []byte) ([]Expression, error) {
 	}
 	result := make([]Expression, 0, len(list))
 	for _, value := range list {
-		result = append(result, &Constant{Value: value})
+		result = append(result, &CouplingConstantWithRadix{Value: value})
 	}
 	return result, nil
 }
 
-func convertInt(val []byte) (*Constant, error) {
+func convertInt(val []byte) (*CouplingConstantWithRadix, error) {
 	var d types.Causet
 	_, i, err := codec.DecodeInt(val)
 	if err != nil {
 		return nil, errors.Errorf("invalid int % x", val)
 	}
 	d.SetInt64(i)
-	return &Constant{Value: d, RetType: types.NewFieldType(allegrosql.TypeLonglong)}, nil
+	return &CouplingConstantWithRadix{Value: d, RetType: types.NewFieldType(allegrosql.TypeLonglong)}, nil
 }
 
-func convertUint(val []byte) (*Constant, error) {
+func convertUint(val []byte) (*CouplingConstantWithRadix, error) {
 	var d types.Causet
 	_, u, err := codec.DecodeUint(val)
 	if err != nil {
 		return nil, errors.Errorf("invalid uint % x", val)
 	}
 	d.SetUint64(u)
-	return &Constant{Value: d, RetType: &types.FieldType{Tp: allegrosql.TypeLonglong, Flag: allegrosql.UnsignedFlag}}, nil
+	return &CouplingConstantWithRadix{Value: d, RetType: &types.FieldType{Tp: allegrosql.TypeLonglong, Flag: allegrosql.UnsignedFlag}}, nil
 }
 
-func convertString(val []byte, tp *fidelpb.FieldType) (*Constant, error) {
+func convertString(val []byte, tp *fidelpb.FieldType) (*CouplingConstantWithRadix, error) {
 	var d types.Causet
 	d.SetBytesAsString(val, protoToDefCauslation(tp.DefCauslate), uint32(tp.Flen))
-	return &Constant{Value: d, RetType: types.NewFieldType(allegrosql.TypeVarString)}, nil
+	return &CouplingConstantWithRadix{Value: d, RetType: types.NewFieldType(allegrosql.TypeVarString)}, nil
 }
 
-func convertFloat(val []byte, f32 bool) (*Constant, error) {
+func convertFloat(val []byte, f32 bool) (*CouplingConstantWithRadix, error) {
 	var d types.Causet
 	_, f, err := codec.DecodeFloat(val)
 	if err != nil {
@@ -1215,10 +1215,10 @@ func convertFloat(val []byte, f32 bool) (*Constant, error) {
 	} else {
 		d.SetFloat64(f)
 	}
-	return &Constant{Value: d, RetType: types.NewFieldType(allegrosql.TypeDouble)}, nil
+	return &CouplingConstantWithRadix{Value: d, RetType: types.NewFieldType(allegrosql.TypeDouble)}, nil
 }
 
-func convertDecimal(val []byte) (*Constant, error) {
+func convertDecimal(val []byte) (*CouplingConstantWithRadix, error) {
 	_, dec, precision, frac, err := codec.DecodeDecimal(val)
 	var d types.Causet
 	d.SetMysqlDecimal(dec)
@@ -1227,20 +1227,20 @@ func convertDecimal(val []byte) (*Constant, error) {
 	if err != nil {
 		return nil, errors.Errorf("invalid decimal % x", val)
 	}
-	return &Constant{Value: d, RetType: types.NewFieldType(allegrosql.TypeNewDecimal)}, nil
+	return &CouplingConstantWithRadix{Value: d, RetType: types.NewFieldType(allegrosql.TypeNewDecimal)}, nil
 }
 
-func convertDuration(val []byte) (*Constant, error) {
+func convertDuration(val []byte) (*CouplingConstantWithRadix, error) {
 	var d types.Causet
 	_, i, err := codec.DecodeInt(val)
 	if err != nil {
 		return nil, errors.Errorf("invalid duration %d", i)
 	}
 	d.SetMysqlDuration(types.Duration{Duration: time.Duration(i), Fsp: types.MaxFsp})
-	return &Constant{Value: d, RetType: types.NewFieldType(allegrosql.TypeDuration)}, nil
+	return &CouplingConstantWithRadix{Value: d, RetType: types.NewFieldType(allegrosql.TypeDuration)}, nil
 }
 
-func convertJSON(val []byte) (*Constant, error) {
+func convertJSON(val []byte) (*CouplingConstantWithRadix, error) {
 	var d types.Causet
 	_, d, err := codec.DecodeOne(val)
 	if err != nil {
@@ -1249,5 +1249,5 @@ func convertJSON(val []byte) (*Constant, error) {
 	if d.HoTT() != types.HoTTMysqlJSON {
 		return nil, errors.Errorf("invalid Causet.HoTT() %d", d.HoTT())
 	}
-	return &Constant{Value: d, RetType: types.NewFieldType(allegrosql.TypeJSON)}, nil
+	return &CouplingConstantWithRadix{Value: d, RetType: types.NewFieldType(allegrosql.TypeJSON)}, nil
 }

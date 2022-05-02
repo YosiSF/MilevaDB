@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,16 +16,16 @@ package executor
 import (
 	"context"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block/blocks"
+	"github.com/whtcorpsinc/MilevaDB-Prod/blockcodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/stringutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/block/blocks"
-	"github.com/whtcorpsinc/milevadb/blockcodec"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/stringutil"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 type keyValueWithDupInfo struct {
@@ -35,7 +35,7 @@ type keyValueWithDupInfo struct {
 }
 
 type toBeCheckedEvent struct {
-	event        []types.Causet
+	event      []types.Causet
 	handleKey  *keyValueWithDupInfo
 	uniqueKeys []*keyValueWithDupInfo
 	// t is the block or partition this event belongs to.
@@ -52,7 +52,7 @@ func encodeNewEvent(ctx stochastikctx.Context, t block.Block, event []types.Caus
 			skimmedEvent = append(skimmedEvent, event[defCaus.Offset])
 		}
 	}
-	sctx, rd := ctx.GetStochastikVars().StmtCtx, &ctx.GetStochastikVars().EventEncoder
+	sctx, rd := ctx.GetStochaseinstein_dbars().StmtCtx, &ctx.GetStochaseinstein_dbars().EventEncoder
 	newEventValue, err := blockcodec.EncodeEvent(sctx, skimmedEvent, defCausIDs, nil, nil, rd)
 	if err != nil {
 		return nil, err
@@ -112,7 +112,7 @@ func getKeysNeedCheckOneEvent(ctx stochastikctx.Context, t block.Block, event []
 		for _, defCaus := range handleDefCauss {
 			handleOrdinals = append(handleOrdinals, defCaus.Offset)
 		}
-		handle, err = ekv.BuildHandleFromCausetEvent(ctx.GetStochastikVars().StmtCtx, event, handleOrdinals)
+		handle, err = ekv.BuildHandleFromCausetEvent(ctx.GetStochaseinstein_dbars().StmtCtx, event, handleOrdinals)
 		if err != nil {
 			return nil, err
 		}
@@ -152,7 +152,7 @@ func getKeysNeedCheckOneEvent(ctx stochastikctx.Context, t block.Block, event []
 		}
 		// Pass handle = 0 to GenIndexKey,
 		// due to we only care about distinct key.
-		key, distinct, err1 := v.GenIndexKey(ctx.GetStochastikVars().StmtCtx,
+		key, distinct, err1 := v.GenIndexKey(ctx.GetStochaseinstein_dbars().StmtCtx,
 			defCausVals, ekv.IntHandle(0), nil)
 		if err1 != nil {
 			return nil, err1
@@ -175,7 +175,7 @@ func getKeysNeedCheckOneEvent(ctx stochastikctx.Context, t block.Block, event []
 		event = event[:len(event)-1]
 	}
 	result = append(result, toBeCheckedEvent{
-		event:        event,
+		event:      event,
 		handleKey:  handleKey,
 		uniqueKeys: uniqueKeys,
 		t:          t,

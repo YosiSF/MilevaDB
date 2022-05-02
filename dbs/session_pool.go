@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ import (
 	"github.com/ngaut/pools"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
 )
 
 // stochastikPool is used to new stochastik.
@@ -58,8 +58,8 @@ func (sg *stochastikPool) get() (stochastikctx.Context, error) {
 	}
 
 	ctx := resource.(stochastikctx.Context)
-	ctx.GetStochastikVars().SetStatusFlag(allegrosql.ServerStatusAutocommit, true)
-	ctx.GetStochastikVars().InRestrictedALLEGROSQL = true
+	ctx.GetStochaseinstein_dbars().SetStatusFlag(allegrosql.ServerStatusAutocommit, true)
+	ctx.GetStochaseinstein_dbars().InRestrictedALLEGROSQL = true
 	return ctx, nil
 }
 

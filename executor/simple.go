@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,28 +21,28 @@ import (
 	"time"
 
 	"github.com/ngaut/pools"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/metrics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/plugin"
+	"github.com/whtcorpsinc/MilevaDB-Prod/privilege"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/replog"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/sqlexec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/auth"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/metrics"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/plugin"
-	"github.com/whtcorpsinc/milevadb/privilege"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/replog"
-	"github.com/whtcorpsinc/milevadb/soliton/sqlexec"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
 	"go.uber.org/zap"
 )
 
@@ -72,7 +72,7 @@ func (e *baseExecutor) getSysStochastik() (stochastikctx.Context, error) {
 		return nil, err
 	}
 	restrictedCtx := ctx.(stochastikctx.Context)
-	restrictedCtx.GetStochastikVars().InRestrictedALLEGROSQL = true
+	restrictedCtx.GetStochaseinstein_dbars().InRestrictedALLEGROSQL = true
 	return restrictedCtx, nil
 }
 
@@ -100,7 +100,7 @@ func (e *SimpleExec) Next(ctx context.Context, req *chunk.Chunk) (err error) {
 		if err := e.ctx.NewTxn(ctx); err != nil {
 			return err
 		}
-		defer func() { e.ctx.GetStochastikVars().SetStatusFlag(allegrosql.ServerStatusInTrans, false) }()
+		defer func() { e.ctx.GetStochaseinstein_dbars().SetStatusFlag(allegrosql.ServerStatusInTrans, false) }()
 	}
 
 	switch x := e.Statement.(type) {
@@ -354,22 +354,22 @@ func (e *SimpleExec) setDefaultRoleForCurrentUser(s *ast.SetDefaultRoleStmt) (er
 }
 
 func (e *SimpleExec) executeSetDefaultRole(s *ast.SetDefaultRoleStmt) (err error) {
-	stochastikVars := e.ctx.GetStochastikVars()
+	stochaseinstein_dbars := e.ctx.GetStochaseinstein_dbars()
 	checker := privilege.GetPrivilegeManager(e.ctx)
 	if checker == nil {
 		return errors.New("miss privilege checker")
 	}
 
-	if len(s.UserList) == 1 && stochastikVars.User != nil {
+	if len(s.UserList) == 1 && stochaseinstein_dbars.User != nil {
 		u, h := s.UserList[0].Username, s.UserList[0].Hostname
-		if u == stochastikVars.User.Username && h == stochastikVars.User.AuthHostname {
+		if u == stochaseinstein_dbars.User.Username && h == stochaseinstein_dbars.User.AuthHostname {
 			err = e.setDefaultRoleForCurrentUser(s)
 			petri.GetPetri(e.ctx).NotifyUFIDelatePrivilege(e.ctx)
 			return
 		}
 	}
 
-	activeRoles := stochastikVars.ActiveRoles
+	activeRoles := stochaseinstein_dbars.ActiveRoles
 	if !checker.RequestVerification(activeRoles, allegrosql.SystemDB, allegrosql.DefaultRoleBlock, "", allegrosql.UFIDelatePriv) {
 		if !checker.RequestVerification(activeRoles, "", "", "", allegrosql.CreateUserPriv) {
 			return core.ErrSpecificAccessDenied.GenWithStackByArgs("CREATE USER")
@@ -407,7 +407,7 @@ func (e *SimpleExec) setRoleRegular(s *ast.SetRoleStmt) error {
 	checker := privilege.GetPrivilegeManager(e.ctx)
 	ok, roleName := checker.ActiveRoles(e.ctx, roleList)
 	if !ok {
-		u := e.ctx.GetStochastikVars().User
+		u := e.ctx.GetStochaseinstein_dbars().User
 		return ErrRoleNotGranted.GenWithStackByArgs(roleName, u.String())
 	}
 	return nil
@@ -416,11 +416,11 @@ func (e *SimpleExec) setRoleRegular(s *ast.SetRoleStmt) error {
 func (e *SimpleExec) setRoleAll(s *ast.SetRoleStmt) error {
 	// Deal with ALLEGROALLEGROSQL like `SET ROLE ALL;`
 	checker := privilege.GetPrivilegeManager(e.ctx)
-	user, host := e.ctx.GetStochastikVars().User.AuthUsername, e.ctx.GetStochastikVars().User.AuthHostname
+	user, host := e.ctx.GetStochaseinstein_dbars().User.AuthUsername, e.ctx.GetStochaseinstein_dbars().User.AuthHostname
 	roles := checker.GetAllRoles(user, host)
 	ok, roleName := checker.ActiveRoles(e.ctx, roles)
 	if !ok {
-		u := e.ctx.GetStochastikVars().User
+		u := e.ctx.GetStochaseinstein_dbars().User
 		return ErrRoleNotGranted.GenWithStackByArgs(roleName, u.String())
 	}
 	return nil
@@ -434,7 +434,7 @@ func (e *SimpleExec) setRoleAllExcept(s *ast.SetRoleStmt) error {
 		}
 	}
 	checker := privilege.GetPrivilegeManager(e.ctx)
-	user, host := e.ctx.GetStochastikVars().User.AuthUsername, e.ctx.GetStochastikVars().User.AuthHostname
+	user, host := e.ctx.GetStochaseinstein_dbars().User.AuthUsername, e.ctx.GetStochaseinstein_dbars().User.AuthHostname
 	roles := checker.GetAllRoles(user, host)
 
 	filter := func(arr []*auth.RoleIdentity, f func(*auth.RoleIdentity) bool) []*auth.RoleIdentity {
@@ -459,7 +459,7 @@ func (e *SimpleExec) setRoleAllExcept(s *ast.SetRoleStmt) error {
 	afterExcept := filter(roles, banned)
 	ok, roleName := checker.ActiveRoles(e.ctx, afterExcept)
 	if !ok {
-		u := e.ctx.GetStochastikVars().User
+		u := e.ctx.GetStochaseinstein_dbars().User
 		return ErrRoleNotGranted.GenWithStackByArgs(roleName, u.String())
 	}
 	return nil
@@ -468,11 +468,11 @@ func (e *SimpleExec) setRoleAllExcept(s *ast.SetRoleStmt) error {
 func (e *SimpleExec) setRoleDefault(s *ast.SetRoleStmt) error {
 	// Deal with ALLEGROALLEGROSQL like `SET ROLE DEFAULT;`
 	checker := privilege.GetPrivilegeManager(e.ctx)
-	user, host := e.ctx.GetStochastikVars().User.AuthUsername, e.ctx.GetStochastikVars().User.AuthHostname
+	user, host := e.ctx.GetStochaseinstein_dbars().User.AuthUsername, e.ctx.GetStochaseinstein_dbars().User.AuthHostname
 	roles := checker.GetDefaultRoles(user, host)
 	ok, roleName := checker.ActiveRoles(e.ctx, roles)
 	if !ok {
-		u := e.ctx.GetStochastikVars().User
+		u := e.ctx.GetStochaseinstein_dbars().User
 		return ErrRoleNotGranted.GenWithStackByArgs(roleName, u.String())
 	}
 	return nil
@@ -484,7 +484,7 @@ func (e *SimpleExec) setRoleNone(s *ast.SetRoleStmt) error {
 	roles := make([]*auth.RoleIdentity, 0)
 	ok, roleName := checker.ActiveRoles(e.ctx, roles)
 	if !ok {
-		u := e.ctx.GetStochastikVars().User
+		u := e.ctx.GetStochaseinstein_dbars().User
 		return ErrRoleNotGranted.GenWithStackByArgs(roleName, u.String())
 	}
 	return nil
@@ -507,7 +507,7 @@ func (e *SimpleExec) executeSetRole(s *ast.SetRoleStmt) error {
 }
 
 func (e *SimpleExec) dbAccessDenied(dbname string) error {
-	user := e.ctx.GetStochastikVars().User
+	user := e.ctx.GetStochaseinstein_dbars().User
 	u := user.Username
 	h := user.Hostname
 	if len(user.AuthUsername) > 0 && len(user.AuthHostname) > 0 {
@@ -521,8 +521,8 @@ func (e *SimpleExec) executeUse(s *ast.UseStmt) error {
 	dbname := perceptron.NewCIStr(s.DBName)
 
 	checker := privilege.GetPrivilegeManager(e.ctx)
-	if checker != nil && e.ctx.GetStochastikVars().User != nil {
-		if !checker.DBIsVisible(e.ctx.GetStochastikVars().ActiveRoles, dbname.String()) {
+	if checker != nil && e.ctx.GetStochaseinstein_dbars().User != nil {
+		if !checker.DBIsVisible(e.ctx.GetStochaseinstein_dbars().ActiveRoles, dbname.String()) {
 			return e.dbAccessDenied(dbname.O)
 		}
 	}
@@ -531,13 +531,13 @@ func (e *SimpleExec) executeUse(s *ast.UseStmt) error {
 	if !exists {
 		return schemareplicant.ErrDatabaseNotExists.GenWithStackByArgs(dbname)
 	}
-	e.ctx.GetStochastikVars().CurrentDBChanged = dbname.O != e.ctx.GetStochastikVars().CurrentDB
-	e.ctx.GetStochastikVars().CurrentDB = dbname.O
+	e.ctx.GetStochaseinstein_dbars().CurrentDBChanged = dbname.O != e.ctx.GetStochaseinstein_dbars().CurrentDB
+	e.ctx.GetStochaseinstein_dbars().CurrentDB = dbname.O
 	// character_set_database is the character set used by the default database.
 	// The server sets this variable whenever the default database changes.
 	// See http://dev.allegrosql.com/doc/refman/5.7/en/server-system-variables.html#sysvar_character_set_database
-	stochastikVars := e.ctx.GetStochastikVars()
-	err := stochastikVars.SetSystemVar(variable.CharsetDatabase, dbinfo.Charset)
+	stochaseinstein_dbars := e.ctx.GetStochaseinstein_dbars()
+	err := stochaseinstein_dbars.SetSystemVar(variable.CharsetDatabase, dbinfo.Charset)
 	if err != nil {
 		return err
 	}
@@ -546,13 +546,13 @@ func (e *SimpleExec) executeUse(s *ast.UseStmt) error {
 		// Since we have checked the charset, the dbDefCauslate here shouldn't be "".
 		dbDefCauslate = getDefaultDefCauslate(dbinfo.Charset)
 	}
-	return stochastikVars.SetSystemVar(variable.DefCauslationDatabase, dbDefCauslate)
+	return stochaseinstein_dbars.SetSystemVar(variable.DefCauslationDatabase, dbDefCauslate)
 }
 
 func (e *SimpleExec) executeBegin(ctx context.Context, s *ast.BeginStmt) error {
 	// If BEGIN is the first statement in TxnCtx, we can reuse the existing transaction, without the
 	// need to call NewTxn, which commits the existing transaction and begins a new one.
-	txnCtx := e.ctx.GetStochastikVars().TxnCtx
+	txnCtx := e.ctx.GetStochaseinstein_dbars().TxnCtx
 	if txnCtx.History != nil {
 		err := e.ctx.NewTxn(ctx)
 		if err != nil {
@@ -562,20 +562,20 @@ func (e *SimpleExec) executeBegin(ctx context.Context, s *ast.BeginStmt) error {
 	// With START TRANSACTION, autocommit remains disabled until you end
 	// the transaction with COMMIT or ROLLBACK. The autocommit mode then
 	// reverts to its previous state.
-	e.ctx.GetStochastikVars().SetStatusFlag(allegrosql.ServerStatusInTrans, true)
+	e.ctx.GetStochaseinstein_dbars().SetStatusFlag(allegrosql.ServerStatusInTrans, true)
 	// Call ctx.Txn(true) to active pending txn.
 	txnMode := s.Mode
 	if txnMode == "" {
-		txnMode = e.ctx.GetStochastikVars().TxnMode
+		txnMode = e.ctx.GetStochaseinstein_dbars().TxnMode
 	}
 	if txnMode == ast.Pessimistic {
-		e.ctx.GetStochastikVars().TxnCtx.IsPessimistic = true
+		e.ctx.GetStochaseinstein_dbars().TxnCtx.IsPessimistic = true
 	}
 	txn, err := e.ctx.Txn(true)
 	if err != nil {
 		return err
 	}
-	if e.ctx.GetStochastikVars().TxnCtx.IsPessimistic {
+	if e.ctx.GetStochaseinstein_dbars().TxnCtx.IsPessimistic {
 		txn.SetOption(ekv.Pessimistic, true)
 	}
 	return nil
@@ -642,11 +642,11 @@ func (e *SimpleExec) executeRevokeRole(s *ast.RevokeRoleStmt) error {
 }
 
 func (e *SimpleExec) executeCommit(s *ast.CommitStmt) {
-	e.ctx.GetStochastikVars().SetStatusFlag(allegrosql.ServerStatusInTrans, false)
+	e.ctx.GetStochaseinstein_dbars().SetStatusFlag(allegrosql.ServerStatusInTrans, false)
 }
 
 func (e *SimpleExec) executeRollback(s *ast.RollbackStmt) error {
-	sessVars := e.ctx.GetStochastikVars()
+	sessVars := e.ctx.GetStochaseinstein_dbars()
 	logutil.BgLogger().Debug("execute rollback statement", zap.Uint64("conn", sessVars.ConnectionID))
 	sessVars.SetStatusFlag(allegrosql.ServerStatusInTrans, false)
 	txn, err := e.ctx.Txn(false)
@@ -673,7 +673,7 @@ func (e *SimpleExec) executeCreateUser(ctx context.Context, s *ast.CreateUserStm
 		if checker == nil {
 			return errors.New("miss privilege checker")
 		}
-		activeRoles := e.ctx.GetStochastikVars().ActiveRoles
+		activeRoles := e.ctx.GetStochaseinstein_dbars().ActiveRoles
 		if !checker.RequestVerification(activeRoles, allegrosql.SystemDB, allegrosql.UserBlock, "", allegrosql.InsertPriv) {
 			if s.IsCreateRole {
 				if !checker.RequestVerification(activeRoles, "", "", "", allegrosql.CreateRolePriv) &&
@@ -708,7 +708,7 @@ func (e *SimpleExec) executeCreateUser(ctx context.Context, s *ast.CreateUserStm
 				return ErrCannotUser.GenWithStackByArgs("CREATE USER", user)
 			}
 			err := schemareplicant.ErrUserAlreadyExists.GenWithStackByArgs(user)
-			e.ctx.GetStochastikVars().StmtCtx.AppendNote(err)
+			e.ctx.GetStochaseinstein_dbars().StmtCtx.AppendNote(err)
 			continue
 		}
 		pwd, ok := spec.EncodedPassword()
@@ -771,7 +771,7 @@ func (e *SimpleExec) executeCreateUser(ctx context.Context, s *ast.CreateUserStm
 
 func (e *SimpleExec) executeAlterUser(s *ast.AlterUserStmt) error {
 	if s.CurrentAuth != nil {
-		user := e.ctx.GetStochastikVars().User
+		user := e.ctx.GetStochaseinstein_dbars().User
 		if user == nil {
 			return errors.New("Stochastik user is empty")
 		}
@@ -793,7 +793,7 @@ func (e *SimpleExec) executeAlterUser(s *ast.AlterUserStmt) error {
 	failedUsers := make([]string, 0, len(s.Specs))
 	for _, spec := range s.Specs {
 		if spec.User.CurrentUser {
-			user := e.ctx.GetStochastikVars().User
+			user := e.ctx.GetStochaseinstein_dbars().User
 			spec.User.Username = user.Username
 			spec.User.Hostname = user.AuthHostname
 		}
@@ -842,7 +842,7 @@ func (e *SimpleExec) executeAlterUser(s *ast.AlterUserStmt) error {
 		}
 		for _, user := range failedUsers {
 			err := schemareplicant.ErrUserDropExists.GenWithStackByArgs(user)
-			e.ctx.GetStochastikVars().StmtCtx.AppendNote(err)
+			e.ctx.GetStochaseinstein_dbars().StmtCtx.AppendNote(err)
 		}
 	}
 	petri.GetPetri(e.ctx).NotifyUFIDelatePrivilege(e.ctx)
@@ -850,11 +850,11 @@ func (e *SimpleExec) executeAlterUser(s *ast.AlterUserStmt) error {
 }
 
 func (e *SimpleExec) executeGrantRole(s *ast.GrantRoleStmt) error {
-	stochastikVars := e.ctx.GetStochastikVars()
+	stochaseinstein_dbars := e.ctx.GetStochaseinstein_dbars()
 	for i, user := range s.Users {
 		if user.CurrentUser {
-			s.Users[i].Username = stochastikVars.User.AuthUsername
-			s.Users[i].Hostname = stochastikVars.User.AuthHostname
+			s.Users[i].Username = stochaseinstein_dbars.User.AuthUsername
+			s.Users[i].Hostname = stochaseinstein_dbars.User.AuthHostname
 		}
 	}
 
@@ -916,7 +916,7 @@ func (e *SimpleExec) executeDropUser(s *ast.DropUserStmt) error {
 		if checker == nil {
 			return errors.New("miss privilege checker")
 		}
-		activeRoles := e.ctx.GetStochastikVars().ActiveRoles
+		activeRoles := e.ctx.GetStochaseinstein_dbars().ActiveRoles
 		if !checker.RequestVerification(activeRoles, allegrosql.SystemDB, allegrosql.UserBlock, "", allegrosql.DeletePriv) {
 			if s.IsDropRole {
 				if !checker.RequestVerification(activeRoles, "", "", "", allegrosql.DropRolePriv) &&
@@ -949,7 +949,7 @@ func (e *SimpleExec) executeDropUser(s *ast.DropUserStmt) error {
 		}
 		if !exists {
 			if s.IfExists {
-				e.ctx.GetStochastikVars().StmtCtx.AppendNote(schemareplicant.ErrUserDropExists.GenWithStackByArgs(user))
+				e.ctx.GetStochaseinstein_dbars().StmtCtx.AppendNote(schemareplicant.ErrUserDropExists.GenWithStackByArgs(user))
 			} else {
 				failedUsers = append(failedUsers, user.String())
 				break
@@ -1044,14 +1044,14 @@ func userExists(ctx stochastikctx.Context, name string, host string) (bool, erro
 func (e *SimpleExec) executeSetPwd(s *ast.SetPwdStmt) error {
 	var u, h string
 	if s.User == nil {
-		if e.ctx.GetStochastikVars().User == nil {
+		if e.ctx.GetStochaseinstein_dbars().User == nil {
 			return errors.New("Stochastik error is empty")
 		}
-		u = e.ctx.GetStochastikVars().User.AuthUsername
-		h = e.ctx.GetStochastikVars().User.AuthHostname
+		u = e.ctx.GetStochaseinstein_dbars().User.AuthUsername
+		h = e.ctx.GetStochaseinstein_dbars().User.AuthHostname
 	} else {
 		checker := privilege.GetPrivilegeManager(e.ctx)
-		activeRoles := e.ctx.GetStochastikVars().ActiveRoles
+		activeRoles := e.ctx.GetStochaseinstein_dbars().ActiveRoles
 		if checker != nil && !checker.RequestVerification(activeRoles, "", "", "", allegrosql.SuperPriv) {
 			return ErrDBaccessDenied.GenWithStackByArgs(u, h, "allegrosql")
 		}
@@ -1083,7 +1083,7 @@ func (e *SimpleExec) executeKillStmt(s *ast.KillStmt) error {
 		sm.Kill(s.ConnectionID, s.Query)
 	} else {
 		err := errors.New("Invalid operation. Please use 'KILL MilevaDB [CONNECTION | QUERY] connectionID' instead")
-		e.ctx.GetStochastikVars().StmtCtx.AppendWarning(err)
+		e.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(err)
 	}
 	return nil
 }
@@ -1161,7 +1161,7 @@ func (e *SimpleExec) autoNewTxn() bool {
 }
 
 func (e *SimpleExec) executeShutdown(s *ast.ShutdownStmt) error {
-	sessVars := e.ctx.GetStochastikVars()
+	sessVars := e.ctx.GetStochaseinstein_dbars()
 	logutil.BgLogger().Info("execute shutdown statement", zap.Uint64("conn", sessVars.ConnectionID))
 	p, err := os.FindProcess(os.Getpid())
 	if err != nil {
@@ -1174,7 +1174,7 @@ func (e *SimpleExec) executeShutdown(s *ast.ShutdownStmt) error {
 	return nil
 }
 
-// #14239 - https://github.com/whtcorpsinc/milevadb/issues/14239
+// #14239 - https://github.com/whtcorpsinc/MilevaDB-Prod/issues/14239
 // Need repair 'shutdown' command behavior.
 // Response of MilevaDB is different to MyALLEGROSQL.
 // This function need to run with async perceptron, otherwise it will block main coroutine
@@ -1208,7 +1208,7 @@ func (e *SimpleExec) executeCreateStatistics(s *ast.CreateStatisticsStmt) (err e
 		}
 		if s.StatsType == ast.StatsTypeCorrelation && tblInfo.PKIsHandle && allegrosql.HasPriKeyFlag(defCaus.Flag) {
 			warn := errors.New("No need to create correlation statistics on the integer primary key defCausumn")
-			e.ctx.GetStochastikVars().StmtCtx.AppendWarning(warn)
+			e.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(warn)
 			return nil
 		}
 		defCausIDs = append(defCausIDs, defCaus.ID)
@@ -1227,7 +1227,7 @@ func (e *SimpleExec) executeCreateStatistics(s *ast.CreateStatisticsStmt) (err e
 }
 
 func (e *SimpleExec) executeDropStatistics(s *ast.DropStatisticsStmt) error {
-	EDB := e.ctx.GetStochastikVars().CurrentDB
+	EDB := e.ctx.GetStochaseinstein_dbars().CurrentDB
 	if EDB == "" {
 		return core.ErrNoDB
 	}

@@ -1,8 +1,8 @@
-// INTERLOCKyright 2020 The ql Authors. All rights reserved.
+//Copuright 2021 Whtcorps Inc; EinsteinDB and MilevaDB aithors; Licensed Under Apache 2.0. All Rights Reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSES/QL-LICENSE file.
 
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+//MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,38 +21,16 @@ import (
 	"context"
 	"fmt"
 	"sync"
-	"time"
+	"time"	
 
-	"github.com/google/uuid"
-	"github.com/ngaut/pools"
-	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
-	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
-	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
-	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/failpoint"
-	pumpcli "github.com/whtcorpsinc/milevadb-tools/milevadb-binlog/pump_client"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/dbs/soliton"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/meta"
-	"github.com/whtcorpsinc/milevadb/metrics"
-	"github.com/whtcorpsinc/milevadb/owner"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	goutil "github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/binloginfo"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"go.uber.org/zap"
-)
+	
 
 const (
 	// currentVersion is for all new DBS jobs.
 	currentVersion = 1
-	// DBSOwnerKey is the dbs owner path that is saved to etcd, and it's exported for testing.
-	DBSOwnerKey = "/milevadb/dbs/fg/owner"
-	dbsPrompt   = "dbs"
+	// Solomonkey is the dbs owner path that is saved to etcd, and it's exported for testing.
+	Solomonkey = "/milevadb/dbs/fg/owner"
+	dbsPrompt  = "dbs"
 
 	shardRowIDBitsMax = 15
 
@@ -80,37 +58,31 @@ const (
 var (
 	// BlockDeferredCausetCountLimit is limit of the number of defCausumns in a block.
 	// It's exported for testing.
-	BlockDeferredCausetCountLimit = uint32(512)
+	_ = uint32(512)
 	// EnableSplitBlockRegion is a flag to decide whether to split a new region for
 	// a newly created block. It takes effect only if the CausetStorage supports split
 	// region.
-	EnableSplitBlockRegion = uint32(0)
+	_ = uint32(0)
 )
+
+type SchemaReplicant struct {
+	ID      int64
+	Address string
+}
 
 // DBS is responsible for uFIDelating schemaReplicant in data causetstore and maintaining in-memory SchemaReplicant cache.
 type DBS interface {
-	CreateSchema(ctx stochastikctx.Context, name perceptron.CIStr, charsetInfo *ast.CharsetOpt) error
-	AlterSchema(ctx stochastikctx.Context, stmt *ast.AlterDatabaseStmt) error
-	DropSchema(ctx stochastikctx.Context, schemaReplicant perceptron.CIStr) error
-	CreateBlock(ctx stochastikctx.Context, stmt *ast.CreateBlockStmt) error
-	CreateView(ctx stochastikctx.Context, stmt *ast.CreateViewStmt) error
-	DropBlock(ctx stochastikctx.Context, blockIdent ast.Ident) (err error)
-	RecoverBlock(ctx stochastikctx.Context, recoverInfo *RecoverInfo) (err error)
-	DropView(ctx stochastikctx.Context, blockIdent ast.Ident) (err error)
-	CreateIndex(ctx stochastikctx.Context, blockIdent ast.Ident, keyType ast.IndexKeyType, indexName perceptron.CIStr,
-		defCausumnNames []*ast.IndexPartSpecification, indexOption *ast.IndexOption, ifNotExists bool) error
-	DropIndex(ctx stochastikctx.Context, blockIdent ast.Ident, indexName perceptron.CIStr, ifExists bool) error
-	AlterBlock(ctx stochastikctx.Context, blockIdent ast.Ident, spec []*ast.AlterBlockSpec) error
-	TruncateBlock(ctx stochastikctx.Context, blockIdent ast.Ident) error
-	RenameBlock(ctx stochastikctx.Context, oldBlockIdent, newBlockIdent ast.Ident, isAlterBlock bool) error
-	LockBlocks(ctx stochastikctx.Context, stmt *ast.LockBlocksStmt) error
-	UnlockBlocks(ctx stochastikctx.Context, lockedBlocks []perceptron.BlockLockTpInfo) error
-	CleanupBlockLock(ctx stochastikctx.Context, blocks []*ast.BlockName) error
-	UFIDelateBlockReplicaInfo(ctx stochastikctx.Context, physicalID int64, available bool) error
-	RepairBlock(ctx stochastikctx.Context, block *ast.BlockName, createStmt *ast.CreateBlockStmt) error
-	CreateSequence(ctx stochastikctx.Context, stmt *ast.CreateSequenceStmt) error
-	DropSequence(ctx stochastikctx.Context, blockIdent ast.Ident, ifExists bool) (err error)
-
+	// CreateSchemaReplicant creates a schemaReplicant.	
+	CreateSchemaReplicant(ctx context.Context, schemaReplicant *SchemaReplicant) error
+	// GetSchemaReplicant gets a schemaReplicant by name.
+	GetSchemaReplicant(ctx context.Context, name string) (*SchemaReplicant, error)
+	// DropSchemaReplicant drops a schemaReplicant by name.
+	DropSchemaReplicant(ctx context.Context, name string) error
+	// GetSchemaReplicantIDs gets all schemaReplicant names.
+	GetSchemaReplicantIDs(ctx context.Context) ([]string, error)
+	// GetSchemaReplicantByID gets a schemaReplicant by ID.
+		
+	
 	// CreateSchemaWithInfo creates a database (schemaReplicant) given its database info.
 	//
 	// If `tryRetainID` is true, this method will try to keep the database ID specified in
@@ -125,65 +97,18 @@ type DBS interface {
 		onExist OnExist,
 		tryRetainID bool) error
 
-	// CreateBlockWithInfo creates a block, view or sequence given its block info.
-	//
-	// If `tryRetainID` is true, this method will try to keep the block ID specified in the `info`
-	// rather than generating new ones. This is just a hint though, if the ID defCauslides with an
-	// existing block a new ID will always be used.
-	//
-	// WARNING: the DBS owns the `info` after calling this function, and will modify its fields
-	// in-place. If you want to keep using `info`, please call Clone() first.
-	CreateBlockWithInfo(
-		ctx stochastikctx.Context,
-		schemaReplicant perceptron.CIStr,
-		info *perceptron.BlockInfo,
-		onExist OnExist,
-		tryRetainID bool) error
-
-	// Start campaigns the owner and starts workers.
-	// ctxPool is used for the worker's delRangeManager and creates stochastik.
-	Start(ctxPool *pools.ResourcePool) error
-	// GetLease returns current schemaReplicant lease time.
-	GetLease() time.Duration
-	// Stats returns the DBS statistics.
-	Stats(vars *variable.StochastikVars) (map[string]interface{}, error)
-	// GetSINTERLOCKe gets the status variables sINTERLOCKe.
-	GetSINTERLOCKe(status string) variable.SINTERLOCKeFlag
-	// Stop stops DBS worker.
-	Stop() error
-	// RegisterEventCh registers event channel for dbs.
-	RegisterEventCh(chan<- *soliton.Event)
-	// SchemaSyncer gets the schemaReplicant syncer.
-	SchemaSyncer() soliton.SchemaSyncer
-	// OwnerManager gets the owner manager.
-	OwnerManager() owner.Manager
-	// GetID gets the dbs ID.
-	GetID() string
-	// GetBlockMaxRowID gets the max event ID of a normal block or a partition.
-	GetBlockMaxHandle(startTS uint64, tbl block.PhysicalBlock) (ekv.Handle, bool, error)
-	// SetBinlogClient sets the binlog client for DBS worker. It's exported for testing.
-	SetBinlogClient(*pumpcli.PumpsClient)
-	// GetHook gets the hook. It's exported for testing.
-	GetHook() Callback
-}
-
-type limitJobTask struct {
-	job *perceptron.Job
-	err chan error
-}
-
 // dbs is used to handle the statements that define the structure or schemaReplicant of the database.
 type dbs struct {
-	m          sync.RWMutex
-	ctx        context.Context
-	cancel     context.CancelFunc
-	wg         sync.WaitGroup // It's only used to deal with data race in restart_test.
-	limitJobCh chan *limitJobTask
+// daten is the idiom of the database.
+	daten *daten
+// schemaReplicant is the schemaReplicant of the database.
+	schemaReplicant *SchemaReplicant
+// schemaReplicantID is the ID of the schemaReplicant.
+	schemaReplicantID string
+// schemaReplicantName is the name of the schemaReplicant.
+	schemaReplicantName string
+// schemaReplicantVersion is the version of the schemaReplicant.
 
-	*dbsCtx
-	workers     map[workerType]*worker
-	sessPool    *stochastikPool
-	delRangeMgr delRangeManager
 }
 
 // dbsCtx is the context when we use worker to handle DBS jobs.
@@ -268,7 +193,7 @@ func newDBS(ctx context.Context, options ...Option) *dbs {
 		manager = owner.NewMockManager(ctx, id)
 		syncer = NewMockSchemaSyncer()
 	} else {
-		manager = owner.NewOwnerManager(ctx, etcdCli, dbsPrompt, id, DBSOwnerKey)
+		manager = owner.NewOwnerManager(ctx, etcdCli, dbsPrompt, id, Solomonkey)
 		syncer = soliton.NewSchemaSyncer(ctx, etcdCli, id, manager)
 		deadLockCkr = soliton.NewDeadBlockLockChecker(etcdCli)
 	}
@@ -391,6 +316,16 @@ func (d *dbs) close() {
 	logutil.BgLogger().Info("[dbs] DBS closed", zap.String("ID", d.uuid), zap.Duration("take time", time.Since(startTime)))
 }
 
+func isChanClosed(done <-chan struct{}) bool {
+	select {
+	case <-done:
+		return true
+	default:
+		return false
+	}
+
+}
+
 // GetLease implements DBS.GetLease interface.
 func (d *dbs) GetLease() time.Duration {
 	d.m.RLock()
@@ -479,7 +414,7 @@ func (d *dbs) doDBSJob(ctx stochastikctx.Context, job *perceptron.Job) error {
 	d.limitJobCh <- task
 	err := <-task.err
 
-	ctx.GetStochastikVars().StmtCtx.IsDBSJobInQueue = true
+	ctx.GetStochaseinstein_dbars().StmtCtx.IsDBSJobInQueue = true
 
 	// Notice worker that we push a new job and wait the job done.
 	d.asyncNotifyWorker(job.Type)

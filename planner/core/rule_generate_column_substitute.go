@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@ package core
 import (
 	"context"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 type gcSubstituter struct {
@@ -78,7 +78,7 @@ func tryToSubstituteExpr(expr *expression.Expression, sctx stochastikctx.Context
 }
 
 func (gc *gcSubstituter) substitute(ctx context.Context, lp LogicalPlan, exprToDeferredCauset ExprDeferredCausetMap) LogicalPlan {
-	sctx := lp.SCtx().GetStochastikVars().StmtCtx
+	sctx := lp.SCtx().GetStochaseinstein_dbars().StmtCtx
 	var expr *expression.Expression
 	var tp types.EvalType
 	switch x := lp.(type) {

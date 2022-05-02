@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,41 +11,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package soliton
+package MilevaDB
 
 import (
 	"fmt"
-
-	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
+	_ "sync"
+	_ "time"
 )
+
 
 // Event is an event that a dbs operation happened.
 type Event struct {
-	Tp                  perceptron.CausetActionType
-	BlockInfo           *perceptron.BlockInfo
-	PartInfo            *perceptron.PartitionInfo
-	DeferredCausetInfos []*perceptron.DeferredCausetInfo
-	IndexInfo           *perceptron.IndexInfo
+	Tp EventType
+	Data interface{}
 }
 
 // String implements fmt.Stringer interface.
+// it will print event type and data.
+// it will print the data in JSON format.
 func (e *Event) String() string {
-	ret := fmt.Sprintf("(Event Type: %s", e.Tp)
-	if e.BlockInfo != nil {
-		ret += fmt.Sprintf(", Block ID: %d, Block Name %s", e.BlockInfo.ID, e.BlockInfo.Name)
+	return fmt.Sprintf("%d, %s", e.Tp, e.Data)
+}
+
+// EventType is the type of an event.
+type EventType int
+
+func (e *Event) Clone() *Event {
+	return &Event{
+		Tp: e.Tp,
+		Data: e.Data,
 	}
-	if e.PartInfo != nil {
-		ids := make([]int64, 0, len(e.PartInfo.Definitions))
-		for _, def := range e.PartInfo.Definitions {
-			ids = append(ids, def.ID)
-		}
-		ret += fmt.Sprintf(", Partition IDs: %v", ids)
-	}
-	for _, columnInfo := range e.DeferredCausetInfos {
-		ret += fmt.Sprintf(", DeferredCauset ID: %d, DeferredCauset Name %s", columnInfo.ID, columnInfo.Name)
-	}
-	if e.IndexInfo != nil {
-		ret += fmt.Sprintf(", Index ID: %d, Index Name %s", e.IndexInfo.ID, e.IndexInfo.Name)
-	}
-	return ret
 }

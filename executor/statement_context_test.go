@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,11 +17,11 @@ import (
 	"fmt"
 	"unicode/utf8"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
 )
 
 const (
@@ -67,7 +67,7 @@ func (s *testSuite1) TestStatementContext(c *C) {
 	tk.MustExec("create block sc2 (a varchar(255))")
 	// Insert an invalid UTF8
 	tk.MustExec("insert sc2 values (unhex('4040ffff'))")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Greater, uint16(0))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Greater, uint16(0))
 	tk.MustQuery("select * from sc2").Check(testkit.Events("@@"))
 	tk.MustExec(strictModeALLEGROSQL)
 	_, err = tk.Exec("insert sc2 values (unhex('4040ffff'))")
@@ -88,7 +88,7 @@ func (s *testSuite1) TestStatementContext(c *C) {
 
 	tk.MustExec(nonStrictModeALLEGROSQL)
 	tk.MustExec("insert sc3 values (unhex('4040ffff'))")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Greater, uint16(0))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Greater, uint16(0))
 	tk.MustQuery("select * from sc3").Check(testkit.Events("@@"))
 
 	tk.MustExec(strictModeALLEGROSQL)
@@ -111,10 +111,10 @@ func (s *testSuite1) TestStatementContext(c *C) {
 	tk.MustExec("create block t1(a varchar(100) charset utf8);")
 	defer tk.MustExec("drop block if exists t1")
 	tk.MustExec("insert t1 values (unhex('f09f8c80'))")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Greater, uint16(0))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Greater, uint16(0))
 	tk.MustQuery("select * from t1").Check(testkit.Events(""))
 	tk.MustExec("insert t1 values (unhex('4040f09f8c80'))")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Greater, uint16(0))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Greater, uint16(0))
 	tk.MustQuery("select * from t1").Check(testkit.Events("", "@@"))
 	tk.MustQuery("select length(a) from t1").Check(testkit.Events("0", "2"))
 	tk.MustExec(strictModeALLEGROSQL)

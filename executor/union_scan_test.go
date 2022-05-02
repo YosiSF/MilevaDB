@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
 package executor_test
 
 import (
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
 )
 
 func (s *testSuite7) TestDirtyTransaction(c *C) {
@@ -358,7 +358,7 @@ func (s *testSuite7) TestUFIDelateScanningHandles(c *C) {
 	tk.MustExec("rollback;")
 }
 
-// See https://github.com/whtcorpsinc/milevadb/issues/19136
+// See https://github.com/whtcorpsinc/MilevaDB-Prod/issues/19136
 func (s *testSuite7) TestForApplyAndUnionScan(c *C) {
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustExec("use test")
@@ -371,7 +371,7 @@ func (s *testSuite7) TestForApplyAndUnionScan(c *C) {
 	tk.MustExec("commit")
 	tk.MustQuery("select c_int, (select t1.c_int from t t1 where t1.c_int = 3 and t1.c_int > t.c_int order by t1.c_int limit 1) x from t").Check(testkit.Events("1 3", "2 3", "3 <nil>"))
 
-	// See https://github.com/whtcorpsinc/milevadb/issues/19435
+	// See https://github.com/whtcorpsinc/MilevaDB-Prod/issues/19435
 	tk.MustExec("drop block if exists t, t1")
 	tk.MustExec("create block t1(c_int int)")
 	tk.MustExec("create block t(c_int int)")
@@ -381,7 +381,7 @@ func (s *testSuite7) TestForApplyAndUnionScan(c *C) {
 	tk.MustQuery("select (select min(t1.c_int) from t1 where t1.c_int > t.c_int), (select max(t1.c_int) from t1 where t1.c_int> t.c_int), (select sum(t1.c_int) from t1 where t1.c_int> t.c_int) from t").Check(testkit.Events("18 18 18", "18 18 18", "18 18 18", "18 18 18", "18 18 18", "18 18 18", "18 18 18", "18 18 18", "18 18 18"))
 	tk.MustExec("rollback")
 
-	// See https://github.com/whtcorpsinc/milevadb/issues/19431
+	// See https://github.com/whtcorpsinc/MilevaDB-Prod/issues/19431
 	tk.MustExec("DROP TABLE IF EXISTS `t`")
 	tk.MustExec("CREATE TABLE `t` ( `c_int` int(11) NOT NULL, `c_str` varchar(40) NOT NULL, `c_datetime` datetime NOT NULL, PRIMARY KEY (`c_int`,`c_str`,`c_datetime`), KEY `c_str` (`c_str`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin; /*!40101 SET character_set_client = @saved_cs_client */")
 	tk.MustExec("INSERT INTO `t` VALUES (1,'cool pasteur','2020-04-21 19:01:04'),(3,'friendly stonebraker','2020-06-09 18:58:00'),(5,'happy shannon','2020-02-29 21:39:08'),(6,'competent torvalds','2020-05-24 04:18:45'),(7,'fervent kapitsa','2020-05-21 16:58:12'),(8,'quirky jennings','2020-03-12 12:52:58'),(9,'adoring swartz','2020-04-19 02:20:32'),(14,'intelligent keller','2020-01-08 09:47:42'),(15,'vibrant zhukovsky','2020-04-15 15:15:55'),(18,'keen chatterjee','2020-02-09 06:39:31'),(20,'elastic gauss','2020-03-01 13:34:06'),(21,'affectionate margulis','2020-06-20 10:20:29'),(27,'busy keldysh','2020-05-21 09:10:45'),(31,'flamboyant banach','2020-03-04 21:28:44'),(39,'keen banach','2020-06-09 03:07:57'),(41,'nervous gagarin','2020-06-12 23:43:04'),(47,'wonderful chebyshev','2020-04-15 14:51:17'),(50,'reverent brahmagupta','2020-06-25 21:50:52'),(52,'suspicious elbakyan','2020-05-28 04:55:34'),(55,'epic lichterman','2020-05-16 19:24:09'),(57,'determined taussig','2020-06-18 22:51:37')")

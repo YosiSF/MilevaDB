@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,20 +18,20 @@ import (
 	"math"
 	"strings"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/dbs"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/petriutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	driver "github.com/whtcorpsinc/MilevaDB-Prod/types/berolinaAllegroSQL_driver"
 	"github.com/whtcorpsinc/berolinaAllegroSQL"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/dbs"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/meta/autoid"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/petriutil"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
-	driver "github.com/whtcorpsinc/milevadb/types/berolinaAllegroSQL_driver"
 )
 
 // PreprocessOpt presents optional parameters to `Preprocess` method.
@@ -49,7 +49,7 @@ func InTxnRetry(p *preprocessor) {
 
 // TryAddExtraLimit trys to add an extra limit for SELECT or UNION statement when sql_select_limit is set.
 func TryAddExtraLimit(ctx stochastikctx.Context, node ast.StmtNode) ast.StmtNode {
-	if ctx.GetStochastikVars().SelectLimit == math.MaxUint64 || ctx.GetStochastikVars().InRestrictedALLEGROSQL {
+	if ctx.GetStochaseinstein_dbars().SelectLimit == math.MaxUint64 || ctx.GetStochaseinstein_dbars().InRestrictedALLEGROSQL {
 		return node
 	}
 	if explain, ok := node.(*ast.ExplainStmt); ok {
@@ -61,7 +61,7 @@ func TryAddExtraLimit(ctx stochastikctx.Context, node ast.StmtNode) ast.StmtNode
 		}
 		newSel := *sel
 		newSel.Limit = &ast.Limit{
-			Count: ast.NewValueExpr(ctx.GetStochastikVars().SelectLimit, "", ""),
+			Count: ast.NewValueExpr(ctx.GetStochaseinstein_dbars().SelectLimit, "", ""),
 		}
 		return &newSel
 	} else if setOprStmt, ok := node.(*ast.SetOprStmt); ok {
@@ -70,7 +70,7 @@ func TryAddExtraLimit(ctx stochastikctx.Context, node ast.StmtNode) ast.StmtNode
 		}
 		newSetOpr := *setOprStmt
 		newSetOpr.Limit = &ast.Limit{
-			Count: ast.NewValueExpr(ctx.GetStochastikVars().SelectLimit, "", ""),
+			Count: ast.NewValueExpr(ctx.GetStochaseinstein_dbars().SelectLimit, "", ""),
 		}
 		return &newSetOpr
 	}
@@ -888,7 +888,7 @@ func (p *preprocessor) checkContainDotDeferredCauset(stmt *ast.CreateBlockStmt) 
 
 func (p *preprocessor) handleBlockName(tn *ast.BlockName) {
 	if tn.Schema.L == "" {
-		currentDB := p.ctx.GetStochastikVars().CurrentDB
+		currentDB := p.ctx.GetStochaseinstein_dbars().CurrentDB
 		if currentDB == "" {
 			p.err = errors.Trace(ErrNoDB)
 			return
@@ -967,14 +967,14 @@ func (p *preprocessor) resolveShowStmt(node *ast.ShowStmt) {
 		if node.Block != nil && node.Block.Schema.L != "" {
 			node.DBName = node.Block.Schema.O
 		} else {
-			node.DBName = p.ctx.GetStochastikVars().CurrentDB
+			node.DBName = p.ctx.GetStochaseinstein_dbars().CurrentDB
 		}
 	} else if node.Block != nil && node.Block.Schema.L == "" {
 		node.Block.Schema = perceptron.NewCIStr(node.DBName)
 	}
 	if node.User != nil && node.User.CurrentUser {
 		// Fill the Username and Hostname with the current user.
-		currentUser := p.ctx.GetStochastikVars().User
+		currentUser := p.ctx.GetStochaseinstein_dbars().User
 		if currentUser != nil {
 			node.User.Username = currentUser.Username
 			node.User.Hostname = currentUser.Hostname

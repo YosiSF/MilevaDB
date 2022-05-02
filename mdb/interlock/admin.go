@@ -25,7 +25,7 @@ type CheckIndexRangeExec struct {
 	table    *serial.TableInfo
 	index    *serial.IndexInfo
 	is       schemaReplicant.SchemaReplicant
-	startKey []types.Datum
+	startKey []types.CausetObjectQL
 
 	handleRanges []ast.HandleRange
 	srcSoliton   *soliton.Soliton

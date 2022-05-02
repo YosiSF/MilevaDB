@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,6 +24,38 @@ import (
 	"time"
 
 	"github.com/cznic/mathutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod-tools/milevadb-binlog/node"
+	"github.com/whtcorpsinc/MilevaDB-Prod-tools/pkg/etcd"
+	"github.com/whtcorpsinc/MilevaDB-Prod-tools/pkg/utils"
+	"github.com/whtcorpsinc/MilevaDB-Prod/bindinfo"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block/blocks"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/dbs"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/plugin"
+	"github.com/whtcorpsinc/MilevaDB-Prod/privilege"
+	"github.com/whtcorpsinc/MilevaDB-Prod/privilege/privileges"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/defCauslate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/format"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/hint"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/replog"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/set"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/sqlexec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/stringutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 	"github.com/whtcorpsinc/berolinaAllegroSQL"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
@@ -32,38 +64,6 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb-tools/milevadb-binlog/node"
-	"github.com/whtcorpsinc/milevadb-tools/pkg/etcd"
-	"github.com/whtcorpsinc/milevadb-tools/pkg/utils"
-	"github.com/whtcorpsinc/milevadb/bindinfo"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/block/blocks"
-	"github.com/whtcorpsinc/milevadb/causetstore/einsteindb"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/dbs"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/meta/autoid"
-	"github.com/whtcorpsinc/milevadb/petri"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/plugin"
-	"github.com/whtcorpsinc/milevadb/privilege"
-	"github.com/whtcorpsinc/milevadb/privilege/privileges"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/defCauslate"
-	"github.com/whtcorpsinc/milevadb/soliton/format"
-	"github.com/whtcorpsinc/milevadb/soliton/hint"
-	"github.com/whtcorpsinc/milevadb/soliton/replog"
-	"github.com/whtcorpsinc/milevadb/soliton/set"
-	"github.com/whtcorpsinc/milevadb/soliton/sqlexec"
-	"github.com/whtcorpsinc/milevadb/soliton/stringutil"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
 )
 
 var etcdDialTimeout = 5 * time.Second
@@ -230,7 +230,7 @@ func (v *visibleChecker) Enter(in ast.Node) (out ast.Node, skipChildren bool) {
 		if !v.is.BlockExists(perceptron.NewCIStr(schemaReplicant), x.Name) {
 			return in, true
 		}
-		activeRoles := v.ctx.GetStochastikVars().ActiveRoles
+		activeRoles := v.ctx.GetStochaseinstein_dbars().ActiveRoles
 		if v.manager != nil && !v.manager.RequestVerification(activeRoles, schemaReplicant, x.Name.L, "", allegrosql.SelectPriv) {
 			v.ok = false
 		}
@@ -318,7 +318,7 @@ func (e *ShowExec) fetchShowDatabases() error {
 	// let information_schema be the first database
 	moveSchemaReplicantToFront(dbs)
 	for _, d := range dbs {
-		if checker != nil && !checker.DBIsVisible(e.ctx.GetStochastikVars().ActiveRoles, d) {
+		if checker != nil && !checker.DBIsVisible(e.ctx.GetStochaseinstein_dbars().ActiveRoles, d) {
 			continue
 		}
 		e.appendEvent([]interface{}{
@@ -334,7 +334,7 @@ func (e *ShowExec) fetchShowProcessList() error {
 		return nil
 	}
 
-	loginUser, activeRoles := e.ctx.GetStochastikVars().User, e.ctx.GetStochastikVars().ActiveRoles
+	loginUser, activeRoles := e.ctx.GetStochaseinstein_dbars().User, e.ctx.GetStochaseinstein_dbars().ActiveRoles
 	var hasProcessPriv bool
 	if pm := privilege.GetPrivilegeManager(e.ctx); pm != nil {
 		if pm.RequestVerification(activeRoles, "", "", "", allegrosql.ProcessPriv) {
@@ -363,8 +363,8 @@ func (e *ShowExec) fetchShowOpenBlocks() error {
 
 func (e *ShowExec) fetchShowBlocks() error {
 	checker := privilege.GetPrivilegeManager(e.ctx)
-	if checker != nil && e.ctx.GetStochastikVars().User != nil {
-		if !checker.DBIsVisible(e.ctx.GetStochastikVars().ActiveRoles, e.DBName.O) {
+	if checker != nil && e.ctx.GetStochaseinstein_dbars().User != nil {
+		if !checker.DBIsVisible(e.ctx.GetStochaseinstein_dbars().ActiveRoles, e.DBName.O) {
 			return e.dbAccessDenied()
 		}
 	}
@@ -373,7 +373,7 @@ func (e *ShowExec) fetchShowBlocks() error {
 	}
 	// sort for blocks
 	blockNames := make([]string, 0, len(e.is.SchemaBlocks(e.DBName)))
-	activeRoles := e.ctx.GetStochastikVars().ActiveRoles
+	activeRoles := e.ctx.GetStochaseinstein_dbars().ActiveRoles
 	var blockTypes = make(map[string]string)
 	for _, v := range e.is.SchemaBlocks(e.DBName) {
 		// Test with allegrosql.AllPrivMask means any privilege would be OK.
@@ -405,8 +405,8 @@ func (e *ShowExec) fetchShowBlocks() error {
 
 func (e *ShowExec) fetchShowBlockStatus() error {
 	checker := privilege.GetPrivilegeManager(e.ctx)
-	if checker != nil && e.ctx.GetStochastikVars().User != nil {
-		if !checker.DBIsVisible(e.ctx.GetStochastikVars().ActiveRoles, e.DBName.O) {
+	if checker != nil && e.ctx.GetStochaseinstein_dbars().User != nil {
+		if !checker.DBIsVisible(e.ctx.GetStochaseinstein_dbars().ActiveRoles, e.DBName.O) {
 			return e.dbAccessDenied()
 		}
 	}
@@ -428,7 +428,7 @@ func (e *ShowExec) fetchShowBlockStatus() error {
 		return errors.Trace(err)
 	}
 
-	activeRoles := e.ctx.GetStochastikVars().ActiveRoles
+	activeRoles := e.ctx.GetStochaseinstein_dbars().ActiveRoles
 	for _, event := range rows {
 		if checker != nil && !checker.RequestVerification(activeRoles, e.DBName.O, event.GetString(0), "", allegrosql.AllPrivMask) {
 			continue
@@ -446,8 +446,8 @@ func (e *ShowExec) fetchShowDeferredCausets(ctx context.Context) error {
 		return errors.Trace(err)
 	}
 	checker := privilege.GetPrivilegeManager(e.ctx)
-	activeRoles := e.ctx.GetStochastikVars().ActiveRoles
-	if checker != nil && e.ctx.GetStochastikVars().User != nil && !checker.RequestVerification(activeRoles, e.DBName.O, tb.Meta().Name.O, "", allegrosql.AllPrivMask) {
+	activeRoles := e.ctx.GetStochaseinstein_dbars().ActiveRoles
+	if checker != nil && e.ctx.GetStochaseinstein_dbars().User != nil && !checker.RequestVerification(activeRoles, e.DBName.O, tb.Meta().Name.O, "", allegrosql.AllPrivMask) {
 		return e.blockAccessDenied("SELECT", tb.Meta().Name.O)
 	}
 
@@ -537,8 +537,8 @@ func (e *ShowExec) fetchShowIndex() error {
 	}
 
 	checker := privilege.GetPrivilegeManager(e.ctx)
-	activeRoles := e.ctx.GetStochastikVars().ActiveRoles
-	if checker != nil && e.ctx.GetStochastikVars().User != nil && !checker.RequestVerification(activeRoles, e.DBName.O, tb.Meta().Name.O, "", allegrosql.AllPrivMask) {
+	activeRoles := e.ctx.GetStochaseinstein_dbars().ActiveRoles
+	if checker != nil && e.ctx.GetStochaseinstein_dbars().User != nil && !checker.RequestVerification(activeRoles, e.DBName.O, tb.Meta().Name.O, "", allegrosql.AllPrivMask) {
 		return e.blockAccessDenied("SELECT", tb.Meta().Name.O)
 	}
 
@@ -640,7 +640,7 @@ func (e *ShowExec) fetchShowCharset() error {
 }
 
 func (e *ShowExec) fetchShowMasterStatus() error {
-	tso := e.ctx.GetStochastikVars().TxnCtx.StartTS
+	tso := e.ctx.GetStochaseinstein_dbars().TxnCtx.StartTS
 	e.appendEvent([]interface{}{"milevadb-binlog", tso, "", "", ""})
 	return nil
 }
@@ -649,16 +649,16 @@ func (e *ShowExec) fetchShowVariables() (err error) {
 	var (
 		value          string
 		ok             bool
-		stochastikVars = e.ctx.GetStochastikVars()
+		stochaseinstein_dbars = e.ctx.GetStochaseinstein_dbars()
 		unreachedVars  = make([]string, 0, len(variable.SysVars))
 	)
 	for _, v := range variable.SysVars {
 		if !e.GlobalSINTERLOCKe {
 			// For a stochastik sINTERLOCKe variable,
-			// 1. try to fetch value from StochastikVars.Systems;
+			// 1. try to fetch value from Stochaseinstein_dbars.Systems;
 			// 2. if this variable is stochastik-only, fetch value from SysVars
 			//		otherwise, fetch the value from block `allegrosql.Global_Variables`.
-			value, ok, err = variable.GetStochastikOnlySysVars(stochastikVars, v.Name)
+			value, ok, err = variable.GetStochastikOnlySysVars(stochaseinstein_dbars, v.Name)
 		} else {
 			// If the sINTERLOCKe of a system variable is SINTERLOCKeNone,
 			// it's a read-only variable, so we return the default value of it.
@@ -675,7 +675,7 @@ func (e *ShowExec) fetchShowVariables() (err error) {
 		e.appendEvent([]interface{}{v.Name, value})
 	}
 	if len(unreachedVars) != 0 {
-		systemVars, err := stochastikVars.GlobalVarsAccessor.GetAllSysVars()
+		systemVars, err := stochaseinstein_dbars.GlobalVarsAccessor.GetAllSysVars()
 		if err != nil {
 			return errors.Trace(err)
 		}
@@ -691,8 +691,8 @@ func (e *ShowExec) fetchShowVariables() (err error) {
 }
 
 func (e *ShowExec) fetchShowStatus() error {
-	stochastikVars := e.ctx.GetStochastikVars()
-	statusVars, err := variable.GetStatusVars(stochastikVars)
+	stochaseinstein_dbars := e.ctx.GetStochaseinstein_dbars()
+	statusVars, err := variable.GetStatusVars(stochaseinstein_dbars)
 	if err != nil {
 		return errors.Trace(err)
 	}
@@ -743,7 +743,7 @@ func ConstructResultOfShowCreateBlock(ctx stochastikctx.Context, blockInfo *perc
 		tblDefCauslate = getDefaultDefCauslate(tblCharset)
 	}
 
-	sqlMode := ctx.GetStochastikVars().ALLEGROSQLMode
+	sqlMode := ctx.GetStochaseinstein_dbars().ALLEGROSQLMode
 	fmt.Fprintf(buf, "CREATE TABLE %s (\n", stringutil.Escape(blockInfo.Name.O, sqlMode))
 	var pkDefCaus *perceptron.DeferredCausetInfo
 	var hasAutoIncID bool
@@ -977,7 +977,7 @@ func ConstructResultOfShowCreateBlock(ctx stochastikctx.Context, blockInfo *perc
 
 // ConstructResultOfShowCreateSequence constructs the result for show create sequence.
 func ConstructResultOfShowCreateSequence(ctx stochastikctx.Context, blockInfo *perceptron.BlockInfo, buf *bytes.Buffer) {
-	sqlMode := ctx.GetStochastikVars().ALLEGROSQLMode
+	sqlMode := ctx.GetStochaseinstein_dbars().ALLEGROSQLMode
 	fmt.Fprintf(buf, "CREATE SEQUENCE %s ", stringutil.Escape(blockInfo.Name.O, sqlMode))
 	sequenceInfo := blockInfo.Sequence
 	fmt.Fprintf(buf, "start with %d ", sequenceInfo.Start)
@@ -1086,7 +1086,7 @@ func (e *ShowExec) fetchShowCreateView() error {
 }
 
 func fetchShowCreateBlock4View(ctx stochastikctx.Context, tb *perceptron.BlockInfo, buf *bytes.Buffer) {
-	sqlMode := ctx.GetStochastikVars().ALLEGROSQLMode
+	sqlMode := ctx.GetStochaseinstein_dbars().ALLEGROSQLMode
 
 	fmt.Fprintf(buf, "CREATE ALGORITHM=%s ", tb.View.Algorithm.String())
 	fmt.Fprintf(buf, "DEFINER=%s@%s ", stringutil.Escape(tb.View.Definer.Username, sqlMode), stringutil.Escape(tb.View.Definer.Hostname, sqlMode))
@@ -1137,7 +1137,7 @@ func appendPartitionInfo(partitionInfo *perceptron.PartitionInfo, buf *bytes.Buf
 
 // ConstructResultOfShowCreateDatabase constructs the result for show create database.
 func ConstructResultOfShowCreateDatabase(ctx stochastikctx.Context, dbInfo *perceptron.DBInfo, ifNotExists bool, buf *bytes.Buffer) (err error) {
-	sqlMode := ctx.GetStochastikVars().ALLEGROSQLMode
+	sqlMode := ctx.GetStochaseinstein_dbars().ALLEGROSQLMode
 	var ifNotExistsStr string
 	if ifNotExists {
 		ifNotExistsStr = "/*!32312 IF NOT EXISTS*/ "
@@ -1175,8 +1175,8 @@ func ConstructResultOfShowCreateDatabase(ctx stochastikctx.Context, dbInfo *perc
 // fetchShowCreateDatabase composes show create database result.
 func (e *ShowExec) fetchShowCreateDatabase() error {
 	checker := privilege.GetPrivilegeManager(e.ctx)
-	if checker != nil && e.ctx.GetStochastikVars().User != nil {
-		if !checker.DBIsVisible(e.ctx.GetStochastikVars().ActiveRoles, e.DBName.String()) {
+	if checker != nil && e.ctx.GetStochaseinstein_dbars().User != nil {
+		if !checker.DBIsVisible(e.ctx.GetStochaseinstein_dbars().ActiveRoles, e.DBName.String()) {
 			return e.dbAccessDenied()
 		}
 	}
@@ -1221,7 +1221,7 @@ func (e *ShowExec) fetchShowCreateUser() error {
 	}
 
 	userName, hostName := e.User.Username, e.User.Hostname
-	sessVars := e.ctx.GetStochastikVars()
+	sessVars := e.ctx.GetStochaseinstein_dbars()
 	if e.User.CurrentUser {
 		userName = sessVars.User.AuthUsername
 		hostName = sessVars.User.AuthHostname
@@ -1272,7 +1272,7 @@ func (e *ShowExec) fetchShowGrants() error {
 	if checker == nil {
 		return errors.New("miss privilege checker")
 	}
-	sessVars := e.ctx.GetStochastikVars()
+	sessVars := e.ctx.GetStochaseinstein_dbars()
 	if !e.User.CurrentUser {
 		userName := sessVars.User.AuthUsername
 		hostName := sessVars.User.AuthHostname
@@ -1358,7 +1358,7 @@ func (e *ShowExec) fetchShowPlugins() error {
 }
 
 func (e *ShowExec) fetchShowWarnings(errOnly bool) error {
-	warns := e.ctx.GetStochastikVars().StmtCtx.GetWarnings()
+	warns := e.ctx.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 	for _, w := range warns {
 		if errOnly && w.Level != stmtctx.WarnLevelError {
 			continue
@@ -1427,7 +1427,7 @@ func (e *ShowExec) getBlock() (block.Block, error) {
 }
 
 func (e *ShowExec) dbAccessDenied() error {
-	user := e.ctx.GetStochastikVars().User
+	user := e.ctx.GetStochaseinstein_dbars().User
 	u := user.Username
 	h := user.Hostname
 	if len(user.AuthUsername) > 0 && len(user.AuthHostname) > 0 {
@@ -1438,7 +1438,7 @@ func (e *ShowExec) dbAccessDenied() error {
 }
 
 func (e *ShowExec) blockAccessDenied(access string, block string) error {
-	user := e.ctx.GetStochastikVars().User
+	user := e.ctx.GetStochaseinstein_dbars().User
 	u := user.Username
 	h := user.Hostname
 	if len(user.AuthUsername) > 0 && len(user.AuthHostname) > 0 {

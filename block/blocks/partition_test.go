@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,22 +16,22 @@ package blocks_test
 import (
 	"context"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block/blocks"
+	"github.com/whtcorpsinc/MilevaDB-Prod/dbs"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/binloginfo"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/block/blocks"
-	"github.com/whtcorpsinc/milevadb/dbs"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/binloginfo"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 func (ts *testSuite) TestPartitionBasic(c *C) {
 	tk := testkit.NewTestKitWithInit(c, ts.causetstore)
 	tk.MustExec("use test")
 	ctx := tk.Se
-	ctx.GetStochastikVars().BinlogClient = binloginfo.MockPumpsClient(mockPumpClient{})
+	ctx.GetStochaseinstein_dbars().BinlogClient = binloginfo.MockPumpsClient(mockPumpClient{})
 	tk.MustExec("set @@stochastik.milevadb_enable_block_partition = '1'")
 	tk.MustExec(`CREATE TABLE partition_basic (id int(11), unique index(id))
 PARTITION BY RANGE COLUMNS ( id ) (

@@ -4,14 +4,14 @@ import (
 	"context"
 	"fmt"
 
-	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
-	"github.com/whtcorpsinc/milevadb/expression"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
+	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
+	. "github.com/whtcorpsinc/check"
 )
 
 var _ = Suite(&pkgTestSuite{})
@@ -28,12 +28,12 @@ func (s *pkgTestSuite) TestNestedLoopApply(c *C) {
 	sctx := mock.NewContext()
 	defCaus0 := &expression.DeferredCauset{Index: 0, RetType: types.NewFieldType(allegrosql.TypeLong)}
 	defCaus1 := &expression.DeferredCauset{Index: 1, RetType: types.NewFieldType(allegrosql.TypeLong)}
-	con := &expression.Constant{Value: types.NewCauset(6), RetType: types.NewFieldType(allegrosql.TypeLong)}
+	con := &expression.CouplingConstantWithRadix{Value: types.NewCauset(6), RetType: types.NewFieldType(allegrosql.TypeLong)}
 	outerSchema := expression.NewSchema(defCaus0)
 	outerExec := buildMockDataSource(mockDataSourceParameters{
 		schemaReplicant: outerSchema,
-		rows:   6,
-		ctx:    sctx,
+		rows:            6,
+		ctx:             sctx,
 		genDataFunc: func(event int, typ *types.FieldType) interface{} {
 			return int64(event + 1)
 		},
@@ -43,8 +43,8 @@ func (s *pkgTestSuite) TestNestedLoopApply(c *C) {
 	innerSchema := expression.NewSchema(defCaus1)
 	innerExec := buildMockDataSource(mockDataSourceParameters{
 		schemaReplicant: innerSchema,
-		rows:   6,
-		ctx:    sctx,
+		rows:            6,
+		ctx:             sctx,
 		genDataFunc: func(event int, typ *types.FieldType) interface{} {
 			return int64(event + 1)
 		},

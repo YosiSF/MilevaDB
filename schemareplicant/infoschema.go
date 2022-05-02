@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,13 +20,13 @@ import (
 
 	"github.com/whtcorpsinc/BerolinaSQL/allegrosql"
 	"github.com/whtcorpsinc/BerolinaSQL/perceptron"
-	"github.com/whtcorpsinc/milevadb/causet"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/spacetime/autoid"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causet"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/spacetime/autoid"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
 	"go.uber.org/zap"
 )
 
@@ -375,12 +375,12 @@ func HasAutoIncrementDeferredCauset(tbInfo *perceptron.BlockInfo) (bool, string)
 // GetSchemaReplicant gets TxnCtx SchemaReplicant if snapshot schemaReplicant is not set,
 // Otherwise, snapshot schemaReplicant is returned.
 func GetSchemaReplicant(ctx stochastikctx.Context) SchemaReplicant {
-	return GetSchemaReplicantByStochastikVars(ctx.GetStochastikVars())
+	return GetSchemaReplicantByStochaseinstein_dbars(ctx.GetStochaseinstein_dbars())
 }
 
-// GetSchemaReplicantByStochastikVars gets TxnCtx SchemaReplicant if snapshot schemaReplicant is not set,
+// GetSchemaReplicantByStochaseinstein_dbars gets TxnCtx SchemaReplicant if snapshot schemaReplicant is not set,
 // Otherwise, snapshot schemaReplicant is returned.
-func GetSchemaReplicantByStochastikVars(sessVar *variable.StochastikVars) SchemaReplicant {
+func GetSchemaReplicantByStochaseinstein_dbars(sessVar *variable.Stochaseinstein_dbars) SchemaReplicant {
 	var is SchemaReplicant
 	if snap := sessVar.SnapshotschemaReplicant; snap != nil {
 		is = snap.(SchemaReplicant)

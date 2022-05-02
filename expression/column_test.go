@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 func (s *testEvaluatorSuite) TestDeferredCauset(c *C) {
@@ -172,7 +172,7 @@ func (s *testEvaluatorSuite) TestDefCausHybird(c *C) {
 		c.Assert(err, IsNil)
 		input.AppendBytes(0, num)
 	}
-	result, err := newBuffer(types.ETInt, 1024)
+	result, err := newBuffer(types.CausetEDN, 1024)
 	c.Assert(err, IsNil)
 	c.Assert(defCaus.VecEvalInt(ctx, input, result), IsNil)
 

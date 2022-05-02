@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,11 +23,11 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/opcode"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/defCauslate"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
-	driver "github.com/whtcorpsinc/milevadb/types/berolinaAllegroSQL_driver"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/defCauslate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	driver "github.com/whtcorpsinc/MilevaDB-Prod/types/berolinaAllegroSQL_driver"
 )
 
 type simpleRewriter struct {
@@ -54,7 +54,7 @@ func ParseSimpleExprWithBlockInfo(ctx stochastikctx.Context, exprStr string, blo
 		stmts, warns, err = berolinaAllegroSQL.New().Parse(exprStr, "", "")
 	}
 	for _, warn := range warns {
-		ctx.GetStochastikVars().StmtCtx.AppendWarning(soliton.SyntaxWarn(warn))
+		ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(soliton.SyntaxWarn(warn))
 	}
 
 	if err != nil {
@@ -77,7 +77,7 @@ func ParseSimpleExprCastWithBlockInfo(ctx stochastikctx.Context, exprStr string,
 
 // RewriteSimpleExprWithBlockInfo rewrites simple ast.ExprNode to expression.Expression.
 func RewriteSimpleExprWithBlockInfo(ctx stochastikctx.Context, tbl *perceptron.BlockInfo, expr ast.ExprNode) (Expression, error) {
-	dbName := perceptron.NewCIStr(ctx.GetStochastikVars().CurrentDB)
+	dbName := perceptron.NewCIStr(ctx.GetStochaseinstein_dbars().CurrentDB)
 	defCausumns, names, err := DeferredCausetInfos2DeferredCausetsAndNames(ctx, dbName, tbl.Name, tbl.DefCauss(), tbl)
 	if err != nil {
 		return nil, err
@@ -99,7 +99,7 @@ func ParseSimpleExprsWithSchema(ctx stochastikctx.Context, exprStr string, schem
 		return nil, soliton.SyntaxWarn(err)
 	}
 	for _, warn := range warns {
-		ctx.GetStochastikVars().StmtCtx.AppendWarning(soliton.SyntaxWarn(warn))
+		ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(soliton.SyntaxWarn(warn))
 	}
 
 	fields := stmts[0].(*ast.SelectStmt).Fields.Fields
@@ -132,7 +132,7 @@ func ParseSimpleExprsWithNames(ctx stochastikctx.Context, exprStr string, schema
 		return nil, soliton.SyntaxWarn(err)
 	}
 	for _, warn := range warns {
-		ctx.GetStochastikVars().StmtCtx.AppendWarning(soliton.SyntaxWarn(warn))
+		ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(soliton.SyntaxWarn(warn))
 	}
 
 	fields := stmts[0].(*ast.SelectStmt).Fields.Fields
@@ -217,7 +217,7 @@ func (sr *simpleRewriter) Leave(originInNode ast.Node) (retNode ast.Node, ok boo
 		}
 		sr.push(defCausumn)
 	case *driver.ValueExpr:
-		value := &Constant{Value: v.Causet, RetType: &v.Type}
+		value := &CouplingConstantWithRadix{Value: v.Causet, RetType: &v.Type}
 		sr.push(value)
 	case *ast.FuncCallExpr:
 		sr.funcCallToExpression(v)
@@ -259,17 +259,17 @@ func (sr *simpleRewriter) Leave(originInNode ast.Node) (retNode ast.Node, ok boo
 	case *ast.DeferredCausetName:
 	// TODO: Perhaps we don't need to transcode these back to generic integers/strings
 	case *ast.TrimDirectionExpr:
-		sr.push(&Constant{
+		sr.push(&CouplingConstantWithRadix{
 			Value:   types.NewIntCauset(int64(v.Direction)),
 			RetType: types.NewFieldType(allegrosql.TypeTiny),
 		})
 	case *ast.TimeUnitExpr:
-		sr.push(&Constant{
+		sr.push(&CouplingConstantWithRadix{
 			Value:   types.NewStringCauset(v.Unit.String()),
 			RetType: types.NewFieldType(allegrosql.TypeVarchar),
 		})
 	case *ast.GetFormatSelectorExpr:
-		sr.push(&Constant{
+		sr.push(&CouplingConstantWithRadix{
 			Value:   types.NewStringCauset(v.Selector.String()),
 			RetType: types.NewFieldType(allegrosql.TypeVarchar),
 		})
@@ -312,7 +312,7 @@ func (sr *simpleRewriter) Leave(originInNode ast.Node) (retNode ast.Node, ok boo
 }
 
 func (sr *simpleRewriter) useCache() bool {
-	return sr.ctx.GetStochastikVars().StmtCtx.UseCache
+	return sr.ctx.GetStochaseinstein_dbars().StmtCtx.UseCache
 }
 
 func (sr *simpleRewriter) binaryOpToExpression(v *ast.BinaryOperationExpr) {
@@ -370,7 +370,7 @@ func (sr *simpleRewriter) rewriteFuncCall(v *ast.FuncCallExpr, args []Expression
 		// NULL
 		nullTp := types.NewFieldType(allegrosql.TypeNull)
 		nullTp.Flen, nullTp.Decimal = allegrosql.GetDefaultFieldLengthAndDecimal(allegrosql.TypeNull)
-		paramNull := &Constant{
+		paramNull := &CouplingConstantWithRadix{
 			Value:   types.NewCauset(nil),
 			RetType: nullTp,
 		}
@@ -481,10 +481,10 @@ func (sr *simpleRewriter) likeToScalarFunc(v *ast.PatternLikeExpr) {
 		return
 	}
 	escapeTp := &types.FieldType{}
-	char, defCaus := sr.ctx.GetStochastikVars().GetCharsetInfo()
+	char, defCaus := sr.ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 	types.DefaultTypeForValue(int(v.Escape), escapeTp, char, defCaus)
 	function := sr.notToExpression(v.Not, ast.Like, &v.Type,
-		expr, pattern, &Constant{Value: types.NewIntCauset(int64(v.Escape)), RetType: escapeTp})
+		expr, pattern, &CouplingConstantWithRadix{Value: types.NewIntCauset(int64(v.Escape)), RetType: escapeTp})
 	sr.push(function)
 }
 
@@ -604,11 +604,11 @@ func (sr *simpleRewriter) inToExpression(lLen int, not bool, tp *types.FieldType
 	}
 	leftEt := leftFt.EvalType()
 
-	if leftEt == types.ETInt {
+	if leftEt == types.CausetEDN {
 		for i := 0; i < len(elems); i++ {
-			if c, ok := elems[i].(*Constant); ok {
+			if c, ok := elems[i].(*CouplingConstantWithRadix); ok {
 				var isExceptional bool
-				elems[i], isExceptional = RefineComparedConstant(sr.ctx, *leftFt, c, opcode.EQ)
+				elems[i], isExceptional = RefineComparedCouplingConstantWithRadix(sr.ctx, *leftFt, c, opcode.EQ)
 				if isExceptional {
 					elems[i] = c
 				}

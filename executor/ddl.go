@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,24 +18,24 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/dbs"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/admin"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/gcutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/sqlexec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/dbs"
-	"github.com/whtcorpsinc/milevadb/meta"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton/admin"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/gcutil"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/sqlexec"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
 	"go.uber.org/zap"
 )
 
@@ -77,7 +77,7 @@ func (e *DBSExec) Next(ctx context.Context, req *chunk.Chunk) (err error) {
 	if err = e.ctx.NewTxn(ctx); err != nil {
 		return err
 	}
-	defer func() { e.ctx.GetStochastikVars().StmtCtx.IsDBSJobInQueue = false }()
+	defer func() { e.ctx.GetStochaseinstein_dbars().StmtCtx.IsDBSJobInQueue = false }()
 
 	switch x := e.stmt.(type) {
 	case *ast.AlterDatabaseStmt:
@@ -127,8 +127,8 @@ func (e *DBSExec) Next(ctx context.Context, req *chunk.Chunk) (err error) {
 	if err != nil {
 		// If the owner return ErrBlockNotExists error when running this DBS, it may be caused by schemaReplicant changed,
 		// otherwise, ErrBlockNotExists can be returned before putting this DBS job to the job queue.
-		if (e.ctx.GetStochastikVars().StmtCtx.IsDBSJobInQueue && schemareplicant.ErrBlockNotExists.Equal(err)) ||
-			!e.ctx.GetStochastikVars().StmtCtx.IsDBSJobInQueue {
+		if (e.ctx.GetStochaseinstein_dbars().StmtCtx.IsDBSJobInQueue && schemareplicant.ErrBlockNotExists.Equal(err)) ||
+			!e.ctx.GetStochaseinstein_dbars().StmtCtx.IsDBSJobInQueue {
 			return e.toErr(err)
 		}
 		return err
@@ -138,11 +138,11 @@ func (e *DBSExec) Next(ctx context.Context, req *chunk.Chunk) (err error) {
 	dom := petri.GetPetri(e.ctx)
 	// UFIDelate SchemaReplicant in TxnCtx, so it will pass schemaReplicant check.
 	is := dom.SchemaReplicant()
-	txnCtx := e.ctx.GetStochastikVars().TxnCtx
+	txnCtx := e.ctx.GetStochaseinstein_dbars().TxnCtx
 	txnCtx.SchemaReplicant = is
 	txnCtx.SchemaVersion = is.SchemaMetaVersion()
 	// DBS will force commit old transaction, after DBS, in transaction status should be false.
-	e.ctx.GetStochastikVars().SetStatusFlag(allegrosql.ServerStatusInTrans, false)
+	e.ctx.GetStochaseinstein_dbars().SetStatusFlag(allegrosql.ServerStatusInTrans, false)
 	return nil
 }
 
@@ -225,14 +225,14 @@ func (e *DBSExec) executeDroFIDelatabase(s *ast.DroFIDelatabaseStmt) error {
 			err = schemareplicant.ErrDatabaseDropExists.GenWithStackByArgs(s.Name)
 		}
 	}
-	stochastikVars := e.ctx.GetStochastikVars()
-	if err == nil && strings.ToLower(stochastikVars.CurrentDB) == dbName.L {
-		stochastikVars.CurrentDB = ""
-		err = variable.SetStochastikSystemVar(stochastikVars, variable.CharsetDatabase, types.NewStringCauset(allegrosql.DefaultCharset))
+	stochaseinstein_dbars := e.ctx.GetStochaseinstein_dbars()
+	if err == nil && strings.ToLower(stochaseinstein_dbars.CurrentDB) == dbName.L {
+		stochaseinstein_dbars.CurrentDB = ""
+		err = variable.SetStochastikSystemVar(stochaseinstein_dbars, variable.CharsetDatabase, types.NewStringCauset(allegrosql.DefaultCharset))
 		if err != nil {
 			return err
 		}
-		err = variable.SetStochastikSystemVar(stochastikVars, variable.DefCauslationDatabase, types.NewStringCauset(allegrosql.DefaultDefCauslationName))
+		err = variable.SetStochastikSystemVar(stochaseinstein_dbars, variable.DefCauslationDatabase, types.NewStringCauset(allegrosql.DefaultDefCauslationName))
 		if err != nil {
 			return err
 		}
@@ -339,9 +339,9 @@ func (e *DBSExec) dropBlockObject(objects []*ast.BlockName, obt objectType, ifEx
 	if len(notExistBlocks) > 0 && ifExists {
 		for _, block := range notExistBlocks {
 			if obt == sequenceObject {
-				e.ctx.GetStochastikVars().StmtCtx.AppendNote(schemareplicant.ErrSequenceDropExists.GenWithStackByArgs(block))
+				e.ctx.GetStochaseinstein_dbars().StmtCtx.AppendNote(schemareplicant.ErrSequenceDropExists.GenWithStackByArgs(block))
 			} else {
-				e.ctx.GetStochastikVars().StmtCtx.AppendNote(schemareplicant.ErrBlockDropExists.GenWithStackByArgs(block))
+				e.ctx.GetStochaseinstein_dbars().StmtCtx.AppendNote(schemareplicant.ErrBlockDropExists.GenWithStackByArgs(block))
 			}
 		}
 	}
@@ -507,7 +507,7 @@ func (e *DBSExec) getRecoverBlockByBlockName(blockName *ast.BlockName) (*percept
 	}
 	schemaName := blockName.Schema.L
 	if schemaName == "" {
-		schemaName = strings.ToLower(e.ctx.GetStochastikVars().CurrentDB)
+		schemaName = strings.ToLower(e.ctx.GetStochaseinstein_dbars().CurrentDB)
 	}
 	if schemaName == "" {
 		return nil, nil, errors.Trace(core.ErrNoDB)

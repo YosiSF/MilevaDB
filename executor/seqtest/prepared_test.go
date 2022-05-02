@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,16 +20,16 @@ import (
 	"time"
 
 	dto "github.com/prometheus/client_perceptron/go"
+	"github.com/whtcorpsinc/MilevaDB-Prod/executor"
+	"github.com/whtcorpsinc/MilevaDB-Prod/metrics"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/kvcache"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastik"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/executor"
-	"github.com/whtcorpsinc/milevadb/metrics"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/kvcache"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/stochastik"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 func (s *seqTestSuite) TestPrepared(c *C) {
@@ -784,9 +784,9 @@ func (s *seqTestSuite) TestPreparedIssue17419(c *C) {
 	tk1.ResultSetToResult(rs, Commentf("%v", rs)).Check(testkit.Events("1", "2", "3"))
 	tk1.Se.SetProcessInfo("", time.Now(), allegrosql.ComStmtExecute, 0)
 
-	s.petri.ExpensiveQueryHandle().LogOnQueryExceedMemQuota(tk.Se.GetStochastikVars().ConnectionID)
+	s.petri.ExpensiveQueryHandle().LogOnQueryExceedMemQuota(tk.Se.GetStochaseinstein_dbars().ConnectionID)
 
-	// After entirely fixing https://github.com/whtcorpsinc/milevadb/issues/17419
+	// After entirely fixing https://github.com/whtcorpsinc/MilevaDB-Prod/issues/17419
 	// c.Assert(tk1.Se.ShowProcess().Plan, NotNil)
 	// _, ok := tk1.Se.ShowProcess().Plan.(*plannercore.Execute)
 	// c.Assert(ok, IsTrue)

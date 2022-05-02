@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import (
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 )
 
 type inGener struct {
@@ -38,7 +38,7 @@ func (g inGener) gen() interface{} {
 	}
 	randNum := rand.Int63n(10)
 	switch g.eType {
-	case types.ETInt:
+	case types.CausetEDN:
 		if rand.Float64() < 0.5 {
 			return -randNum
 		}
@@ -78,23 +78,23 @@ var vecBuiltinOtherGeneratedCases = map[string][]vecExprBenchCase{
 	ast.In: {
 		// builtinInIntSig
 		{
-			retEvalType: types.ETInt,
+			retEvalType: types.CausetEDN,
 			childrenTypes: []types.EvalType{
-				types.ETInt,
-				types.ETInt,
-				types.ETInt,
-				types.ETInt,
+				types.CausetEDN,
+				types.CausetEDN,
+				types.CausetEDN,
+				types.CausetEDN,
 			},
 			geners: []dataGenerator{
-				inGener{*newDefaultGener(0.2, types.ETInt)},
-				inGener{*newDefaultGener(0.2, types.ETInt)},
-				inGener{*newDefaultGener(0.2, types.ETInt)},
-				inGener{*newDefaultGener(0.2, types.ETInt)},
+				inGener{*newDefaultGener(0.2, types.CausetEDN)},
+				inGener{*newDefaultGener(0.2, types.CausetEDN)},
+				inGener{*newDefaultGener(0.2, types.CausetEDN)},
+				inGener{*newDefaultGener(0.2, types.CausetEDN)},
 			},
 		},
 		// builtinInStringSig
 		{
-			retEvalType: types.ETInt,
+			retEvalType: types.CausetEDN,
 			childrenTypes: []types.EvalType{
 				types.ETString,
 				types.ETString,
@@ -110,7 +110,7 @@ var vecBuiltinOtherGeneratedCases = map[string][]vecExprBenchCase{
 		},
 		// builtinInDecimalSig
 		{
-			retEvalType: types.ETInt,
+			retEvalType: types.CausetEDN,
 			childrenTypes: []types.EvalType{
 				types.ETDecimal,
 				types.ETDecimal,
@@ -126,7 +126,7 @@ var vecBuiltinOtherGeneratedCases = map[string][]vecExprBenchCase{
 		},
 		// builtinInRealSig
 		{
-			retEvalType: types.ETInt,
+			retEvalType: types.CausetEDN,
 			childrenTypes: []types.EvalType{
 				types.ETReal,
 				types.ETReal,
@@ -142,7 +142,7 @@ var vecBuiltinOtherGeneratedCases = map[string][]vecExprBenchCase{
 		},
 		// builtinInTimeSig
 		{
-			retEvalType: types.ETInt,
+			retEvalType: types.CausetEDN,
 			childrenTypes: []types.EvalType{
 				types.ETDatetime,
 				types.ETDatetime,
@@ -158,7 +158,7 @@ var vecBuiltinOtherGeneratedCases = map[string][]vecExprBenchCase{
 		},
 		// builtinInDurationSig
 		{
-			retEvalType: types.ETInt,
+			retEvalType: types.CausetEDN,
 			childrenTypes: []types.EvalType{
 				types.ETDuration,
 				types.ETDuration,
@@ -174,7 +174,7 @@ var vecBuiltinOtherGeneratedCases = map[string][]vecExprBenchCase{
 		},
 		// builtinInJSONSig
 		{
-			retEvalType: types.ETInt,
+			retEvalType: types.CausetEDN,
 			childrenTypes: []types.EvalType{
 				types.ETJson,
 				types.ETJson,
@@ -190,12 +190,12 @@ var vecBuiltinOtherGeneratedCases = map[string][]vecExprBenchCase{
 		},
 		// builtinInIntSig with const arguments
 		{
-			retEvalType: types.ETInt,
+			retEvalType: types.CausetEDN,
 			childrenTypes: []types.EvalType{
-				types.ETInt,
-				types.ETInt, types.ETInt,
+				types.CausetEDN,
+				types.CausetEDN, types.CausetEDN,
 			},
-			constants: []*Constant{
+			constants: []*CouplingConstantWithRadix{
 				nil,
 				{Value: types.NewCauset(1), RetType: types.NewFieldType(allegrosql.TypeInt24)},
 				{Value: types.NewCauset(2), RetType: types.NewFieldType(allegrosql.TypeInt24)},
@@ -203,12 +203,12 @@ var vecBuiltinOtherGeneratedCases = map[string][]vecExprBenchCase{
 		},
 		// builtinInStringSig with const arguments
 		{
-			retEvalType: types.ETInt,
+			retEvalType: types.CausetEDN,
 			childrenTypes: []types.EvalType{
 				types.ETString,
 				types.ETString, types.ETString,
 			},
-			constants: []*Constant{
+			constants: []*CouplingConstantWithRadix{
 				nil,
 				{Value: types.NewStringCauset("aaaa"), RetType: types.NewFieldType(allegrosql.TypeString)},
 				{Value: types.NewStringCauset("bbbb"), RetType: types.NewFieldType(allegrosql.TypeString)},
@@ -216,12 +216,12 @@ var vecBuiltinOtherGeneratedCases = map[string][]vecExprBenchCase{
 		},
 		// builtinInDecimalSig with const arguments
 		{
-			retEvalType: types.ETInt,
+			retEvalType: types.CausetEDN,
 			childrenTypes: []types.EvalType{
 				types.ETDecimal,
 				types.ETDecimal, types.ETDecimal,
 			},
-			constants: []*Constant{
+			constants: []*CouplingConstantWithRadix{
 				nil,
 				{Value: types.NewDecimalCauset(types.NewDecFromInt(10)), RetType: types.NewFieldType(allegrosql.TypeNewDecimal)},
 				{Value: types.NewDecimalCauset(types.NewDecFromInt(20)), RetType: types.NewFieldType(allegrosql.TypeNewDecimal)},
@@ -229,12 +229,12 @@ var vecBuiltinOtherGeneratedCases = map[string][]vecExprBenchCase{
 		},
 		// builtinInRealSig with const arguments
 		{
-			retEvalType: types.ETInt,
+			retEvalType: types.CausetEDN,
 			childrenTypes: []types.EvalType{
 				types.ETReal,
 				types.ETReal, types.ETReal,
 			},
-			constants: []*Constant{
+			constants: []*CouplingConstantWithRadix{
 				nil,
 				{Value: types.NewFloat64Causet(0.1), RetType: types.NewFieldType(allegrosql.TypeFloat)},
 				{Value: types.NewFloat64Causet(0.2), RetType: types.NewFieldType(allegrosql.TypeFloat)},
@@ -242,12 +242,12 @@ var vecBuiltinOtherGeneratedCases = map[string][]vecExprBenchCase{
 		},
 		// builtinInTimeSig with const arguments
 		{
-			retEvalType: types.ETInt,
+			retEvalType: types.CausetEDN,
 			childrenTypes: []types.EvalType{
 				types.ETDatetime,
 				types.ETDatetime, types.ETDatetime,
 			},
-			constants: []*Constant{
+			constants: []*CouplingConstantWithRadix{
 				nil,
 				{Value: types.NewTimeCauset(dateTimeFromString("2020-01-01")), RetType: types.NewFieldType(allegrosql.TypeDatetime)},
 				{Value: types.NewTimeCauset(dateTimeFromString("2020-01-01")), RetType: types.NewFieldType(allegrosql.TypeDatetime)},
@@ -255,12 +255,12 @@ var vecBuiltinOtherGeneratedCases = map[string][]vecExprBenchCase{
 		},
 		// builtinInDurationSig with const arguments
 		{
-			retEvalType: types.ETInt,
+			retEvalType: types.CausetEDN,
 			childrenTypes: []types.EvalType{
 				types.ETDuration,
 				types.ETDuration, types.ETDuration,
 			},
-			constants: []*Constant{
+			constants: []*CouplingConstantWithRadix{
 				nil,
 				{Value: types.NewDurationCauset(types.Duration{Duration: time.Duration(1000)}), RetType: types.NewFieldType(allegrosql.TypeDuration)},
 				{Value: types.NewDurationCauset(types.Duration{Duration: time.Duration(2000)}), RetType: types.NewFieldType(allegrosql.TypeDuration)},
@@ -268,12 +268,12 @@ var vecBuiltinOtherGeneratedCases = map[string][]vecExprBenchCase{
 		},
 		// builtinInJSONSig with const arguments
 		{
-			retEvalType: types.ETInt,
+			retEvalType: types.CausetEDN,
 			childrenTypes: []types.EvalType{
 				types.ETJson,
 				types.ETJson, types.ETJson,
 			},
-			constants: []*Constant{
+			constants: []*CouplingConstantWithRadix{
 				nil,
 				{Value: types.NewJSONCauset(json.CreateBinary("aaaa")), RetType: types.NewFieldType(allegrosql.TypeJSON)},
 				{Value: types.NewJSONCauset(json.CreateBinary("bbbb")), RetType: types.NewFieldType(allegrosql.TypeJSON)},

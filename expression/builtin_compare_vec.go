@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@ package expression
 
 import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 // vecEvalDecimal evals a builtinGreatestDecimalSig.
@@ -94,7 +94,7 @@ func (b *builtinLeastDecimalSig) vectorized() bool {
 
 func (b *builtinLeastIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -129,7 +129,7 @@ func (b *builtinLeastIntSig) vectorized() bool {
 
 func (b *builtinGreatestIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -170,7 +170,7 @@ func (b *builtinGEIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredC
 	n := input.NumEvents()
 	var err error
 	var buf0, buf1 *chunk.DeferredCauset
-	buf0, err = b.bufSlabPredictor.get(types.ETInt, n)
+	buf0, err = b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -178,7 +178,7 @@ func (b *builtinGEIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredC
 	if err = b.args[0].VecEvalInt(b.ctx, input, buf0); err != nil {
 		return err
 	}
-	buf1, err = b.bufSlabPredictor.get(types.ETInt, n)
+	buf1, err = b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -290,7 +290,7 @@ func (b *builtinEQIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredC
 	n := input.NumEvents()
 	var err error
 	var buf0, buf1 *chunk.DeferredCauset
-	buf0, err = b.bufSlabPredictor.get(types.ETInt, n)
+	buf0, err = b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -298,7 +298,7 @@ func (b *builtinEQIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredC
 	if err := b.args[0].VecEvalInt(b.ctx, input, buf0); err != nil {
 		return err
 	}
-	buf1, err = b.bufSlabPredictor.get(types.ETInt, n)
+	buf1, err = b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -322,7 +322,7 @@ func (b *builtinNEIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredC
 	n := input.NumEvents()
 	var err error
 	var buf0, buf1 *chunk.DeferredCauset
-	buf0, err = b.bufSlabPredictor.get(types.ETInt, n)
+	buf0, err = b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -330,7 +330,7 @@ func (b *builtinNEIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredC
 	if err := b.args[0].VecEvalInt(b.ctx, input, buf0); err != nil {
 		return err
 	}
-	buf1, err = b.bufSlabPredictor.get(types.ETInt, n)
+	buf1, err = b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -354,7 +354,7 @@ func (b *builtinGTIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredC
 	n := input.NumEvents()
 	var err error
 	var buf0, buf1 *chunk.DeferredCauset
-	buf0, err = b.bufSlabPredictor.get(types.ETInt, n)
+	buf0, err = b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -362,7 +362,7 @@ func (b *builtinGTIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredC
 	if err := b.args[0].VecEvalInt(b.ctx, input, buf0); err != nil {
 		return err
 	}
-	buf1, err = b.bufSlabPredictor.get(types.ETInt, n)
+	buf1, err = b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -384,7 +384,7 @@ func (b *builtinNullEQIntSig) vectorized() bool {
 
 func (b *builtinNullEQIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	buf0, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf0, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -392,7 +392,7 @@ func (b *builtinNullEQIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.Defer
 	if err := b.args[0].VecEvalInt(b.ctx, input, buf0); err != nil {
 		return err
 	}
-	buf1, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf1, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -492,7 +492,7 @@ func (b *builtinLEIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredC
 	n := input.NumEvents()
 	var err error
 	var buf0, buf1 *chunk.DeferredCauset
-	buf0, err = b.bufSlabPredictor.get(types.ETInt, n)
+	buf0, err = b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -500,7 +500,7 @@ func (b *builtinLEIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredC
 	if err := b.args[0].VecEvalInt(b.ctx, input, buf0); err != nil {
 		return err
 	}
-	buf1, err = b.bufSlabPredictor.get(types.ETInt, n)
+	buf1, err = b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -524,7 +524,7 @@ func (b *builtinLTIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredC
 	n := input.NumEvents()
 	var err error
 	var buf0, buf1 *chunk.DeferredCauset
-	buf0, err = b.bufSlabPredictor.get(types.ETInt, n)
+	buf0, err = b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -532,7 +532,7 @@ func (b *builtinLTIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredC
 	if err := b.args[0].VecEvalInt(b.ctx, input, buf0); err != nil {
 		return err
 	}
-	buf1, err = b.bufSlabPredictor.get(types.ETInt, n)
+	buf1, err = b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -640,7 +640,7 @@ func (b *builtinGreatestTimeSig) vecEvalString(input *chunk.Chunk, result *chunk
 	}
 	defer b.bufSlabPredictor.put(dst)
 
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	dst.ResizeTime(n, false)
 	dstTimes := dst.Times()
 	for i := 0; i < n; i++ {
@@ -726,7 +726,7 @@ func (b *builtinLeastTimeSig) vecEvalString(input *chunk.Chunk, result *chunk.De
 	}
 	defer b.bufSlabPredictor.put(dst)
 
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	dst.ResizeTime(n, false)
 	dstTimes := dst.Times()
 	for i := 0; i < n; i++ {

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,22 +25,22 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/privilege"
+	"github.com/whtcorpsinc/MilevaDB-Prod/privilege/privileges"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testleak"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastik"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/auth"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/privilege"
-	"github.com/whtcorpsinc/milevadb/privilege/privileges"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/solitonutil"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/soliton/testleak"
-	"github.com/whtcorpsinc/milevadb/stochastik"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
 )
 
 func TestT(t *testing.T) {
@@ -222,20 +222,20 @@ func (s *testPrivilegeSuite) TestCheckPrivilegeWithRoles(c *C) {
 
 	mustExec(c, rootSe, `GRANT SELECT ON test.* TO r_1;`)
 	pc := privilege.GetPrivilegeManager(se)
-	activeRoles := se.GetStochastikVars().ActiveRoles
+	activeRoles := se.GetStochaseinstein_dbars().ActiveRoles
 	c.Assert(pc.RequestVerification(activeRoles, "test", "", "", allegrosql.SelectPriv), IsTrue)
 	c.Assert(pc.RequestVerification(activeRoles, "test", "", "", allegrosql.UFIDelatePriv), IsFalse)
 	mustExec(c, rootSe, `GRANT UFIDelATE ON test.* TO r_2;`)
 	c.Assert(pc.RequestVerification(activeRoles, "test", "", "", allegrosql.UFIDelatePriv), IsTrue)
 
 	mustExec(c, se, `SET ROLE NONE;`)
-	c.Assert(len(se.GetStochastikVars().ActiveRoles), Equals, 0)
+	c.Assert(len(se.GetStochaseinstein_dbars().ActiveRoles), Equals, 0)
 	mustExec(c, se, `SET ROLE DEFAULT;`)
-	c.Assert(len(se.GetStochastikVars().ActiveRoles), Equals, 1)
+	c.Assert(len(se.GetStochaseinstein_dbars().ActiveRoles), Equals, 1)
 	mustExec(c, se, `SET ROLE ALL;`)
-	c.Assert(len(se.GetStochastikVars().ActiveRoles), Equals, 3)
+	c.Assert(len(se.GetStochaseinstein_dbars().ActiveRoles), Equals, 3)
 	mustExec(c, se, `SET ROLE ALL EXCEPT r_1, r_2;`)
-	c.Assert(len(se.GetStochastikVars().ActiveRoles), Equals, 1)
+	c.Assert(len(se.GetStochaseinstein_dbars().ActiveRoles), Equals, 1)
 }
 
 func (s *testPrivilegeSuite) TestShowGrants(c *C) {
@@ -334,7 +334,7 @@ func (s *testPrivilegeSuite) TestShowGrants(c *C) {
 
 	// Usage should not exist after dropping the user
 	// Which we need privileges to do so!
-	ctx.GetStochastikVars().User = &auth.UserIdentity{Username: "root", Hostname: "localhost"}
+	ctx.GetStochaseinstein_dbars().User = &auth.UserIdentity{Username: "root", Hostname: "localhost"}
 	mustExec(c, se, `DROP USER 'show'@'localhost'`)
 
 	// This should now return an error
@@ -402,23 +402,23 @@ func (s *testPrivilegeSuite) TestDropBlockPriv(c *C) {
 	se := newStochastik(c, s.causetstore, s.dbName)
 	ctx, _ := se.(stochastikctx.Context)
 	mustExec(c, se, `CREATE TABLE todrop(c int);`)
-	// ctx.GetStochastikVars().User = "root@localhost"
+	// ctx.GetStochaseinstein_dbars().User = "root@localhost"
 	c.Assert(se.Auth(&auth.UserIdentity{Username: "root", Hostname: "localhost"}, nil, nil), IsTrue)
 	mustExec(c, se, `CREATE USER 'drop'@'localhost';`)
 	mustExec(c, se, `GRANT Select ON test.todrop TO  'drop'@'localhost';`)
 
-	// ctx.GetStochastikVars().User = "drop@localhost"
+	// ctx.GetStochaseinstein_dbars().User = "drop@localhost"
 	c.Assert(se.Auth(&auth.UserIdentity{Username: "drop", Hostname: "localhost"}, nil, nil), IsTrue)
 	mustExec(c, se, `SELECT * FROM todrop;`)
 	_, err := se.Execute(context.Background(), "DROP TABLE todrop;")
 	c.Assert(err, NotNil)
 
 	se = newStochastik(c, s.causetstore, s.dbName)
-	ctx.GetStochastikVars().User = &auth.UserIdentity{Username: "root", Hostname: "localhost"}
+	ctx.GetStochaseinstein_dbars().User = &auth.UserIdentity{Username: "root", Hostname: "localhost"}
 	mustExec(c, se, `GRANT Drop ON test.todrop TO  'drop'@'localhost';`)
 
 	se = newStochastik(c, s.causetstore, s.dbName)
-	ctx.GetStochastikVars().User = &auth.UserIdentity{Username: "drop", Hostname: "localhost"}
+	ctx.GetStochaseinstein_dbars().User = &auth.UserIdentity{Username: "drop", Hostname: "localhost"}
 	mustExec(c, se, `DROP TABLE todrop;`)
 }
 
@@ -445,19 +445,19 @@ func (s *testPrivilegeSuite) TestSelectViewSecurity(c *C) {
 	se := newStochastik(c, s.causetstore, s.dbName)
 	ctx, _ := se.(stochastikctx.Context)
 	mustExec(c, se, `CREATE TABLE viewsecurity(c int);`)
-	// ctx.GetStochastikVars().User = "root@localhost"
+	// ctx.GetStochaseinstein_dbars().User = "root@localhost"
 	c.Assert(se.Auth(&auth.UserIdentity{Username: "root", Hostname: "localhost"}, nil, nil), IsTrue)
 	mustExec(c, se, `CREATE USER 'selectusr'@'localhost';`)
 	mustExec(c, se, `GRANT CREATE VIEW ON test.* TO  'selectusr'@'localhost';`)
 	mustExec(c, se, `GRANT SELECT ON test.viewsecurity TO  'selectusr'@'localhost';`)
 
-	// ctx.GetStochastikVars().User = "selectusr@localhost"
+	// ctx.GetStochaseinstein_dbars().User = "selectusr@localhost"
 	c.Assert(se.Auth(&auth.UserIdentity{Username: "selectusr", Hostname: "localhost"}, nil, nil), IsTrue)
 	mustExec(c, se, `SELECT * FROM test.viewsecurity;`)
 	mustExec(c, se, `CREATE ALGORITHM = UNDEFINED ALLEGROALLEGROSQL SECURITY DEFINER VIEW test.selectviewsecurity as select * FROM test.viewsecurity;`)
 
 	se = newStochastik(c, s.causetstore, s.dbName)
-	ctx.GetStochastikVars().User = &auth.UserIdentity{Username: "root", Hostname: "localhost"}
+	ctx.GetStochaseinstein_dbars().User = &auth.UserIdentity{Username: "root", Hostname: "localhost"}
 	mustExec(c, se, "SELECT * FROM test.selectviewsecurity")
 	mustExec(c, se, `REVOKE Select ON test.viewsecurity FROM  'selectusr'@'localhost';`)
 	_, err := se.Execute(context.Background(), "select * from test.selectviewsecurity")
@@ -534,7 +534,7 @@ func (s *testPrivilegeSuite) TestCheckCertBasedAuth(c *C) {
 	c.Assert(se.Auth(&auth.UserIdentity{Username: "r5", Hostname: "localhost"}, nil, nil), IsFalse)
 
 	// test use ssl without ca
-	se.GetStochastikVars().TLSConnectionState = &tls.ConnectionState{VerifiedChains: nil}
+	se.GetStochaseinstein_dbars().TLSConnectionState = &tls.ConnectionState{VerifiedChains: nil}
 	c.Assert(se.Auth(&auth.UserIdentity{Username: "r1", Hostname: "localhost"}, nil, nil), IsTrue)
 	c.Assert(se.Auth(&auth.UserIdentity{Username: "r2", Hostname: "localhost"}, nil, nil), IsTrue)
 	c.Assert(se.Auth(&auth.UserIdentity{Username: "r3", Hostname: "localhost"}, nil, nil), IsTrue)
@@ -542,7 +542,7 @@ func (s *testPrivilegeSuite) TestCheckCertBasedAuth(c *C) {
 	c.Assert(se.Auth(&auth.UserIdentity{Username: "r5", Hostname: "localhost"}, nil, nil), IsFalse)
 
 	// test use ssl with signed but info wrong ca.
-	se.GetStochastikVars().TLSConnectionState = &tls.ConnectionState{VerifiedChains: [][]*x509.Certificate{{{}}}}
+	se.GetStochaseinstein_dbars().TLSConnectionState = &tls.ConnectionState{VerifiedChains: [][]*x509.Certificate{{{}}}}
 	c.Assert(se.Auth(&auth.UserIdentity{Username: "r1", Hostname: "localhost"}, nil, nil), IsTrue)
 	c.Assert(se.Auth(&auth.UserIdentity{Username: "r2", Hostname: "localhost"}, nil, nil), IsTrue)
 	c.Assert(se.Auth(&auth.UserIdentity{Username: "r3", Hostname: "localhost"}, nil, nil), IsTrue)
@@ -550,7 +550,7 @@ func (s *testPrivilegeSuite) TestCheckCertBasedAuth(c *C) {
 	c.Assert(se.Auth(&auth.UserIdentity{Username: "r5", Hostname: "localhost"}, nil, nil), IsFalse)
 
 	// test a all pass case
-	se.GetStochastikVars().TLSConnectionState = connectionState(
+	se.GetStochaseinstein_dbars().TLSConnectionState = connectionState(
 		pkix.Name{
 			Names: []pkix.AttributeTypeAndValue{
 				soliton.MockPkixAttribute(soliton.Country, "US"),
@@ -584,11 +584,11 @@ func (s *testPrivilegeSuite) TestCheckCertBasedAuth(c *C) {
 	c.Assert(se.Auth(&auth.UserIdentity{Username: "r14_san_only_pass", Hostname: "localhost"}, nil, nil), IsTrue)
 
 	// test require but give nothing
-	se.GetStochastikVars().TLSConnectionState = nil
+	se.GetStochaseinstein_dbars().TLSConnectionState = nil
 	c.Assert(se.Auth(&auth.UserIdentity{Username: "r5", Hostname: "localhost"}, nil, nil), IsFalse)
 
 	// test mismatch cipher
-	se.GetStochastikVars().TLSConnectionState = connectionState(
+	se.GetStochaseinstein_dbars().TLSConnectionState = connectionState(
 		pkix.Name{
 			Names: []pkix.AttributeTypeAndValue{
 				soliton.MockPkixAttribute(soliton.Country, "US"),
@@ -615,7 +615,7 @@ func (s *testPrivilegeSuite) TestCheckCertBasedAuth(c *C) {
 	c.Assert(se.Auth(&auth.UserIdentity{Username: "r11_cipher_only", Hostname: "localhost"}, nil, nil), IsTrue)
 
 	// test only subject or only issuer
-	se.GetStochastikVars().TLSConnectionState = connectionState(
+	se.GetStochaseinstein_dbars().TLSConnectionState = connectionState(
 		pkix.Name{
 			Names: []pkix.AttributeTypeAndValue{
 				soliton.MockPkixAttribute(soliton.Country, "US"),
@@ -638,7 +638,7 @@ func (s *testPrivilegeSuite) TestCheckCertBasedAuth(c *C) {
 		},
 		tls.TLS_AES_128_GCM_SHA256)
 	c.Assert(se.Auth(&auth.UserIdentity{Username: "r7_issuer_only", Hostname: "localhost"}, nil, nil), IsTrue)
-	se.GetStochastikVars().TLSConnectionState = connectionState(
+	se.GetStochaseinstein_dbars().TLSConnectionState = connectionState(
 		pkix.Name{
 			Names: []pkix.AttributeTypeAndValue{
 				soliton.MockPkixAttribute(soliton.Country, "AU"),
@@ -663,7 +663,7 @@ func (s *testPrivilegeSuite) TestCheckCertBasedAuth(c *C) {
 	c.Assert(se.Auth(&auth.UserIdentity{Username: "r8_subject_only", Hostname: "localhost"}, nil, nil), IsTrue)
 
 	// test disorder issuer or subject
-	se.GetStochastikVars().TLSConnectionState = connectionState(
+	se.GetStochaseinstein_dbars().TLSConnectionState = connectionState(
 		pkix.Name{
 			Names: []pkix.AttributeTypeAndValue{},
 		},
@@ -679,7 +679,7 @@ func (s *testPrivilegeSuite) TestCheckCertBasedAuth(c *C) {
 		},
 		tls.TLS_AES_128_GCM_SHA256)
 	c.Assert(se.Auth(&auth.UserIdentity{Username: "r9_subject_disorder", Hostname: "localhost"}, nil, nil), IsFalse)
-	se.GetStochastikVars().TLSConnectionState = connectionState(
+	se.GetStochaseinstein_dbars().TLSConnectionState = connectionState(
 		pkix.Name{
 			Names: []pkix.AttributeTypeAndValue{
 				soliton.MockPkixAttribute(soliton.Country, "US"),

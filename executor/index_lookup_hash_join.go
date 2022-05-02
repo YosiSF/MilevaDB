@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,15 +23,15 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/codec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/memory"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/ranger"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/expression"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/codec"
-	"github.com/whtcorpsinc/milevadb/soliton/memory"
-	"github.com/whtcorpsinc/milevadb/soliton/ranger"
 )
 
 // numResChkHold indicates the number of resource chunks that an inner worker
@@ -145,18 +145,18 @@ func (e *IndexNestedLoopHashJoin) Open(ctx context.Context) error {
 		return err
 	}
 	e.memTracker = memory.NewTracker(e.id, -1)
-	e.memTracker.AttachTo(e.ctx.GetStochastikVars().StmtCtx.MemTracker)
+	e.memTracker.AttachTo(e.ctx.GetStochaseinstein_dbars().StmtCtx.MemTracker)
 	e.innerPtrBytes = make([][]byte, 0, 8)
 	if e.runtimeStats != nil {
 		e.stats = &indexLookUpJoinRuntimeStats{}
-		e.ctx.GetStochastikVars().StmtCtx.RuntimeStatsDefCausl.RegisterStats(e.id, e.stats)
+		e.ctx.GetStochaseinstein_dbars().StmtCtx.RuntimeStatsDefCausl.RegisterStats(e.id, e.stats)
 	}
 	e.startWorkers(ctx)
 	return nil
 }
 
 func (e *IndexNestedLoopHashJoin) startWorkers(ctx context.Context) {
-	concurrency := e.ctx.GetStochastikVars().IndexLookupJoinConcurrency()
+	concurrency := e.ctx.GetStochaseinstein_dbars().IndexLookupJoinConcurrency()
 	if e.stats != nil {
 		e.stats.concurrency = concurrency
 	}
@@ -391,7 +391,7 @@ func (e *IndexNestedLoopHashJoin) newOuterWorker(innerCh chan *indexHashJoinTask
 			ctx:              e.ctx,
 			executor:         e.children[0],
 			batchSize:        32,
-			maxBatchSize:     e.ctx.GetStochastikVars().IndexJoinBatchSize,
+			maxBatchSize:     e.ctx.GetStochaseinstein_dbars().IndexJoinBatchSize,
 			parentMemTracker: e.memTracker,
 			lookup:           &e.IndexLookUpJoin,
 		},
@@ -431,13 +431,13 @@ func (e *IndexNestedLoopHashJoin) newInnerWorker(taskCh chan *indexHashJoinTask,
 		outerEventStatus:  make([]outerEventStatusFlag, 0, e.maxChunkSize),
 	}
 	if e.lastDefCausHelper != nil {
-		// nextCwf.TmpConstant needs to be reset for every individual
+		// nextCwf.TmpCouplingConstantWithRadix needs to be reset for every individual
 		// inner worker to avoid data race when the inner workers is running
 		// concurrently.
 		nextCwf := *e.lastDefCausHelper
-		nextCwf.TmpConstant = make([]*expression.Constant, len(e.lastDefCausHelper.TmpConstant))
-		for i := range e.lastDefCausHelper.TmpConstant {
-			nextCwf.TmpConstant[i] = &expression.Constant{RetType: nextCwf.TargetDefCaus.RetType}
+		nextCwf.TmpCouplingConstantWithRadix = make([]*expression.CouplingConstantWithRadix, len(e.lastDefCausHelper.TmpCouplingConstantWithRadix))
+		for i := range e.lastDefCausHelper.TmpCouplingConstantWithRadix {
+			nextCwf.TmpCouplingConstantWithRadix[i] = &expression.CouplingConstantWithRadix{RetType: nextCwf.TargetDefCaus.RetType}
 		}
 		iw.nextDefCausCompareFilters = &nextCwf
 	}
@@ -543,7 +543,7 @@ func (iw *indexHashJoinInnerWorker) buildHashBlockForOuterResult(ctx context.Con
 				}
 			}
 			h.Reset()
-			err := codec.HashChunkEvent(iw.ctx.GetStochastikVars().StmtCtx, h, event, iw.outerCtx.rowTypes, keyDefCausIdx, buf)
+			err := codec.HashChunkEvent(iw.ctx.GetStochaseinstein_dbars().StmtCtx, h, event, iw.outerCtx.rowTypes, keyDefCausIdx, buf)
 			failpoint.Inject("testIndexHashJoinBuildErr", func() {
 				err = errors.New("mocHoTTexHashJoinBuildErr")
 			})
@@ -634,7 +634,7 @@ func (iw *indexHashJoinInnerWorker) doJoinUnordered(ctx context.Context, task *i
 
 func (iw *indexHashJoinInnerWorker) getMatchedOuterEvents(innerEvent chunk.Event, task *indexHashJoinTask, h hash.Hash64, buf []byte) (matchedEvents []chunk.Event, matchedEventPtr []chunk.EventPtr, err error) {
 	h.Reset()
-	err = codec.HashChunkEvent(iw.ctx.GetStochastikVars().StmtCtx, h, innerEvent, iw.rowTypes, iw.keyDefCauss, buf)
+	err = codec.HashChunkEvent(iw.ctx.GetStochaseinstein_dbars().StmtCtx, h, innerEvent, iw.rowTypes, iw.keyDefCauss, buf)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -648,7 +648,7 @@ func (iw *indexHashJoinInnerWorker) getMatchedOuterEvents(innerEvent chunk.Event
 	matchedEventPtr = make([]chunk.EventPtr, 0, len(iw.matchedOuterPtrs))
 	for _, ptr := range iw.matchedOuterPtrs {
 		outerEvent := task.outerResult.GetEvent(ptr)
-		ok, err := codec.EqualChunkEvent(iw.ctx.GetStochastikVars().StmtCtx, innerEvent, iw.rowTypes, iw.keyDefCauss, outerEvent, iw.outerCtx.rowTypes, iw.outerCtx.keyDefCauss)
+		ok, err := codec.EqualChunkEvent(iw.ctx.GetStochaseinstein_dbars().StmtCtx, innerEvent, iw.rowTypes, iw.keyDefCauss, outerEvent, iw.outerCtx.rowTypes, iw.outerCtx.keyDefCauss)
 		if err != nil {
 			return nil, nil, err
 		}

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,12 +23,12 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/charset"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/soliton/solitonutil"
-	"github.com/whtcorpsinc/milevadb/soliton/testleak"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testleak"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 var _ = SerialSuites(&testEvaluatorSerialSuites{})
@@ -75,15 +75,15 @@ func (s *testEvaluatorSuiteBase) TearDownSuite(c *C) {
 
 func (s *testEvaluatorSuiteBase) SetUpTest(c *C) {
 	s.ctx = mock.NewContext()
-	s.ctx.GetStochastikVars().StmtCtx.TimeZone = time.Local
-	sc := s.ctx.GetStochastikVars().StmtCtx
+	s.ctx.GetStochaseinstein_dbars().StmtCtx.TimeZone = time.Local
+	sc := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	sc.TruncateAsWarning = true
-	s.ctx.GetStochastikVars().SetSystemVar("max_allowed_packet", "67108864")
-	s.ctx.GetStochastikVars().PlanDeferredCausetID = 0
+	s.ctx.GetStochaseinstein_dbars().SetSystemVar("max_allowed_packet", "67108864")
+	s.ctx.GetStochaseinstein_dbars().PlanDeferredCausetID = 0
 }
 
 func (s *testEvaluatorSuiteBase) TearDownTest(c *C) {
-	s.ctx.GetStochastikVars().StmtCtx.SetWarnings(nil)
+	s.ctx.GetStochaseinstein_dbars().StmtCtx.SetWarnings(nil)
 }
 
 func (s *testEvaluatorSuiteBase) HoTTToFieldType(HoTT byte) types.FieldType {
@@ -132,7 +132,7 @@ func (s *testEvaluatorSuiteBase) HoTTToFieldType(HoTT byte) types.FieldType {
 	return ft
 }
 
-func (s *testEvaluatorSuiteBase) datumsToConstants(datums []types.Causet) []Expression {
+func (s *testEvaluatorSuiteBase) datumsToCouplingConstantWithRadixs(datums []types.Causet) []Expression {
 	constants := make([]Expression, 0, len(datums))
 	for _, d := range datums {
 		ft := s.HoTTToFieldType(d.HoTT())
@@ -140,14 +140,14 @@ func (s *testEvaluatorSuiteBase) datumsToConstants(datums []types.Causet) []Expr
 			ft.DefCauslate = d.DefCauslation()
 		}
 		ft.Flen, ft.Decimal = types.UnspecifiedLength, types.UnspecifiedLength
-		constants = append(constants, &Constant{Value: d, RetType: &ft})
+		constants = append(constants, &CouplingConstantWithRadix{Value: d, RetType: &ft})
 	}
 	return constants
 }
 
-func (s *testEvaluatorSuiteBase) primitiveValsToConstants(args []interface{}) []Expression {
-	cons := s.datumsToConstants(types.MakeCausets(args...))
-	char, defCaus := s.ctx.GetStochastikVars().GetCharsetInfo()
+func (s *testEvaluatorSuiteBase) primitiveValsToCouplingConstantWithRadixs(args []interface{}) []Expression {
+	cons := s.datumsToCouplingConstantWithRadixs(types.MakeCausets(args...))
+	char, defCaus := s.ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 	for i, arg := range args {
 		types.DefaultTypeForValue(arg, cons[i].GetType(), char, defCaus)
 	}
@@ -156,20 +156,20 @@ func (s *testEvaluatorSuiteBase) primitiveValsToConstants(args []interface{}) []
 
 func (s *testEvaluatorSuite) TestSleep(c *C) {
 	ctx := mock.NewContext()
-	sessVars := ctx.GetStochastikVars()
+	sessVars := ctx.GetStochaseinstein_dbars()
 
 	fc := funcs[ast.Sleep]
 	// non-strict perceptron
 	sessVars.StrictALLEGROSQLMode = false
 	d := make([]types.Causet, 1)
-	f, err := fc.getFunction(ctx, s.datumsToConstants(d))
+	f, err := fc.getFunction(ctx, s.datumsToCouplingConstantWithRadixs(d))
 	c.Assert(err, IsNil)
 	ret, isNull, err := f.evalInt(chunk.Row{})
 	c.Assert(err, IsNil)
 	c.Assert(isNull, IsFalse)
 	c.Assert(ret, Equals, int64(0))
 	d[0].SetInt64(-1)
-	f, err = fc.getFunction(ctx, s.datumsToConstants(d))
+	f, err = fc.getFunction(ctx, s.datumsToCouplingConstantWithRadixs(d))
 	c.Assert(err, IsNil)
 	ret, isNull, err = f.evalInt(chunk.Row{})
 	c.Assert(err, IsNil)
@@ -179,13 +179,13 @@ func (s *testEvaluatorSuite) TestSleep(c *C) {
 	// for error case under the strict perceptron
 	sessVars.StrictALLEGROSQLMode = true
 	d[0].SetNull()
-	_, err = fc.getFunction(ctx, s.datumsToConstants(d))
+	_, err = fc.getFunction(ctx, s.datumsToCouplingConstantWithRadixs(d))
 	c.Assert(err, IsNil)
 	_, isNull, err = f.evalInt(chunk.Row{})
 	c.Assert(err, NotNil)
 	c.Assert(isNull, IsFalse)
 	d[0].SetFloat64(-2.5)
-	_, err = fc.getFunction(ctx, s.datumsToConstants(d))
+	_, err = fc.getFunction(ctx, s.datumsToCouplingConstantWithRadixs(d))
 	c.Assert(err, IsNil)
 	_, isNull, err = f.evalInt(chunk.Row{})
 	c.Assert(err, NotNil)
@@ -194,7 +194,7 @@ func (s *testEvaluatorSuite) TestSleep(c *C) {
 	// strict perceptron
 	d[0].SetFloat64(0.5)
 	start := time.Now()
-	f, err = fc.getFunction(ctx, s.datumsToConstants(d))
+	f, err = fc.getFunction(ctx, s.datumsToCouplingConstantWithRadixs(d))
 	c.Assert(err, IsNil)
 	ret, isNull, err = f.evalInt(chunk.Row{})
 	c.Assert(err, IsNil)
@@ -204,12 +204,12 @@ func (s *testEvaluatorSuite) TestSleep(c *C) {
 	c.Assert(sub.Nanoseconds(), GreaterEqual, int64(0.5*1e9))
 
 	d[0].SetFloat64(3)
-	f, err = fc.getFunction(ctx, s.datumsToConstants(d))
+	f, err = fc.getFunction(ctx, s.datumsToCouplingConstantWithRadixs(d))
 	c.Assert(err, IsNil)
 	start = time.Now()
 	go func() {
 		time.Sleep(1 * time.Second)
-		atomic.CompareAndSwapUint32(&ctx.GetStochastikVars().Killed, 0, 1)
+		atomic.CompareAndSwapUint32(&ctx.GetStochaseinstein_dbars().Killed, 0, 1)
 	}()
 	ret, isNull, err = f.evalInt(chunk.Row{})
 	sub = time.Since(start)
@@ -258,11 +258,11 @@ func (s *testEvaluatorSuite) TestBinopComparison(c *C) {
 	}
 	for _, t := range tbl {
 		fc := funcs[t.op]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(t.lhs, t.rhs)))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(t.lhs, t.rhs)))
 		c.Assert(err, IsNil)
 		v, err := evalBuiltinFunc(f, chunk.Row{})
 		c.Assert(err, IsNil)
-		val, err := v.ToBool(s.ctx.GetStochastikVars().StmtCtx)
+		val, err := v.ToBool(s.ctx.GetStochaseinstein_dbars().StmtCtx)
 		c.Assert(err, IsNil)
 		c.Assert(val, Equals, t.result)
 	}
@@ -289,7 +289,7 @@ func (s *testEvaluatorSuite) TestBinopComparison(c *C) {
 
 	for _, t := range nilTbl {
 		fc := funcs[t.op]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(t.lhs, t.rhs)))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(t.lhs, t.rhs)))
 		c.Assert(err, IsNil)
 		v, err := evalBuiltinFunc(f, chunk.Row{})
 		c.Assert(err, IsNil)
@@ -322,7 +322,7 @@ func (s *testEvaluatorSuite) TestBinopLogic(c *C) {
 	}
 	for _, t := range tbl {
 		fc := funcs[t.op]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(t.lhs, t.rhs)))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(t.lhs, t.rhs)))
 		c.Assert(err, IsNil)
 		v, err := evalBuiltinFunc(f, chunk.Row{})
 		c.Assert(err, IsNil)
@@ -357,7 +357,7 @@ func (s *testEvaluatorSuite) TestBinopBitop(c *C) {
 
 	for _, t := range tbl {
 		fc := funcs[t.op]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(t.lhs, t.rhs)))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(t.lhs, t.rhs)))
 		c.Assert(err, IsNil)
 		v, err := evalBuiltinFunc(f, chunk.Row{})
 		c.Assert(err, IsNil)
@@ -450,7 +450,7 @@ func (s *testEvaluatorSuite) TestBinopNumeric(c *C) {
 
 	for _, t := range tbl {
 		fc := funcs[t.op]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(t.lhs, t.rhs)))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(t.lhs, t.rhs)))
 		c.Assert(err, IsNil)
 		v, err := evalBuiltinFunc(f, chunk.Row{})
 		c.Assert(err, IsNil)
@@ -459,7 +459,7 @@ func (s *testEvaluatorSuite) TestBinopNumeric(c *C) {
 			c.Assert(t.ret, IsNil)
 		default:
 			// we use float64 as the result type check for all.
-			sc := s.ctx.GetStochastikVars().StmtCtx
+			sc := s.ctx.GetStochaseinstein_dbars().StmtCtx
 			f, err := v.ToFloat64(sc)
 			c.Assert(err, IsNil)
 			d := types.NewCauset(t.ret)
@@ -491,35 +491,35 @@ func (s *testEvaluatorSuite) TestBinopNumeric(c *C) {
 		{types.NewDecFromInt(10), ast.Mod, 0},
 	}
 
-	oldInSelectStmt := s.ctx.GetStochastikVars().StmtCtx.InSelectStmt
-	s.ctx.GetStochastikVars().StmtCtx.InSelectStmt = false
-	oldALLEGROSQLMode := s.ctx.GetStochastikVars().ALLEGROSQLMode
-	s.ctx.GetStochastikVars().ALLEGROSQLMode |= allegrosql.ModeErrorForDivisionByZero
-	oldInInsertStmt := s.ctx.GetStochastikVars().StmtCtx.InInsertStmt
-	s.ctx.GetStochastikVars().StmtCtx.InInsertStmt = true
+	oldInSelectStmt := s.ctx.GetStochaseinstein_dbars().StmtCtx.InSelectStmt
+	s.ctx.GetStochaseinstein_dbars().StmtCtx.InSelectStmt = false
+	oldALLEGROSQLMode := s.ctx.GetStochaseinstein_dbars().ALLEGROSQLMode
+	s.ctx.GetStochaseinstein_dbars().ALLEGROSQLMode |= allegrosql.ModeErrorForDivisionByZero
+	oldInInsertStmt := s.ctx.GetStochaseinstein_dbars().StmtCtx.InInsertStmt
+	s.ctx.GetStochaseinstein_dbars().StmtCtx.InInsertStmt = true
 	for _, t := range testcases {
 		fc := funcs[t.op]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(t.lhs, t.rhs)))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(t.lhs, t.rhs)))
 		c.Assert(err, IsNil)
 		_, err = evalBuiltinFunc(f, chunk.Row{})
 		c.Assert(err, NotNil)
 	}
 
-	oldDividedByZeroAsWarning := s.ctx.GetStochastikVars().StmtCtx.DividedByZeroAsWarning
-	s.ctx.GetStochastikVars().StmtCtx.DividedByZeroAsWarning = true
+	oldDividedByZeroAsWarning := s.ctx.GetStochaseinstein_dbars().StmtCtx.DividedByZeroAsWarning
+	s.ctx.GetStochaseinstein_dbars().StmtCtx.DividedByZeroAsWarning = true
 	for _, t := range testcases {
 		fc := funcs[t.op]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(t.lhs, t.rhs)))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(t.lhs, t.rhs)))
 		c.Assert(err, IsNil)
 		v, err := evalBuiltinFunc(f, chunk.Row{})
 		c.Assert(err, IsNil)
 		c.Assert(v.HoTT(), Equals, types.HoTTNull)
 	}
 
-	s.ctx.GetStochastikVars().StmtCtx.InSelectStmt = oldInSelectStmt
-	s.ctx.GetStochastikVars().ALLEGROSQLMode = oldALLEGROSQLMode
-	s.ctx.GetStochastikVars().StmtCtx.InInsertStmt = oldInInsertStmt
-	s.ctx.GetStochastikVars().StmtCtx.DividedByZeroAsWarning = oldDividedByZeroAsWarning
+	s.ctx.GetStochaseinstein_dbars().StmtCtx.InSelectStmt = oldInSelectStmt
+	s.ctx.GetStochaseinstein_dbars().ALLEGROSQLMode = oldALLEGROSQLMode
+	s.ctx.GetStochaseinstein_dbars().StmtCtx.InInsertStmt = oldInInsertStmt
+	s.ctx.GetStochaseinstein_dbars().StmtCtx.DividedByZeroAsWarning = oldDividedByZeroAsWarning
 }
 
 func (s *testEvaluatorSuite) TestExtract(c *C) {
@@ -551,7 +551,7 @@ func (s *testEvaluatorSuite) TestExtract(c *C) {
 	}
 	for _, t := range tbl {
 		fc := funcs[ast.Extract]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(t.Unit, str)))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(t.Unit, str)))
 		c.Assert(err, IsNil)
 		v, err := evalBuiltinFunc(f, chunk.Row{})
 		c.Assert(err, IsNil)
@@ -560,7 +560,7 @@ func (s *testEvaluatorSuite) TestExtract(c *C) {
 
 	// Test nil
 	fc := funcs[ast.Extract]
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets("SECOND", nil)))
+	f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets("SECOND", nil)))
 	c.Assert(err, IsNil)
 	v, err := evalBuiltinFunc(f, chunk.Row{})
 	c.Assert(err, IsNil)
@@ -602,7 +602,7 @@ func (s *testEvaluatorSuite) TestUnaryOp(c *C) {
 	}
 	for i, t := range tbl {
 		fc := funcs[t.op]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(t.arg)))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(t.arg)))
 		c.Assert(err, IsNil)
 		result, err := evalBuiltinFunc(f, chunk.Row{})
 		c.Assert(err, IsNil)
@@ -621,14 +621,14 @@ func (s *testEvaluatorSuite) TestUnaryOp(c *C) {
 
 	for _, t := range tbl {
 		fc := funcs[t.op]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(t.arg)))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(t.arg)))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		result, err := evalBuiltinFunc(f, chunk.Row{})
 		c.Assert(err, IsNil)
 
 		expect := types.NewCauset(t.result)
-		ret, err := result.CompareCauset(s.ctx.GetStochastikVars().StmtCtx, &expect)
+		ret, err := result.CompareCauset(s.ctx.GetStochaseinstein_dbars().StmtCtx, &expect)
 		c.Assert(err, IsNil)
 		c.Assert(ret, Equals, 0, Commentf("%v %s", t.arg, t.op))
 	}
@@ -636,17 +636,17 @@ func (s *testEvaluatorSuite) TestUnaryOp(c *C) {
 
 func (s *testEvaluatorSuite) TestMod(c *C) {
 	fc := funcs[ast.Mod]
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(234, 10)))
+	f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(234, 10)))
 	c.Assert(err, IsNil)
 	r, err := evalBuiltinFunc(f, chunk.Row{})
 	c.Assert(err, IsNil)
 	c.Assert(r, solitonutil.CausetEquals, types.NewIntCauset(4))
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(29, 9)))
+	f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(29, 9)))
 	c.Assert(err, IsNil)
 	r, err = evalBuiltinFunc(f, chunk.Row{})
 	c.Assert(err, IsNil)
 	c.Assert(r, solitonutil.CausetEquals, types.NewIntCauset(2))
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(34.5, 3)))
+	f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(34.5, 3)))
 	c.Assert(err, IsNil)
 	r, err = evalBuiltinFunc(f, chunk.Row{})
 	c.Assert(err, IsNil)

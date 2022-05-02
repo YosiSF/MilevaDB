@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,26 +14,26 @@
 package aggfuncs_test
 
 import (
+	"github.com/whtcorpsinc/MilevaDB-Prod/executor/aggfuncs"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/executor/aggfuncs"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 func (s *testSuite) TestLeadLag(c *C) {
 	zero := expression.NewZero()
 	one := expression.NewOne()
-	two := &expression.Constant{
+	two := &expression.CouplingConstantWithRadix{
 		Value:   types.NewCauset(2),
 		RetType: types.NewFieldType(allegrosql.TypeTiny),
 	}
-	three := &expression.Constant{
+	three := &expression.CouplingConstantWithRadix{
 		Value:   types.NewCauset(3),
 		RetType: types.NewFieldType(allegrosql.TypeTiny),
 	}
-	million := &expression.Constant{
+	million := &expression.CouplingConstantWithRadix{
 		Value:   types.NewCauset(1000000),
 		RetType: types.NewFieldType(allegrosql.TypeLong),
 	}
@@ -118,15 +118,15 @@ func (s *testSuite) TestLeadLag(c *C) {
 func (s *testSuite) TestMemLeadLag(c *C) {
 	zero := expression.NewZero()
 	one := expression.NewOne()
-	two := &expression.Constant{
+	two := &expression.CouplingConstantWithRadix{
 		Value:   types.NewCauset(2),
 		RetType: types.NewFieldType(allegrosql.TypeTiny),
 	}
-	three := &expression.Constant{
+	three := &expression.CouplingConstantWithRadix{
 		Value:   types.NewCauset(3),
 		RetType: types.NewFieldType(allegrosql.TypeTiny),
 	}
-	million := &expression.Constant{
+	million := &expression.CouplingConstantWithRadix{
 		Value:   types.NewCauset(1000000),
 		RetType: types.NewFieldType(allegrosql.TypeLong),
 	}

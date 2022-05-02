@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,10 +23,10 @@ import (
 
 	"github.com/BurntSushi/toml"
 	tracing "github.com/uber/jaeger-client-go/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	. "github.com/whtcorpsinc/check"
 	zaplog "github.com/whtcorpsinc/log"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
 )
 
 var _ = SerialSuites(&testConfigSuite{})

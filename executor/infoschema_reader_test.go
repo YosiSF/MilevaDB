@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,31 +23,31 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/helper"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/executor"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri/infosync"
+	"github.com/whtcorpsinc/MilevaDB-Prod/server"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/FIDelapi"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/stringutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testleak"
+	"github.com/whtcorpsinc/MilevaDB-Prod/statistics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/statistics/handle"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastik"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/auth"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/failpoint"
 	"github.com/whtcorpsinc/fn"
-	"github.com/whtcorpsinc/milevadb/causetstore/einsteindb"
-	"github.com/whtcorpsinc/milevadb/causetstore/helper"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/executor"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/petri/infosync"
-	"github.com/whtcorpsinc/milevadb/server"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/FIDelapi"
-	"github.com/whtcorpsinc/milevadb/soliton/solitonutil"
-	"github.com/whtcorpsinc/milevadb/soliton/stringutil"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/soliton/testleak"
-	"github.com/whtcorpsinc/milevadb/statistics"
-	"github.com/whtcorpsinc/milevadb/statistics/handle"
-	"github.com/whtcorpsinc/milevadb/stochastik"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
 	"google.golang.org/grpc"
 )
 
@@ -116,7 +116,7 @@ func (s *inspectionSuite) TestInspectionBlocks(c *C) {
 		"milevadb,127.0.0.1:11080,127.0.0.1:10080,mock-version,mock-githash",
 		"einsteindb,127.0.0.1:11080,127.0.0.1:10080,mock-version,mock-githash",
 	}
-	fpName := "github.com/whtcorpsinc/milevadb/schemareplicant/mockClusterInfo"
+	fpName := "github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant/mockClusterInfo"
 	fpExpr := `return("` + strings.Join(instances, ";") + `")`
 	c.Assert(failpoint.Enable(fpName, fpExpr), IsNil)
 	defer func() { c.Assert(failpoint.Disable(fpName), IsNil) }()
@@ -129,7 +129,7 @@ func (s *inspectionSuite) TestInspectionBlocks(c *C) {
 
 	// enable inspection mode
 	inspectionBlockCache := map[string]variable.BlockSnapshot{}
-	tk.Se.GetStochastikVars().InspectionBlockCache = inspectionBlockCache
+	tk.Se.GetStochaseinstein_dbars().InspectionBlockCache = inspectionBlockCache
 	tk.MustQuery("select type, instance, status_address, version, git_hash from information_schema.cluster_info").Check(testkit.Events(
 		"fidel 127.0.0.1:11080 127.0.0.1:10080 mock-version mock-githash",
 		"milevadb 127.0.0.1:11080 127.0.0.1:10080 mock-version mock-githash",
@@ -145,7 +145,7 @@ func (s *inspectionSuite) TestInspectionBlocks(c *C) {
 		"milevadb 127.0.0.1:11080 127.0.0.1:10080 mock-version mock-githash",
 		"einsteindb 127.0.0.1:11080 127.0.0.1:10080 mock-version mock-githash",
 	))
-	tk.Se.GetStochastikVars().InspectionBlockCache = nil
+	tk.Se.GetStochaseinstein_dbars().InspectionBlockCache = nil
 }
 
 func (s *testschemaReplicantBlockSuite) TestProfiling(c *C) {
@@ -477,7 +477,7 @@ func (s *testschemaReplicantBlockSuite) TestBlockConstraintsBlock(c *C) {
 	tk.MustQuery("select * from information_schema.TABLE_CONSTRAINTS where TABLE_NAME='gc_delete_range';").Check(testkit.Events("def allegrosql delete_range_index allegrosql gc_delete_range UNIQUE"))
 }
 
-func (s *testschemaReplicantBlockSuite) TestBlockStochastikVar(c *C) {
+func (s *testschemaReplicantBlockSuite) TestBlockStochaseinstein_dbar(c *C) {
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustQuery("select * from information_schema.SESSION_VARIABLES where VARIABLE_NAME='milevadb_retry_limit';").Check(testkit.Events("milevadb_retry_limit 10"))
 }
@@ -537,8 +537,8 @@ func (s *testschemaReplicantBlockSerialSuite) TestForServersInfo(c *C) {
 }
 
 func (s *testschemaReplicantBlockSerialSuite) TestForBlockTiFlashReplica(c *C) {
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/schemareplicant/mockTiFlashStoreCount", `return(true)`), IsNil)
-	defer failpoint.Disable("github.com/whtcorpsinc/milevadb/schemareplicant/mockTiFlashStoreCount")
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant/mockTiFlashStoreCount", `return(true)`), IsNil)
+	defer failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant/mockTiFlashStoreCount")
 
 	tk := testkit.NewTestKit(c, s.causetstore)
 	statistics.ClearHistoryJobs()
@@ -726,9 +726,9 @@ func (s *testschemaReplicantClusterBlockSuite) TestMilevaDBClusterInfo(c *C) {
 		event("einsteindb", "store1", ""),
 	))
 
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/schemareplicant/mockStoreTombstone", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant/mockStoreTombstone", `return(true)`), IsNil)
 	tk.MustQuery("select type, instance, start_time from information_schema.cluster_info where type = 'einsteindb'").Check(testkit.Events())
-	c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/schemareplicant/mockStoreTombstone"), IsNil)
+	c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant/mockStoreTombstone"), IsNil)
 
 	// information_schema.cluster_config
 	instances := []string{
@@ -737,9 +737,9 @@ func (s *testschemaReplicantClusterBlockSuite) TestMilevaDBClusterInfo(c *C) {
 		"einsteindb,127.0.0.1:11080," + mockAddr + ",mock-version,mock-githash",
 	}
 	fpExpr := `return("` + strings.Join(instances, ";") + `")`
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/schemareplicant/mockClusterInfo", fpExpr), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant/mockClusterInfo", fpExpr), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/schemareplicant/mockClusterInfo"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant/mockClusterInfo"), IsNil)
 	}()
 	tk.MustQuery("select * from information_schema.cluster_config").Check(testkit.Events(
 		"fidel 127.0.0.1:11080 key1 value1",

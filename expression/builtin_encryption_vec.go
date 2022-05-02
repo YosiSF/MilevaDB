@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,10 +29,10 @@ import (
 
 	"github.com/whtcorpsinc/berolinaAllegroSQL/auth"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/encrypt"
-	"github.com/whtcorpsinc/milevadb/soliton/replog"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/encrypt"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/replog"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 func (b *builtinAesDecryptSig) vectorized() bool {
@@ -64,7 +64,7 @@ func (b *builtinAesDecryptSig) vecEvalString(input *chunk.Chunk, result *chunk.D
 	}
 
 	isWarning := !b.ivRequired && len(b.args) == 3
-	isConstKey := b.args[1].ConstItem(b.ctx.GetStochastikVars().StmtCtx)
+	isConstKey := b.args[1].ConstItem(b.ctx.GetStochaseinstein_dbars().StmtCtx)
 
 	var key []byte
 	if isConstKey {
@@ -72,7 +72,7 @@ func (b *builtinAesDecryptSig) vecEvalString(input *chunk.Chunk, result *chunk.D
 	}
 
 	result.ReserveString(n)
-	stmtCtx := b.ctx.GetStochastikVars().StmtCtx
+	stmtCtx := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	for i := 0; i < n; i++ {
 		// According to doc: If either function argument is NULL, the function returns NULL.
 		if strBuf.IsNull(i) || keyBuf.IsNull(i) {
@@ -150,7 +150,7 @@ func (b *builtinAesEncryptIVSig) vecEvalString(input *chunk.Chunk, result *chunk
 		return errors.Errorf("unsupported block encryption mode - %v", b.modeName)
 	}
 
-	isConst := b.args[1].ConstItem(b.ctx.GetStochastikVars().StmtCtx)
+	isConst := b.args[1].ConstItem(b.ctx.GetStochaseinstein_dbars().StmtCtx)
 	var key []byte
 	if isConst {
 		key = encrypt.DeriveKeyMyALLEGROSQL(keyBuf.GetBytes(0), b.keySize)
@@ -323,7 +323,7 @@ func (b *builtinAesDecryptIVSig) vecEvalString(input *chunk.Chunk, result *chunk
 		return errors.Errorf("unsupported block encryption mode - %v", b.modeName)
 	}
 
-	isConst := b.args[1].ConstItem(b.ctx.GetStochastikVars().StmtCtx)
+	isConst := b.args[1].ConstItem(b.ctx.GetStochaseinstein_dbars().StmtCtx)
 	var key []byte
 	if isConst {
 		key = encrypt.DeriveKeyMyALLEGROSQL(keyBuf.GetBytes(0), b.keySize)
@@ -375,7 +375,7 @@ func (b *builtinRandomBytesSig) vectorized() bool {
 
 func (b *builtinRandomBytesSig) vecEvalString(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -454,7 +454,7 @@ func (b *builtinSHA2Sig) vecEvalString(input *chunk.Chunk, result *chunk.Deferre
 	if err := b.args[0].VecEvalString(b.ctx, input, buf); err != nil {
 		return err
 	}
-	buf1, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf1, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -630,13 +630,13 @@ func (b *builtinAesEncryptSig) vecEvalString(input *chunk.Chunk, result *chunk.D
 	}
 
 	isWarning := !b.ivRequired && len(b.args) == 3
-	isConst := b.args[1].ConstItem(b.ctx.GetStochastikVars().StmtCtx)
+	isConst := b.args[1].ConstItem(b.ctx.GetStochaseinstein_dbars().StmtCtx)
 	var key []byte
 	if isConst {
 		key = encrypt.DeriveKeyMyALLEGROSQL(keyBuf.GetBytes(0), b.keySize)
 	}
 
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	result.ReserveString(n)
 	for i := 0; i < n; i++ {
 		// According to doc: If either function argument is NULL, the function returns NULL.
@@ -692,7 +692,7 @@ func (b *builtinPasswordSig) vecEvalString(input *chunk.Chunk, result *chunk.Def
 		}
 		// We should append a warning here because function "PASSWORD" is deprecated since MyALLEGROSQL 5.7.6.
 		// See https://dev.allegrosql.com/doc/refman/5.7/en/encryption-functions.html#function_password
-		b.ctx.GetStochastikVars().StmtCtx.AppendWarning(errDeprecatedSyntaxNoRememristed.GenWithStackByArgs("PASSWORD"))
+		b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errDeprecatedSyntaxNoRememristed.GenWithStackByArgs("PASSWORD"))
 
 		result.AppendString(auth.EncodePassword(pass))
 	}
@@ -749,7 +749,7 @@ func (b *builtinUncompressSig) vecEvalString(input *chunk.Chunk, result *chunk.D
 	}
 
 	result.ReserveString(n)
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	for i := 0; i < n; i++ {
 		if buf.IsNull(i) {
 			result.AppendNull()
@@ -792,7 +792,7 @@ func (b *builtinUncompressedLengthSig) vectorized() bool {
 }
 
 func (b *builtinUncompressedLengthSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredCauset) error {
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	nr := input.NumEvents()
 	payloadBuf, err := b.bufSlabPredictor.get(types.ETString, nr)
 	if err != nil {

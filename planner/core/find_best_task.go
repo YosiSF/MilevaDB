@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,22 +16,22 @@ package core
 import (
 	"math"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/property"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/collate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/ranger"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/set"
+	"github.com/whtcorpsinc/MilevaDB-Prod/statistics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/planner/property"
-	"github.com/whtcorpsinc/milevadb/planner/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/collate"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/ranger"
-	"github.com/whtcorpsinc/milevadb/soliton/set"
-	"github.com/whtcorpsinc/milevadb/statistics"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/types"
 	"go.uber.org/zap"
 	"golang.org/x/tools/container/intsets"
 )
@@ -211,7 +211,7 @@ func (p *baseLogicalPlan) enumeratePhysicalPlans4Task(physicalPlans []PhysicalPl
 		// The curCntPlan records the number of possible plans for pp
 		curCntPlan = 1
 		TimeStampNow := p.GetlogicalTS4TaskMap()
-		savedPlanID := p.ctx.GetStochastikVars().PlanID
+		savedPlanID := p.ctx.GetStochaseinstein_dbars().PlanID
 		for j, child := range p.children {
 			childTask, cnt, err := child.findBestTask(pp.GetChildReqProps(j), &PlanCounterDisabled)
 			childCnts[j] = cnt
@@ -232,7 +232,7 @@ func (p *baseLogicalPlan) enumeratePhysicalPlans4Task(physicalPlans []PhysicalPl
 
 		// If the target plan can be found in this physicalPlan(pp), rebuild childTasks to build the corresponding combination.
 		if planCounter.IsForce() && int64(*planCounter) <= curCntPlan {
-			p.ctx.GetStochastikVars().PlanID = savedPlanID
+			p.ctx.GetStochaseinstein_dbars().PlanID = savedPlanID
 			curCntPlan = int64(*planCounter)
 			err := p.rebuildChildTasks(&childTasks, pp, childCnts, int64(*planCounter), TimeStampNow)
 			if err != nil {
@@ -386,7 +386,7 @@ func (p *LogicalMemBlock) findBestTask(prop *property.PhysicalProperty, planCoun
 // tryToGetDualTask will check if the push down predicate has false constant. If so, it will return block dual.
 func (ds *DataSource) tryToGetDualTask() (task, error) {
 	for _, cond := range ds.pushedDownConds {
-		if con, ok := cond.(*expression.Constant); ok && con.DeferredExpr == nil && con.ParamMarker == nil {
+		if con, ok := cond.(*expression.CouplingConstantWithRadix); ok && con.DeferredExpr == nil && con.ParamMarker == nil {
 			result, _, err := expression.EvalBool(ds.ctx, []expression.Expression{cond}, chunk.Row{})
 			if err != nil {
 				return nil, err
@@ -529,7 +529,7 @@ func (ds *DataSource) skylinePruning(prop *property.PhysicalProperty) []*candida
 			continue
 		}
 		// if we already know the range of the scan is empty, just return a BlockDual
-		if len(path.Ranges) == 0 && !ds.ctx.GetStochastikVars().StmtCtx.UseCache {
+		if len(path.Ranges) == 0 && !ds.ctx.GetStochaseinstein_dbars().StmtCtx.UseCache {
 			return []*candidatePath{{path: path}}
 		}
 		if path.StoreType != ekv.TiFlash && (prop.TaskTp == property.INTERLOCKTiFlashLocalReadTaskType || prop.TaskTp == property.INTERLOCKTiFlashGlobalReadTaskType) {
@@ -663,7 +663,7 @@ func (ds *DataSource) findBestTask(prop *property.PhysicalProperty, planCounter 
 			continue
 		}
 		// if we already know the range of the scan is empty, just return a BlockDual
-		if len(path.Ranges) == 0 && !ds.ctx.GetStochastikVars().StmtCtx.UseCache {
+		if len(path.Ranges) == 0 && !ds.ctx.GetStochaseinstein_dbars().StmtCtx.UseCache {
 			dual := PhysicalBlockDual{}.Init(ds.ctx, ds.stats, ds.blockOffset)
 			dual.SetSchema(ds.schemaReplicant)
 			cntPlan += 1
@@ -685,13 +685,13 @@ func (ds *DataSource) findBestTask(prop *property.PhysicalProperty, planCounter 
 				}
 			}
 		}
-		if ds.block.Meta().GetPartitionInfo() != nil && ds.ctx.GetStochastikVars().UseDynamicPartitionPrune() {
+		if ds.block.Meta().GetPartitionInfo() != nil && ds.ctx.GetStochaseinstein_dbars().UseDynamicPartitionPrune() {
 			canConvertPointGet = false
 		}
 		if canConvertPointGet {
 			allRangeIsPoint := true
 			for _, ran := range path.Ranges {
-				if !ran.IsPoint(ds.ctx.GetStochastikVars().StmtCtx) {
+				if !ran.IsPoint(ds.ctx.GetStochaseinstein_dbars().StmtCtx) {
 					allRangeIsPoint = false
 					break
 				}
@@ -813,7 +813,7 @@ func (ds *DataSource) convertToPartialIndexScan(prop *property.PhysicalProperty,
 	rowSize := is.indexScanRowSize(idx, ds, false)
 	// TODO: Consider using isCoveringIndex() to avoid another BlockRead
 	indexConds := path.IndexFilters
-	sessVars := ds.ctx.GetStochastikVars()
+	sessVars := ds.ctx.GetStochaseinstein_dbars()
 	if indexConds != nil {
 		var selectivity float64
 		partialCost += rowCount * sessVars.INTERLOCKCPUFactor
@@ -842,7 +842,7 @@ func (ds *DataSource) convertToPartialBlockScan(prop *property.PhysicalProperty,
 	rowCount float64) {
 	ts, partialCost, rowCount := ds.getOriginalPhysicalBlockScan(prop, path, false)
 	rowSize := ds.TblDefCausHists.GetAvgRowSize(ds.ctx, ds.TblDefCauss, false, false)
-	sessVars := ds.ctx.GetStochastikVars()
+	sessVars := ds.ctx.GetStochaseinstein_dbars()
 	if len(ts.filterCondition) > 0 {
 		selectivity, _, err := ds.blockStats.HistDefCausl.Selectivity(ds.ctx, ts.filterCondition, nil)
 		if err != nil {
@@ -862,7 +862,7 @@ func (ds *DataSource) convertToPartialBlockScan(prop *property.PhysicalProperty,
 
 func (ds *DataSource) buildIndexMergeBlockScan(prop *property.PhysicalProperty, blockFilters []expression.Expression, totalRowCount float64) (PhysicalPlan, float64, error) {
 	var partialCost float64
-	sessVars := ds.ctx.GetStochastikVars()
+	sessVars := ds.ctx.GetStochaseinstein_dbars()
 	ts := PhysicalBlockScan{
 		Block:           ds.blockInfo,
 		DeferredCausets: ds.DeferredCausets,
@@ -1063,7 +1063,7 @@ func (is *PhysicalIndexScan) initSchema(idxExprDefCauss []*expression.DeferredCa
 			indexDefCauss = append(indexDefCauss, &expression.DeferredCauset{
 				ID:       is.Block.DeferredCausets[is.Index.DeferredCausets[i].Offset].ID,
 				RetType:  &is.Block.DeferredCausets[is.Index.DeferredCausets[i].Offset].FieldType,
-				UniqueID: is.ctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+				UniqueID: is.ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 			})
 		}
 	}
@@ -1093,7 +1093,7 @@ func (is *PhysicalIndexScan) initSchema(idxExprDefCauss []*expression.DeferredCa
 			indexDefCauss = append(indexDefCauss, &expression.DeferredCauset{
 				RetType:  types.NewFieldType(allegrosql.TypeLonglong),
 				ID:       perceptron.ExtraHandleID,
-				UniqueID: is.ctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+				UniqueID: is.ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 			})
 		}
 	}
@@ -1108,13 +1108,13 @@ func (is *PhysicalIndexScan) addPushedDownSelection(INTERLOCKTask *INTERLOCKTask
 	blockConds, INTERLOCKTask.rootTaskConds = SplitSelCondsWithVirtualDeferredCauset(blockConds)
 
 	var newRootConds []expression.Expression
-	indexConds, newRootConds = expression.PushDownExprs(is.ctx.GetStochastikVars().StmtCtx, indexConds, is.ctx.GetClient(), ekv.EinsteinDB)
+	indexConds, newRootConds = expression.PushDownExprs(is.ctx.GetStochaseinstein_dbars().StmtCtx, indexConds, is.ctx.GetClient(), ekv.EinsteinDB)
 	INTERLOCKTask.rootTaskConds = append(INTERLOCKTask.rootTaskConds, newRootConds...)
 
-	blockConds, newRootConds = expression.PushDownExprs(is.ctx.GetStochastikVars().StmtCtx, blockConds, is.ctx.GetClient(), ekv.EinsteinDB)
+	blockConds, newRootConds = expression.PushDownExprs(is.ctx.GetStochaseinstein_dbars().StmtCtx, blockConds, is.ctx.GetClient(), ekv.EinsteinDB)
 	INTERLOCKTask.rootTaskConds = append(INTERLOCKTask.rootTaskConds, newRootConds...)
 
-	sessVars := is.ctx.GetStochastikVars()
+	sessVars := is.ctx.GetStochaseinstein_dbars()
 	if indexConds != nil {
 		INTERLOCKTask.cst += INTERLOCKTask.count() * sessVars.INTERLOCKCPUFactor
 		var selectivity float64
@@ -1273,7 +1273,7 @@ func (ds *DataSource) crossEstimateRowCount(path *soliton.AccessPath, expectedCn
 	if ds.statisticBlock.Pseudo || len(path.BlockFilters) == 0 {
 		return 0, false, 0
 	}
-	col, corr := getMostCorrDefCausFromExprs(path.BlockFilters, ds.statisticBlock, ds.ctx.GetStochastikVars().CorrelationThreshold)
+	col, corr := getMostCorrDefCausFromExprs(path.BlockFilters, ds.statisticBlock, ds.ctx.GetStochaseinstein_dbars().CorrelationThreshold)
 	// If block scan is not full range scan, we cannot use histogram of other columns for estimation, because
 	// the histogram reflects value distribution in the whole block level.
 	if col == nil || len(path.AccessConds) > 0 {
@@ -1289,7 +1289,7 @@ func (ds *DataSource) crossEstimateRowCount(path *soliton.AccessPath, expectedCn
 	if len(accessConds) == 0 {
 		return 0, false, corr
 	}
-	sc := ds.ctx.GetStochastikVars().StmtCtx
+	sc := ds.ctx.GetStochaseinstein_dbars().StmtCtx
 	ranges, err := ranger.BuildDeferredCausetRange(accessConds, sc, col.RetType, types.UnspecifiedLength)
 	if len(ranges) == 0 || err != nil {
 		return 0, err == nil, corr
@@ -1429,7 +1429,7 @@ func (ds *DataSource) convertToPointGet(prop *property.PhysicalProperty, candida
 		dbName:           ds.DBName.L,
 		TblInfo:          ds.BlockInfo(),
 		outputNames:      ds.OutputNames(),
-		LockWaitTime:     ds.ctx.GetStochastikVars().LockWaitTimeout,
+		LockWaitTime:     ds.ctx.GetStochaseinstein_dbars().LockWaitTimeout,
 		DeferredCausets:  ds.DeferredCausets,
 	}.Init(ds.ctx, ds.blockStats.ScaleByExpectCnt(accessCnt), ds.blockOffset)
 	var partitionInfo *perceptron.PartitionDefinition
@@ -1455,7 +1455,7 @@ func (ds *DataSource) convertToPointGet(prop *property.PhysicalProperty, candida
 		cost = pointGetPlan.GetCost(ds.TblDefCauss)
 		// Add filter condition to block plan now.
 		if len(candidate.path.BlockFilters) > 0 {
-			sessVars := ds.ctx.GetStochastikVars()
+			sessVars := ds.ctx.GetStochaseinstein_dbars()
 			cost += pointGetPlan.stats.RowCount * sessVars.CPUFactor
 			sel := PhysicalSelection{
 				Conditions: candidate.path.BlockFilters,
@@ -1476,7 +1476,7 @@ func (ds *DataSource) convertToPointGet(prop *property.PhysicalProperty, candida
 		}
 		// Add index condition to block plan now.
 		if len(candidate.path.IndexFilters)+len(candidate.path.BlockFilters) > 0 {
-			sessVars := ds.ctx.GetStochastikVars()
+			sessVars := ds.ctx.GetStochaseinstein_dbars()
 			cost += pointGetPlan.stats.RowCount * sessVars.CPUFactor
 			sel := PhysicalSelection{
 				Conditions: append(candidate.path.IndexFilters, candidate.path.BlockFilters...),
@@ -1519,7 +1519,7 @@ func (ds *DataSource) convertToBatchPointGet(prop *property.PhysicalProperty, ca
 		cost = batchPointGetPlan.GetCost(ds.TblDefCauss)
 		// Add filter condition to block plan now.
 		if len(candidate.path.BlockFilters) > 0 {
-			sessVars := ds.ctx.GetStochastikVars()
+			sessVars := ds.ctx.GetStochaseinstein_dbars()
 			cost += batchPointGetPlan.stats.RowCount * sessVars.CPUFactor
 			sel := PhysicalSelection{
 				Conditions: candidate.path.BlockFilters,
@@ -1545,7 +1545,7 @@ func (ds *DataSource) convertToBatchPointGet(prop *property.PhysicalProperty, ca
 		}
 		// Add index condition to block plan now.
 		if len(candidate.path.IndexFilters)+len(candidate.path.BlockFilters) > 0 {
-			sessVars := ds.ctx.GetStochastikVars()
+			sessVars := ds.ctx.GetStochaseinstein_dbars()
 			cost += batchPointGetPlan.stats.RowCount * sessVars.CPUFactor
 			sel := PhysicalSelection{
 				Conditions: append(candidate.path.IndexFilters, candidate.path.BlockFilters...),
@@ -1562,11 +1562,11 @@ func (ds *DataSource) convertToBatchPointGet(prop *property.PhysicalProperty, ca
 func (ts *PhysicalBlockScan) addPushedDownSelection(INTERLOCKTask *INTERLOCKTask, stats *property.StatsInfo) {
 	ts.filterCondition, INTERLOCKTask.rootTaskConds = SplitSelCondsWithVirtualDeferredCauset(ts.filterCondition)
 	var newRootConds []expression.Expression
-	ts.filterCondition, newRootConds = expression.PushDownExprs(ts.ctx.GetStochastikVars().StmtCtx, ts.filterCondition, ts.ctx.GetClient(), ts.StoreType)
+	ts.filterCondition, newRootConds = expression.PushDownExprs(ts.ctx.GetStochaseinstein_dbars().StmtCtx, ts.filterCondition, ts.ctx.GetClient(), ts.StoreType)
 	INTERLOCKTask.rootTaskConds = append(INTERLOCKTask.rootTaskConds, newRootConds...)
 
 	// Add filter condition to block plan now.
-	sessVars := ts.ctx.GetStochastikVars()
+	sessVars := ts.ctx.GetStochaseinstein_dbars()
 	if len(ts.filterCondition) > 0 {
 		INTERLOCKTask.cst += INTERLOCKTask.count() * sessVars.INTERLOCKCPUFactor
 		sel := PhysicalSelection{Conditions: ts.filterCondition}.Init(ts.ctx, stats, ts.blockOffset)
@@ -1610,7 +1610,7 @@ func (ds *DataSource) getOriginalPhysicalBlockScan(prop *property.PhysicalProper
 			// we do not add this check temporarily.
 			rowCount = count
 		} else if corr < 1 {
-			correlationFactor := math.Pow(1-corr, float64(ds.ctx.GetStochastikVars().CorrelationExpFactor))
+			correlationFactor := math.Pow(1-corr, float64(ds.ctx.GetStochaseinstein_dbars().CorrelationExpFactor))
 			selectivity := ds.stats.RowCount / rowCount
 			rowCount = math.Min(prop.ExpectedCnt/selectivity/correlationFactor, rowCount)
 		}
@@ -1629,7 +1629,7 @@ func (ds *DataSource) getOriginalPhysicalBlockScan(prop *property.PhysicalProper
 		// This logic can be ensured in column pruning.
 		rowSize = ds.TblDefCausHists.GetBlockAvgRowSize(ds.ctx, ts.Schema().DeferredCausets, ts.StoreType, ds.handleDefCauss != nil)
 	}
-	sessVars := ds.ctx.GetStochastikVars()
+	sessVars := ds.ctx.GetStochaseinstein_dbars()
 	cost := rowCount * rowSize * sessVars.ScanFactor
 	if ts.IsGlobalRead {
 		cost += rowCount * sessVars.NetworkFactor * rowSize
@@ -1681,7 +1681,7 @@ func (ds *DataSource) getOriginalPhysicalIndexScan(prop *property.PhysicalProper
 	}
 	is.stats = ds.blockStats.ScaleByExpectCnt(rowCount)
 	rowSize := is.indexScanRowSize(idx, ds, true)
-	sessVars := ds.ctx.GetStochastikVars()
+	sessVars := ds.ctx.GetStochaseinstein_dbars()
 	cost := rowCount * rowSize * sessVars.ScanFactor
 	if isMatchProp {
 		if prop.Items[0].Desc {

@@ -67,7 +67,7 @@ function build_importer()
     importer="./importer"
     echo "building importer binary: $importer"
     rm -rf $importer
-    GO111MODULE=on go build -o $importer github.com/whtcorpsinc/milevadb/cmd/importer
+    GO111MODULE=on go build -o $importer github.com/whtcorpsinc/MilevaDB-Prod/cmd/importer
 }
 
 function build_portgenerator()
@@ -75,7 +75,7 @@ function build_portgenerator()
     portgenerator="./portgenerator"
     echo "building portgenerator binary: $portgenerator"
     rm -rf $portgenerator
-    GO111MODULE=on go build -o $portgenerator github.com/whtcorpsinc/milevadb/cmd/portgenerator
+    GO111MODULE=on go build -o $portgenerator github.com/whtcorpsinc/MilevaDB-Prod/cmd/portgenerator
 }
 
 
@@ -84,7 +84,7 @@ function build_milevadb_server()
     milevadb_server="./explaintest_milevadb-server"
     echo "building milevadb-server binary: $milevadb_server"
     rm -rf $milevadb_server
-    GO111MODULE=on go build -race -o $milevadb_server github.com/whtcorpsinc/milevadb/milevadb-server
+    GO111MODULE=on go build -race -o $milevadb_server github.com/whtcorpsinc/MilevaDB-Prod/milevadb-server
 }
 
 function build_explain_test()

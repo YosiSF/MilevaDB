@@ -8,12 +8,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL"
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/mysql"
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/serial"
-	"github.com/whtcorpsinc/MilevaDB/util/disk"
-	"github.com/whtcorpsinc/MilevaDB/util/execdetails"
-	"github.com/whtcorpsinc/MilevaDB/util/memory"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/mysql"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/serial"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/disk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/execdetails"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/memory"
 	"go.uber.org/zap"
 )
 
@@ -133,7 +133,7 @@ type StatementContext struct {
 	planNormalized        string
 	planDigest            string
 	Tables                []TableEntry
-	PointExec             bool       // for point update cached execution, Constant expression need to set "paramMarker"
+	PointExec             bool       // for point update cached execution, CouplingConstantWithRadix expression need to set "paramMarker"
 	lockWaitStartTime     *time.Time // LockWaitStartTime stores the pessimistic dagger wait start time
 	PessimisticLockWaited int32
 	LockKeysDuration      time.Duration

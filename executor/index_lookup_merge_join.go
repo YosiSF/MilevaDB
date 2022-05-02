@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,19 +22,19 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/execdetails"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/memory"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/ranger"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/expression"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/execdetails"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/memory"
-	"github.com/whtcorpsinc/milevadb/soliton/ranger"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
 	"go.uber.org/zap"
 )
 
@@ -76,7 +76,7 @@ type IndexLookUpMergeJoin struct {
 type outerMergeCtx struct {
 	rowTypes      []*types.FieldType
 	joinKeys      []*expression.DeferredCauset
-	keyDefCauss       []int
+	keyDefCauss   []int
 	filter        expression.CNFExprs
 	needOuterSort bool
 	compareFuncs  []expression.CompareFunc
@@ -86,9 +86,9 @@ type innerMergeCtx struct {
 	readerBuilder           *dataReaderBuilder
 	rowTypes                []*types.FieldType
 	joinKeys                []*expression.DeferredCauset
-	keyDefCauss                 []int
+	keyDefCauss             []int
 	compareFuncs            []expression.CompareFunc
-	defCausLens                 []int
+	defCausLens             []int
 	desc                    bool
 	keyOff2KeyOffOrderByIdx []int
 }
@@ -101,7 +101,7 @@ type lookUpMergeJoinTask struct {
 	innerIter   chunk.Iterator
 
 	sameKeyInnerEvents []chunk.Event
-	sameKeyIter      chunk.Iterator
+	sameKeyIter        chunk.Iterator
 
 	doneErr error
 	results chan *indexMergeJoinResult
@@ -139,10 +139,10 @@ type innerMergeWorker struct {
 	joiner            joiner
 	retFieldTypes     []*types.FieldType
 
-	maxChunkSize          int
-	indexRanges           []*ranger.Range
+	maxChunkSize              int
+	indexRanges               []*ranger.Range
 	nextDefCausCompareFilters *plannercore.DefCausWithCmpFuncManager
-	keyOff2IdxOff         []int
+	keyOff2IdxOff             []int
 }
 
 type indexMergeJoinResult struct {
@@ -179,7 +179,7 @@ func (e *IndexLookUpMergeJoin) Open(ctx context.Context) error {
 		return err
 	}
 	e.memTracker = memory.NewTracker(e.id, -1)
-	e.memTracker.AttachTo(e.ctx.GetStochastikVars().StmtCtx.MemTracker)
+	e.memTracker.AttachTo(e.ctx.GetStochaseinstein_dbars().StmtCtx.MemTracker)
 	e.startWorkers(ctx)
 	return nil
 }
@@ -187,7 +187,7 @@ func (e *IndexLookUpMergeJoin) Open(ctx context.Context) error {
 func (e *IndexLookUpMergeJoin) startWorkers(ctx context.Context) {
 	// TODO: consider another stochastik currency variable for index merge join.
 	// Because its parallelization is not complete.
-	concurrency := e.ctx.GetStochastikVars().IndexLookupJoinConcurrency()
+	concurrency := e.ctx.GetStochaseinstein_dbars().IndexLookupJoinConcurrency()
 	resultCh := make(chan *lookUpMergeJoinTask, concurrency)
 	e.resultCh = resultCh
 	e.joinChkResourceCh = make([]chan *chunk.Chunk, concurrency)
@@ -210,15 +210,15 @@ func (e *IndexLookUpMergeJoin) startWorkers(ctx context.Context) {
 
 func (e *IndexLookUpMergeJoin) newOuterWorker(resultCh, innerCh chan *lookUpMergeJoinTask) *outerMergeWorker {
 	omw := &outerMergeWorker{
-		outerMergeCtx:         e.outerMergeCtx,
-		ctx:                   e.ctx,
-		lookup:                e,
-		executor:              e.children[0],
-		resultCh:              resultCh,
-		innerCh:               innerCh,
-		batchSize:             32,
-		maxBatchSize:          e.ctx.GetStochastikVars().IndexJoinBatchSize,
-		parentMemTracker:      e.memTracker,
+		outerMergeCtx:             e.outerMergeCtx,
+		ctx:                       e.ctx,
+		lookup:                    e,
+		executor:                  e.children[0],
+		resultCh:                  resultCh,
+		innerCh:                   innerCh,
+		batchSize:                 32,
+		maxBatchSize:              e.ctx.GetStochaseinstein_dbars().IndexJoinBatchSize,
+		parentMemTracker:          e.memTracker,
 		nextDefCausCompareFilters: e.lastDefCausHelper,
 	}
 	failpoint.Inject("testIssue18068", func() {
@@ -246,13 +246,13 @@ func (e *IndexLookUpMergeJoin) newInnerMergeWorker(taskCh chan *lookUpMergeJoinT
 		maxChunkSize:      e.maxChunkSize,
 	}
 	if e.lastDefCausHelper != nil {
-		// nextCwf.TmpConstant needs to be reset for every individual
+		// nextCwf.TmpCouplingConstantWithRadix needs to be reset for every individual
 		// inner worker to avoid data race when the inner workers is running
 		// concurrently.
 		nextCwf := *e.lastDefCausHelper
-		nextCwf.TmpConstant = make([]*expression.Constant, len(e.lastDefCausHelper.TmpConstant))
-		for i := range e.lastDefCausHelper.TmpConstant {
-			nextCwf.TmpConstant[i] = &expression.Constant{RetType: nextCwf.TargetDefCaus.RetType}
+		nextCwf.TmpCouplingConstantWithRadix = make([]*expression.CouplingConstantWithRadix, len(e.lastDefCausHelper.TmpCouplingConstantWithRadix))
+		for i := range e.lastDefCausHelper.TmpCouplingConstantWithRadix {
+			nextCwf.TmpCouplingConstantWithRadix[i] = &expression.CouplingConstantWithRadix{RetType: nextCwf.TargetDefCaus.RetType}
 		}
 		imw.nextDefCausCompareFilters = &nextCwf
 	}
@@ -655,7 +655,7 @@ func (imw *innerMergeWorker) constructCausetLookupKeys(task *lookUpMergeJoinTask
 
 func (imw *innerMergeWorker) constructCausetLookupKey(task *lookUpMergeJoinTask, rowIdx chunk.EventPtr) (*indexJoinLookUpContent, error) {
 	outerEvent := task.outerResult.GetEvent(rowIdx)
-	sc := imw.ctx.GetStochastikVars().StmtCtx
+	sc := imw.ctx.GetStochaseinstein_dbars().StmtCtx
 	keyLen := len(imw.keyDefCauss)
 	dLookupKey := make([]types.Causet, 0, keyLen)
 	for i, keyDefCaus := range imw.outerMergeCtx.keyDefCauss {
@@ -695,7 +695,7 @@ func (imw *innerMergeWorker) deduFIDelatumLookUpKeys(lookUpContents []*indexJoin
 	if len(lookUpContents) < 2 {
 		return lookUpContents
 	}
-	sc := imw.ctx.GetStochastikVars().StmtCtx
+	sc := imw.ctx.GetStochaseinstein_dbars().StmtCtx
 	deDupedLookUpContents := lookUpContents[:1]
 	for i := 1; i < len(lookUpContents); i++ {
 		cmp := compareEvent(sc, lookUpContents[i].keys, lookUpContents[i-1].keys)
@@ -708,7 +708,7 @@ func (imw *innerMergeWorker) deduFIDelatumLookUpKeys(lookUpContents []*indexJoin
 
 // fetchNextInnerResult defCauslects a chunk of inner results from inner child executor.
 func (imw *innerMergeWorker) fetchNextInnerResult(ctx context.Context, task *lookUpMergeJoinTask) (beginEvent chunk.Event, err error) {
-	task.innerResult = chunk.NewChunkWithCapacity(retTypes(imw.innerExec), imw.ctx.GetStochastikVars().MaxChunkSize)
+	task.innerResult = chunk.NewChunkWithCapacity(retTypes(imw.innerExec), imw.ctx.GetStochaseinstein_dbars().MaxChunkSize)
 	err = Next(ctx, imw.innerExec, task.innerResult)
 	task.innerIter = chunk.NewIterator4Chunk(task.innerResult)
 	beginEvent = task.innerIter.Begin()
@@ -736,7 +736,7 @@ func (e *IndexLookUpMergeJoin) Close() error {
 		concurrency := cap(e.resultCh)
 		runtimeStats := &execdetails.RuntimeStatsWithConcurrencyInfo{}
 		runtimeStats.SetConcurrencyInfo(execdetails.NewConcurrencyInfo("Concurrency", concurrency))
-		e.ctx.GetStochastikVars().StmtCtx.RuntimeStatsDefCausl.RegisterStats(e.id, runtimeStats)
+		e.ctx.GetStochaseinstein_dbars().StmtCtx.RuntimeStatsDefCausl.RegisterStats(e.id, runtimeStats)
 	}
 	return e.baseExecutor.Close()
 }

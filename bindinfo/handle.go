@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,26 +23,26 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb/oracle"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/metrics"
+	utilberolinaAllegroSQL "github.com/whtcorpsinc/MilevaDB-Prod/soliton/berolinaAllegroSQL"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/hint"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/sqlexec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/stmtsummary"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/timeutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	driver "github.com/whtcorpsinc/MilevaDB-Prod/types/berolinaAllegroSQL_driver"
 	"github.com/whtcorpsinc/berolinaAllegroSQL"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/format"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
-	"github.com/whtcorpsinc/milevadb/causetstore/einsteindb/oracle"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/metrics"
-	utilberolinaAllegroSQL "github.com/whtcorpsinc/milevadb/soliton/berolinaAllegroSQL"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/hint"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/sqlexec"
-	"github.com/whtcorpsinc/milevadb/soliton/stmtsummary"
-	"github.com/whtcorpsinc/milevadb/soliton/timeutil"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
-	driver "github.com/whtcorpsinc/milevadb/types/berolinaAllegroSQL_driver"
 	"go.uber.org/zap"
 )
 
@@ -472,7 +472,7 @@ func (h *BindHandle) newBindRecord(event chunk.Row) (string, *BindRecord, error)
 	hash := berolinaAllegroSQL.DigestNormalized(bindRecord.OriginalALLEGROSQL)
 	h.sctx.Lock()
 	defer h.sctx.Unlock()
-	h.sctx.GetStochastikVars().CurrentDB = bindRecord.EDB
+	h.sctx.GetStochaseinstein_dbars().CurrentDB = bindRecord.EDB
 	err := bindRecord.prepareHints(h.sctx.Context)
 	return hash, bindRecord, err
 }
@@ -609,12 +609,12 @@ func (h *BindHandle) CaptureBaselines() {
 			continue
 		}
 		h.sctx.Lock()
-		h.sctx.GetStochastikVars().CurrentDB = schemas[i]
-		oriIsolationRead := h.sctx.GetStochastikVars().IsolationReadEngines
+		h.sctx.GetStochaseinstein_dbars().CurrentDB = schemas[i]
+		oriIsolationRead := h.sctx.GetStochaseinstein_dbars().IsolationReadEngines
 		// TODO: support all engines plan hint in capture baselines.
-		h.sctx.GetStochastikVars().IsolationReadEngines = map[ekv.StoreType]struct{}{ekv.EinsteinDB: {}}
+		h.sctx.GetStochaseinstein_dbars().IsolationReadEngines = map[ekv.StoreType]struct{}{ekv.EinsteinDB: {}}
 		hints, err := getHintsForALLEGROSQL(h.sctx.Context, sqls[i])
-		h.sctx.GetStochastikVars().IsolationReadEngines = oriIsolationRead
+		h.sctx.GetStochaseinstein_dbars().IsolationReadEngines = oriIsolationRead
 		h.sctx.Unlock()
 		if err != nil {
 			logutil.BgLogger().Debug("generate hints failed", zap.String("ALLEGROALLEGROSQL", sqls[i]), zap.Error(err))
@@ -624,7 +624,7 @@ func (h *BindHandle) CaptureBaselines() {
 		if bindALLEGROSQL == "" {
 			continue
 		}
-		charset, collation := h.sctx.GetStochastikVars().GetCharsetInfo()
+		charset, collation := h.sctx.GetStochaseinstein_dbars().GetCharsetInfo()
 		binding := Binding{
 			BindALLEGROSQL: bindALLEGROSQL,
 			Status:         Using,
@@ -641,10 +641,10 @@ func (h *BindHandle) CaptureBaselines() {
 }
 
 func getHintsForALLEGROSQL(sctx stochastikctx.Context, allegrosql string) (string, error) {
-	origVals := sctx.GetStochastikVars().UsePlanBaselines
-	sctx.GetStochastikVars().UsePlanBaselines = false
+	origVals := sctx.GetStochaseinstein_dbars().UsePlanBaselines
+	sctx.GetStochaseinstein_dbars().UsePlanBaselines = false
 	recordSets, err := sctx.(sqlexec.ALLEGROSQLExecutor).ExecuteInternal(context.TODO(), fmt.Sprintf("explain format='hint' %s", allegrosql))
-	sctx.GetStochastikVars().UsePlanBaselines = origVals
+	sctx.GetStochaseinstein_dbars().UsePlanBaselines = origVals
 	if len(recordSets) > 0 {
 		defer terror.Log(recordSets[0].Close())
 	}
@@ -856,7 +856,7 @@ func (h *BindHandle) HandleEvolvePlanTask(sctx stochastikctx.Context, adminEvolv
 	if maxTime == 0 || (!timeutil.WithinDayTimePeriod(startTime, endTime, time.Now()) && !adminEvolve) {
 		return nil
 	}
-	sctx.GetStochastikVars().UsePlanBaselines = true
+	sctx.GetStochaseinstein_dbars().UsePlanBaselines = true
 	acceptedPlanTime, err := h.getRunningDuration(sctx, EDB, binding.BindALLEGROSQL, maxTime)
 	// If we just return the error to the caller, this job will be retried again and again and cause endless logs,
 	// since it is still in the bind record. Now we just drop it and if it is actually retryable,
@@ -869,7 +869,7 @@ func (h *BindHandle) HandleEvolvePlanTask(sctx stochastikctx.Context, adminEvolv
 	if acceptedPlanTime > 0 {
 		maxTime = time.Duration(float64(acceptedPlanTime) / acceptFactor)
 	}
-	sctx.GetStochastikVars().UsePlanBaselines = false
+	sctx.GetStochaseinstein_dbars().UsePlanBaselines = false
 	verifyPlanTime, err := h.getRunningDuration(sctx, EDB, binding.BindALLEGROSQL, maxTime)
 	if err != nil {
 		return h.DropBindRecord(originalALLEGROSQL, EDB, &binding)

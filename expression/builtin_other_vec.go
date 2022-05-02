@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@ import (
 	"strings"
 
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/defCauslate"
-	"github.com/whtcorpsinc/milevadb/soliton/stringutil"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/defCauslate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/stringutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 func (b *builtinValuesIntSig) vectorized() bool {
@@ -126,9 +126,9 @@ func (b *builtinGetParamStringSig) vectorized() bool {
 }
 
 func (b *builtinGetParamStringSig) vecEvalString(input *chunk.Chunk, result *chunk.DeferredCauset) error {
-	stochastikVars := b.ctx.GetStochastikVars()
+	stochaseinstein_dbars := b.ctx.GetStochaseinstein_dbars()
 	n := input.NumEvents()
-	idx, err := b.bufSlabPredictor.get(types.ETInt, n)
+	idx, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -144,7 +144,7 @@ func (b *builtinGetParamStringSig) vecEvalString(input *chunk.Chunk, result *chu
 			continue
 		}
 		idxI := idxIs[i]
-		v := stochastikVars.PreparedParams[idxI]
+		v := stochaseinstein_dbars.PreparedParams[idxI]
 		str, err := v.ToString()
 		if err != nil {
 			result.AppendNull()
@@ -178,10 +178,10 @@ func (b *builtinSetVarSig) vecEvalString(input *chunk.Chunk, result *chunk.Defer
 		return err
 	}
 	result.ReserveString(n)
-	stochastikVars := b.ctx.GetStochastikVars()
-	stochastikVars.UsersLock.Lock()
-	defer stochastikVars.UsersLock.Unlock()
-	_, defCauslation := stochastikVars.GetCharsetInfo()
+	stochaseinstein_dbars := b.ctx.GetStochaseinstein_dbars()
+	stochaseinstein_dbars.UsersLock.Lock()
+	defer stochaseinstein_dbars.UsersLock.Unlock()
+	_, defCauslation := stochaseinstein_dbars.GetCharsetInfo()
 	for i := 0; i < n; i++ {
 		if buf0.IsNull(i) || buf1.IsNull(i) {
 			result.AppendNull()
@@ -189,7 +189,7 @@ func (b *builtinSetVarSig) vecEvalString(input *chunk.Chunk, result *chunk.Defer
 		}
 		varName := strings.ToLower(buf0.GetString(i))
 		res := buf1.GetString(i)
-		stochastikVars.Users[varName] = types.NewDefCauslationStringCauset(stringutil.INTERLOCKy(res), defCauslation, defCauslate.DefaultLen)
+		stochaseinstein_dbars.Users[varName] = types.NewDefCauslationStringCauset(stringutil.INTERLOCKy(res), defCauslation, defCauslate.DefaultLen)
 		result.AppendString(res)
 	}
 	return nil
@@ -218,16 +218,16 @@ func (b *builtinGetVarSig) vecEvalString(input *chunk.Chunk, result *chunk.Defer
 		return err
 	}
 	result.ReserveString(n)
-	stochastikVars := b.ctx.GetStochastikVars()
-	stochastikVars.UsersLock.Lock()
-	defer stochastikVars.UsersLock.Unlock()
+	stochaseinstein_dbars := b.ctx.GetStochaseinstein_dbars()
+	stochaseinstein_dbars.UsersLock.Lock()
+	defer stochaseinstein_dbars.UsersLock.Unlock()
 	for i := 0; i < n; i++ {
 		if buf0.IsNull(i) {
 			result.AppendNull()
 			continue
 		}
 		varName := strings.ToLower(buf0.GetString(i))
-		if v, ok := stochastikVars.Users[varName]; ok {
+		if v, ok := stochaseinstein_dbars.Users[varName]; ok {
 			result.AppendString(v.GetString())
 			continue
 		}

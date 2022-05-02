@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,32 +16,34 @@ package blocks
 import (
 	"context"
 	"io"
-
-	"github.com/opentracing/opentracing-go"
-	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
-	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
-	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/blockcodec"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/soliton/codec"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/types"
+	_ "sync"
+	_ "time"
 )
+
+type Iterator interface {
+	Close() error
+	Next(background context.Context) (interface{}, interface{}, interface{})
+}
 
 // indexIter is for KV causetstore index iterator.
 type indexIter struct {
-	it     ekv.Iterator
-	idx    *index
-	prefix ekv.Key
+	iter *Iterator
+	idx  int
 }
 
 // Close does the clean up works when KV causetstore index iterator is closed.
 func (c *indexIter) Close() {
-	if c.it != nil {
-		c.it.Close()
-		c.it = nil
+	if c.iter != nil {
+		for {
+			k, _, err := c.iter.Next(context.Background())
+			if err != nil {
+				break
+			}
+			if k != nil {
+				c.idx++
+			}
+		}
+		c.iter = nil
 	}
 }
 
@@ -184,7 +186,7 @@ func (c *index) Create(sctx stochastikctx.Context, us ekv.UnionStore, indexedVal
 	for _, fn := range opts {
 		fn(&opt)
 	}
-	vars := sctx.GetStochastikVars()
+	vars := sctx.GetStochaseinstein_dbars()
 	writeBufs := vars.GetWriteStmtBufs()
 	skipCheck := vars.StmtCtx.BatchCheck
 	key, distinct, err := c.GenIndexKey(vars.StmtCtx, indexedValues, h, writeBufs.IndexKeyBuf)
@@ -209,7 +211,7 @@ func (c *index) Create(sctx stochastikctx.Context, us ekv.UnionStore, indexedVal
 
 	// save the key buffer to reuse.
 	writeBufs.IndexKeyBuf = key
-	idxVal, err := blockcodec.GenIndexValueNew(sctx.GetStochastikVars().StmtCtx, c.tblInfo, c.idxInfo,
+	idxVal, err := blockcodec.GenIndexValueNew(sctx.GetStochaseinstein_dbars().StmtCtx, c.tblInfo, c.idxInfo,
 		c.containNonBinaryString, distinct, opt.Untouched, indexedValues, h, c.phyTblID)
 	if err != nil {
 		return nil, err
@@ -231,7 +233,7 @@ func (c *index) Create(sctx stochastikctx.Context, us ekv.UnionStore, indexedVal
 	}
 
 	var value []byte
-	if sctx.GetStochastikVars().LazyCheckKeyNotExists() {
+	if sctx.GetStochaseinstein_dbars().LazyCheckKeyNotExists() {
 		value, err = us.GetMemBuffer().Get(ctx, key)
 	} else {
 		value, err = us.Get(ctx, key)
@@ -240,7 +242,7 @@ func (c *index) Create(sctx stochastikctx.Context, us ekv.UnionStore, indexedVal
 		return nil, err
 	}
 	if err != nil || len(value) == 0 {
-		if sctx.GetStochastikVars().LazyCheckKeyNotExists() && err != nil {
+		if sctx.GetStochaseinstein_dbars().LazyCheckKeyNotExists() && err != nil {
 			err = us.GetMemBuffer().SetWithFlags(key, idxVal, ekv.SetPresumeKeyNotExists)
 		} else {
 			err = us.GetMemBuffer().Set(key, idxVal)
@@ -363,6 +365,16 @@ func (c *index) FetchValues(r []types.Causet, vals []types.Causet) ([]types.Caus
 		vals[i] = r[ic.Offset]
 	}
 	return vals, nil
+}
+
+// FindChangingDefCaus finds the changing defCausumn in idxInfo.
+func FindChangingDefCaus(defcaus []*block.DeferredCauset, idxInfo *perceptron.IndexInfo) *block.DeferredCauset {
+	for _, ic := range idxInfo.DeferredCausets {
+		if defCaus := defcaus[ic.Offset]; defCaus.ChangeStateInfo != nil {
+			return defCaus
+		}
+	}
+	return nil
 }
 
 // FindChangingDefCaus finds the changing defCausumn in idxInfo.

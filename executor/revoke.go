@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,16 +17,16 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/sqlexec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/sqlexec"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
 	"go.uber.org/zap"
 )
 
@@ -63,7 +63,7 @@ func (e *RevokeExec) Next(ctx context.Context, req *chunk.Chunk) error {
 	if err := e.ctx.NewTxn(ctx); err != nil {
 		return err
 	}
-	defer func() { e.ctx.GetStochastikVars().SetStatusFlag(allegrosql.ServerStatusInTrans, false) }()
+	defer func() { e.ctx.GetStochaseinstein_dbars().SetStatusFlag(allegrosql.ServerStatusInTrans, false) }()
 
 	// Create internal stochastik to start internal transaction.
 	isCommit := false
@@ -115,7 +115,7 @@ func (e *RevokeExec) Next(ctx context.Context, req *chunk.Chunk) error {
 func (e *RevokeExec) revokeOneUser(internalStochastik stochastikctx.Context, user, host string) error {
 	dbName := e.Level.DBName
 	if len(dbName) == 0 {
-		dbName = e.ctx.GetStochastikVars().CurrentDB
+		dbName = e.ctx.GetStochaseinstein_dbars().CurrentDB
 	}
 
 	// If there is no privilege entry in corresponding block, insert a new one.
@@ -178,7 +178,7 @@ func (e *RevokeExec) revokeGlobalPriv(internalStochastik stochastikctx.Context, 
 func (e *RevokeExec) revokeDBPriv(internalStochastik stochastikctx.Context, priv *ast.PrivElem, userName, host string) error {
 	dbName := e.Level.DBName
 	if len(dbName) == 0 {
-		dbName = e.ctx.GetStochastikVars().CurrentDB
+		dbName = e.ctx.GetStochaseinstein_dbars().CurrentDB
 	}
 	asgns, err := composeDBPrivUFIDelate(priv.Priv, "N")
 	if err != nil {

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,12 +17,12 @@ import (
 	"context"
 	"strings"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
 	"github.com/whtcorpsinc/berolinaAllegroSQL"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
 )
 
 // IndexAdviseExec represents a index advise executor.
@@ -87,7 +87,7 @@ func (e *IndexAdviseInfo) getStmtNodes(data []byte) error {
 	}
 	sqls = sqls[:j]
 
-	sv := e.Ctx.GetStochastikVars()
+	sv := e.Ctx.GetStochaseinstein_dbars()
 	e.StmtNodes = make([][]ast.StmtNode, len(sqls))
 	sqlberolinaAllegroSQL := berolinaAllegroSQL.New()
 	for i, allegrosql := range sqls {

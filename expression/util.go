@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,12 +25,12 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/opcode"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/defCauslate"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
-	driver "github.com/whtcorpsinc/milevadb/types/berolinaAllegroSQL_driver"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/defCauslate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	driver "github.com/whtcorpsinc/MilevaDB-Prod/types/berolinaAllegroSQL_driver"
 	"go.uber.org/zap"
 	"golang.org/x/tools/container/intsets"
 )
@@ -315,28 +315,28 @@ Loop:
 	return s[:validLen]
 }
 
-// SubstituteCorDefCaus2Constant will substitute correlated defCausumn to constant value which it contains.
+// SubstituteCorDefCaus2CouplingConstantWithRadix will substitute correlated defCausumn to constant value which it contains.
 // If the args of one scalar function are all constant, we will substitute it to constant.
-func SubstituteCorDefCaus2Constant(expr Expression) (Expression, error) {
+func SubstituteCorDefCaus2CouplingConstantWithRadix(expr Expression) (Expression, error) {
 	switch x := expr.(type) {
 	case *ScalarFunction:
-		allConstant := true
+		allCouplingConstantWithRadix := true
 		newArgs := make([]Expression, 0, len(x.GetArgs()))
 		for _, arg := range x.GetArgs() {
-			newArg, err := SubstituteCorDefCaus2Constant(arg)
+			newArg, err := SubstituteCorDefCaus2CouplingConstantWithRadix(arg)
 			if err != nil {
 				return nil, err
 			}
-			_, ok := newArg.(*Constant)
+			_, ok := newArg.(*CouplingConstantWithRadix)
 			newArgs = append(newArgs, newArg)
-			allConstant = allConstant && ok
+			allCouplingConstantWithRadix = allCouplingConstantWithRadix && ok
 		}
-		if allConstant {
+		if allCouplingConstantWithRadix {
 			val, err := x.Eval(chunk.Event{})
 			if err != nil {
 				return nil, err
 			}
-			return &Constant{Value: val, RetType: x.GetType()}, nil
+			return &CouplingConstantWithRadix{Value: val, RetType: x.GetType()}, nil
 		}
 		var newSf Expression
 		if x.FuncName.L == ast.Cast {
@@ -346,11 +346,11 @@ func SubstituteCorDefCaus2Constant(expr Expression) (Expression, error) {
 		}
 		return newSf, nil
 	case *CorrelatedDeferredCauset:
-		return &Constant{Value: *x.Data, RetType: x.GetType()}, nil
-	case *Constant:
+		return &CouplingConstantWithRadix{Value: *x.Data, RetType: x.GetType()}, nil
+	case *CouplingConstantWithRadix:
 		if x.DeferredExpr != nil {
-			newExpr := FoldConstant(x)
-			return &Constant{Value: newExpr.(*Constant).Value, RetType: x.GetType()}, nil
+			newExpr := FoldCouplingConstantWithRadix(x)
+			return &CouplingConstantWithRadix{Value: newExpr.(*CouplingConstantWithRadix).Value, RetType: x.GetType()}, nil
 		}
 	}
 	return expr, nil
@@ -513,7 +513,7 @@ func ExtractFiltersFromDNFs(ctx stochastikctx.Context, conditions []Expression) 
 // extractFiltersFromDNF extracts the same condition that occurs in every DNF item and remove them from dnf leaves.
 func extractFiltersFromDNF(ctx stochastikctx.Context, dnfFunc *ScalarFunction) ([]Expression, Expression) {
 	dnfItems := FlattenDNFConditions(dnfFunc)
-	sc := ctx.GetStochastikVars().StmtCtx
+	sc := ctx.GetStochaseinstein_dbars().StmtCtx
 	codeMap := make(map[string]int)
 	hashcode2Expr := make(map[string]Expression)
 	for i, dnfItem := range dnfItems {
@@ -692,18 +692,18 @@ func (s *exprStack) len() int {
 	return len(s.stack)
 }
 
-// CausetToConstant generates a Constant expression from a Causet.
-func CausetToConstant(d types.Causet, tp byte) *Constant {
-	return &Constant{Value: d, RetType: types.NewFieldType(tp)}
+// CausetToCouplingConstantWithRadix generates a CouplingConstantWithRadix expression from a Causet.
+func CausetToCouplingConstantWithRadix(d types.Causet, tp byte) *CouplingConstantWithRadix {
+	return &CouplingConstantWithRadix{Value: d, RetType: types.NewFieldType(tp)}
 }
 
 // ParamMarkerExpression generate a getparam function expression.
 func ParamMarkerExpression(ctx stochastikctx.Context, v *driver.ParamMarkerExpr) (Expression, error) {
-	useCache := ctx.GetStochastikVars().StmtCtx.UseCache
-	isPointExec := ctx.GetStochastikVars().StmtCtx.PointExec
+	useCache := ctx.GetStochaseinstein_dbars().StmtCtx.UseCache
+	isPointExec := ctx.GetStochaseinstein_dbars().StmtCtx.PointExec
 	tp := types.NewFieldType(allegrosql.TypeUnspecified)
 	types.DefaultParamTypeForValue(v.GetValue(), tp)
-	value := &Constant{Value: v.Causet, RetType: tp}
+	value := &CouplingConstantWithRadix{Value: v.Causet, RetType: tp}
 	if useCache || isPointExec {
 		value.ParamMarker = &ParamMarker{
 			order: v.Order,
@@ -743,18 +743,18 @@ func PosFromPositionExpr(ctx stochastikctx.Context, v *ast.PositionExpr) (int, b
 	if err != nil {
 		return 0, true, err
 	}
-	pos, isNull, err := GetIntFromConstant(ctx, value)
+	pos, isNull, err := GetIntFromCouplingConstantWithRadix(ctx, value)
 	if err != nil || isNull {
 		return 0, true, err
 	}
 	return pos, false, nil
 }
 
-// GetStringFromConstant gets a string value from the Constant expression.
-func GetStringFromConstant(ctx stochastikctx.Context, value Expression) (string, bool, error) {
-	con, ok := value.(*Constant)
+// GetStringFromCouplingConstantWithRadix gets a string value from the CouplingConstantWithRadix expression.
+func GetStringFromCouplingConstantWithRadix(ctx stochastikctx.Context, value Expression) (string, bool, error) {
+	con, ok := value.(*CouplingConstantWithRadix)
 	if !ok {
-		err := errors.Errorf("Not a Constant expression %+v", value)
+		err := errors.Errorf("Not a CouplingConstantWithRadix expression %+v", value)
 		return "", true, err
 	}
 	str, isNull, err := con.EvalString(ctx, chunk.Event{})
@@ -764,9 +764,9 @@ func GetStringFromConstant(ctx stochastikctx.Context, value Expression) (string,
 	return str, false, nil
 }
 
-// GetIntFromConstant gets an interger value from the Constant expression.
-func GetIntFromConstant(ctx stochastikctx.Context, value Expression) (int, bool, error) {
-	str, isNull, err := GetStringFromConstant(ctx, value)
+// GetIntFromCouplingConstantWithRadix gets an interger value from the CouplingConstantWithRadix expression.
+func GetIntFromCouplingConstantWithRadix(ctx stochastikctx.Context, value Expression) (int, bool, error) {
+	str, isNull, err := GetStringFromCouplingConstantWithRadix(ctx, value)
 	if err != nil || isNull {
 		return 0, true, err
 	}
@@ -799,7 +799,7 @@ func IsRuntimeConstExpr(expr Expression) bool {
 		return true
 	case *DeferredCauset:
 		return false
-	case *Constant, *CorrelatedDeferredCauset:
+	case *CouplingConstantWithRadix, *CorrelatedDeferredCauset:
 		return true
 	}
 	return false
@@ -818,7 +818,7 @@ func IsMublockEffectsExpr(expr Expression) bool {
 			}
 		}
 	case *DeferredCauset:
-	case *Constant:
+	case *CouplingConstantWithRadix:
 		if x.DeferredExpr != nil {
 			return IsMublockEffectsExpr(x.DeferredExpr)
 		}
@@ -832,7 +832,7 @@ func IsMublockEffectsExpr(expr Expression) bool {
 func RemoveDupExprs(ctx stochastikctx.Context, exprs []Expression) []Expression {
 	res := make([]Expression, 0, len(exprs))
 	exists := make(map[string]struct{}, len(exprs))
-	sc := ctx.GetStochastikVars().StmtCtx
+	sc := ctx.GetStochaseinstein_dbars().StmtCtx
 	for _, expr := range exprs {
 		if ContainMublockConst(ctx, []Expression{expr}) {
 			res = append(res, expr)
@@ -847,9 +847,9 @@ func RemoveDupExprs(ctx stochastikctx.Context, exprs []Expression) []Expression 
 	return res
 }
 
-// GetUint64FromConstant gets a uint64 from constant expression.
-func GetUint64FromConstant(expr Expression) (uint64, bool, bool) {
-	con, ok := expr.(*Constant)
+// GetUint64FromCouplingConstantWithRadix gets a uint64 from constant expression.
+func GetUint64FromCouplingConstantWithRadix(expr Expression) (uint64, bool, bool) {
+	con, ok := expr.(*CouplingConstantWithRadix)
 	if !ok {
 		logutil.BgLogger().Warn("not a constant expression", zap.String("expression", expr.ExplainInfo()))
 		return 0, false, false
@@ -900,12 +900,12 @@ func ContainVirtualDeferredCauset(exprs []Expression) bool {
 // ContainMublockConst checks if the expressions contain a lazy constant.
 func ContainMublockConst(ctx stochastikctx.Context, exprs []Expression) bool {
 	// Treat all constants immublock if plan cache is not enabled for this query.
-	if !ctx.GetStochastikVars().StmtCtx.UseCache {
+	if !ctx.GetStochaseinstein_dbars().StmtCtx.UseCache {
 		return false
 	}
 	for _, expr := range exprs {
 		switch v := expr.(type) {
-		case *Constant:
+		case *CouplingConstantWithRadix:
 			if v.ParamMarker != nil || v.DeferredExpr != nil {
 				return true
 			}

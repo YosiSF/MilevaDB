@@ -3,10 +3,10 @@ import (
 
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/parser"
-	"github.com/whtcorpsinc/milevadb/BerolinaSQL/ast"
-	"github.com/whtcorpsinc/milevadb/BerolinaSQL/charset"
-	"github.com/whtcorpsinc/milevadb/BerolinaSQL/serial"
-	"github.com/whtcorpsinc/milevadb/util"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/ast"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/charset"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/serial"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util"
 )
 
 // nameResolver is the visitor to resolve table name and column name.

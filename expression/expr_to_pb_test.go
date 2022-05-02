@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,15 +26,15 @@ import (
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/failpoint"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/soliton/defCauslate"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/defCauslate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 func init() {
-	fpname := "github.com/whtcorpsinc/milevadb/expression/PanicIfPbCodeUnspecified"
+	fpname := "github.com/whtcorpsinc/MilevaDB-Prod/expression/PanicIfPbCodeUnspecified"
 	err := failpoint.Enable(fpname, "return(true)")
 	if err != nil {
 		panic(errors.Errorf("enable global failpoint `%s` failed: %v", fpname, err))
@@ -52,60 +52,60 @@ func (dg *dataGen4Expr2PbTest) genDeferredCauset(tp byte, id int64) *DeferredCau
 	}
 }
 
-func (s *testEvaluatorSuite) TestConstant2Pb(c *C) {
+func (s *testEvaluatorSuite) TestCouplingConstantWithRadix2Pb(c *C) {
 	c.Skip("constant pb has changed")
 	var constExprs []Expression
 	sc := new(stmtctx.StatementContext)
 	client := new(mock.Client)
 
 	// can be transformed
-	constValue := new(Constant)
+	constValue := new(CouplingConstantWithRadix)
 	constValue.Value = types.NewCauset(nil)
 	c.Assert(constValue.Value.HoTT(), Equals, types.HoTTNull)
 	constExprs = append(constExprs, constValue)
 
-	constValue = new(Constant)
+	constValue = new(CouplingConstantWithRadix)
 	constValue.Value = types.NewCauset(int64(100))
 	c.Assert(constValue.Value.HoTT(), Equals, types.HoTTInt64)
 	constExprs = append(constExprs, constValue)
 
-	constValue = new(Constant)
+	constValue = new(CouplingConstantWithRadix)
 	constValue.Value = types.NewCauset(uint64(100))
 	c.Assert(constValue.Value.HoTT(), Equals, types.HoTTUint64)
 	constExprs = append(constExprs, constValue)
 
-	constValue = new(Constant)
+	constValue = new(CouplingConstantWithRadix)
 	constValue.Value = types.NewCauset("100")
 	c.Assert(constValue.Value.HoTT(), Equals, types.HoTTString)
 	constExprs = append(constExprs, constValue)
 
-	constValue = new(Constant)
+	constValue = new(CouplingConstantWithRadix)
 	constValue.Value = types.NewCauset([]byte{'1', '2', '4', 'c'})
 	c.Assert(constValue.Value.HoTT(), Equals, types.HoTTBytes)
 	constExprs = append(constExprs, constValue)
 
-	constValue = new(Constant)
+	constValue = new(CouplingConstantWithRadix)
 	constValue.Value = types.NewCauset(types.NewDecFromInt(110))
 	c.Assert(constValue.Value.HoTT(), Equals, types.HoTTMysqlDecimal)
 	constExprs = append(constExprs, constValue)
 
-	constValue = new(Constant)
+	constValue = new(CouplingConstantWithRadix)
 	constValue.Value = types.NewCauset(types.Duration{})
 	c.Assert(constValue.Value.HoTT(), Equals, types.HoTTMysqlDuration)
 	constExprs = append(constExprs, constValue)
 
 	// can not be transformed
-	constValue = new(Constant)
+	constValue = new(CouplingConstantWithRadix)
 	constValue.Value = types.NewCauset(float32(100))
 	c.Assert(constValue.Value.HoTT(), Equals, types.HoTTFloat32)
 	constExprs = append(constExprs, constValue)
 
-	constValue = new(Constant)
+	constValue = new(CouplingConstantWithRadix)
 	constValue.Value = types.NewCauset(float64(100))
 	c.Assert(constValue.Value.HoTT(), Equals, types.HoTTFloat64)
 	constExprs = append(constExprs, constValue)
 
-	constValue = new(Constant)
+	constValue = new(CouplingConstantWithRadix)
 	constValue.Value = types.NewCauset(types.Enum{Name: "A", Value: 19})
 	c.Assert(constValue.Value.HoTT(), Equals, types.HoTTMysqlEnum)
 	constExprs = append(constExprs, constValue)
@@ -273,10 +273,10 @@ func (s *testEvaluatorSuite) TestLikeFunc2Pb(c *C) {
 	retTp.Charset = charset.CharsetUTF8
 	retTp.DefCauslate = charset.DefCauslationUTF8
 	args := []Expression{
-		&Constant{RetType: retTp, Value: types.NewCauset("string")},
-		&Constant{RetType: retTp, Value: types.NewCauset("pattern")},
-		&Constant{RetType: retTp, Value: types.NewCauset(`%abc%`)},
-		&Constant{RetType: retTp, Value: types.NewCauset("\\")},
+		&CouplingConstantWithRadix{RetType: retTp, Value: types.NewCauset("string")},
+		&CouplingConstantWithRadix{RetType: retTp, Value: types.NewCauset("pattern")},
+		&CouplingConstantWithRadix{RetType: retTp, Value: types.NewCauset(`%abc%`)},
+		&CouplingConstantWithRadix{RetType: retTp, Value: types.NewCauset("\\")},
 	}
 	ctx := mock.NewContext()
 	retTp = types.NewFieldType(allegrosql.TypeUnspecified)
@@ -496,9 +496,9 @@ func (s *testEvaluatorSerialSuites) TestPushDownSwitcher(c *C) {
 		}
 	}
 
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/expression/PushDownTestSwitcher", `return("all")`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/expression/PushDownTestSwitcher", `return("all")`), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/expression/PushDownTestSwitcher"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/expression/PushDownTestSwitcher"), IsNil)
 	}()
 
 	pbExprs, err := ExpressionsToPBList(sc, funcs, client)
@@ -509,7 +509,7 @@ func (s *testEvaluatorSerialSuites) TestPushDownSwitcher(c *C) {
 	}
 
 	// All disabled
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/expression/PushDownTestSwitcher", `return("")`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/expression/PushDownTestSwitcher", `return("")`), IsNil)
 	pc := PbConverter{client: client, sc: sc}
 	for i := range funcs {
 		pbExpr := pc.ExprToPB(funcs[i])
@@ -518,7 +518,7 @@ func (s *testEvaluatorSerialSuites) TestPushDownSwitcher(c *C) {
 
 	// Partial enabled
 	fpexpr := fmt.Sprintf(`return("%s")`, strings.Join(enabled, ","))
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/expression/PushDownTestSwitcher", fpexpr), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/expression/PushDownTestSwitcher", fpexpr), IsNil)
 	for i := range funcs {
 		pbExpr := pc.ExprToPB(funcs[i])
 		if !cases[i].enable {
@@ -736,9 +736,9 @@ func (s *testEvaluatorSerialSuites) TestMetadata(c *C) {
 	client := new(mock.Client)
 	dg := new(dataGen4Expr2PbTest)
 
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/expression/PushDownTestSwitcher", `return("all")`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/expression/PushDownTestSwitcher", `return("all")`), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/expression/PushDownTestSwitcher"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/expression/PushDownTestSwitcher"), IsNil)
 	}()
 
 	pc := PbConverter{client: client, sc: sc}

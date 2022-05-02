@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,10 +21,10 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
-	driver "github.com/whtcorpsinc/milevadb/types/berolinaAllegroSQL_driver"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	driver "github.com/whtcorpsinc/MilevaDB-Prod/types/berolinaAllegroSQL_driver"
 )
 
 func boolToInt64(v bool) int64 {
@@ -58,7 +58,7 @@ func IsValidCurrentTimestampExpr(exprNode ast.ExprNode, fieldType *types.FieldTy
 func GetTimeValue(ctx stochastikctx.Context, v interface{}, tp byte, fsp int8) (d types.Causet, err error) {
 	value := types.NewTime(types.ZeroCoreTime, tp, fsp)
 
-	sc := ctx.GetStochastikVars().StmtCtx
+	sc := ctx.GetStochaseinstein_dbars().StmtCtx
 	switch x := v.(type) {
 	case string:
 		upperX := strings.ToUpper(x)
@@ -69,7 +69,7 @@ func GetTimeValue(ctx stochastikctx.Context, v interface{}, tp byte, fsp int8) (
 			}
 			value.SetCoreTime(types.FromGoTime(defaultTime.Truncate(time.Duration(math.Pow10(9-int(fsp))) * time.Nanosecond)))
 			if tp == allegrosql.TypeTimestamp || tp == allegrosql.TypeDatetime {
-				err = value.ConvertTimeZone(time.Local, ctx.GetStochastikVars().Location())
+				err = value.ConvertTimeZone(time.Local, ctx.GetStochaseinstein_dbars().Location())
 				if err != nil {
 					return d, err
 				}
@@ -113,7 +113,7 @@ func GetTimeValue(ctx stochastikctx.Context, v interface{}, tp byte, fsp int8) (
 			return d, err
 		}
 		ft := types.NewFieldType(allegrosql.TypeLonglong)
-		xval, err := v.ConvertTo(ctx.GetStochastikVars().StmtCtx, ft)
+		xval, err := v.ConvertTo(ctx.GetStochaseinstein_dbars().StmtCtx, ft)
 		if err != nil {
 			return d, err
 		}
@@ -138,14 +138,14 @@ func getStmtTimestamp(ctx stochastikctx.Context) (time.Time, error) {
 		return now, nil
 	}
 
-	stochastikVars := ctx.GetStochastikVars()
-	timestampStr, err := variable.GetStochastikSystemVar(stochastikVars, "timestamp")
+	stochaseinstein_dbars := ctx.GetStochaseinstein_dbars()
+	timestampStr, err := variable.GetStochastikSystemVar(stochaseinstein_dbars, "timestamp")
 	if err != nil {
 		return now, err
 	}
 
 	if timestampStr != "" {
-		timestamp, err := types.StrToInt(stochastikVars.StmtCtx, timestampStr, false)
+		timestamp, err := types.StrToInt(stochaseinstein_dbars.StmtCtx, timestampStr, false)
 		if err != nil {
 			return time.Time{}, err
 		}
@@ -154,6 +154,6 @@ func getStmtTimestamp(ctx stochastikctx.Context) (time.Time, error) {
 		}
 		return time.Unix(timestamp, 0), nil
 	}
-	stmtCtx := ctx.GetStochastikVars().StmtCtx
+	stmtCtx := ctx.GetStochaseinstein_dbars().StmtCtx
 	return stmtCtx.GetNowTsCached(), nil
 }

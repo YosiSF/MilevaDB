@@ -17,14 +17,14 @@ import (
 	"context"
 	"sync"
 
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/serial"
-	"github.com/whtcorpsinc/MilevaDB/causetnetctx"
-	"github.com/whtcorpsinc/MilevaDB/ekv"
-	"github.com/whtcorpsinc/MilevaDB/expression"
-	plannercore "github.com/whtcorpsinc/MilevaDB/rel-planner/core"
-	"github.com/whtcorpsinc/MilevaDB/table"
-	"github.com/whtcorpsinc/MilevaDB/types"
-	"github.com/whtcorpsinc/MilevaDB/util/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/serial"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetnetctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/rel-planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/table"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/chunk"
 )
 
 // DirtyDB stores uncommitted write operations for a transaction.
@@ -107,10 +107,10 @@ type UnionScanExec struct {
 	// belowHandleCols is the handle's position of the below scan plan.
 	belowHandleCols plannercore.HandleCols
 
-	addedRows           [][]types.Datum
+	addedRows           [][]types.CausetObjectQL
 	cursor4AddRows      int
 	sortErr             error
-	snapshotRows        [][]types.Datum
+	snapshotRows        [][]types.CausetObjectQL
 	cursor4SnapshotRows int
 	snapshotChunkBuffer *chunk.Chunk
 	mutableRow          chunk.MutRow
@@ -167,7 +167,7 @@ func (us *UnionScanExec) Next(ctx context.Context, req *chunk.Chunk) error {
 		if row == nil {
 			return nil
 		}
-		mutableRow.SetDatums(row...)
+		mutableRow.SetCausetObjectQLs(row...)
 
 		for _, idx := range us.virtualColumnIndex {
 			datum, err := us.schema.Columns[idx].EvalVirtualColumn(mutableRow.ToRow())
@@ -176,11 +176,11 @@ func (us *UnionScanExec) Next(ctx context.Context, req *chunk.Chunk) error {
 			}
 			// Because the expression might return different type from
 			// the generated column, we should wrap a CAST on the result.
-			castDatum, err := table.CastValue(us.ctx, datum, us.columns[idx], false, true)
+			castCausetObjectQL, err := table.CastValue(us.ctx, datum, us.columns[idx], false, true)
 			if err != nil {
 				return err
 			}
-			mutableRow.SetDatum(idx, castDatum)
+			mutableRow.SetCausetObjectQL(idx, castCausetObjectQL)
 		}
 
 		matched, _, err := expression.EvalBool(us.ctx, us.conditionsWithVirCol, mutableRow.ToRow())
@@ -195,13 +195,13 @@ func (us *UnionScanExec) Next(ctx context.Context, req *chunk.Chunk) error {
 }
 
 // getOneRow gets one result row from dirty table or child.
-func (us *UnionScanExec) getOneRow(ctx context.Context) ([]types.Datum, error) {
+func (us *UnionScanExec) getOneRow(ctx context.Context) ([]types.CausetObjectQL, error) {
 	snapshotRow, err := us.getSnapshotRow(ctx)
 	if err != nil {
 		return nil, err
 	}
 	addedRow := us.getAddedRow()
-	var row []types.Datum
+	var row []types.CausetObjectQL
 	var isSnapshotRow bool
 	if addedRow == nil {
 		row = snapshotRow
@@ -231,7 +231,7 @@ func (us *UnionScanExec) getOneRow(ctx context.Context) ([]types.Datum, error) {
 	return row, nil
 }
 
-func (us *UnionScanExec) getSnapshotRow(ctx context.Context) ([]types.Datum, error) {
+func (us *UnionScanExec) getSnapshotRow(ctx context.Context) ([]types.CausetObjectQL, error) {
 	if us.cursor4SnapshotRows < len(us.snapshotRows) {
 		return us.snapshotRows[us.cursor4SnapshotRows], nil
 	}
@@ -258,14 +258,14 @@ func (us *UnionScanExec) getSnapshotRow(ctx context.Context) ([]types.Datum, err
 				// commit, but for simplicity, we don't handle it here.
 				continue
 			}
-			us.snapshotRows = append(us.snapshotRows, row.GetDatumRow(retTypes(us.children[0])))
+			us.snapshotRows = append(us.snapshotRows, row.GetCausetObjectQLRow(retTypes(us.children[0])))
 		}
 	}
 	return us.snapshotRows[0], nil
 }
 
-func (us *UnionScanExec) getAddedRow() []types.Datum {
-	var addedRow []types.Datum
+func (us *UnionScanExec) getAddedRow() []types.CausetObjectQL {
+	var addedRow []types.CausetObjectQL
 	if us.cursor4AddRows < len(us.addedRows) {
 		addedRow = us.addedRows[us.cursor4AddRows]
 	}
@@ -274,7 +274,7 @@ func (us *UnionScanExec) getAddedRow() []types.Datum {
 
 // shouldPickFirstRow picks the suitable row in order.
 // The value returned is used to determine whether to pick the first input row.
-func (us *UnionScanExec) shouldPickFirstRow(a, b []types.Datum) (bool, error) {
+func (us *UnionScanExec) shouldPickFirstRow(a, b []types.CausetObjectQL) (bool, error) {
 	var isFirstRow bool
 	addedCmpSrc, err := us.compare(a, b)
 	if err != nil {
@@ -293,12 +293,12 @@ func (us *UnionScanExec) shouldPickFirstRow(a, b []types.Datum) (bool, error) {
 	return isFirstRow, nil
 }
 
-func (us *UnionScanExec) compare(a, b []types.Datum) (int, error) {
+func (us *UnionScanExec) compare(a, b []types.CausetObjectQL) (int, error) {
 	sc := us.ctx.GetCausetNetVars().StmtCtx
 	for _, colOff := range us.usedIndex {
 		aColumn := a[colOff]
 		bColumn := b[colOff]
-		cmp, err := aColumn.CompareDatum(sc, &bColumn)
+		cmp, err := aColumn.CompareCausetObjectQL(sc, &bColumn)
 		if err != nil {
 			return 0, err
 		}

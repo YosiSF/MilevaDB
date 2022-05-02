@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ import (
 
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 func (b *builtinArithmeticMultiplyRealSig) vectorized() bool {
@@ -79,7 +79,7 @@ func (b *builtinArithmeticDivideDecimalSig) vecEvalDecimal(input *chunk.Chunk, r
 	y := buf.Decimals()
 	var to types.MyDecimal
 	var frac int
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	for i := 0; i < n; i++ {
 		if result.IsNull(i) {
 			continue
@@ -116,7 +116,7 @@ func (b *builtinArithmeticModIntSig) vectorized() bool {
 
 func (b *builtinArithmeticModIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	lh, err := b.bufSlabPredictor.get(types.ETInt, n)
+	lh, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -324,7 +324,7 @@ func (b *builtinArithmeticMinusIntSig) vectorized() bool {
 
 func (b *builtinArithmeticMinusIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	lh, err := b.bufSlabPredictor.get(types.ETInt, n)
+	lh, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -345,7 +345,7 @@ func (b *builtinArithmeticMinusIntSig) vecEvalInt(input *chunk.Chunk, result *ch
 	rhi64s := rh.Int64s()
 	resulti64s := result.Int64s()
 
-	forceToSigned := b.ctx.GetStochastikVars().ALLEGROSQLMode.HasNoUnsignedSubtractionMode()
+	forceToSigned := b.ctx.GetStochaseinstein_dbars().ALLEGROSQLMode.HasNoUnsignedSubtractionMode()
 	isLHSUnsigned := allegrosql.HasUnsignedFlag(b.args[0].GetType().Flag)
 	isRHSUnsigned := allegrosql.HasUnsignedFlag(b.args[1].GetType().Flag)
 
@@ -653,7 +653,7 @@ func (b *builtinArithmeticIntDivideDecimalSig) vectorized() bool {
 }
 
 func (b *builtinArithmeticIntDivideDecimalSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredCauset) error {
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	n := input.NumEvents()
 	var err error
 	var buf [2]*chunk.DeferredCauset
@@ -736,7 +736,7 @@ func (b *builtinArithmeticMultiplyIntSig) vecEvalInt(input *chunk.Chunk, result 
 		return err
 	}
 	n := input.NumEvents()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -814,7 +814,7 @@ func (b *builtinArithmeticIntDivideIntSig) vectorized() bool {
 
 func (b *builtinArithmeticIntDivideIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	lhsBuf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	lhsBuf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -947,7 +947,7 @@ func (b *builtinArithmeticPlusIntSig) vectorized() bool {
 
 func (b *builtinArithmeticPlusIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	lh, err := b.bufSlabPredictor.get(types.ETInt, n)
+	lh, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -1096,7 +1096,7 @@ func (b *builtinArithmeticMultiplyIntUnsignedSig) vecEvalInt(input *chunk.Chunk,
 		return err
 	}
 	n := input.NumEvents()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}

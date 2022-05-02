@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,10 +24,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 )
 
 var (
@@ -91,7 +91,7 @@ func (c *sleepFunctionClass) getFunction(ctx stochastikctx.Context, args []Expre
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETReal)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETReal)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +118,7 @@ func (b *builtinSleepSig) evalInt(event chunk.Event) (int64, bool, error) {
 		return 0, isNull, err
 	}
 
-	sessVars := b.ctx.GetStochastikVars()
+	sessVars := b.ctx.GetStochaseinstein_dbars()
 	if isNull || val < 0 {
 		if sessVars.StrictALLEGROSQLMode {
 			return 0, false, errIncorrectArgs.GenWithStackByArgs("sleep")
@@ -147,7 +147,7 @@ func (c *lockFunctionClass) getFunction(ctx stochastikctx.Context, args []Expres
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETString, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETString, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
@@ -182,7 +182,7 @@ func (c *releaseLockFunctionClass) getFunction(ctx stochastikctx.Context, args [
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETString)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETString)
 	if err != nil {
 		return nil, err
 	}
@@ -232,7 +232,7 @@ func (c *anyValueFunctionClass) getFunction(ctx stochastikctx.Context, args []Ex
 	case types.ETDuration:
 		sig = &builtinDurationAnyValueSig{bf}
 		sig.setPbCode(fidelpb.ScalarFuncSig_DurationAnyValue)
-	case types.ETInt:
+	case types.CausetEDN:
 		bf.tp.Decimal = 0
 		sig = &builtinIntAnyValueSig{bf}
 		sig.setPbCode(fidelpb.ScalarFuncSig_IntAnyValue)
@@ -384,7 +384,7 @@ func (c *inetAtonFunctionClass) getFunction(ctx stochastikctx.Context, args []Ex
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETString)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETString)
 	if err != nil {
 		return nil, err
 	}
@@ -460,11 +460,11 @@ func (c *inetNtoaFunctionClass) getFunction(ctx stochastikctx.Context, args []Ex
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
-	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochastikVars().GetCharsetInfo()
+	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 	bf.tp.Flen = 93
 	bf.tp.Decimal = 0
 	sig := &builtinInetNtoaSig{bf}
@@ -588,7 +588,7 @@ func (c *inet6NtoaFunctionClass) getFunction(ctx stochastikctx.Context, args []E
 	if err != nil {
 		return nil, err
 	}
-	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochastikVars().GetCharsetInfo()
+	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 	bf.tp.Flen = 117
 	bf.tp.Decimal = 0
 	sig := &builtinInet6NtoaSig{bf}
@@ -640,7 +640,7 @@ func (c *isIPv4FunctionClass) getFunction(ctx stochastikctx.Context, args []Expr
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETString)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETString)
 	if err != nil {
 		return nil, err
 	}
@@ -707,7 +707,7 @@ func (c *isIPv4CompatFunctionClass) getFunction(ctx stochastikctx.Context, args 
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETString)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETString)
 	if err != nil {
 		return nil, err
 	}
@@ -755,7 +755,7 @@ func (c *isIPv4MappedFunctionClass) getFunction(ctx stochastikctx.Context, args 
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETString)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETString)
 	if err != nil {
 		return nil, err
 	}
@@ -803,7 +803,7 @@ func (c *isIPv6FunctionClass) getFunction(ctx stochastikctx.Context, args []Expr
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETString)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETString)
 	if err != nil {
 		return nil, err
 	}
@@ -872,7 +872,7 @@ func (c *nameConstFunctionClass) getFunction(ctx stochastikctx.Context, args []E
 		sig = &builtinNameConstDecimalSig{bf}
 	case types.ETDuration:
 		sig = &builtinNameConstDurationSig{bf}
-	case types.ETInt:
+	case types.CausetEDN:
 		bf.tp.Decimal = 0
 		sig = &builtinNameConstIntSig{bf}
 	case types.ETJson:
@@ -1009,7 +1009,7 @@ func (c *uuidFunctionClass) getFunction(ctx stochastikctx.Context, args []Expres
 	if err != nil {
 		return nil, err
 	}
-	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochastikVars().GetCharsetInfo()
+	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 	bf.tp.Flen = 36
 	sig := &builtinUUIDSig{bf}
 	return sig, nil

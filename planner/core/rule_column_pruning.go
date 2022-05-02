@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@ package core
 import (
 	"context"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression/aggregation"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/expression/aggregation"
-	"github.com/whtcorpsinc/milevadb/planner/soliton"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 type columnPruner struct {
@@ -111,7 +111,7 @@ func (la *LogicalAggregation) PruneDeferredCausets(parentUsedDefCauss []*express
 		}
 		la.AggFuncs = []*aggregation.AggFuncDesc{one}
 		col := &expression.DeferredCauset{
-			UniqueID: la.ctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+			UniqueID: la.ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 			RetType:  types.NewFieldType(allegrosql.TypeLonglong),
 		}
 		la.schemaReplicant.DeferredCausets = []*expression.DeferredCauset{col}

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,12 +22,12 @@ import (
 
 	"github.com/whtcorpsinc/BerolinaSQL/allegrosql"
 	"github.com/whtcorpsinc/BerolinaSQL/perceptron"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causet"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/set"
+	"github.com/whtcorpsinc/MilevaDB-Prod/spacetime/autoid"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/causet"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/set"
-	"github.com/whtcorpsinc/milevadb/spacetime/autoid"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
 )
 
 const (
@@ -109,7 +109,7 @@ func (def *MetricBlockDef) GenPromQL(sctx stochastikctx.Context, labels map[stri
 	}
 
 	if strings.Contains(promQL, promQRangeDurationKey) {
-		promQL = strings.Replace(promQL, promQRangeDurationKey, strconv.FormatInt(sctx.GetStochastikVars().MetricSchemaRangeDuration, 10)+"s", -1)
+		promQL = strings.Replace(promQL, promQRangeDurationKey, strconv.FormatInt(sctx.GetStochaseinstein_dbars().MetricSchemaRangeDuration, 10)+"s", -1)
 	}
 	return promQL
 }

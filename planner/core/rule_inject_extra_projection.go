@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
 package core
 
 import (
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/expression/aggregation"
-	"github.com/whtcorpsinc/milevadb/planner/soliton"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression/aggregation"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
 )
 
 // injectExtraProjection is used to extract the expressions of specific
@@ -99,12 +99,12 @@ func InjectProjBelowAgg(aggPlan PhysicalPlan, aggFuncs []*aggregation.AggFuncDes
 
 	for _, f := range aggFuncs {
 		for i, arg := range f.Args {
-			if _, isCnst := arg.(*expression.Constant); isCnst {
+			if _, isCnst := arg.(*expression.CouplingConstantWithRadix); isCnst {
 				continue
 			}
 			projExprs = append(projExprs, arg)
 			newArg := &expression.DeferredCauset{
-				UniqueID: aggPlan.SCtx().GetStochastikVars().AllocPlanDeferredCausetID(),
+				UniqueID: aggPlan.SCtx().GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 				RetType:  arg.GetType(),
 				Index:    cursor,
 			}
@@ -113,12 +113,12 @@ func InjectProjBelowAgg(aggPlan PhysicalPlan, aggFuncs []*aggregation.AggFuncDes
 			cursor++
 		}
 		for _, byItem := range f.OrderByItems {
-			if _, isCnst := byItem.Expr.(*expression.Constant); isCnst {
+			if _, isCnst := byItem.Expr.(*expression.CouplingConstantWithRadix); isCnst {
 				continue
 			}
 			projExprs = append(projExprs, byItem.Expr)
 			newArg := &expression.DeferredCauset{
-				UniqueID: aggPlan.SCtx().GetStochastikVars().AllocPlanDeferredCausetID(),
+				UniqueID: aggPlan.SCtx().GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 				RetType:  byItem.Expr.GetType(),
 				Index:    cursor,
 			}
@@ -129,12 +129,12 @@ func InjectProjBelowAgg(aggPlan PhysicalPlan, aggFuncs []*aggregation.AggFuncDes
 	}
 
 	for i, item := range groupByItems {
-		if _, isCnst := item.(*expression.Constant); isCnst {
+		if _, isCnst := item.(*expression.CouplingConstantWithRadix); isCnst {
 			continue
 		}
 		projExprs = append(projExprs, item)
 		newArg := &expression.DeferredCauset{
-			UniqueID: aggPlan.SCtx().GetStochastikVars().AllocPlanDeferredCausetID(),
+			UniqueID: aggPlan.SCtx().GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 			RetType:  item.GetType(),
 			Index:    cursor,
 		}
@@ -203,7 +203,7 @@ func InjectProjBelowSort(p PhysicalPlan, orderByItems []*soliton.ByItems) Physic
 		}
 		bottomProjExprs = append(bottomProjExprs, itemExpr)
 		newArg := &expression.DeferredCauset{
-			UniqueID: p.SCtx().GetStochastikVars().AllocPlanDeferredCausetID(),
+			UniqueID: p.SCtx().GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 			RetType:  itemExpr.GetType(),
 			Index:    len(bottomProjSchemaDefCauss),
 		}
@@ -253,7 +253,7 @@ func TurnNominalSortIntoProj(p PhysicalPlan, onlyDeferredCauset bool, orderByIte
 		}
 		bottomProjExprs = append(bottomProjExprs, itemExpr)
 		newArg := &expression.DeferredCauset{
-			UniqueID: p.SCtx().GetStochastikVars().AllocPlanDeferredCausetID(),
+			UniqueID: p.SCtx().GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 			RetType:  itemExpr.GetType(),
 			Index:    len(bottomProjSchemaDefCauss),
 		}

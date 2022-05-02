@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import (
 
 	"github.com/cznic/mathutil"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 func (b *builtinLog1ArgSig) vecEvalReal(input *chunk.Chunk, result *chunk.DeferredCauset) error {
@@ -35,7 +35,7 @@ func (b *builtinLog1ArgSig) vecEvalReal(input *chunk.Chunk, result *chunk.Deferr
 			continue
 		}
 		if f64s[i] <= 0 {
-			b.ctx.GetStochastikVars().StmtCtx.AppendWarning(ErrInvalidArgumentForLogarithm)
+			b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(ErrInvalidArgumentForLogarithm)
 			result.SetNull(i, true)
 		} else {
 			f64s[i] = math.Log(f64s[i])
@@ -58,7 +58,7 @@ func (b *builtinLog2Sig) vecEvalReal(input *chunk.Chunk, result *chunk.DeferredC
 			continue
 		}
 		if f64s[i] <= 0 {
-			b.ctx.GetStochastikVars().StmtCtx.AppendWarning(ErrInvalidArgumentForLogarithm)
+			b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(ErrInvalidArgumentForLogarithm)
 			result.SetNull(i, true)
 		} else {
 			f64s[i] = math.Log2(f64s[i])
@@ -81,7 +81,7 @@ func (b *builtinLog10Sig) vecEvalReal(input *chunk.Chunk, result *chunk.Deferred
 			continue
 		}
 		if f64s[i] <= 0 {
-			b.ctx.GetStochastikVars().StmtCtx.AppendWarning(ErrInvalidArgumentForLogarithm)
+			b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(ErrInvalidArgumentForLogarithm)
 			result.SetNull(i, true)
 		} else {
 			f64s[i] = math.Log10(f64s[i])
@@ -477,7 +477,7 @@ func (b *builtinLog2ArgsSig) vecEvalReal(input *chunk.Chunk, result *chunk.Defer
 			continue
 		}
 		if d[i] <= 0 || d[i] == 1 || x[i] <= 0 {
-			b.ctx.GetStochastikVars().StmtCtx.AppendWarning(ErrInvalidArgumentForLogarithm)
+			b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(ErrInvalidArgumentForLogarithm)
 			result.SetNull(i, true)
 		}
 		d[i] = math.Log(x[i]) / math.Log(d[i])
@@ -530,7 +530,7 @@ func (b *builtinRoundWithFracRealSig) vecEvalReal(input *chunk.Chunk, result *ch
 		return err
 	}
 	n := input.NumEvents()
-	buf1, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf1, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -560,7 +560,7 @@ func (b *builtinTruncateRealSig) vecEvalReal(input *chunk.Chunk, result *chunk.D
 		return err
 	}
 	n := input.NumEvents()
-	buf1, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf1, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -637,7 +637,7 @@ func (b *builtinRoundWithFracIntSig) vecEvalInt(input *chunk.Chunk, result *chun
 	}
 
 	n := input.NumEvents()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -722,7 +722,7 @@ func (b *builtinRandWithSeedFirstGenSig) vectorized() bool {
 
 func (b *builtinRandWithSeedFirstGenSig) vecEvalReal(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -752,7 +752,7 @@ func (b *builtinCeilIntToDecSig) vectorized() bool {
 
 func (b *builtinCeilIntToDecSig) vecEvalDecimal(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -790,7 +790,7 @@ func (b *builtinTruncateIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.Def
 	}
 
 	n := input.NumEvents()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -834,7 +834,7 @@ func (b *builtinTruncateUintSig) vecEvalInt(input *chunk.Chunk, result *chunk.De
 	}
 
 	n := input.NumEvents()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -942,7 +942,7 @@ func (b *builtinTruncateDecimalSig) vecEvalDecimal(input *chunk.Chunk, result *c
 	if err := b.args[0].VecEvalDecimal(b.ctx, input, result); err != nil {
 		return err
 	}
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -976,7 +976,7 @@ func (b *builtinRoundWithFracDecSig) vecEvalDecimal(input *chunk.Chunk, result *
 	if err := b.args[0].VecEvalDecimal(b.ctx, input, result); err != nil {
 		return err
 	}
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -1008,7 +1008,7 @@ func (b *builtinFloorIntToDecSig) vectorized() bool {
 
 func (b *builtinFloorIntToDecSig) vecEvalDecimal(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -1080,12 +1080,12 @@ func (b *builtinConvSig) vecEvalString(input *chunk.Chunk, result *chunk.Deferre
 		return err
 	}
 	defer b.bufSlabPredictor.put(buf1)
-	buf2, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf2, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
 	defer b.bufSlabPredictor.put(buf2)
-	buf3, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf3, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}

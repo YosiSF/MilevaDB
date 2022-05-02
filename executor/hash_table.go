@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,14 +20,14 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/codec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/disk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/memory"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/codec"
-	"github.com/whtcorpsinc/milevadb/soliton/disk"
-	"github.com/whtcorpsinc/milevadb/soliton/memory"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 const (
@@ -98,10 +98,10 @@ type hashEventContainer struct {
 }
 
 func newHashEventContainer(sCtx stochastikctx.Context, estCount int, hCtx *hashContext) *hashEventContainer {
-	maxChunkSize := sCtx.GetStochastikVars().MaxChunkSize
+	maxChunkSize := sCtx.GetStochaseinstein_dbars().MaxChunkSize
 	rc := chunk.NewEventContainer(hCtx.allTypes, maxChunkSize)
 	c := &hashEventContainer{
-		sc:           sCtx.GetStochastikVars().StmtCtx,
+		sc:           sCtx.GetStochaseinstein_dbars().StmtCtx,
 		hCtx:         hCtx,
 		hashBlock:    newConcurrentMapHashBlock(),
 		rowContainer: rc,

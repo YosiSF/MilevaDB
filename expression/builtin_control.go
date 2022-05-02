@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/charset"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 )
 
 var (
@@ -71,7 +71,7 @@ func InferType4ControlFuncs(lexp, rexp Expression) *types.FieldType {
 	} else {
 		resultFieldType = types.AggFieldType([]*types.FieldType{lhs, rhs})
 		evalType := types.AggregateEvalType([]*types.FieldType{lhs, rhs}, &resultFieldType.Flag)
-		if evalType == types.ETInt {
+		if evalType == types.CausetEDN {
 			resultFieldType.Decimal = 0
 		} else {
 			if lhs.Decimal == types.UnspecifiedLength || rhs.Decimal == types.UnspecifiedLength {
@@ -97,7 +97,7 @@ func InferType4ControlFuncs(lexp, rexp Expression) *types.FieldType {
 		} else {
 			resultFieldType.Charset, resultFieldType.DefCauslate, resultFieldType.Flag = allegrosql.DefaultCharset, allegrosql.DefaultDefCauslationName, 0
 		}
-		if evalType == types.ETDecimal || evalType == types.ETInt {
+		if evalType == types.ETDecimal || evalType == types.CausetEDN {
 			lhsUnsignedFlag, rhsUnsignedFlag := allegrosql.HasUnsignedFlag(lhs.Flag), allegrosql.HasUnsignedFlag(rhs.Flag)
 			lhsFlagLen, rhsFlagLen := 0, 0
 			if !lhsUnsignedFlag {
@@ -121,7 +121,7 @@ func InferType4ControlFuncs(lexp, rexp Expression) *types.FieldType {
 	}
 	// Fix decimal for int and string.
 	resultEvalType := resultFieldType.EvalType()
-	if resultEvalType == types.ETInt {
+	if resultEvalType == types.CausetEDN {
 		resultFieldType.Decimal = 0
 	} else if resultEvalType == types.ETString {
 		if lhs.Tp != allegrosql.TypeNull || rhs.Tp != allegrosql.TypeNull {
@@ -169,7 +169,7 @@ func (c *caseWhenFunctionClass) getFunction(ctx stochastikctx.Context, args []Ex
 	fieldTp := types.AggFieldType(fieldTps)
 	tp := fieldTp.EvalType()
 
-	if tp == types.ETInt {
+	if tp == types.CausetEDN {
 		decimal = 0
 	}
 	fieldTp.Decimal, fieldTp.Flen = decimal, flen
@@ -189,7 +189,7 @@ func (c *caseWhenFunctionClass) getFunction(ctx stochastikctx.Context, args []Ex
 		if args[i], err = wrapWithIsTrue(ctx, true, args[i], false); err != nil {
 			return nil, err
 		}
-		argTps = append(argTps, types.ETInt, tp)
+		argTps = append(argTps, types.CausetEDN, tp)
 	}
 	if l%2 == 1 {
 		argTps = append(argTps, tp)
@@ -201,7 +201,7 @@ func (c *caseWhenFunctionClass) getFunction(ctx stochastikctx.Context, args []Ex
 	bf.tp = fieldTp
 
 	switch tp {
-	case types.ETInt:
+	case types.CausetEDN:
 		bf.tp.Decimal = 0
 		sig = &builtinCaseWhenIntSig{bf}
 		sig.setPbCode(fidelpb.ScalarFuncSig_CaseWhenInt)
@@ -493,14 +493,14 @@ func (c *ifFunctionClass) getFunction(ctx stochastikctx.Context, args []Expressi
 	if err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, evalTps, types.ETInt, evalTps, evalTps)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, evalTps, types.CausetEDN, evalTps, evalTps)
 	if err != nil {
 		return nil, err
 	}
 	retTp.Flag |= bf.tp.Flag
 	bf.tp = retTp
 	switch evalTps {
-	case types.ETInt:
+	case types.CausetEDN:
 		sig = &builtinIfIntSig{bf}
 		sig.setPbCode(fidelpb.ScalarFuncSig_IfInt)
 	case types.ETReal:
@@ -695,7 +695,7 @@ func (c *ifNullFunctionClass) getFunction(ctx stochastikctx.Context, args []Expr
 	}
 	bf.tp = retTp
 	switch evalTps {
-	case types.ETInt:
+	case types.CausetEDN:
 		sig = &builtinIfNullIntSig{bf}
 		sig.setPbCode(fidelpb.ScalarFuncSig_IfNullInt)
 	case types.ETReal:

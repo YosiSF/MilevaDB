@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,9 +21,9 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/opcode"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 var (
@@ -76,7 +76,7 @@ func (c *logicAndFunctionClass) getFunction(ctx stochastikctx.Context, args []Ex
 		return nil, errors.Trace(err)
 	}
 
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETInt, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.CausetEDN, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
@@ -129,7 +129,7 @@ func (c *logicOrFunctionClass) getFunction(ctx stochastikctx.Context, args []Exp
 		return nil, errors.Trace(err)
 	}
 
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETInt, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.CausetEDN, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
@@ -188,7 +188,7 @@ func (c *logicXorFunctionClass) getFunction(ctx stochastikctx.Context, args []Ex
 		return nil, errors.Trace(err)
 	}
 
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETInt, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.CausetEDN, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
@@ -232,7 +232,7 @@ func (c *bitAndFunctionClass) getFunction(ctx stochastikctx.Context, args []Expr
 	if err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETInt, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.CausetEDN, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
@@ -273,7 +273,7 @@ func (c *bitOrFunctionClass) getFunction(ctx stochastikctx.Context, args []Expre
 	if err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETInt, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.CausetEDN, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
@@ -314,7 +314,7 @@ func (c *bitXorFunctionClass) getFunction(ctx stochastikctx.Context, args []Expr
 	if err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETInt, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.CausetEDN, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
@@ -355,7 +355,7 @@ func (c *leftShiftFunctionClass) getFunction(ctx stochastikctx.Context, args []E
 	if err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETInt, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.CausetEDN, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
@@ -396,7 +396,7 @@ func (c *rightShiftFunctionClass) getFunction(ctx stochastikctx.Context, args []
 	if err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETInt, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.CausetEDN, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
@@ -445,12 +445,12 @@ func (c *isTrueOrFalseFunctionClass) getFunction(ctx stochastikctx.Context, args
 
 	argTp := args[0].GetType().EvalType()
 	if argTp == types.ETTimestamp || argTp == types.ETDatetime || argTp == types.ETDuration {
-		argTp = types.ETInt
+		argTp = types.CausetEDN
 	} else if argTp == types.ETJson || argTp == types.ETString {
 		argTp = types.ETReal
 	}
 
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, argTp)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, argTp)
 	if err != nil {
 		return nil, err
 	}
@@ -474,7 +474,7 @@ func (c *isTrueOrFalseFunctionClass) getFunction(ctx stochastikctx.Context, args
 			} else {
 				sig.setPbCode(fidelpb.ScalarFuncSig_DecimalIsTrue)
 			}
-		case types.ETInt:
+		case types.CausetEDN:
 			sig = &builtinIntIsTrueSig{bf, c.keepNull}
 			if c.keepNull {
 				sig.setPbCode(fidelpb.ScalarFuncSig_IntIsTrueWithNull)
@@ -500,7 +500,7 @@ func (c *isTrueOrFalseFunctionClass) getFunction(ctx stochastikctx.Context, args
 			} else {
 				sig.setPbCode(fidelpb.ScalarFuncSig_DecimalIsFalse)
 			}
-		case types.ETInt:
+		case types.CausetEDN:
 			sig = &builtinIntIsFalseSig{bf, c.keepNull}
 			if c.keepNull {
 				sig.setPbCode(fidelpb.ScalarFuncSig_IntIsFalseWithNull)
@@ -672,7 +672,7 @@ func (c *bitNegFunctionClass) getFunction(ctx stochastikctx.Context, args []Expr
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
@@ -711,12 +711,12 @@ func (c *unaryNotFunctionClass) getFunction(ctx stochastikctx.Context, args []Ex
 
 	argTp := args[0].GetType().EvalType()
 	if argTp == types.ETTimestamp || argTp == types.ETDatetime || argTp == types.ETDuration {
-		argTp = types.ETInt
+		argTp = types.CausetEDN
 	} else if argTp == types.ETJson || argTp == types.ETString {
 		argTp = types.ETReal
 	}
 
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, argTp)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, argTp)
 	if err != nil {
 		return nil, err
 	}
@@ -730,7 +730,7 @@ func (c *unaryNotFunctionClass) getFunction(ctx stochastikctx.Context, args []Ex
 	case types.ETDecimal:
 		sig = &builtinUnaryNotDecimalSig{bf}
 		sig.setPbCode(fidelpb.ScalarFuncSig_UnaryNotDecimal)
-	case types.ETInt:
+	case types.CausetEDN:
 		sig = &builtinUnaryNotIntSig{bf}
 		sig.setPbCode(fidelpb.ScalarFuncSig_UnaryNotInt)
 	default:
@@ -806,7 +806,7 @@ type unaryMinusFunctionClass struct {
 	baseFunctionClass
 }
 
-func (c *unaryMinusFunctionClass) handleIntOverflow(arg *Constant) (overflow bool) {
+func (c *unaryMinusFunctionClass) handleIntOverflow(arg *CouplingConstantWithRadix) (overflow bool) {
 	if allegrosql.HasUnsignedFlag(arg.GetType().Flag) {
 		uval := arg.Value.GetUint64()
 		// -math.MinInt64 is 9223372036854775808, so if uval is more than 9223372036854775808, like
@@ -826,16 +826,16 @@ func (c *unaryMinusFunctionClass) handleIntOverflow(arg *Constant) (overflow boo
 }
 
 // typeInfer infers unaryMinus function return type. when the arg is an int constant and overflow,
-// typerInfer will infers the return type as types.ETDecimal, not types.ETInt.
+// typerInfer will infers the return type as types.ETDecimal, not types.CausetEDN.
 func (c *unaryMinusFunctionClass) typeInfer(argExpr Expression) (types.EvalType, bool) {
 	tp := argExpr.GetType().EvalType()
-	if tp != types.ETInt && tp != types.ETDecimal {
+	if tp != types.CausetEDN && tp != types.ETDecimal {
 		tp = types.ETReal
 	}
 
 	overflow := false
 	// TODO: Handle float overflow.
-	if arg, ok := argExpr.(*Constant); ok && tp == types.ETInt {
+	if arg, ok := argExpr.(*CouplingConstantWithRadix); ok && tp == types.CausetEDN {
 		overflow = c.handleIntOverflow(arg)
 		if overflow {
 			tp = types.ETDecimal
@@ -854,7 +854,7 @@ func (c *unaryMinusFunctionClass) getFunction(ctx stochastikctx.Context, args []
 
 	var bf baseBuiltinFunc
 	switch argExprTp.EvalType() {
-	case types.ETInt:
+	case types.CausetEDN:
 		if intOverflow {
 			bf, err = newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETDecimal, types.ETDecimal)
 			if err != nil {
@@ -863,7 +863,7 @@ func (c *unaryMinusFunctionClass) getFunction(ctx stochastikctx.Context, args []
 			sig = &builtinUnaryMinusDecimalSig{bf, true}
 			sig.setPbCode(fidelpb.ScalarFuncSig_UnaryMinusDecimal)
 		} else {
-			bf, err = newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETInt)
+			bf, err = newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.CausetEDN)
 			if err != nil {
 				return nil, err
 			}
@@ -987,14 +987,14 @@ func (c *isNullFunctionClass) getFunction(ctx stochastikctx.Context, args []Expr
 	} else if argTp == types.ETJson {
 		argTp = types.ETString
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, argTp)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, argTp)
 	if err != nil {
 		return nil, err
 	}
 	bf.tp.Flen = 1
 	var sig builtinFunc
 	switch argTp {
-	case types.ETInt:
+	case types.CausetEDN:
 		sig = &builtinIntIsNullSig{bf}
 		sig.setPbCode(fidelpb.ScalarFuncSig_IntIsNull)
 	case types.ETDecimal:

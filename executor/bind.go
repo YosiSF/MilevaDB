@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,26 +16,26 @@ package executor
 import (
 	"context"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/bindinfo"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/bindinfo"
-	"github.com/whtcorpsinc/milevadb/petri"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
 )
 
 // ALLEGROSQLBindExec represents a bind executor.
 type ALLEGROSQLBindExec struct {
 	baseExecutor
 
-	sqlBindOp    plannercore.ALLEGROSQLBindOpType
+	sqlBindOp           plannercore.ALLEGROSQLBindOpType
 	normdOrigALLEGROSQL string
 	bindALLEGROSQL      string
-	charset      string
-	defCauslation    string
-	EDB           string
-	isGlobal     bool
-	bindAst      ast.StmtNode
+	charset             string
+	defCauslation       string
+	EDB                 string
+	isGlobal            bool
+	bindAst             ast.StmtNode
 }
 
 // Next implements the Executor Next interface.
@@ -64,9 +64,9 @@ func (e *ALLEGROSQLBindExec) dropALLEGROSQLBind() error {
 	var bindInfo *bindinfo.Binding
 	if e.bindALLEGROSQL != "" {
 		bindInfo = &bindinfo.Binding{
-			BindALLEGROSQL:   e.bindALLEGROSQL,
-			Charset:   e.charset,
-			DefCauslation: e.defCauslation,
+			BindALLEGROSQL: e.bindALLEGROSQL,
+			Charset:        e.charset,
+			DefCauslation:  e.defCauslation,
 		}
 	}
 	if !e.isGlobal {
@@ -78,16 +78,16 @@ func (e *ALLEGROSQLBindExec) dropALLEGROSQLBind() error {
 
 func (e *ALLEGROSQLBindExec) createALLEGROSQLBind() error {
 	bindInfo := bindinfo.Binding{
-		BindALLEGROSQL:   e.bindALLEGROSQL,
-		Charset:   e.charset,
-		DefCauslation: e.defCauslation,
-		Status:    bindinfo.Using,
-		Source:    bindinfo.Manual,
+		BindALLEGROSQL: e.bindALLEGROSQL,
+		Charset:        e.charset,
+		DefCauslation:  e.defCauslation,
+		Status:         bindinfo.Using,
+		Source:         bindinfo.Manual,
 	}
 	record := &bindinfo.BindRecord{
 		OriginalALLEGROSQL: e.normdOrigALLEGROSQL,
-		EDB:          e.EDB,
-		Bindings:    []bindinfo.Binding{bindInfo},
+		EDB:                e.EDB,
+		Bindings:           []bindinfo.Binding{bindInfo},
 	}
 	if !e.isGlobal {
 		handle := e.ctx.Value(bindinfo.StochastikBindInfoKeyType).(*bindinfo.StochastikHandle)

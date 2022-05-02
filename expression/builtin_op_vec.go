@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ import (
 	"math"
 
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 func (b *builtinTimeIsNullSig) vectorized() bool {
@@ -78,13 +78,13 @@ func (b *builtinLogicOrSig) vecEvalInt(input *chunk.Chunk, result *chunk.Deferre
 	}
 
 	n := input.NumEvents()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
 	defer b.bufSlabPredictor.put(buf)
 
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 	err = b.args[1].VecEvalInt(b.ctx, input, buf)
 	afterWarns := sc.WarningCount()
@@ -130,7 +130,7 @@ func (b *builtinBitOrSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredC
 		return err
 	}
 	numEvents := input.NumEvents()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, numEvents)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, numEvents)
 	if err != nil {
 		return err
 	}
@@ -373,13 +373,13 @@ func (b *builtinLogicAndSig) vecEvalInt(input *chunk.Chunk, result *chunk.Deferr
 		return err
 	}
 
-	buf1, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf1, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
 	defer b.bufSlabPredictor.put(buf1)
 
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 	err = b.args[1].VecEvalInt(b.ctx, input, buf1)
 	afterWarns := sc.WarningCount()
@@ -427,7 +427,7 @@ func (b *builtinBitXorSig) vecEvalInt(input *chunk.Chunk, result *chunk.Deferred
 		return err
 	}
 	numEvents := input.NumEvents()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, numEvents)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, numEvents)
 	if err != nil {
 		return err
 	}
@@ -454,7 +454,7 @@ func (b *builtinLogicXorSig) vecEvalInt(input *chunk.Chunk, result *chunk.Deferr
 	}
 
 	n := input.NumEvents()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -492,7 +492,7 @@ func (b *builtinBitAndSig) vecEvalInt(input *chunk.Chunk, result *chunk.Deferred
 		return err
 	}
 	numEvents := input.NumEvents()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, numEvents)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, numEvents)
 	if err != nil {
 		return err
 	}
@@ -669,7 +669,7 @@ func (b *builtinLeftShiftSig) vecEvalInt(input *chunk.Chunk, result *chunk.Defer
 		return err
 	}
 	numEvents := input.NumEvents()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, numEvents)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, numEvents)
 	if err != nil {
 		return err
 	}
@@ -695,7 +695,7 @@ func (b *builtinRightShiftSig) vecEvalInt(input *chunk.Chunk, result *chunk.Defe
 		return err
 	}
 	numEvents := input.NumEvents()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, numEvents)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, numEvents)
 	if err != nil {
 		return err
 	}

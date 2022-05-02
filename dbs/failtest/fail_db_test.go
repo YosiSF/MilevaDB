@@ -22,24 +22,24 @@ import (
 	"testing"
 	"time"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore/cluster"
+	"github.com/whtcorpsinc/MilevaDB-Prod/dbs"
+	dbsutil "github.com/whtcorpsinc/MilevaDB-Prod/dbs/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/dbs/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	. "github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testleak"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastik"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
 	"github.com/whtcorpsinc/berolinaAllegroSQL"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore/cluster"
-	"github.com/whtcorpsinc/milevadb/dbs"
-	dbsutil "github.com/whtcorpsinc/milevadb/dbs/soliton"
-	"github.com/whtcorpsinc/milevadb/dbs/solitonutil"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	. "github.com/whtcorpsinc/milevadb/soliton/solitonutil"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/soliton/testleak"
-	"github.com/whtcorpsinc/milevadb/stochastik"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
 )
 
 func TestT(t *testing.T) {
@@ -93,9 +93,9 @@ func (s *testFailDBSuite) TearDownSuite(c *C) {
 
 // TestHalfwayCancelOperations tests the case that the schemaReplicant is correct after the execution of operations are cancelled halfway.
 func (s *testFailDBSuite) TestHalfwayCancelOperations(c *C) {
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/dbs/truncateBlockErr", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/truncateBlockErr", `return(true)`), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/dbs/truncateBlockErr"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/truncateBlockErr"), IsNil)
 	}()
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustExec("create database cancel_job_db")
@@ -119,9 +119,9 @@ func (s *testFailDBSuite) TestHalfwayCancelOperations(c *C) {
 	// Test schemaReplicant is correct.
 	tk.MustExec("select * from t")
 	// test for renaming block
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/dbs/renameBlockErr", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/renameBlockErr", `return(true)`), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/dbs/renameBlockErr"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/renameBlockErr"), IsNil)
 	}()
 	tk.MustExec("create block tx(a int)")
 	tk.MustExec("insert into tx values(1)")
@@ -138,9 +138,9 @@ func (s *testFailDBSuite) TestHalfwayCancelOperations(c *C) {
 	tk.MustExec("use cancel_job_db")
 	tk.MustExec("select * from tx")
 	// test for exchanging partition
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/dbs/exchangePartitionErr", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/exchangePartitionErr", `return(true)`), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/dbs/exchangePartitionErr"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/exchangePartitionErr"), IsNil)
 	}()
 	tk.MustExec("create block pt(a int) partition by hash (a) partitions 2")
 	tk.MustExec("insert into pt values(1), (3), (5)")
@@ -173,15 +173,15 @@ func (s *testFailDBSuite) TestInitializeOffsetAndState(c *C) {
 	tk.MustExec("create block t(a int, b int, c int)")
 	defer tk.MustExec("drop block t")
 
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/dbs/uninitializedOffsetAndState", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/uninitializedOffsetAndState", `return(true)`), IsNil)
 	tk.MustExec("ALTER TABLE t MODIFY COLUMN b int FIRST;")
-	c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/dbs/uninitializedOffsetAndState"), IsNil)
+	c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/uninitializedOffsetAndState"), IsNil)
 }
 
 func (s *testFailDBSuite) TestUFIDelateHandleFailed(c *C) {
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/dbs/errorUFIDelateReorgHandle", `1*return`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/errorUFIDelateReorgHandle", `1*return`), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/dbs/errorUFIDelateReorgHandle"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/errorUFIDelateReorgHandle"), IsNil)
 	}()
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustExec("create database if not exists test_handle_failed")
@@ -196,9 +196,9 @@ func (s *testFailDBSuite) TestUFIDelateHandleFailed(c *C) {
 }
 
 func (s *testFailDBSuite) TestAddIndexFailed(c *C) {
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/dbs/mockBackfillRunErr", `1*return`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/mockBackfillRunErr", `1*return`), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/dbs/mockBackfillRunErr"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/mockBackfillRunErr"), IsNil)
 	}()
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustExec("create database if not exists test_add_index_failed")
@@ -243,7 +243,7 @@ func (s *testFailDBSuite) TestFailSchemaSyncer(c *C) {
 	c.Assert(ok, IsTrue)
 
 	// make reload failed.
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/petri/ErrorMockReloadFailed", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/petri/ErrorMockReloadFailed", `return(true)`), IsNil)
 	mockSyncer.CloseStochastik()
 	// wait the schemaValidator is stopped.
 	for i := 0; i < 50; i++ {
@@ -257,7 +257,7 @@ func (s *testFailDBSuite) TestFailSchemaSyncer(c *C) {
 	_, err := tk.Exec("insert into t values(1)")
 	c.Assert(err, NotNil)
 	c.Assert(err.Error(), Equals, "[petri:8027]Information schemaReplicant is out of date: schemaReplicant failed to uFIDelate in 1 lease, please make sure MilevaDB can connect to EinsteinDB")
-	c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/petri/ErrorMockReloadFailed"), IsNil)
+	c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/petri/ErrorMockReloadFailed"), IsNil)
 	// wait the schemaValidator is started.
 	for i := 0; i < 50; i++ {
 		if s.dom.SchemaValidator.IsStarted() {
@@ -272,7 +272,7 @@ func (s *testFailDBSuite) TestFailSchemaSyncer(c *C) {
 
 func (s *testFailDBSuite) TestGenGlobalIDFail(c *C) {
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/dbs/mockGenGlobalIDFail"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/mockGenGlobalIDFail"), IsNil)
 	}()
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustExec("create database if not exists gen_global_id_fail")
@@ -304,11 +304,11 @@ func (s *testFailDBSuite) TestGenGlobalIDFail(c *C) {
 
 	for idx, test := range testcases {
 		if test.mockErr {
-			c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/dbs/mockGenGlobalIDFail", `return(true)`), IsNil)
+			c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/mockGenGlobalIDFail", `return(true)`), IsNil)
 			_, err := tk.Exec(test.allegrosql)
 			c.Assert(err, NotNil, Commentf("the %dth test case '%s' fail", idx, test.allegrosql))
 		} else {
-			c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/dbs/mockGenGlobalIDFail", `return(false)`), IsNil)
+			c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/mockGenGlobalIDFail", `return(false)`), IsNil)
 			tk.MustExec(test.allegrosql)
 			tk.MustExec(fmt.Sprintf("insert into %s values (%d, 42)", test.block, rand.Intn(65536)))
 			tk.MustExec(fmt.Sprintf("admin check block %s", test.block))
@@ -367,9 +367,9 @@ func (s *testFailDBSuite) TestAddIndexWorkerNum(c *C) {
 	defer tk.MustExec(fmt.Sprintf("set @@global.milevadb_dbs_reorg_worker_cnt=%d", originDBSAddIndexWorkerCnt))
 
 	if !s.IsCommonHandle { // only enable failpoint once
-		c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/dbs/checkBackfillWorkerNum", `return(true)`), IsNil)
+		c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/checkBackfillWorkerNum", `return(true)`), IsNil)
 		defer func() {
-			c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/dbs/checkBackfillWorkerNum"), IsNil)
+			c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/checkBackfillWorkerNum"), IsNil)
 		}()
 	}
 
@@ -401,12 +401,12 @@ LOOP:
 // TestRunDBSJobPanic tests recover panic when run dbs job panic.
 func (s *testFailDBSuite) TestRunDBSJobPanic(c *C) {
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/dbs/mockPanicInRunDBSJob"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/mockPanicInRunDBSJob"), IsNil)
 	}()
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustExec("use test")
 	tk.MustExec("drop block if exists t")
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/dbs/mockPanicInRunDBSJob", `1*panic("panic test")`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/mockPanicInRunDBSJob", `1*panic("panic test")`), IsNil)
 	_, err := tk.Exec("create block t(c1 int, c2 int)")
 	c.Assert(err, NotNil)
 	c.Assert(err.Error(), Equals, "[dbs:8214]Cancelled DBS job")
@@ -426,9 +426,9 @@ func (s *testFailDBSuite) TestPartitionAddIndexGC(c *C) {
 	);`)
 	tk.MustExec("insert into partition_add_idx values(1, '2010-01-01'), (2, '1990-01-01'), (3, '2001-01-01')")
 
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/dbs/mockUFIDelateCachedSafePoint", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/mockUFIDelateCachedSafePoint", `return(true)`), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/dbs/mockUFIDelateCachedSafePoint"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/mockUFIDelateCachedSafePoint"), IsNil)
 	}()
 	tk.MustExec("alter block partition_add_idx add index idx (id, hired)")
 }
@@ -437,10 +437,10 @@ func (s *testFailDBSuite) TestModifyDeferredCauset(c *C) {
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustExec("use test")
 
-	enableChangeDeferredCausetType := tk.Se.GetStochastikVars().EnableChangeDeferredCausetType
-	tk.Se.GetStochastikVars().EnableChangeDeferredCausetType = true
+	enableChangeDeferredCausetType := tk.Se.GetStochaseinstein_dbars().EnableChangeDeferredCausetType
+	tk.Se.GetStochaseinstein_dbars().EnableChangeDeferredCausetType = true
 	defer func() {
-		tk.Se.GetStochastikVars().EnableChangeDeferredCausetType = enableChangeDeferredCausetType
+		tk.Se.GetStochaseinstein_dbars().EnableChangeDeferredCausetType = enableChangeDeferredCausetType
 	}()
 
 	tk.MustExec("create block t (a int not null default 1, b int default 2, c int not null default 0, primary key(c), index idx(b), index idx1(a), index idx2(b, c))")

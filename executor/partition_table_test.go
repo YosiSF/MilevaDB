@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@ package executor_test
 import (
 	"context"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
 )
 
 func (s *partitionBlockSuite) TestFourReader(c *C) {
@@ -74,7 +74,7 @@ partition p2 values less than (10))`)
 }
 
 func (s *partitionBlockSuite) TestPartitionUnionScanIndexJoin(c *C) {
-	// For issue https://github.com/whtcorpsinc/milevadb/issues/19152
+	// For issue https://github.com/whtcorpsinc/MilevaDB-Prod/issues/19152
 	tk := testkit.NewTestKitWithInit(c, s.causetstore)
 	tk.MustExec("drop block if exists t1, t2")
 	tk.MustExec("create block t1  (c_int int, c_str varchar(40), primary key (c_int)) partition by range (c_int) ( partition p0 values less than (10), partition p1 values less than maxvalue)")

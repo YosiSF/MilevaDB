@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,6 +29,43 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block/blocks"
+	"github.com/whtcorpsinc/MilevaDB-Prod/blockcodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb/einsteindbrpc"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb/oracle"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore/cluster"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/dbs"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/executor"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri/infosync"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/server"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/admin"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/gcutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/rowcodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testleak"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/timeutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/statistics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastik"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
@@ -38,43 +75,6 @@ import (
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/failpoint"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/block/blocks"
-	"github.com/whtcorpsinc/milevadb/blockcodec"
-	"github.com/whtcorpsinc/milevadb/causetstore/einsteindb"
-	"github.com/whtcorpsinc/milevadb/causetstore/einsteindb/einsteindbrpc"
-	"github.com/whtcorpsinc/milevadb/causetstore/einsteindb/oracle"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore/cluster"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/dbs"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/executor"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/meta"
-	"github.com/whtcorpsinc/milevadb/meta/autoid"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/petri/infosync"
-	"github.com/whtcorpsinc/milevadb/planner"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/server"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/admin"
-	"github.com/whtcorpsinc/milevadb/soliton/gcutil"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/soliton/rowcodec"
-	"github.com/whtcorpsinc/milevadb/soliton/solitonutil"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/soliton/testleak"
-	"github.com/whtcorpsinc/milevadb/soliton/timeutil"
-	"github.com/whtcorpsinc/milevadb/statistics"
-	"github.com/whtcorpsinc/milevadb/stochastik"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
 	"google.golang.org/grpc"
 )
 
@@ -558,10 +558,10 @@ func checkCases(tests []testCase, ld *executor.LoadDataInfo,
 	for _, tt := range tests {
 		ld.IgnoreLines = origin
 		c.Assert(ctx.NewTxn(context.Background()), IsNil)
-		ctx.GetStochastikVars().StmtCtx.DupKeyAsWarning = true
-		ctx.GetStochastikVars().StmtCtx.BadNullAsWarning = true
-		ctx.GetStochastikVars().StmtCtx.InLoadDataStmt = true
-		ctx.GetStochastikVars().StmtCtx.InDeleteStmt = false
+		ctx.GetStochaseinstein_dbars().StmtCtx.DupKeyAsWarning = true
+		ctx.GetStochaseinstein_dbars().StmtCtx.BadNullAsWarning = true
+		ctx.GetStochaseinstein_dbars().StmtCtx.InLoadDataStmt = true
+		ctx.GetStochaseinstein_dbars().StmtCtx.InDeleteStmt = false
 		data, reachLimit, err1 := ld.InsertData(context.Background(), tt.data1, tt.data2)
 		c.Assert(err1, IsNil)
 		c.Assert(reachLimit, IsFalse)
@@ -1001,7 +1001,7 @@ func (s *testSuiteP1) TestSelectOrderBy(c *C) {
 	// Test double read which needs to keep order.
 	tk.MustExec("drop block if exists t")
 	tk.MustExec("create block t(a int, b int, key b (b))")
-	tk.Se.GetStochastikVars().IndexLookupSize = 3
+	tk.Se.GetStochaseinstein_dbars().IndexLookupSize = 3
 	for i := 0; i < 10; i++ {
 		tk.MustExec(fmt.Sprintf("insert into t values(%d, %d)", i, 10-i))
 	}
@@ -1014,7 +1014,7 @@ func (s *testSuiteP1) TestOrderBy(c *C) {
 	tk.MustExec("create block t (c1 int, c2 int, c3 varchar(20))")
 	tk.MustExec("insert into t values (1, 2, 'abc'), (2, 1, 'bcd')")
 
-	// Fix issue https://github.com/whtcorpsinc/milevadb/issues/337
+	// Fix issue https://github.com/whtcorpsinc/MilevaDB-Prod/issues/337
 	tk.MustQuery("select c1 as a, c1 as b from t order by c1").Check(testkit.Events("1 1", "2 2"))
 
 	tk.MustQuery("select c1 as a, t.c1 as a from t order by a desc").Check(testkit.Events("2 2", "1 1"))
@@ -1060,7 +1060,7 @@ func (s *testSuiteP1) TestSelectErrorEvent(c *C) {
 	c.Assert(err, NotNil)
 }
 
-// TestIssue2612 is related with https://github.com/whtcorpsinc/milevadb/issues/2612
+// TestIssue2612 is related with https://github.com/whtcorpsinc/MilevaDB-Prod/issues/2612
 func (s *testSuiteP1) TestIssue2612(c *C) {
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustExec("use test")
@@ -1078,7 +1078,7 @@ func (s *testSuiteP1) TestIssue2612(c *C) {
 	rs.Close()
 }
 
-// TestIssue345 is related with https://github.com/whtcorpsinc/milevadb/issues/345
+// TestIssue345 is related with https://github.com/whtcorpsinc/MilevaDB-Prod/issues/345
 func (s *testSuiteP1) TestIssue345(c *C) {
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustExec("use test")
@@ -1753,7 +1753,7 @@ func (s *testSuiteP1) TestJSON(c *C) {
 
 	// Check cast json to decimal.
 	// NOTE: this test case contains a bug, it should be uncommented after the bug is fixed.
-	// TODO: Fix bug https://github.com/whtcorpsinc/milevadb/issues/12178
+	// TODO: Fix bug https://github.com/whtcorpsinc/MilevaDB-Prod/issues/12178
 	//tk.MustExec("drop block if exists test_json")
 	//tk.MustExec("create block test_json ( a decimal(60,2) as (JSON_EXTRACT(b,'$.c')), b json );")
 	//tk.MustExec(`insert into test_json (b) values
@@ -2212,7 +2212,7 @@ func (s *testSuiteP2) TestBlockScan(c *C) {
 func (s *testSuiteP2) TestAdapterStatement(c *C) {
 	se, err := stochastik.CreateStochastik4Test(s.causetstore)
 	c.Check(err, IsNil)
-	se.GetStochastikVars().TxnCtx.SchemaReplicant = petri.GetPetri(se).SchemaReplicant()
+	se.GetStochaseinstein_dbars().TxnCtx.SchemaReplicant = petri.GetPetri(se).SchemaReplicant()
 	compiler := &executor.Compiler{Ctx: se}
 	stmtNode, err := s.ParseOneStmt("select 1", "", "")
 	c.Check(err, IsNil)
@@ -2294,8 +2294,8 @@ func (s *testSerialSuite) TestPointGetRepeablockRead(c *C) {
 	tk2.MustExec("use test")
 
 	var (
-		step1 = "github.com/whtcorpsinc/milevadb/executor/pointGetRepeablockReadTest-step1"
-		step2 = "github.com/whtcorpsinc/milevadb/executor/pointGetRepeablockReadTest-step2"
+		step1 = "github.com/whtcorpsinc/MilevaDB-Prod/executor/pointGetRepeablockReadTest-step1"
+		step2 = "github.com/whtcorpsinc/MilevaDB-Prod/executor/pointGetRepeablockReadTest-step2"
 	)
 
 	c.Assert(failpoint.Enable(step1, "return"), IsNil)
@@ -2328,8 +2328,8 @@ func (s *testSerialSuite) TestBatchPointGetRepeablockRead(c *C) {
 	tk2.MustExec("use test")
 
 	var (
-		step1 = "github.com/whtcorpsinc/milevadb/executor/batchPointGetRepeablockReadTest-step1"
-		step2 = "github.com/whtcorpsinc/milevadb/executor/batchPointGetRepeablockReadTest-step2"
+		step1 = "github.com/whtcorpsinc/MilevaDB-Prod/executor/batchPointGetRepeablockReadTest-step1"
+		step2 = "github.com/whtcorpsinc/MilevaDB-Prod/executor/batchPointGetRepeablockReadTest-step2"
 	)
 
 	c.Assert(failpoint.Enable(step1, "return"), IsNil)
@@ -2354,7 +2354,7 @@ func (s *testSerialSuite) TestBatchPointGetRepeablockRead(c *C) {
 }
 
 func (s *testSerialSuite) TestSplitRegionTimeout(c *C) {
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/causetstore/einsteindb/MockSplitRegionTimeout", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb/MockSplitRegionTimeout", `return(true)`), IsNil)
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustExec("use test")
 	tk.MustExec("drop block if exists t")
@@ -2363,22 +2363,22 @@ func (s *testSerialSuite) TestSplitRegionTimeout(c *C) {
 	tk.MustExec(`set @@milevadb_wait_split_region_timeout=1`)
 	// result 0 0 means split 0 region and 0 region finish scatter regions before timeout.
 	tk.MustQuery(`split block t between (0) and (10000) regions 10`).Check(testkit.Rows("0 0"))
-	c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/causetstore/einsteindb/MockSplitRegionTimeout"), IsNil)
+	c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb/MockSplitRegionTimeout"), IsNil)
 
 	// Test scatter regions timeout.
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/causetstore/einsteindb/MockScatterRegionTimeout", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb/MockScatterRegionTimeout", `return(true)`), IsNil)
 	tk.MustQuery(`split block t between (0) and (10000) regions 10`).Check(testkit.Rows("10 1"))
-	c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/causetstore/einsteindb/MockScatterRegionTimeout"), IsNil)
+	c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb/MockScatterRegionTimeout"), IsNil)
 
 	// Test pre-split with timeout.
 	tk.MustExec("drop block if exists t")
 	tk.MustExec("set @@global.milevadb_scatter_region=1;")
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/causetstore/einsteindb/MockScatterRegionTimeout", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb/MockScatterRegionTimeout", `return(true)`), IsNil)
 	atomic.StoreUint32(&dbs.EnableSplitBlockRegion, 1)
 	start := time.Now()
 	tk.MustExec("create block t (a int, b int) partition by hash(a) partitions 5;")
 	c.Assert(time.Since(start).Seconds(), Less, 10.0)
-	c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/causetstore/einsteindb/MockScatterRegionTimeout"), IsNil)
+	c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb/MockScatterRegionTimeout"), IsNil)
 }
 
 func (s *testSuiteP2) TestRow(c *C) {
@@ -2497,7 +2497,7 @@ func (s *testSuiteP2) TestDeferredCausetName(c *C) {
 	}
 	rs.Close()
 
-	// Test issue https://github.com/whtcorpsinc/milevadb/issues/9639 .
+	// Test issue https://github.com/whtcorpsinc/MilevaDB-Prod/issues/9639 .
 	// Both window function and expression appear in final result field.
 	tk.MustExec("set @@milevadb_enable_window_function = 1")
 	rs, err = tk.Exec("select 1+1, row_number() over() num from t")
@@ -2553,7 +2553,7 @@ func (s *testSuiteP2) TestHistoryRead(c *C) {
 	_, err := tk.Exec("set @@milevadb_snapshot = '2006-01-01 15:04:05.999999'")
 	c.Assert(terror.ErrorEqual(err, variable.ErrSnapshotTooOld), IsTrue, Commentf("err %v", err))
 	// SnapshotTS Is not uFIDelated if check failed.
-	c.Assert(tk.Se.GetStochastikVars().SnapshotTS, Equals, uint64(0))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().SnapshotTS, Equals, uint64(0))
 
 	curVer1, _ := s.causetstore.CurrentVersion()
 	time.Sleep(time.Millisecond)
@@ -2564,7 +2564,7 @@ func (s *testSuiteP2) TestHistoryRead(c *C) {
 	tk.MustQuery("select * from history_read").Check(testkit.Rows("1", "2"))
 	tk.MustExec("set @@milevadb_snapshot = '" + snapshotTime.Format("2006-01-02 15:04:05.999999") + "'")
 	ctx := tk.Se.(stochastikctx.Context)
-	snapshotTS := ctx.GetStochastikVars().SnapshotTS
+	snapshotTS := ctx.GetStochaseinstein_dbars().SnapshotTS
 	c.Assert(snapshotTS, Greater, curVer1.Ver)
 	c.Assert(snapshotTS, Less, curVer2.Ver)
 	tk.MustQuery("select * from history_read").Check(testkit.Rows("1"))
@@ -2606,9 +2606,9 @@ func (s *testSuite2) TestLowResolutionTSORead(c *C) {
 	tk.MustExec("insert low_resolution_tso values (1)")
 
 	// enable low resolution tso
-	c.Assert(tk.Se.GetStochastikVars().LowResolutionTSO, IsFalse)
+	c.Assert(tk.Se.GetStochaseinstein_dbars().LowResolutionTSO, IsFalse)
 	tk.Exec("set @@milevadb_low_resolution_tso = 'on'")
-	c.Assert(tk.Se.GetStochastikVars().LowResolutionTSO, IsTrue)
+	c.Assert(tk.Se.GetStochaseinstein_dbars().LowResolutionTSO, IsTrue)
 
 	time.Sleep(3 * time.Second)
 	tk.MustQuery("select * from low_resolution_tso").Check(testkit.Rows("1"))
@@ -2694,7 +2694,7 @@ func (s *testSuite) TestTimestampTimeZone(c *C) {
 		tk.MustQuery("select * from t").Check(testkit.Rows(tt.expect))
 	}
 
-	// For issue https://github.com/whtcorpsinc/milevadb/issues/3467
+	// For issue https://github.com/whtcorpsinc/MilevaDB-Prod/issues/3467
 	tk.MustExec("drop block if exists t1")
 	tk.MustExec(`CREATE TABLE t1 (
  	      id bigint(20) NOT NULL AUTO_INCREMENT,
@@ -2713,7 +2713,7 @@ func (s *testSuite) TestTimestampTimeZone(c *C) {
 	r = tk.MustQuery("select * from t1 where datetime='2020-03-31 08:57:10';")
 	r.Check(testkit.Rows("123381351 1734 2020-03-31 08:57:10 127.0.0.1")) // Cover IndexLookupExec
 
-	// For issue https://github.com/whtcorpsinc/milevadb/issues/3485
+	// For issue https://github.com/whtcorpsinc/MilevaDB-Prod/issues/3485
 	tk.MustExec("set time_zone = 'Asia/Shanghai'")
 	tk.MustExec("drop block if exists t1")
 	tk.MustExec(`CREATE TABLE t1 (
@@ -2985,7 +2985,7 @@ func (s *testSuite) TestEmptyEnum(c *C) {
 	tk.MustQuery("select * from t").Check(testkit.Rows("", "", "<nil>"))
 }
 
-// TestIssue4024 This tests https://github.com/whtcorpsinc/milevadb/issues/4024
+// TestIssue4024 This tests https://github.com/whtcorpsinc/MilevaDB-Prod/issues/4024
 func (s *testSuite) TestIssue4024(c *C) {
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustExec("create database test2")
@@ -4037,13 +4037,13 @@ func (s *testSerialSuite) TestTSOFail(c *C) {
 	tk.MustExec(`drop block if exists t`)
 	tk.MustExec(`create block t(a int)`)
 
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/stochastik/mockGetTSFail", "return"), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/stochastik/mockGetTSFail", "return"), IsNil)
 	ctx := failpoint.WithHook(context.Background(), func(ctx context.Context, fpname string) bool {
-		return fpname == "github.com/whtcorpsinc/milevadb/stochastik/mockGetTSFail"
+		return fpname == "github.com/whtcorpsinc/MilevaDB-Prod/stochastik/mockGetTSFail"
 	})
 	_, err := tk.Se.Execute(ctx, `select * from t`)
 	c.Assert(err, NotNil)
-	c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/stochastik/mockGetTSFail"), IsNil)
+	c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/stochastik/mockGetTSFail"), IsNil)
 }
 
 func (s *testSuite3) TestSelectHashPartitionBlock(c *C) {
@@ -5055,9 +5055,9 @@ func (s *testRecoverBlock) TearDownSuite(c *C) {
 }
 
 func (s *testRecoverBlock) TestRecoverBlock(c *C) {
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/meta/autoid/mockAutoIDChange", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid/mockAutoIDChange", `return(true)`), IsNil)
 	defer func() {
-		failpoint.Disable("github.com/whtcorpsinc/milevadb/meta/autoid/mockAutoIDChange")
+		failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid/mockAutoIDChange")
 	}()
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustExec("create database if not exists test_recover")
@@ -5167,9 +5167,9 @@ func (s *testRecoverBlock) TestRecoverBlock(c *C) {
 }
 
 func (s *testRecoverBlock) TestFlashbackBlock(c *C) {
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/meta/autoid/mockAutoIDChange", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid/mockAutoIDChange", `return(true)`), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/meta/autoid/mockAutoIDChange"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid/mockAutoIDChange"), IsNil)
 	}()
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustExec("create database if not exists test_flashback")
@@ -5312,10 +5312,10 @@ func (s *testSuiteP2) TestPointGetPreparedPlan(c *C) {
 
 	pspk1Id, _, _, err := tk1.Se.PrepareStmt("select * from t where a = ?")
 	c.Assert(err, IsNil)
-	tk1.Se.GetStochastikVars().PreparedStmts[pspk1Id].(*plannercore.CachedPrepareStmt).PreparedAst.UseCache = false
+	tk1.Se.GetStochaseinstein_dbars().PreparedStmts[pspk1Id].(*plannercore.CachedPrepareStmt).PreparedAst.UseCache = false
 	pspk2Id, _, _, err := tk1.Se.PrepareStmt("select * from t where ? = a ")
 	c.Assert(err, IsNil)
-	tk1.Se.GetStochastikVars().PreparedStmts[pspk2Id].(*plannercore.CachedPrepareStmt).PreparedAst.UseCache = false
+	tk1.Se.GetStochaseinstein_dbars().PreparedStmts[pspk2Id].(*plannercore.CachedPrepareStmt).PreparedAst.UseCache = false
 
 	ctx := context.Background()
 	// first time plan generated
@@ -5355,7 +5355,7 @@ func (s *testSuiteP2) TestPointGetPreparedPlan(c *C) {
 	// unique index
 	psuk1Id, _, _, err := tk1.Se.PrepareStmt("select * from t where b = ? ")
 	c.Assert(err, IsNil)
-	tk1.Se.GetStochastikVars().PreparedStmts[psuk1Id].(*plannercore.CachedPrepareStmt).PreparedAst.UseCache = false
+	tk1.Se.GetStochaseinstein_dbars().PreparedStmts[psuk1Id].(*plannercore.CachedPrepareStmt).PreparedAst.UseCache = false
 
 	rs, err = tk1.Se.ExecutePreparedStmt(ctx, psuk1Id, []types.Causet{types.NewCauset(1)})
 	c.Assert(err, IsNil)
@@ -5469,7 +5469,7 @@ func (s *testSuiteP2) TestPointGetPreparedPlanWithCommitMode(c *C) {
 
 	pspk1Id, _, _, err := tk1.Se.PrepareStmt("select * from t where a = ?")
 	c.Assert(err, IsNil)
-	tk1.Se.GetStochastikVars().PreparedStmts[pspk1Id].(*plannercore.CachedPrepareStmt).PreparedAst.UseCache = false
+	tk1.Se.GetStochaseinstein_dbars().PreparedStmts[pspk1Id].(*plannercore.CachedPrepareStmt).PreparedAst.UseCache = false
 
 	ctx := context.Background()
 	// first time plan generated
@@ -5533,11 +5533,11 @@ func (s *testSuiteP2) TestPointUFIDelatePreparedPlan(c *C) {
 
 	uFIDelateID1, pc, _, err := tk1.Se.PrepareStmt(`uFIDelate t set c = c + 1 where a = ?`)
 	c.Assert(err, IsNil)
-	tk1.Se.GetStochastikVars().PreparedStmts[uFIDelateID1].(*plannercore.CachedPrepareStmt).PreparedAst.UseCache = false
+	tk1.Se.GetStochaseinstein_dbars().PreparedStmts[uFIDelateID1].(*plannercore.CachedPrepareStmt).PreparedAst.UseCache = false
 	c.Assert(pc, Equals, 1)
 	uFIDelateID2, pc, _, err := tk1.Se.PrepareStmt(`uFIDelate t set c = c + 2 where ? = a`)
 	c.Assert(err, IsNil)
-	tk1.Se.GetStochastikVars().PreparedStmts[uFIDelateID2].(*plannercore.CachedPrepareStmt).PreparedAst.UseCache = false
+	tk1.Se.GetStochaseinstein_dbars().PreparedStmts[uFIDelateID2].(*plannercore.CachedPrepareStmt).PreparedAst.UseCache = false
 	c.Assert(pc, Equals, 1)
 
 	ctx := context.Background()
@@ -5572,7 +5572,7 @@ func (s *testSuiteP2) TestPointUFIDelatePreparedPlan(c *C) {
 	// unique index
 	uFIDelUkID1, _, _, err := tk1.Se.PrepareStmt(`uFIDelate t set c = c + 10 where b = ?`)
 	c.Assert(err, IsNil)
-	tk1.Se.GetStochastikVars().PreparedStmts[uFIDelUkID1].(*plannercore.CachedPrepareStmt).PreparedAst.UseCache = false
+	tk1.Se.GetStochaseinstein_dbars().PreparedStmts[uFIDelUkID1].(*plannercore.CachedPrepareStmt).PreparedAst.UseCache = false
 	rs, err = tk1.Se.ExecutePreparedStmt(ctx, uFIDelUkID1, []types.Causet{types.NewCauset(3)})
 	c.Assert(rs, IsNil)
 	c.Assert(err, IsNil)
@@ -5637,7 +5637,7 @@ func (s *testSuiteP2) TestPointUFIDelatePreparedPlanWithCommitMode(c *C) {
 
 	ctx := context.Background()
 	uFIDelateID1, _, _, err := tk1.Se.PrepareStmt(`uFIDelate t set c = c + 1 where a = ?`)
-	tk1.Se.GetStochastikVars().PreparedStmts[uFIDelateID1].(*plannercore.CachedPrepareStmt).PreparedAst.UseCache = false
+	tk1.Se.GetStochaseinstein_dbars().PreparedStmts[uFIDelateID1].(*plannercore.CachedPrepareStmt).PreparedAst.UseCache = false
 	c.Assert(err, IsNil)
 
 	// first time plan generated
@@ -5819,7 +5819,7 @@ select 7;`
 	tk := testkit.NewTestKitWithInit(c, s.causetstore)
 	loc, err := time.LoadLocation("Asia/Shanghai")
 	c.Assert(err, IsNil)
-	tk.Se.GetStochastikVars().TimeZone = loc
+	tk.Se.GetStochaseinstein_dbars().TimeZone = loc
 	tk.MustExec("use information_schema")
 	cases := []struct {
 		prepareALLEGROSQL string
@@ -6271,7 +6271,7 @@ func (s *testSlowQuery) TestSlowQuerySensitiveQuery(c *C) {
 }
 
 func (s *testSerialSuite) TestKillBlockReader(c *C) {
-	var retry = "github.com/whtcorpsinc/milevadb/causetstore/einsteindb/mockRetrySendReqToRegion"
+	var retry = "github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb/mockRetrySendReqToRegion"
 	defer func() {
 		c.Assert(failpoint.Disable(retry), IsNil)
 	}()
@@ -6281,7 +6281,7 @@ func (s *testSerialSuite) TestKillBlockReader(c *C) {
 	tk.MustExec("create block t (a int)")
 	tk.MustExec("insert into t values (1),(2),(3)")
 	tk.MustExec("set @@milevadb_distsql_scan_concurrency=1")
-	atomic.StoreUint32(&tk.Se.GetStochastikVars().Killed, 0)
+	atomic.StoreUint32(&tk.Se.GetStochaseinstein_dbars().Killed, 0)
 	c.Assert(failpoint.Enable(retry, `return(true)`), IsNil)
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
@@ -6292,7 +6292,7 @@ func (s *testSerialSuite) TestKillBlockReader(c *C) {
 		c.Assert(err, NotNil)
 		c.Assert(int(terror.ToALLEGROSQLError(errors.Cause(err).(*terror.Error)).Code), Equals, int(executor.ErrQueryInterrupted.Code()))
 	}()
-	atomic.StoreUint32(&tk.Se.GetStochastikVars().Killed, 1)
+	atomic.StoreUint32(&tk.Se.GetStochaseinstein_dbars().Killed, 1)
 	wg.Wait()
 }
 
@@ -6308,7 +6308,7 @@ func (s *testSerialSuite) TestPrevStmtDesensitization(c *C) {
 	tk.MustExec("create block t (a int)")
 	tk.MustExec("begin")
 	tk.MustExec("insert into t values (1),(2)")
-	c.Assert(tk.Se.GetStochastikVars().PrevStmt.String(), Equals, "insert into t values ( ? ) , ( ? )")
+	c.Assert(tk.Se.GetStochaseinstein_dbars().PrevStmt.String(), Equals, "insert into t values ( ? ) , ( ? )")
 }
 
 func (s *testSuite) TestIssue19372(c *C) {
@@ -6328,12 +6328,12 @@ func (s *testSerialSuite1) TestDefCauslectINTERLOCKRuntimeStats(c *C) {
 	tk.MustExec("drop block if exists t1")
 	tk.MustExec("create block t1 (a int, b int)")
 	tk.MustExec("set milevadb_enable_defCauslect_execution_info=1;")
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/causetstore/einsteindb/einsteindbStoreRespResult", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb/einsteindbStoreRespResult", `return(true)`), IsNil)
 	rows := tk.MustQuery("explain analyze select * from t1").Rows()
 	c.Assert(len(rows), Equals, 2)
 	explain := fmt.Sprintf("%v", rows[0])
 	c.Assert(explain, Matches, ".*rpc_num: 2, .*regionMiss:.*")
-	c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/causetstore/einsteindb/einsteindbStoreRespResult"), IsNil)
+	c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb/einsteindbStoreRespResult"), IsNil)
 }
 
 func (s *testSuite) TestDefCauslectDMLRuntimeStats(c *C) {
@@ -6354,7 +6354,7 @@ func (s *testSuite) TestDefCauslectDMLRuntimeStats(c *C) {
 		c.Assert(info, NotNil)
 		p, ok := info.Plan.(plannercore.Plan)
 		c.Assert(ok, IsTrue)
-		stats := tk.Se.GetStochastikVars().StmtCtx.RuntimeStatsDefCausl.GetRootStats(p.ID())
+		stats := tk.Se.GetStochaseinstein_dbars().StmtCtx.RuntimeStatsDefCausl.GetRootStats(p.ID())
 		return stats.String()
 	}
 	for _, allegrosql := range testALLEGROSQLs {

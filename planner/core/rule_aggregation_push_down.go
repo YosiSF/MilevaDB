@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,12 +15,12 @@ package core
 import (
 	"context"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression/aggregation"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/expression/aggregation"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 type aggregationPushDownSolver struct {
@@ -193,7 +193,7 @@ func (a *aggregationPushDownSolver) decompose(ctx stochastikctx.Context, aggFunc
 	result := []*aggregation.AggFuncDesc{aggFunc.Clone()}
 	for _, aggFunc := range result {
 		schemaReplicant.Append(&expression.DeferredCauset{
-			UniqueID: ctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+			UniqueID: ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 			RetType:  aggFunc.RetTp,
 		})
 	}
@@ -228,7 +228,7 @@ func (a *aggregationPushDownSolver) tryToPushDownAgg(aggFuncs []*aggregation.Agg
 	// If agg has no group-by item, it will return a default value, which may cause some bugs.
 	// So here we add a group-by item forcely.
 	if len(agg.GroupByItems) == 0 {
-		agg.GroupByItems = []expression.Expression{&expression.Constant{
+		agg.GroupByItems = []expression.Expression{&expression.CouplingConstantWithRadix{
 			Value:   types.NewCauset(0),
 			RetType: types.NewFieldType(allegrosql.TypeLong)}}
 	}
@@ -264,7 +264,7 @@ func (a *aggregationPushDownSolver) checkAnyCountAndSum(aggFuncs []*aggregation.
 }
 
 // TODO:
-//   1. https://github.com/whtcorpsinc/milevadb/issues/16355, push avg & distinct functions across join
+//   1. https://github.com/whtcorpsinc/MilevaDB-Prod/issues/16355, push avg & distinct functions across join
 //   2. remove this method and use splitPartialAgg instead for clean code.
 func (a *aggregationPushDownSolver) makeNewAgg(ctx stochastikctx.Context, aggFuncs []*aggregation.AggFuncDesc, gbyDefCauss []*expression.DeferredCauset, aggHints aggHintInfo, blockOffset int) (*LogicalAggregation, error) {
 	agg := LogicalAggregation{
@@ -397,7 +397,7 @@ func (a *aggregationPushDownSolver) aggPushDown(p LogicalPlan) (_ LogicalPlan, e
 			p = proj
 		} else {
 			child := agg.children[0]
-			if join, ok1 := child.(*LogicalJoin); ok1 && a.checkValidJoin(join) && p.SCtx().GetStochastikVars().AllowAggPushDown {
+			if join, ok1 := child.(*LogicalJoin); ok1 && a.checkValidJoin(join) && p.SCtx().GetStochaseinstein_dbars().AllowAggPushDown {
 				if valid, leftAggFuncs, rightAggFuncs, leftGbyDefCauss, rightGbyDefCauss := a.splitAggFuncsAndGbyDefCauss(agg, join); valid {
 					var lChild, rChild LogicalPlan
 					// If there exist count or sum functions in left join path, we can't push any
@@ -428,7 +428,7 @@ func (a *aggregationPushDownSolver) aggPushDown(p LogicalPlan) (_ LogicalPlan, e
 						p = proj
 					}
 				}
-			} else if proj, ok1 := child.(*LogicalProjection); ok1 && p.SCtx().GetStochastikVars().AllowAggPushDown {
+			} else if proj, ok1 := child.(*LogicalProjection); ok1 && p.SCtx().GetStochaseinstein_dbars().AllowAggPushDown {
 				// TODO: This optimization is not always reasonable. We have not supported pushing projection to ekv layer yet,
 				// so we must do this optimization.
 				for i, gbyItem := range agg.GroupByItems {
@@ -444,7 +444,7 @@ func (a *aggregationPushDownSolver) aggPushDown(p LogicalPlan) (_ LogicalPlan, e
 				}
 				projChild := proj.children[0]
 				agg.SetChildren(projChild)
-			} else if union, ok1 := child.(*LogicalUnionAll); ok1 && p.SCtx().GetStochastikVars().AllowAggPushDown {
+			} else if union, ok1 := child.(*LogicalUnionAll); ok1 && p.SCtx().GetStochaseinstein_dbars().AllowAggPushDown {
 				err := a.tryAggPushDownForUnion(union, agg)
 				if err != nil {
 					return nil, err

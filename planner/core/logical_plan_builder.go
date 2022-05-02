@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,6 +26,25 @@ import (
 	"unicode"
 
 	"github.com/cznic/mathutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block/blocks"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression/aggregation"
+	"github.com/whtcorpsinc/MilevaDB-Prod/metrics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/property"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/privilege"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	util2 "github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	utilhint "github.com/whtcorpsinc/MilevaDB-Prod/soliton/hint"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/plancodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/statistics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	driver "github.com/whtcorpsinc/MilevaDB-Prod/types/berolinaAllegroSQL_driver"
 	"github.com/whtcorpsinc/berolinaAllegroSQL"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
@@ -33,25 +52,6 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/opcode"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/block/blocks"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/expression/aggregation"
-	"github.com/whtcorpsinc/milevadb/metrics"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/planner/property"
-	"github.com/whtcorpsinc/milevadb/planner/soliton"
-	"github.com/whtcorpsinc/milevadb/privilege"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	util2 "github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	utilhint "github.com/whtcorpsinc/milevadb/soliton/hint"
-	"github.com/whtcorpsinc/milevadb/soliton/plancodec"
-	"github.com/whtcorpsinc/milevadb/statistics"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
-	driver "github.com/whtcorpsinc/milevadb/types/berolinaAllegroSQL_driver"
 )
 
 const (
@@ -239,7 +239,7 @@ func (b *PlanBuilder) builPosetDaggregation(ctx context.Context, p LogicalPlan, 
 			aggIndexMap[i] = position
 			plan4Agg.AggFuncs = append(plan4Agg.AggFuncs, newFunc)
 			schema4Agg.Append(&expression.DeferredCauset{
-				UniqueID: b.ctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+				UniqueID: b.ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 				RetType:  newFunc.RetTp,
 			})
 			names = append(names, types.EmptyName)
@@ -294,8 +294,8 @@ func (b *PlanBuilder) buildResultSetNode(ctx context.Context, node ast.ResultSet
 			}
 		}
 		// `BlockName` is not a select block, so we do not need to handle it.
-		if !isBlockName && b.ctx.GetStochastikVars().PlannerSelectBlockAsName != nil {
-			b.ctx.GetStochastikVars().PlannerSelectBlockAsName[p.SelectBlockOffset()] = ast.HintBlock{DBName: p.OutputNames()[0].DBName, BlockName: p.OutputNames()[0].TblName}
+		if !isBlockName && b.ctx.GetStochaseinstein_dbars().PlannerSelectBlockAsName != nil {
+			b.ctx.GetStochaseinstein_dbars().PlannerSelectBlockAsName[p.SelectBlockOffset()] = ast.HintBlock{DBName: p.OutputNames()[0].DBName, BlockName: p.OutputNames()[0].TblName}
 		}
 		// Duplicate column name in one block is not allowed.
 		// "select * from (select 1, 1) as a;" is duplicate
@@ -461,7 +461,7 @@ func extractBlockAlias(p Plan, parentOffset int) *hintBlockInfo {
 			}
 		}
 		blockOffset := p.SelectBlockOffset()
-		blockAsNames := p.SCtx().GetStochastikVars().PlannerSelectBlockAsName
+		blockAsNames := p.SCtx().GetStochaseinstein_dbars().PlannerSelectBlockAsName
 		// For sub-queries like `(select * from t) t1`, t1 should belong to its surrounding select block.
 		if blockOffset != parentOffset && blockAsNames != nil && blockAsNames[blockOffset].BlockName.L != "" {
 			blockOffset = parentOffset
@@ -521,7 +521,7 @@ func (p *LogicalJoin) setPreferredJoinType(hintInfo *blockHintInfo) {
 	if containDifferentJoinTypes(p.preferJoinType) {
 		errMsg := "Join hints are conflict, you can only specify one type of join"
 		warning := ErrInternal.GenWithStack(errMsg)
-		p.ctx.GetStochastikVars().StmtCtx.AppendWarning(warning)
+		p.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(warning)
 		p.preferJoinType = 0
 	}
 	// set hintInfo for further usage if this hint info can be used.
@@ -552,9 +552,9 @@ func (ds *DataSource) setPreferredStoreType(hintInfo *blockHintInfo) {
 		if ds.preferStoreType&preferEinsteinDB == 0 {
 			errMsg := fmt.Sprintf("No available path for block %s.%s with the causetstore type %s of the hint /*+ read_from_storage */, "+
 				"please check the status of the block replica and variable value of milevadb_isolation_read_engines(%v)",
-				ds.DBName.O, ds.block.Meta().Name.O, ekv.EinsteinDB.Name(), ds.ctx.GetStochastikVars().GetIsolationReadEngines())
+				ds.DBName.O, ds.block.Meta().Name.O, ekv.EinsteinDB.Name(), ds.ctx.GetStochaseinstein_dbars().GetIsolationReadEngines())
 			warning := ErrInternal.GenWithStack(errMsg)
-			ds.ctx.GetStochastikVars().StmtCtx.AppendWarning(warning)
+			ds.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(warning)
 		}
 	}
 	if hintTbl := hintInfo.ifPreferTiFlash(alias); hintTbl != nil {
@@ -565,7 +565,7 @@ func (ds *DataSource) setPreferredStoreType(hintInfo *blockHintInfo) {
 			errMsg := fmt.Sprintf("CausetStorage hints are conflict, you can only specify one storage type of block %s.%s",
 				alias.dbName.L, alias.tblName.L)
 			warning := ErrInternal.GenWithStack(errMsg)
-			ds.ctx.GetStochastikVars().StmtCtx.AppendWarning(warning)
+			ds.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(warning)
 			ds.preferStoreType = 0
 			return
 		}
@@ -579,9 +579,9 @@ func (ds *DataSource) setPreferredStoreType(hintInfo *blockHintInfo) {
 		if ds.preferStoreType&preferTiFlash == 0 {
 			errMsg := fmt.Sprintf("No available path for block %s.%s with the causetstore type %s of the hint /*+ read_from_storage */, "+
 				"please check the status of the block replica and variable value of milevadb_isolation_read_engines(%v)",
-				ds.DBName.O, ds.block.Meta().Name.O, ekv.TiFlash.Name(), ds.ctx.GetStochastikVars().GetIsolationReadEngines())
+				ds.DBName.O, ds.block.Meta().Name.O, ekv.TiFlash.Name(), ds.ctx.GetStochaseinstein_dbars().GetIsolationReadEngines())
 			warning := ErrInternal.GenWithStack(errMsg)
-			ds.ctx.GetStochastikVars().StmtCtx.AppendWarning(warning)
+			ds.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(warning)
 		}
 	}
 }
@@ -837,7 +837,7 @@ func (b *PlanBuilder) buildSelection(ctx context.Context, p LogicalPlan, where a
 		}
 		cnfItems := expression.SplitCNFItems(expr)
 		for _, item := range cnfItems {
-			if con, ok := item.(*expression.Constant); ok && con.DeferredExpr == nil && con.ParamMarker == nil {
+			if con, ok := item.(*expression.CouplingConstantWithRadix); ok && con.DeferredExpr == nil && con.ParamMarker == nil {
 				ret, _, err := expression.EvalBool(b.ctx, expression.CNFExprs{con}, chunk.Row{})
 				if err != nil || ret {
 					continue
@@ -983,7 +983,7 @@ func (b *PlanBuilder) buildProjectionField(ctx context.Context, p LogicalPlan, f
 		return col, name, nil
 	}
 	newDefCaus := &expression.DeferredCauset{
-		UniqueID: b.ctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+		UniqueID: b.ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 		RetType:  expr.GetType(),
 	}
 	return newDefCaus, name, nil
@@ -1116,7 +1116,7 @@ func unionJoinFieldType(a, b *types.FieldType) *types.FieldType {
 	resultTp.Decimal = mathutil.Max(a.Decimal, b.Decimal)
 	// `Flen - Decimal` is the fraction before '.'
 	resultTp.Flen = mathutil.Max(a.Flen-a.Decimal, b.Flen-b.Decimal) + resultTp.Decimal
-	if resultTp.EvalType() != types.ETInt && (a.EvalType() == types.ETInt || b.EvalType() == types.ETInt) && resultTp.Flen < allegrosql.MaxIntWidth {
+	if resultTp.EvalType() != types.CausetEDN && (a.EvalType() == types.CausetEDN || b.EvalType() == types.CausetEDN) && resultTp.Flen < allegrosql.MaxIntWidth {
 		resultTp.Flen = allegrosql.MaxIntWidth
 	}
 	resultTp.Charset = a.Charset
@@ -1139,7 +1139,7 @@ func (b *PlanBuilder) buildProjection4Union(ctx context.Context, u *LogicalUnion
 		names = append(names, &types.FieldName{DefCausName: u.children[0].OutputNames()[i].DefCausName})
 		unionDefCauss = append(unionDefCauss, &expression.DeferredCauset{
 			RetType:  resultTp,
-			UniqueID: b.ctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+			UniqueID: b.ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 		})
 	}
 	u.schemaReplicant = expression.NewSchema(unionDefCauss...)
@@ -1209,14 +1209,14 @@ func (b *PlanBuilder) buildSetOpr(ctx context.Context, setOpr *ast.SetOprStmt) (
 		}
 	}
 
-	// Fix issue #8189 (https://github.com/whtcorpsinc/milevadb/issues/8189).
+	// Fix issue #8189 (https://github.com/whtcorpsinc/MilevaDB-Prod/issues/8189).
 	// If there are extra expressions generated from `ORDER BY` clause, generate a `Projection` to remove them.
 	if oldLen != setOprPlan.Schema().Len() {
 		proj := LogicalProjection{Exprs: expression.DeferredCauset2Exprs(setOprPlan.Schema().DeferredCausets[:oldLen])}.Init(b.ctx, b.getSelectOffset())
 		proj.SetChildren(setOprPlan)
 		schemaReplicant := expression.NewSchema(setOprPlan.Schema().Clone().DeferredCausets[:oldLen]...)
 		for _, col := range schemaReplicant.DeferredCausets {
-			col.UniqueID = b.ctx.GetStochastikVars().AllocPlanDeferredCausetID()
+			col.UniqueID = b.ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID()
 		}
 		proj.names = setOprPlan.OutputNames()[:oldLen]
 		proj.SetSchema(schemaReplicant)
@@ -1428,7 +1428,7 @@ func getUintFromNode(ctx stochastikctx.Context, n ast.Node) (uVal uint64, isNull
 		if err != nil {
 			return 0, false, false
 		}
-		str, isNull, err := expression.GetStringFromConstant(ctx, param)
+		str, isNull, err := expression.GetStringFromCouplingConstantWithRadix(ctx, param)
 		if err != nil {
 			return 0, false, false
 		}
@@ -1447,7 +1447,7 @@ func getUintFromNode(ctx stochastikctx.Context, n ast.Node) (uVal uint64, isNull
 			return uint64(v), false, true
 		}
 	case string:
-		sc := ctx.GetStochastikVars().StmtCtx
+		sc := ctx.GetStochaseinstein_dbars().StmtCtx
 		uVal, err := types.StrToUint(sc, v, false)
 		if err != nil {
 			return 0, false, false
@@ -2406,7 +2406,7 @@ func (b *PlanBuilder) pushHintWithoutBlockWarning(hint *ast.BlockOptimizerHint) 
 		return
 	}
 	errMsg := fmt.Sprintf("Hint %s is inapplicable. Please specify the block names in the arguments.", sb.String())
-	b.ctx.GetStochastikVars().StmtCtx.AppendWarning(ErrInternal.GenWithStack(errMsg))
+	b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(ErrInternal.GenWithStack(errMsg))
 }
 
 func (b *PlanBuilder) pushBlockHints(hints []*ast.BlockOptimizerHint, nodeType utilhint.NodeType, currentLevel int) {
@@ -2454,7 +2454,7 @@ func (b *PlanBuilder) pushBlockHints(hints []*ast.BlockOptimizerHint, nodeType u
 		case HintUseIndex:
 			dbName := hint.Blocks[0].DBName
 			if dbName.L == "" {
-				dbName = perceptron.NewCIStr(b.ctx.GetStochastikVars().CurrentDB)
+				dbName = perceptron.NewCIStr(b.ctx.GetStochaseinstein_dbars().CurrentDB)
 			}
 			indexHintList = append(indexHintList, indexHintInfo{
 				dbName:     dbName,
@@ -2469,7 +2469,7 @@ func (b *PlanBuilder) pushBlockHints(hints []*ast.BlockOptimizerHint, nodeType u
 		case HintIgnoreIndex:
 			dbName := hint.Blocks[0].DBName
 			if dbName.L == "" {
-				dbName = perceptron.NewCIStr(b.ctx.GetStochastikVars().CurrentDB)
+				dbName = perceptron.NewCIStr(b.ctx.GetStochaseinstein_dbars().CurrentDB)
 			}
 			indexHintList = append(indexHintList, indexHintInfo{
 				dbName:     dbName,
@@ -2491,7 +2491,7 @@ func (b *PlanBuilder) pushBlockHints(hints []*ast.BlockOptimizerHint, nodeType u
 		case HintIndexMerge:
 			dbName := hint.Blocks[0].DBName
 			if dbName.L == "" {
-				dbName = perceptron.NewCIStr(b.ctx.GetStochastikVars().CurrentDB)
+				dbName = perceptron.NewCIStr(b.ctx.GetStochaseinstein_dbars().CurrentDB)
 			}
 			indexMergeHintList = append(indexMergeHintList, indexHintInfo{
 				dbName:     dbName,
@@ -2557,7 +2557,7 @@ func (b *PlanBuilder) appendUnmatchedIndexHintWarning(indexHints []indexHintInfo
 				hint.dbName,
 				hint.tblName,
 			)
-			b.ctx.GetStochastikVars().StmtCtx.AppendWarning(ErrInternal.GenWithStack(errMsg))
+			b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(ErrInternal.GenWithStack(errMsg))
 		}
 	}
 }
@@ -2573,7 +2573,7 @@ func (b *PlanBuilder) appendUnmatchedJoinHintWarning(joinType string, joinTypeAl
 
 	errMsg := fmt.Sprintf("There are no matching block names for (%s) in optimizer hint %s%s. Maybe you can use the block alias name",
 		strings.Join(unMatchedBlocks, ", "), restore2JoinHint(joinType, hintBlocks), joinTypeAlias)
-	b.ctx.GetStochastikVars().StmtCtx.AppendWarning(ErrInternal.GenWithStack(errMsg))
+	b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(ErrInternal.GenWithStack(errMsg))
 }
 
 func (b *PlanBuilder) appendUnmatchedStorageHintWarning(tiflashBlocks, einsteindbBlocks []hintBlockInfo) {
@@ -2585,7 +2585,7 @@ func (b *PlanBuilder) appendUnmatchedStorageHintWarning(tiflashBlocks, einsteind
 	errMsg := fmt.Sprintf("There are no matching block names for (%s) in optimizer hint %s. Maybe you can use the block alias name",
 		strings.Join(append(unMatchedTiFlashBlocks, unMatchedEinsteinDBBlocks...), ", "),
 		restore2StorageHint(tiflashBlocks, einsteindbBlocks))
-	b.ctx.GetStochastikVars().StmtCtx.AppendWarning(ErrInternal.GenWithStack(errMsg))
+	b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(ErrInternal.GenWithStack(errMsg))
 }
 
 // BlockHints returns the *blockHintInfo of PlanBuilder.
@@ -2604,7 +2604,7 @@ func (b *PlanBuilder) buildSelect(ctx context.Context, sel *ast.SelectStmt) (p L
 		// block hints are only visible in the current SELECT statement.
 		b.popBlockHints()
 	}()
-	enableNoopFuncs := b.ctx.GetStochastikVars().EnableNoopFuncs
+	enableNoopFuncs := b.ctx.GetStochaseinstein_dbars().EnableNoopFuncs
 	if sel.SelectStmtOpts != nil {
 		if sel.SelectStmtOpts.CalcFoundRows && !enableNoopFuncs {
 			err = expression.ErrFunctionsNoopImpl.GenWithStackByArgs("ALLEGROSQL_CALC_FOUND_ROWS")
@@ -2647,7 +2647,7 @@ func (b *PlanBuilder) buildSelect(ctx context.Context, sel *ast.SelectStmt) (p L
 		}
 	}
 
-	if b.ctx.GetStochastikVars().ALLEGROSQLMode.HasOnlyFullGroupBy() && sel.From != nil {
+	if b.ctx.GetStochaseinstein_dbars().ALLEGROSQLMode.HasOnlyFullGroupBy() && sel.From != nil {
 		err = b.checkOnlyFullGroupBy(p, sel)
 		if err != nil {
 			return nil, err
@@ -2778,7 +2778,7 @@ func (b *PlanBuilder) buildSelect(ctx context.Context, sel *ast.SelectStmt) (p L
 		proj.SetChildren(p)
 		schemaReplicant := expression.NewSchema(p.Schema().Clone().DeferredCausets[:oldLen]...)
 		for _, col := range schemaReplicant.DeferredCausets {
-			col.UniqueID = b.ctx.GetStochastikVars().AllocPlanDeferredCausetID()
+			col.UniqueID = b.ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID()
 		}
 		proj.names = p.OutputNames()[:oldLen]
 		proj.SetSchema(schemaReplicant)
@@ -2796,7 +2796,7 @@ func (b *PlanBuilder) buildBlockDual() *LogicalBlockDual {
 func (ds *DataSource) newExtraHandleSchemaDefCaus() *expression.DeferredCauset {
 	return &expression.DeferredCauset{
 		RetType:  types.NewFieldType(allegrosql.TypeLonglong),
-		UniqueID: ds.ctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+		UniqueID: ds.ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 		ID:       perceptron.ExtraHandleID,
 		OrigName: fmt.Sprintf("%v.%v.%v", ds.DBName, ds.blockInfo.Name, perceptron.ExtraHandleName),
 	}
@@ -2839,9 +2839,9 @@ func getStatsBlock(ctx stochastikctx.Context, tblInfo *perceptron.BlockInfo, pid
 
 func (b *PlanBuilder) buildDataSource(ctx context.Context, tn *ast.BlockName, asName *perceptron.CIStr) (LogicalPlan, error) {
 	dbName := tn.Schema
-	stochastikVars := b.ctx.GetStochastikVars()
+	stochaseinstein_dbars := b.ctx.GetStochaseinstein_dbars()
 	if dbName.L == "" {
-		dbName = perceptron.NewCIStr(stochastikVars.CurrentDB)
+		dbName = perceptron.NewCIStr(stochaseinstein_dbars.CurrentDB)
 	}
 
 	tbl, err := b.is.BlockByName(dbName, tn.Name)
@@ -2851,8 +2851,8 @@ func (b *PlanBuilder) buildDataSource(ctx context.Context, tn *ast.BlockName, as
 
 	blockInfo := tbl.Meta()
 	var authErr error
-	if stochastikVars.User != nil {
-		authErr = ErrBlockaccessDenied.FastGenByArgs("SELECT", stochastikVars.User.AuthUsername, stochastikVars.User.AuthHostname, blockInfo.Name.L)
+	if stochaseinstein_dbars.User != nil {
+		authErr = ErrBlockaccessDenied.FastGenByArgs("SELECT", stochaseinstein_dbars.User.AuthUsername, stochaseinstein_dbars.User.AuthHostname, blockInfo.Name.L)
 	}
 	b.visitInfo = appendVisitInfo(b.visitInfo, allegrosql.SelectPriv, dbName.L, blockInfo.Name.L, "", authErr)
 
@@ -2869,7 +2869,7 @@ func (b *PlanBuilder) buildDataSource(ctx context.Context, tn *ast.BlockName, as
 
 	if blockInfo.GetPartitionInfo() != nil {
 		// Use the new partition implementation, clean up the code here when it's full implemented.
-		if !b.ctx.GetStochastikVars().UseDynamicPartitionPrune() {
+		if !b.ctx.GetStochaseinstein_dbars().UseDynamicPartitionPrune() {
 			b.optFlag = b.optFlag | flagPartitionProcessor
 		}
 
@@ -2973,7 +2973,7 @@ func (b *PlanBuilder) buildDataSource(ctx context.Context, tn *ast.BlockName, as
 					errMsg := fmt.Sprintf("use_index_merge(%s) is inapplicable, check whether the indexes (%s) "+
 						"exist, or the indexes are conflicted with use_index/ignore_index hints.",
 						hint.indexString(), strings.Join(invalidIdxNames, ", "))
-					b.ctx.GetStochastikVars().StmtCtx.AppendWarning(ErrInternal.GenWithStack(errMsg))
+					b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(ErrInternal.GenWithStack(errMsg))
 				}
 			}
 		}
@@ -3007,7 +3007,7 @@ func (b *PlanBuilder) buildDataSource(ctx context.Context, tn *ast.BlockName, as
 			Hidden:          col.Hidden,
 		})
 		newDefCaus := &expression.DeferredCauset{
-			UniqueID: stochastikVars.AllocPlanDeferredCausetID(),
+			UniqueID: stochaseinstein_dbars.AllocPlanDeferredCausetID(),
 			ID:       col.ID,
 			RetType:  &col.FieldType,
 			OrigName: names[i].String(),
@@ -3024,7 +3024,7 @@ func (b *PlanBuilder) buildDataSource(ctx context.Context, tn *ast.BlockName, as
 	if handleDefCauss == nil {
 		if blockInfo.IsCommonHandle {
 			primaryIdx := blocks.FindPrimaryIndex(blockInfo)
-			handleDefCauss = NewCommonHandleDefCauss(b.ctx.GetStochastikVars().StmtCtx, blockInfo, primaryIdx, ds.TblDefCauss)
+			handleDefCauss = NewCommonHandleDefCauss(b.ctx.GetStochaseinstein_dbars().StmtCtx, blockInfo, primaryIdx, ds.TblDefCauss)
 		} else {
 			extraDefCaus := ds.newExtraHandleSchemaDefCaus()
 			handleDefCauss = &IntHandleDefCauss{col: extraDefCaus}
@@ -3065,10 +3065,10 @@ func (b *PlanBuilder) buildDataSource(ctx context.Context, tn *ast.BlockName, as
 		us.SetChildren(ds)
 		result = us
 	}
-	if stochastikVars.StmtCtx.TblInfo2UnionScan == nil {
-		stochastikVars.StmtCtx.TblInfo2UnionScan = make(map[*perceptron.BlockInfo]bool)
+	if stochaseinstein_dbars.StmtCtx.TblInfo2UnionScan == nil {
+		stochaseinstein_dbars.StmtCtx.TblInfo2UnionScan = make(map[*perceptron.BlockInfo]bool)
 	}
-	stochastikVars.StmtCtx.TblInfo2UnionScan[blockInfo] = dirty
+	stochaseinstein_dbars.StmtCtx.TblInfo2UnionScan[blockInfo] = dirty
 
 	for i, colExpr := range ds.Schema().DeferredCausets {
 		var expr expression.Expression
@@ -3101,7 +3101,7 @@ func (b *PlanBuilder) timeRangeForSummaryBlock() QueryTimeRange {
 	parse := func(s string) (time.Time, bool) {
 		t, err := time.ParseInLocation(MetricBlockTimeFormat, s, time.Local)
 		if err != nil {
-			b.ctx.GetStochastikVars().StmtCtx.AppendWarning(err)
+			b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(err)
 		}
 		return t, err == nil
 	}
@@ -3136,7 +3136,7 @@ func (b *PlanBuilder) buildMemBlock(_ context.Context, dbName perceptron.CIStr, 
 		})
 		// NOTE: Rewrite the expression if memory block supports generated columns in the future
 		newDefCaus := &expression.DeferredCauset{
-			UniqueID: b.ctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+			UniqueID: b.ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 			ID:       col.ID,
 			RetType:  &col.FieldType,
 		}
@@ -3196,9 +3196,9 @@ func (b *PlanBuilder) buildMemBlock(_ context.Context, dbName perceptron.CIStr, 
 
 // BuildDataSourceFromView is used to build LogicalPlan from view
 func (b *PlanBuilder) BuildDataSourceFromView(ctx context.Context, dbName perceptron.CIStr, blockInfo *perceptron.BlockInfo) (LogicalPlan, error) {
-	charset, collation := b.ctx.GetStochastikVars().GetCharsetInfo()
+	charset, collation := b.ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 	viewberolinaAllegroSQL := berolinaAllegroSQL.New()
-	viewberolinaAllegroSQL.EnableWindowFunc(b.ctx.GetStochastikVars().EnableWindowFunction)
+	viewberolinaAllegroSQL.EnableWindowFunc(b.ctx.GetStochaseinstein_dbars().EnableWindowFunction)
 	selectNode, err := viewberolinaAllegroSQL.ParseOneStmt(blockInfo.View.SelectStmt, charset, collation)
 	if err != nil {
 		return nil, err
@@ -3223,7 +3223,7 @@ func (b *PlanBuilder) BuildDataSourceFromView(ctx context.Context, dbName percep
 	}
 	b.visitInfo = append(originalVisitInfo, b.visitInfo...)
 
-	if b.ctx.GetStochastikVars().StmtCtx.InExplainStmt {
+	if b.ctx.GetStochaseinstein_dbars().StmtCtx.InExplainStmt {
 		b.visitInfo = appendVisitInfo(b.visitInfo, allegrosql.ShowViewPriv, dbName.L, blockInfo.Name.L, "", ErrViewNoExplain)
 	}
 
@@ -3337,7 +3337,7 @@ func (b *PlanBuilder) buildSemiJoin(outerPlan, innerPlan LogicalPlan, onConditio
 		newSchema := outerPlan.Schema().Clone()
 		newSchema.Append(&expression.DeferredCauset{
 			RetType:  types.NewFieldType(allegrosql.TypeTiny),
-			UniqueID: b.ctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+			UniqueID: b.ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 		})
 		joinPlan.names = append(joinPlan.names, types.EmptyName)
 		joinPlan.SetSchema(newSchema)
@@ -3498,7 +3498,7 @@ func (b *PlanBuilder) buildUFIDelate(ctx context.Context, uFIDelate *ast.UFIDela
 	for _, t := range blockList {
 		dbName := t.Schema.L
 		if dbName == "" {
-			dbName = b.ctx.GetStochastikVars().CurrentDB
+			dbName = b.ctx.GetStochaseinstein_dbars().CurrentDB
 		}
 		if t.BlockInfo.IsView() {
 			return nil, errors.Errorf("uFIDelate view %s is not supported now.", t.Name.O)
@@ -3516,7 +3516,7 @@ func (b *PlanBuilder) buildUFIDelate(ctx context.Context, uFIDelate *ast.UFIDela
 			return nil, err
 		}
 	}
-	if b.ctx.GetStochastikVars().TxnCtx.IsPessimistic {
+	if b.ctx.GetStochaseinstein_dbars().TxnCtx.IsPessimistic {
 		if uFIDelate.BlockRefs.BlockRefs.Right == nil {
 			// buildSelectLock is an optimization that can reduce RPC call.
 			// We only need do this optimization for single block uFIDelate which is the most common case.
@@ -3551,15 +3551,15 @@ func (b *PlanBuilder) buildUFIDelate(ctx context.Context, uFIDelate *ast.UFIDela
 
 	var uFIDelateBlockList []*ast.BlockName
 	uFIDelateBlockList = extractBlockList(uFIDelate.BlockRefs.BlockRefs, uFIDelateBlockList, true)
-	orderedList, np, allAssignmentsAreConstant, err := b.buildUFIDelateLists(ctx, uFIDelateBlockList, uFIDelate.List, p)
+	orderedList, np, allAssignmentsAreCouplingConstantWithRadix, err := b.buildUFIDelateLists(ctx, uFIDelateBlockList, uFIDelate.List, p)
 	if err != nil {
 		return nil, err
 	}
 	p = np
 
 	uFIDelt := UFIDelate{
-		OrderedList:               orderedList,
-		AllAssignmentsAreConstant: allAssignmentsAreConstant,
+		OrderedList: orderedList,
+		AllAssignmentsAreCouplingConstantWithRadix: allAssignmentsAreCouplingConstantWithRadix,
 	}.Init(b.ctx)
 	uFIDelt.names = p.OutputNames()
 	// We cannot apply projection elimination when building the subplan, because
@@ -3592,7 +3592,7 @@ func (b *PlanBuilder) buildUFIDelate(ctx context.Context, uFIDelate *ast.UFIDela
 func GetUFIDelateDeferredCausets(ctx stochastikctx.Context, orderedList []*expression.Assignment, schemaLen int) ([]bool, error) {
 	assignFlag := make([]bool, schemaLen)
 	for _, v := range orderedList {
-		if !ctx.GetStochastikVars().AllowWriteRowID && v.DefCaus.ID == perceptron.ExtraHandleID {
+		if !ctx.GetStochaseinstein_dbars().AllowWriteRowID && v.DefCaus.ID == perceptron.ExtraHandleID {
 			return nil, errors.Errorf("insert, uFIDelate and replace statements for _milevadb_rowid are not supported.")
 		}
 		idx := v.DefCaus.Index
@@ -3625,7 +3625,7 @@ func (b *PlanBuilder) buildUFIDelateLists(
 	p LogicalPlan,
 ) (newList []*expression.Assignment,
 	po LogicalPlan,
-	allAssignmentsAreConstant bool,
+	allAssignmentsAreCouplingConstantWithRadix bool,
 	e error,
 ) {
 	b.curClause = fieldList
@@ -3691,7 +3691,7 @@ func (b *PlanBuilder) buildUFIDelateLists(
 		}
 	}
 
-	allAssignmentsAreConstant = true
+	allAssignmentsAreCouplingConstantWithRadix = true
 	newList = make([]*expression.Assignment, 0, p.Schema().Len())
 	tblDbMap := make(map[string]string, len(blockList))
 	for _, tbl := range blockList {
@@ -3743,8 +3743,8 @@ func (b *PlanBuilder) buildUFIDelateLists(
 		if err != nil {
 			return nil, nil, false, err
 		}
-		if _, isConst := newExpr.(*expression.Constant); !isConst {
-			allAssignmentsAreConstant = false
+		if _, isConst := newExpr.(*expression.CouplingConstantWithRadix); !isConst {
+			allAssignmentsAreCouplingConstantWithRadix = false
 		}
 		p = np
 		newList = append(newList, &expression.Assignment{DefCaus: col, DefCausName: name.DefCausName, Expr: newExpr})
@@ -3754,11 +3754,11 @@ func (b *PlanBuilder) buildUFIDelateLists(
 			dbName = dbNameTmp
 		}
 		if dbName == "" {
-			dbName = b.ctx.GetStochastikVars().CurrentDB
+			dbName = b.ctx.GetStochaseinstein_dbars().CurrentDB
 		}
 		b.visitInfo = appendVisitInfo(b.visitInfo, allegrosql.UFIDelatePriv, dbName, name.OrigTblName.L, "", nil)
 	}
-	return newList, p, allAssignmentsAreConstant, nil
+	return newList, p, allAssignmentsAreCouplingConstantWithRadix, nil
 }
 
 // extractDefaultExpr extract a `DefaultExpr` from `ExprNode`,
@@ -3795,7 +3795,7 @@ func (b *PlanBuilder) buildDelete(ctx context.Context, delete *ast.DeleteStmt) (
 			return nil, err
 		}
 	}
-	if b.ctx.GetStochastikVars().TxnCtx.IsPessimistic {
+	if b.ctx.GetStochaseinstein_dbars().TxnCtx.IsPessimistic {
 		if !delete.IsMultiBlock {
 			p = b.buildSelectLock(p, &ast.SelectLockInfo{
 				LockType: ast.SelectLockForUFIDelate,
@@ -3864,7 +3864,7 @@ func (b *PlanBuilder) buildDelete(ctx context.Context, delete *ast.DeleteStmt) (
 			for _, v := range blockList {
 				dbName := v.Schema.L
 				if dbName == "" {
-					dbName = b.ctx.GetStochastikVars().CurrentDB
+					dbName = b.ctx.GetStochaseinstein_dbars().CurrentDB
 				}
 				if (tn.Schema.L == "" || tn.Schema.L == dbName) && tn.Name.L == v.Name.L {
 					tn.Schema.L = dbName
@@ -3909,7 +3909,7 @@ func (b *PlanBuilder) buildDelete(ctx context.Context, delete *ast.DeleteStmt) (
 			}
 			dbName := v.Schema.L
 			if dbName == "" {
-				dbName = b.ctx.GetStochastikVars().CurrentDB
+				dbName = b.ctx.GetStochaseinstein_dbars().CurrentDB
 			}
 			b.visitInfo = appendVisitInfo(b.visitInfo, allegrosql.DeletePriv, dbName, v.Name.L, "", nil)
 		}
@@ -4040,14 +4040,14 @@ func (b *PlanBuilder) buildProjectionForWindow(ctx context.Context, p LogicalPla
 		}
 		p = np
 		switch newArg.(type) {
-		case *expression.DeferredCauset, *expression.Constant:
+		case *expression.DeferredCauset, *expression.CouplingConstantWithRadix:
 			newArgList = append(newArgList, newArg)
 			continue
 		}
 		proj.Exprs = append(proj.Exprs, newArg)
 		proj.names = append(proj.names, types.EmptyName)
 		col := &expression.DeferredCauset{
-			UniqueID: b.ctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+			UniqueID: b.ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 			RetType:  newArg.GetType(),
 		}
 		proj.schemaReplicant.Append(col)
@@ -4072,12 +4072,12 @@ func (b *PlanBuilder) buildArgs4WindowFunc(ctx context.Context, p LogicalPlan, a
 		}
 		p = np
 		switch newArg.(type) {
-		case *expression.DeferredCauset, *expression.Constant:
+		case *expression.DeferredCauset, *expression.CouplingConstantWithRadix:
 			newArgList = append(newArgList, newArg)
 			continue
 		}
 		col := &expression.DeferredCauset{
-			UniqueID: b.ctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+			UniqueID: b.ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 			RetType:  newArg.GetType(),
 		}
 		newDefCausIndex += 1
@@ -4113,7 +4113,7 @@ func (b *PlanBuilder) buildByItemsForWindow(
 		proj.Exprs = append(proj.Exprs, it)
 		proj.names = append(proj.names, types.EmptyName)
 		col := &expression.DeferredCauset{
-			UniqueID: b.ctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+			UniqueID: b.ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 			RetType:  it.GetType(),
 		}
 		proj.schemaReplicant.Append(col)
@@ -4156,9 +4156,9 @@ func (b *PlanBuilder) buildWindowFunctionFrameBound(ctx context.Context, spec *a
 	// TODO: We also need to raise error for non-deterministic expressions, like rand().
 	val, err := evalAstExpr(b.ctx, boundClause.Expr)
 	if err != nil {
-		return nil, ErrWindowRangeBoundNotConstant.GenWithStackByArgs(getWindowName(spec.Name.O))
+		return nil, ErrWindowRangeBoundNotCouplingConstantWithRadix.GenWithStackByArgs(getWindowName(spec.Name.O))
 	}
-	expr := expression.Constant{Value: val, RetType: boundClause.Expr.GetType()}
+	expr := expression.CouplingConstantWithRadix{Value: val, RetType: boundClause.Expr.GetType()}
 
 	checker := &paramMarkerInPrepareChecker{}
 	boundClause.Expr.Accept(checker)
@@ -4166,10 +4166,10 @@ func (b *PlanBuilder) buildWindowFunctionFrameBound(ctx context.Context, spec *a
 	// If it has paramMarker and is in prepare stmt. We don't need to eval it since its value is not decided yet.
 	if !checker.inPrepareStmt {
 		// Do not raise warnings for truncate.
-		oriIgnoreTruncate := b.ctx.GetStochastikVars().StmtCtx.IgnoreTruncate
-		b.ctx.GetStochastikVars().StmtCtx.IgnoreTruncate = true
+		oriIgnoreTruncate := b.ctx.GetStochaseinstein_dbars().StmtCtx.IgnoreTruncate
+		b.ctx.GetStochaseinstein_dbars().StmtCtx.IgnoreTruncate = true
 		uVal, isNull, err := expr.EvalInt(b.ctx, chunk.Row{})
-		b.ctx.GetStochastikVars().StmtCtx.IgnoreTruncate = oriIgnoreTruncate
+		b.ctx.GetStochaseinstein_dbars().StmtCtx.IgnoreTruncate = oriIgnoreTruncate
 		if uVal < 0 || isNull || err != nil {
 			return nil, ErrWindowFrameIllegal.GenWithStackByArgs(getWindowName(spec.Name.O))
 		}
@@ -4179,7 +4179,7 @@ func (b *PlanBuilder) buildWindowFunctionFrameBound(ctx context.Context, spec *a
 	if boundClause.Unit != ast.TimeUnitInvalid {
 		// TODO: Perhaps we don't need to transcode this back to generic string
 		unitVal := boundClause.Unit.String()
-		unit := expression.Constant{
+		unit := expression.CouplingConstantWithRadix{
 			Value:   types.NewStringCauset(unitVal),
 			RetType: types.NewFieldType(allegrosql.TypeVarchar),
 		}
@@ -4373,7 +4373,7 @@ func (b *PlanBuilder) buildWindowFunctions(ctx context.Context, p LogicalPlan, g
 			descs = append(descs, desc)
 			windowMap[windowFunc] = schemaReplicant.Len()
 			schemaReplicant.Append(&expression.DeferredCauset{
-				UniqueID: b.ctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+				UniqueID: b.ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 				RetType:  desc.RetTp,
 			})
 			window.names = append(window.names, types.EmptyName)
@@ -4506,7 +4506,7 @@ func (b *PlanBuilder) handleDefaultFrame(spec *ast.WindowSpec, windowFuncName st
 	// For functions that operate on the entire partition, the frame clause will be ignored.
 	if !needFrame && spec.Frame != nil {
 		specName := spec.Name.O
-		b.ctx.GetStochastikVars().StmtCtx.AppendNote(ErrWindowFunctionIgnoresFrame.GenWithStackByArgs(windowFuncName, getWindowName(specName)))
+		b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendNote(ErrWindowFunctionIgnoresFrame.GenWithStackByArgs(windowFuncName, getWindowName(specName)))
 		newSpec := *spec
 		newSpec.Frame = nil
 		return &newSpec, true

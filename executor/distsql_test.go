@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,17 +20,17 @@ import (
 	"runtime/pprof"
 	"strings"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/block/blocks"
+	"github.com/whtcorpsinc/MilevaDB-Prod/blockcodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/executor"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/block/blocks"
-	"github.com/whtcorpsinc/milevadb/blockcodec"
-	"github.com/whtcorpsinc/milevadb/causetstore/einsteindb"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/executor"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 func checkGoroutineExists(keyword string) bool {
@@ -179,7 +179,7 @@ func (s *testSuiteP1) TestUniqueKeyNullValueSelect(c *C) {
 	res.Check(testkit.Events("<nil> a", "<nil> b", "<nil> c"))
 }
 
-// TestIssue10178 contains tests for https://github.com/whtcorpsinc/milevadb/issues/10178 .
+// TestIssue10178 contains tests for https://github.com/whtcorpsinc/MilevaDB-Prod/issues/10178 .
 func (s *testSuite3) TestIssue10178(c *C) {
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustExec("use test")
@@ -234,7 +234,7 @@ func (s *testSuite3) TestInconsistentIndex(c *C) {
 	for i := 0; i < 10; i++ {
 		txn, err := s.causetstore.Begin()
 		c.Assert(err, IsNil)
-		err = idxOp.Delete(ctx.GetStochastikVars().StmtCtx, txn, types.MakeCausets(i+10), ekv.IntHandle(100+i))
+		err = idxOp.Delete(ctx.GetStochaseinstein_dbars().StmtCtx, txn, types.MakeCausets(i+10), ekv.IntHandle(100+i))
 		c.Assert(err, IsNil)
 		err = txn.Commit(context.Background())
 		c.Assert(err, IsNil)

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
 	"github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
 )
 
 func TestT(t *testing.T) {
@@ -61,7 +61,7 @@ func TestLoadPluginSuccess(t *testing.T) {
 						return nil
 					},
 				},
-				OnGeneralEvent: func(ctx context.Context, sctx *variable.StochastikVars, event GeneralEvent, cmd string) {
+				OnGeneralEvent: func(ctx context.Context, sctx *variable.Stochaseinstein_dbars, event GeneralEvent, cmd string) {
 				},
 			}
 			return ExportManifest(m)
@@ -153,7 +153,7 @@ func TestLoadPluginSkipError(t *testing.T) {
 						return io.EOF
 					},
 				},
-				OnGeneralEvent: func(ctx context.Context, sctx *variable.StochastikVars, event GeneralEvent, cmd string) {
+				OnGeneralEvent: func(ctx context.Context, sctx *variable.Stochaseinstein_dbars, event GeneralEvent, cmd string) {
 				},
 			}
 			return ExportManifest(m)
@@ -248,7 +248,7 @@ func TestLoadFail(t *testing.T) {
 						return io.EOF
 					},
 				},
-				OnGeneralEvent: func(ctx context.Context, sctx *variable.StochastikVars, event GeneralEvent, cmd string) {
+				OnGeneralEvent: func(ctx context.Context, sctx *variable.Stochaseinstein_dbars, event GeneralEvent, cmd string) {
 				},
 			}
 			return ExportManifest(m)

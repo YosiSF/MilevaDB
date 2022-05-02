@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
 )
 
 func (s *testSuite1) TestIndexLookupJoinHang(c *C) {
@@ -27,8 +27,8 @@ func (s *testSuite1) TestIndexLookupJoinHang(c *C) {
 	tk.MustExec("create block idxJoinInner (a int unsigned unique)")
 	tk.MustExec("insert idxJoinOuter values (1), (1), (1), (1), (1)")
 	tk.MustExec("insert idxJoinInner values (1)")
-	tk.Se.GetStochastikVars().IndexJoinBatchSize = 1
-	tk.Se.GetStochastikVars().SetIndexLookupJoinConcurrency(1)
+	tk.Se.GetStochaseinstein_dbars().IndexJoinBatchSize = 1
+	tk.Se.GetStochaseinstein_dbars().SetIndexLookupJoinConcurrency(1)
 
 	rs, err := tk.Exec("select /*+ INL_JOIN(i)*/ * from idxJoinOuter o left join idxJoinInner i on o.a = i.a where o.a in (1, 2) and (i.a - 3) > 0")
 	c.Assert(err, IsNil)

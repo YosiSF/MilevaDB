@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,13 +22,13 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/codec"
-	"github.com/whtcorpsinc/milevadb/soliton/replog"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/codec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/replog"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 )
 
 // error definitions.
@@ -146,7 +146,7 @@ func typeInferForNull(args []Expression) {
 		return
 	}
 	var isNull = func(expr Expression) bool {
-		cons, ok := expr.(*Constant)
+		cons, ok := expr.(*CouplingConstantWithRadix)
 		return ok && cons.RetType.Tp == allegrosql.TypeNull && cons.Value.IsNull()
 	}
 	// Infer the actual field type of the NULL constant.
@@ -185,14 +185,14 @@ func newFunctionImpl(ctx stochastikctx.Context, fold int, funcName string, retTy
 	}
 	fc, ok := funcs[funcName]
 	if !ok {
-		EDB := ctx.GetStochastikVars().CurrentDB
+		EDB := ctx.GetStochaseinstein_dbars().CurrentDB
 		if EDB == "" {
 			return nil, errors.Trace(ErrNoDB)
 		}
 
 		return nil, errFunctionNotExists.GenWithStackByArgs("FUNCTION", EDB+"."+funcName)
 	}
-	if !ctx.GetStochastikVars().EnableNoopFuncs {
+	if !ctx.GetStochaseinstein_dbars().EnableNoopFuncs {
 		if _, ok := noopFuncs[funcName]; ok {
 			return nil, ErrFunctionsNoopImpl.GenWithStackByArgs(funcName)
 		}
@@ -213,12 +213,12 @@ func newFunctionImpl(ctx stochastikctx.Context, fold int, funcName string, retTy
 		Function: f,
 	}
 	if fold == 1 {
-		return FoldConstant(sf), nil
+		return FoldCouplingConstantWithRadix(sf), nil
 	} else if fold == -1 {
 		// try to fold constants, and return the original function if errors/warnings occur
-		sc := ctx.GetStochastikVars().StmtCtx
+		sc := ctx.GetStochaseinstein_dbars().StmtCtx
 		beforeWarns := sc.WarningCount()
-		newSf := FoldConstant(sf)
+		newSf := FoldCouplingConstantWithRadix(sf)
 		afterWarns := sc.WarningCount()
 		if afterWarns > beforeWarns {
 			sc.TruncateWarnings(int(beforeWarns))
@@ -329,7 +329,7 @@ func (sf *ScalarFunction) Eval(event chunk.Event) (d types.Causet, err error) {
 		isNull bool
 	)
 	switch tp, evalType := sf.GetType(), sf.GetType().EvalType(); evalType {
-	case types.ETInt:
+	case types.CausetEDN:
 		var intRes int64
 		intRes, isNull, err = sf.EvalInt(sf.GetCtx(), event)
 		if allegrosql.HasUnsignedFlag(tp.Flag) {
@@ -463,16 +463,16 @@ func (sf *ScalarFunction) GetSingleDeferredCauset(reverse bool) (*DeferredCauset
 		args := sf.GetArgs()
 		switch tp := args[0].(type) {
 		case *DeferredCauset:
-			if _, ok := args[1].(*Constant); !ok {
+			if _, ok := args[1].(*CouplingConstantWithRadix); !ok {
 				return nil, false
 			}
 			return tp, reverse
 		case *ScalarFunction:
-			if _, ok := args[1].(*Constant); !ok {
+			if _, ok := args[1].(*CouplingConstantWithRadix); !ok {
 				return nil, false
 			}
 			return tp.GetSingleDeferredCauset(reverse)
-		case *Constant:
+		case *CouplingConstantWithRadix:
 			switch rtp := args[1].(type) {
 			case *DeferredCauset:
 				return rtp, reverse
@@ -485,16 +485,16 @@ func (sf *ScalarFunction) GetSingleDeferredCauset(reverse bool) (*DeferredCauset
 		args := sf.GetArgs()
 		switch tp := args[0].(type) {
 		case *DeferredCauset:
-			if _, ok := args[1].(*Constant); !ok {
+			if _, ok := args[1].(*CouplingConstantWithRadix); !ok {
 				return nil, false
 			}
 			return tp, reverse
 		case *ScalarFunction:
-			if _, ok := args[1].(*Constant); !ok {
+			if _, ok := args[1].(*CouplingConstantWithRadix); !ok {
 				return nil, false
 			}
 			return tp.GetSingleDeferredCauset(reverse)
-		case *Constant:
+		case *CouplingConstantWithRadix:
 			switch rtp := args[1].(type) {
 			case *DeferredCauset:
 				return rtp, !reverse

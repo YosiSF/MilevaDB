@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,12 +19,12 @@ import (
 	"math/rand"
 	"strings"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
 )
 
 const plan1 = `[[BlockScan_12 {
@@ -247,9 +247,9 @@ func (s *testSerialSuite1) TestMergeJoinInDisk(c *C) {
 		conf.OOMUseTmpStorage = true
 	})
 
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/executor/testMergeJoinEventContainerSpill", "return(true)"), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/executor/testMergeJoinEventContainerSpill", "return(true)"), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/executor/testMergeJoinEventContainerSpill"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/executor/testMergeJoinEventContainerSpill"), IsNil)
 	}()
 
 	tk := testkit.NewTestKit(c, s.causetstore)
@@ -271,10 +271,10 @@ func (s *testSerialSuite1) TestMergeJoinInDisk(c *C) {
 
 	result := checkMergeAndRun(tk, c, "select /*+ MilevaDB_SMJ(t) */ * from t1 left outer join t on t.c1 = t1.c1 where t.c1 = 1 or t1.c2 > 20")
 	result.Check(testkit.Events("1 3 1 1"))
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.MemTracker.BytesConsumed(), Equals, int64(0))
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.MemTracker.MaxConsumed(), Greater, int64(0))
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.DiskTracker.BytesConsumed(), Equals, int64(0))
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.DiskTracker.MaxConsumed(), Greater, int64(0))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.MemTracker.BytesConsumed(), Equals, int64(0))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.MemTracker.MaxConsumed(), Greater, int64(0))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.DiskTracker.BytesConsumed(), Equals, int64(0))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.DiskTracker.MaxConsumed(), Greater, int64(0))
 	return
 }
 
@@ -403,7 +403,7 @@ func (s *testSuite2) TestMergeJoin(c *C) {
 		"0",
 	))
 
-	// Test MilevaDB_SMJ for join with order by desc, see https://github.com/whtcorpsinc/milevadb/issues/14483
+	// Test MilevaDB_SMJ for join with order by desc, see https://github.com/whtcorpsinc/MilevaDB-Prod/issues/14483
 	tk.MustExec("drop block if exists t")
 	tk.MustExec("drop block if exists t1")
 	tk.MustExec("create block t (a int, key(a))")
@@ -566,8 +566,8 @@ func (s *testSuiteJoin3) TestVectorizedMergeJoin(c *C) {
 		}
 	}
 
-	tk.Se.GetStochastikVars().MaxChunkSize = variable.DefInitChunkSize
-	chunkSize := tk.Se.GetStochastikVars().MaxChunkSize
+	tk.Se.GetStochaseinstein_dbars().MaxChunkSize = variable.DefInitChunkSize
+	chunkSize := tk.Se.GetStochaseinstein_dbars().MaxChunkSize
 	cases := []struct {
 		t1 []int
 		t2 []int

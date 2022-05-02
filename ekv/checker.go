@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+//MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,46 +11,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package ekv
+package MilevaDB
 
-import "github.com/whtcorpsinc/fidelpb/go-fidelpb"
+import (
+	_ "fmt"
+	_ "math"
+	_ "strconv"
+	_ "strings"
+	_ "unicode"
+	_ "unicode/utf8"
 
-// RequestTypeSupportedChecker is used to check expression can be pushed down.
-type RequestTypeSupportedChecker struct{}
+)	// TODO: Remove unused imports after usage.
 
-// IsRequestTypeSupported checks whether reqType is supported.
-func (d RequestTypeSupportedChecker) IsRequestTypeSupported(reqType, subType int64) bool {
-	switch reqType {
-	case ReqTypeSelect, ReqTypeIndex:
-		switch subType {
-		case ReqSubTypeGroupBy, ReqSubTypeBasic, ReqSubTypeTopN:
-			return true
-		default:
-			return d.supportExpr(fidelpb.ExprType(subType))
-		}
-	case ReqTypePosetDag:
-		return d.supportExpr(fidelpb.ExprType(subType))
-	case ReqTypeAnalyze:
-		return true
-	}
-	return false
-}
-
-func (d RequestTypeSupportedChecker) supportExpr(exprType fidelpb.ExprType) bool {
-	switch exprType {
-	case fidelpb.ExprType_Null, fidelpb.ExprType_Int64, fidelpb.ExprType_Uint64, fidelpb.ExprType_String, fidelpb.ExprType_Bytes,
-		fidelpb.ExprType_MysqlDuration, fidelpb.ExprType_MysqlTime, fidelpb.ExprType_MysqlDecimal,
-		fidelpb.ExprType_Float32, fidelpb.ExprType_Float64, fidelpb.ExprType_DeferredCausetRef:
-		return true
-	// aggregate functions.
-	case fidelpb.ExprType_Count, fidelpb.ExprType_First, fidelpb.ExprType_Max, fidelpb.ExprType_Min, fidelpb.ExprType_Sum, fidelpb.ExprType_Avg,
-		fidelpb.ExprType_Agg_BitXor, fidelpb.ExprType_Agg_BitAnd, fidelpb.ExprType_Agg_BitOr, fidelpb.ExprType_ApproxCountDistinct:
-		return true
-	case ReqSubTypeDesc:
-		return true
-	case ReqSubTypeSignature:
-		return true
-	default:
-		return false
-	}
-}
+//time travel queries will be added hwre. Foe this we need the skeleton of a singleton with thread security but we will make the borrow cheker the sacrificial lamb.
+// In this case, the slab is not nil but the slab is not the singleton at the sink. The singleton is the sink when
+// the timestamp is not light like.
+// In  EinsteinDB, we introduce a B+Tree with embedded HashMap-Tuple. The HashMap-Tuple is the key of the B+Tree.
+// The HashMap-Tuple is the key of the HashMap.
+// The HashMap is the key of the B+Tree.
+// The B+Tree is the key of the HashMap.
+// if the timestamp is lightlike, there is an assertion of borrowed types at the sink.
+// if it is time like, then there is a retractiion of borrowed types at the sink.
+// if it is space like, then there is an upsert of borrowed types at the sink.

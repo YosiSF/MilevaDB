@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,10 +23,10 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/causetstore/einsteindb/oracle"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb/oracle"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 func (b *builtinMonthSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredCauset) error {
@@ -49,7 +49,7 @@ func (b *builtinMonthSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredC
 			continue
 		}
 		if ds[i].IsZero() {
-			if b.ctx.GetStochastikVars().ALLEGROSQLMode.HasNoZeroDateMode() {
+			if b.ctx.GetStochaseinstein_dbars().ALLEGROSQLMode.HasNoZeroDateMode() {
 				if err := handleInvalidTimeError(b.ctx, types.ErrWrongValue.GenWithStackByArgs(types.DateTimeStr, ds[i].String())); err != nil {
 					return err
 				}
@@ -88,7 +88,7 @@ func (b *builtinYearSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredCa
 			continue
 		}
 		if ds[i].IsZero() {
-			if b.ctx.GetStochastikVars().ALLEGROSQLMode.HasNoZeroDateMode() {
+			if b.ctx.GetStochaseinstein_dbars().ALLEGROSQLMode.HasNoZeroDateMode() {
 				if err := handleInvalidTimeError(b.ctx, types.ErrWrongValue.GenWithStackByArgs(types.DateTimeStr, ds[i].String())); err != nil {
 					return err
 				}
@@ -188,7 +188,7 @@ func (b *builtinSysDateWithoutFspSig) vectorized() bool {
 
 func (b *builtinSysDateWithoutFspSig) vecEvalTime(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	loc := b.ctx.GetStochastikVars().Location()
+	loc := b.ctx.GetStochaseinstein_dbars().Location()
 	now := time.Now().In(loc)
 
 	result.ResizeTime(n, false)
@@ -412,7 +412,7 @@ func (b *builtinUTCTimeWithArgSig) vectorized() bool {
 // See https://dev.allegrosql.com/doc/refman/5.7/en/date-and-time-functions.html#function_utc-time
 func (b *builtinUTCTimeWithArgSig) vecEvalDuration(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -425,7 +425,7 @@ func (b *builtinUTCTimeWithArgSig) vecEvalDuration(input *chunk.Chunk, result *c
 		return err
 	}
 	utc := nowTs.UTC().Format(types.TimeFSPFormat)
-	stmtCtx := b.ctx.GetStochastikVars().StmtCtx
+	stmtCtx := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	result.ResizeGoDuration(n, false)
 	d64s := result.GoDurations()
 	i64s := buf.Int64s()
@@ -530,7 +530,7 @@ func (b *builtinPeriodDiffSig) vecEvalInt(input *chunk.Chunk, result *chunk.Defe
 	}
 
 	n := input.NumEvents()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -560,7 +560,7 @@ func (b *builtinNowWithArgSig) vectorized() bool {
 
 func (b *builtinNowWithArgSig) vecEvalTime(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	bufFsp, err := b.bufSlabPredictor.get(types.ETInt, n)
+	bufFsp, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -740,7 +740,7 @@ func (b *builtinStrToDateDateSig) vecEvalTime(input *chunk.Chunk, result *chunk.
 	result.ResizeTime(n, false)
 	result.MergeNulls(bufStrings, bufFormats)
 	times := result.Times()
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	for i := 0; i < n; i++ {
 		if result.IsNull(i) {
 			continue
@@ -754,7 +754,7 @@ func (b *builtinStrToDateDateSig) vecEvalTime(input *chunk.Chunk, result *chunk.
 			result.SetNull(i, true)
 			continue
 		}
-		if b.ctx.GetStochastikVars().ALLEGROSQLMode.HasNoZeroDateMode() && (t.Year() == 0 || t.Month() == 0 || t.Day() == 0) {
+		if b.ctx.GetStochaseinstein_dbars().ALLEGROSQLMode.HasNoZeroDateMode() && (t.Year() == 0 || t.Month() == 0 || t.Day() == 0) {
 			if err := handleInvalidTimeError(b.ctx, types.ErrWrongValue.GenWithStackByArgs(types.DateTimeStr, t.String())); err != nil {
 				return err
 			}
@@ -774,7 +774,7 @@ func (b *builtinSysDateWithFspSig) vectorized() bool {
 
 func (b *builtinSysDateWithFspSig) vecEvalTime(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -783,7 +783,7 @@ func (b *builtinSysDateWithFspSig) vecEvalTime(input *chunk.Chunk, result *chunk
 		return err
 	}
 
-	loc := b.ctx.GetStochastikVars().Location()
+	loc := b.ctx.GetStochaseinstein_dbars().Location()
 	now := time.Now().In(loc)
 
 	result.ResizeTime(n, false)
@@ -810,7 +810,7 @@ func (b *builtinMilevaDBParseTsoSig) vectorized() bool {
 
 func (b *builtinMilevaDBParseTsoSig) vecEvalTime(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -832,7 +832,7 @@ func (b *builtinMilevaDBParseTsoSig) vecEvalTime(input *chunk.Chunk, result *chu
 		}
 		t := oracle.GetTimeFromTS(uint64(args[i]))
 		r := types.NewTime(types.FromGoTime(t), allegrosql.TypeDatetime, types.MaxFsp)
-		if err := r.ConvertTimeZone(time.Local, b.ctx.GetStochastikVars().Location()); err != nil {
+		if err := r.ConvertTimeZone(time.Local, b.ctx.GetStochaseinstein_dbars().Location()); err != nil {
 			return err
 		}
 		times[i] = r
@@ -846,7 +846,7 @@ func (b *builtinFromDaysSig) vectorized() bool {
 
 func (b *builtinFromDaysSig) vecEvalTime(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -949,7 +949,7 @@ func (b *builtinWeekWithModeSig) vecEvalInt(input *chunk.Chunk, result *chunk.De
 	}
 	defer b.bufSlabPredictor.put(buf1)
 
-	buf2, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf2, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -1055,8 +1055,8 @@ func (b *builtinStrToDateDurationSig) vecEvalDuration(input *chunk.Chunk, result
 	result.ResizeGoDuration(n, false)
 	result.MergeNulls(bufStrings, bufFormats)
 	d64s := result.GoDurations()
-	sc := b.ctx.GetStochastikVars().StmtCtx
-	hasNoZeroDateMode := b.ctx.GetStochastikVars().ALLEGROSQLMode.HasNoZeroDateMode()
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
+	hasNoZeroDateMode := b.ctx.GetStochaseinstein_dbars().ALLEGROSQLMode.HasNoZeroDateMode()
 	for i := 0; i < n; i++ {
 		if result.IsNull(i) {
 			continue
@@ -1222,7 +1222,7 @@ func (b *builtinMakeDateSig) vectorized() bool {
 
 func (b *builtinMakeDateSig) vecEvalTime(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	buf1, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf1, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -1231,7 +1231,7 @@ func (b *builtinMakeDateSig) vecEvalTime(input *chunk.Chunk, result *chunk.Defer
 		return err
 	}
 
-	buf2, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf2, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -1322,7 +1322,7 @@ func (b *builtinUTCTimestampWithArgSig) vectorized() bool {
 // See https://dev.allegrosql.com/doc/refman/5.7/en/date-and-time-functions.html#function_utc-timestamp
 func (b *builtinUTCTimestampWithArgSig) vecEvalTime(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -1422,8 +1422,8 @@ func (b *builtinStrToDateDatetimeSig) vecEvalTime(input *chunk.Chunk, result *ch
 	result.ResizeTime(n, false)
 	result.MergeNulls(dateBuf, formatBuf)
 	times := result.Times()
-	sc := b.ctx.GetStochastikVars().StmtCtx
-	hasNoZeroDateMode := b.ctx.GetStochastikVars().ALLEGROSQLMode.HasNoZeroDateMode()
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
+	hasNoZeroDateMode := b.ctx.GetStochaseinstein_dbars().ALLEGROSQLMode.HasNoZeroDateMode()
 	fsp := int8(b.tp.Decimal)
 
 	for i := 0; i < n; i++ {
@@ -1495,7 +1495,7 @@ func (b *builtinWeekWithoutModeSig) vecEvalInt(input *chunk.Chunk, result *chunk
 	ds := buf.Times()
 
 	mode := 0
-	modeStr, ok := b.ctx.GetStochastikVars().GetSystemVar(variable.DefaultWeekFormat)
+	modeStr, ok := b.ctx.GetStochaseinstein_dbars().GetSystemVar(variable.DefaultWeekFormat)
 	if ok && modeStr != "" {
 		mode, err = strconv.Atoi(modeStr)
 		if err != nil {
@@ -1578,7 +1578,7 @@ func (b *builtinPeriodAddSig) vecEvalInt(input *chunk.Chunk, result *chunk.Defer
 	}
 
 	n := input.NumEvents()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -1621,7 +1621,7 @@ func (b *builtinTimestampAddSig) vecEvalString(input *chunk.Chunk, result *chunk
 		return err
 	}
 
-	buf1, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf1, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -1682,7 +1682,7 @@ func (b *builtinTimestampAddSig) vecEvalString(input *chunk.Chunk, result *chunk
 			return types.ErrWrongValue.GenWithStackByArgs(types.TimeStr, unit)
 		}
 		r := types.NewTime(types.FromGoTime(tb), b.resolveType(arg.Type(), unit), fsp)
-		if err = r.Check(b.ctx.GetStochastikVars().StmtCtx); err != nil {
+		if err = r.Check(b.ctx.GetStochaseinstein_dbars().StmtCtx); err != nil {
 			if err = handleInvalidTimeError(b.ctx, err); err != nil {
 				return err
 			}
@@ -1871,7 +1871,7 @@ func (b *builtinSecToTimeSig) vecEvalDuration(input *chunk.Chunk, result *chunk.
 			second = seconds % 60
 		}
 		secondDemical := float64(second) + demical
-		duration, err := types.ParseDuration(b.ctx.GetStochastikVars().StmtCtx, fmt.Sprintf("%s%02d:%02d:%s", negative, hour, minute, strconv.FormatFloat(secondDemical, 'f', -1, 64)), int8(b.tp.Decimal))
+		duration, err := types.ParseDuration(b.ctx.GetStochaseinstein_dbars().StmtCtx, fmt.Sprintf("%s%02d:%02d:%s", negative, hour, minute, strconv.FormatFloat(secondDemical, 'f', -1, 64)), int8(b.tp.Decimal))
 		if err != nil {
 			return err
 		}
@@ -1892,7 +1892,7 @@ func (b *builtinUTCTimeWithoutArgSig) vecEvalDuration(input *chunk.Chunk, result
 	if err != nil {
 		return err
 	}
-	res, err := types.ParseDuration(b.ctx.GetStochastikVars().StmtCtx, nowTs.UTC().Format(types.TimeFormat), types.DefaultFsp)
+	res, err := types.ParseDuration(b.ctx.GetStochaseinstein_dbars().StmtCtx, nowTs.UTC().Format(types.TimeFormat), types.DefaultFsp)
 	if err != nil {
 		return err
 	}
@@ -1963,7 +1963,7 @@ func (b *builtinCurrentDateSig) vecEvalTime(input *chunk.Chunk, result *chunk.De
 		return err
 	}
 
-	tz := b.ctx.GetStochastikVars().Location()
+	tz := b.ctx.GetStochaseinstein_dbars().Location()
 	year, month, day := nowTs.In(tz).Date()
 	timeValue := types.NewTime(types.FromDate(year, int(month), day, 0, 0, 0, 0), allegrosql.TypeDate, 0)
 
@@ -2006,7 +2006,7 @@ func (b *builtinMakeTimeSig) vecEvalDuration(input *chunk.Chunk, result *chunk.D
 	if err = b.getVecIntParam(b.args[0], input, hoursBuf); err != nil {
 		return err
 	}
-	minutesBuf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	minutesBuf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -2130,7 +2130,7 @@ func (b *builtinYearWeekWithModeSig) vecEvalInt(input *chunk.Chunk, result *chun
 	if err := b.args[0].VecEvalTime(b.ctx, input, buf1); err != nil {
 		return err
 	}
-	buf2, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf2, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -2293,9 +2293,9 @@ func (b *builtinCurrentTime0ArgSig) vecEvalDuration(input *chunk.Chunk, result *
 	if err != nil {
 		return err
 	}
-	tz := b.ctx.GetStochastikVars().Location()
+	tz := b.ctx.GetStochaseinstein_dbars().Location()
 	dur := nowTs.In(tz).Format(types.TimeFormat)
-	res, err := types.ParseDuration(b.ctx.GetStochastikVars().StmtCtx, dur, types.MinFsp)
+	res, err := types.ParseDuration(b.ctx.GetStochaseinstein_dbars().StmtCtx, dur, types.MinFsp)
 	if err != nil {
 		return err
 	}
@@ -2325,7 +2325,7 @@ func (b *builtinTimeSig) vecEvalDuration(input *chunk.Chunk, result *chunk.Defer
 	result.ResizeGoDuration(n, false)
 	result.MergeNulls(buf)
 	ds := result.GoDurations()
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	for i := 0; i < n; i++ {
 		if result.IsNull(i) {
 			continue
@@ -2361,7 +2361,7 @@ func (b *builtinDateLiteralSig) vectorized() bool {
 
 func (b *builtinDateLiteralSig) vecEvalTime(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	mode := b.ctx.GetStochastikVars().ALLEGROSQLMode
+	mode := b.ctx.GetStochaseinstein_dbars().ALLEGROSQLMode
 	if mode.HasNoZeroDateMode() && b.literal.IsZero() {
 		return types.ErrWrongValue.GenWithStackByArgs(types.DateTimeStr, b.literal.String())
 	}
@@ -2410,7 +2410,7 @@ func (b *builtinMonthNameSig) vecEvalString(input *chunk.Chunk, result *chunk.De
 			continue
 		}
 		mon := ds[i].Month()
-		if (ds[i].IsZero() && b.ctx.GetStochastikVars().ALLEGROSQLMode.HasNoZeroDateMode()) || mon < 0 || mon > len(types.MonthNames) {
+		if (ds[i].IsZero() && b.ctx.GetStochaseinstein_dbars().ALLEGROSQLMode.HasNoZeroDateMode()) || mon < 0 || mon > len(types.MonthNames) {
 			if err := handleInvalidTimeError(b.ctx, types.ErrWrongValue.GenWithStackByArgs(types.DateTimeStr, ds[i].String())); err != nil {
 				return err
 			}
@@ -2469,7 +2469,7 @@ func (b *builtinCurrentTime1ArgSig) vectorized() bool {
 
 func (b *builtinCurrentTime1ArgSig) vecEvalDuration(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -2482,9 +2482,9 @@ func (b *builtinCurrentTime1ArgSig) vecEvalDuration(input *chunk.Chunk, result *
 	if err != nil {
 		return err
 	}
-	tz := b.ctx.GetStochastikVars().Location()
+	tz := b.ctx.GetStochaseinstein_dbars().Location()
 	dur := nowTs.In(tz).Format(types.TimeFSPFormat)
-	stmtCtx := b.ctx.GetStochastikVars().StmtCtx
+	stmtCtx := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	i64s := buf.Int64s()
 	result.ResizeGoDuration(n, false)
 	durations := result.GoDurations()
@@ -2583,7 +2583,7 @@ func (b *builtinTimestamp1ArgSig) vecEvalTime(input *chunk.Chunk, result *chunk.
 	result.ResizeTime(n, false)
 	result.MergeNulls(buf)
 	times := result.Times()
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	var tm types.Time
 	for i := 0; i < n; i++ {
 		if result.IsNull(i) {
@@ -2635,7 +2635,7 @@ func (b *builtinTimestamp2ArgsSig) vecEvalTime(input *chunk.Chunk, result *chunk
 	result.ResizeTime(n, false)
 	result.MergeNulls(buf0, buf1)
 	times := result.Times()
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	var tm types.Time
 	for i := 0; i < n; i++ {
 		if result.IsNull(i) {
@@ -2702,7 +2702,7 @@ func (b *builtinDayOfMonthSig) vecEvalInt(input *chunk.Chunk, result *chunk.Defe
 			continue
 		}
 		if ds[i].IsZero() {
-			if b.ctx.GetStochastikVars().ALLEGROSQLMode.HasNoZeroDateMode() {
+			if b.ctx.GetStochaseinstein_dbars().ALLEGROSQLMode.HasNoZeroDateMode() {
 				if err := handleInvalidTimeError(b.ctx, types.ErrWrongValue.GenWithStackByArgs(types.DateTimeStr, ds[i].String())); err != nil {
 					return err
 				}

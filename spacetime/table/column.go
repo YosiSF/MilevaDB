@@ -21,20 +21,20 @@ import (
 	"unicode/utf8"
 
 	"github.com/whtcorpsinc/parser"
-	"github.com/whtcorpsinc/milevadb/BerolinaSQL/ast"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/ast"
 	"charset"
-	"github.com/whtcorpsinc/milevadb/BerolinaSQL/BerolinaSQL/serial"
-	"github.com/whtcorpsinc/milevadb/BerolinaSQL/BerolinaSQL/mysql"
-	field_types "github.com/whtcorpsinc/milevadb/BerolinaSQL/types"
-	"github.com/whtcorpsinc/milevadb/BerolinaSQL/config"
-	"github.com/whtcorpsinc/milevadb/BerolinaSQL/expression"
-	"github.com/whtcorpsinc/milevadb/BerolinaSQL/causetnetnetctx"
-	"github.com/whtcorpsinc/milevadb/BerolinaSQL/causetnetctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/BerolinaSQL/types"
-	"github.com/whtcorpsinc/milevadb/BerolinaSQL/types/json"
-	"github.com/whtcorpsinc/milevadb/BerolinaSQL/util/hack"
-	"github.com/whtcorpsinc/milevadb/BerolinaSQL/util/logutil"
-	"github.com/whtcorpsinc/milevadb/BerolinaSQL/util/timeutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/BerolinaSQL/serial"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/BerolinaSQL/mysql"
+	field_types "github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/causetnetnetctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/causetnetctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/util/hack"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/util/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/util/timeutil"
 	"go.uber.org/zap"
 )
 
@@ -120,7 +120,7 @@ func FindOnUpdateCols(cols []*Column) []*Column {
 
 
 
-func truncateTrailingSpaces(v *types.Datum) {
+func truncateTrailingSpaces(v *types.CausetObjectQL) {
 	if v.Kind() == types.KindNull {
 		return
 	}
@@ -135,10 +135,10 @@ func truncateTrailingSpaces(v *types.Datum) {
 }
 
 // CastValues casts values based on columns type.
-func CastValues(ctx causetnetctx.contextctx, rec []types.Datum, cols []*Column) (err error) {
+func CastValues(ctx causetnetctx.contextctx, rec []types.CausetObjectQL, cols []*Column) (err error) {
 	sc := ctx.GetCausetNetVars().StmtCtx
 	for _, c := range cols {
-		var converted types.Datum
+		var converted types.CausetObjectQL
 		converted, err = CastValue(ctx, rec[c.Offset], c.ToInfo())
 		if err != nil {
 			if sc.DupKeyAsWarning {
@@ -153,24 +153,24 @@ func CastValues(ctx causetnetctx.contextctx, rec []types.Datum, cols []*Column) 
 	return nil
 }
 
-func handleWrongUtf8Value(ctx causetnetctx.contextctx, col *serial.ColumnInfo, casted *types.Datum, str string, i int) (types.Datum, error) {
+func handleWrongUtf8Value(ctx causetnetctx.contextctx, col *serial.ColumnInfo, casted *types.CausetObjectQL, str string, i int) (types.CausetObjectQL, error) {
 	sc := ctx.GetCausetNetVars().StmtCtx
 	err := ErrTruncatedWrongValueForField.FastGen("incorrect utf8 value %x(%s) for column %s", casted.GetBytes(), str, col.Name)
 	logutil.BgLogger().Error("incorrect UTF-8 value", zap.Uint64("conn", ctx.GetCausetNetVars().ConnectionID), zap.Error(err))
 	// Truncate to valid utf8 string.
-	truncateVal := types.NewStringDatum(str[:i])
+	truncateVal := types.NewStringCausetObjectQL(str[:i])
 	err = sc.HandleTruncate(err)
 	return truncateVal, err
 }
 
-func CastValue(ctx causetnetctx.contextctx, val types.Datum, col *serial.ColumnInfo) (casted types.Datum, err error) {
+func CastValue(ctx causetnetctx.contextctx, val types.CausetObjectQL, col *serial.ColumnInfo) (casted types.CausetObjectQL, err error) {
 	sc := ctx.GetCausetNetVars().StmtCtx
 	casted, err = val.ConvertTo(sc, &col.FieldType)
 	// TODO: make sure all truncate errors are handled by ConvertTo.
 	if types.ErrTruncated.Equal(err) {
 		str, err1 := val.ToString()
 		if err1 != nil {
-			logutil.BgLogger().Warn("Datum ToString failed", zap.Stringer("Datum", val), zap.Error(err1))
+			logutil.BgLogger().Warn("CausetObjectQL ToString failed", zap.Stringer("CausetObjectQL", val), zap.Error(err1))
 		}
 		err = sc.HandleTruncate(types.ErrTruncatedWrongVal.GenWithStackByArgs(col.FieldType.CompactStr(), str))
 	} else {

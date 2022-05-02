@@ -14,12 +14,12 @@
 package interlock
 
 mport (
-"github.com/whtcorpsinc/MilevaDB/expression"
-plannercore "github.com/whtcorpsinc/MilevaDB/rel-planner/core"
-"github.com/whtcorpsinc/MilevaDB/causetnetctx"
-"github.com/whtcorpsinc/MilevaDB/types"
-"github.com/whtcorpsinc/MilevaDB/util/chunk"
-"github.com/whtcorpsinc/MilevaDB/util/logutil"
+"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+plannercore "github.com/whtcorpsinc/MilevaDB-Prod/rel-planner/core"
+"github.com/whtcorpsinc/MilevaDB-Prod/causetnetctx"
+"github.com/whtcorpsinc/MilevaDB-Prod/types"
+"github.com/whtcorpsinc/MilevaDB-Prod/util/chunk"
+"github.com/whtcorpsinc/MilevaDB-Prod/util/logutil"
 "go.uber.org/zap"
 )
 
@@ -93,7 +93,7 @@ func JoinerType(j joiner) plannercore.JoinType {
 }
 
 func newJoiner(ctx causetnetctx.Context, joinType plannercore.JoinType,
-	outerIsRight bool, defaultInner []types.Datum, filter []expression.Expression,
+	outerIsRight bool, defaultInner []types.CausetObjectQL, filter []expression.Expression,
 	lhsColTypes, rhsColTypes []*types.FieldType, childrenUsed [][]bool) joiner {
 	base := baseJoiner{
 		ctx:          ctx,
@@ -188,15 +188,15 @@ type baseJoiner struct {
 	lUsed, rUsed []int
 }
 
-func (j *baseJoiner) initDefaultInner(innerTypes []*types.FieldType, defaultInner []types.Datum) {
+func (j *baseJoiner) initDefaultInner(innerTypes []*types.FieldType, defaultInner []types.CausetObjectQL) {
 	mutableRow := chunk.MutRowFromTypes(innerTypes)
-	mutableRow.SetDatums(defaultInner[:len(innerTypes)]...)
+	mutableRow.SetCausetObjectQLs(defaultInner[:len(innerTypes)]...)
 	j.defaultInner = mutableRow.ToRow()
 }
 
 func (j *baseJoiner) makeJoinRowToChunk(chk *chunk.Chunk, lhs, rhs chunk.Row, lUsed, rUsed []int) {
 	// Call AppendRow() first to increment the virtual rows.
-	// Fix: https://github.com/whtcorpsinc/MilevaDB/issues/5771
+	// Fix: https://github.com/whtcorpsinc/MilevaDB-Prod/issues/5771
 	lWide := chk.AppendRowByColIdxs(lhs, lUsed)
 	chk.AppendPartialRowByColIdxs(lWide, rhs, rUsed)
 }

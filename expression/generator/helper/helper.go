@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,25 +13,25 @@
 
 package helper
 
-// TypeContext is the template context for each "github.com/whtcorpsinc/milevadb/types".EvalType .
+// TypeContext is the template context for each "github.com/whtcorpsinc/MilevaDB-Prod/types".EvalType .
 type TypeContext struct {
-	// Describe the name of "github.com/whtcorpsinc/milevadb/types".ET{{ .ETName }} .
+	// Describe the name of "github.com/whtcorpsinc/MilevaDB-Prod/types".ET{{ .ETName }} .
 	ETName string
-	// Describe the name of "github.com/whtcorpsinc/milevadb/expression".VecExpr.VecEval{{ .TypeName }} .
+	// Describe the name of "github.com/whtcorpsinc/MilevaDB-Prod/expression".VecExpr.VecEval{{ .TypeName }} .
 	TypeName string
-	// Describe the name of "github.com/whtcorpsinc/milevadb/soliton/chunk".*DeferredCauset.Append{{ .TypeNameInDeferredCauset }},
+	// Describe the name of "github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk".*DeferredCauset.Append{{ .TypeNameInDeferredCauset }},
 	// Resize{{ .TypeNameInDeferredCauset }}, Reserve{{ .TypeNameInDeferredCauset }}, Get{{ .TypeNameInDeferredCauset }} and
 	// {{ .TypeNameInDeferredCauset }}s.
 	// If undefined, it's same as TypeName.
 	TypeNameInDeferredCauset string
 	// Describe the type name in golang.
 	TypeNameGo string
-	// Same as "github.com/whtcorpsinc/milevadb/soliton/chunk".getFixedLen() .
+	// Same as "github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk".getFixedLen() .
 	Fixed bool
 }
 
 var (
-	// TypeInt represents the template context of types.ETInt .
+	// TypeInt represents the template context of types.CausetEDN .
 	TypeInt = TypeContext{ETName: "Int", TypeName: "Int", TypeNameInDeferredCauset: "Int64", TypeNameGo: "int64", Fixed: true}
 	// TypeReal represents the template context of types.ETReal .
 	TypeReal = TypeContext{ETName: "Real", TypeName: "Real", TypeNameInDeferredCauset: "Float64", TypeNameGo: "float64", Fixed: true}

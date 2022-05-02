@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/whtcorpsinc/MilevaDB/causetnetctx/stmtctx"
-	"github.com/whtcorpsinc/MilevaDB/types"
-	"github.com/whtcorpsinc/MilevaDB/util/codec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetnetctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/codec"
 )
 
 // Key represents high-level Key type.
@@ -380,9 +380,9 @@ func (m *HandleMap) Range(fn func(h Handle, val interface{}) bool) {
 	}
 }
 
-// BuildHandleFromDatumRow builds ekv.Handle from cols in row.
-func BuildHandleFromDatumRow(sctx *stmtctx.StatementContext, row []types.Datum, handleOrdinals []int) (Handle, error) {
-	pkDts := make([]types.Datum, 0, len(handleOrdinals))
+// BuildHandleFromCausetObjectQLRow builds ekv.Handle from cols in row.
+func BuildHandleFromCausetObjectQLRow(sctx *stmtctx.StatementContext, row []types.CausetObjectQL, handleOrdinals []int) (Handle, error) {
+	pkDts := make([]types.CausetObjectQL, 0, len(handleOrdinals))
 	for _, ordinal := range handleOrdinals {
 		pkDts = append(pkDts, row[ordinal])
 	}

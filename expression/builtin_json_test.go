@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/solitonutil"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 )
 
 func (s *testEvaluatorSuite) TestJSONType(c *C) {
@@ -39,7 +39,7 @@ func (s *testEvaluatorSuite) TestJSONType(c *C) {
 	}
 	dtbl := tblToDtbl(tbl)
 	for _, t := range dtbl {
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -67,7 +67,7 @@ func (s *testEvaluatorSuite) TestJSONQuote(c *C) {
 	}
 	dtbl := tblToDtbl(tbl)
 	for _, t := range dtbl {
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -98,7 +98,7 @@ func (s *testEvaluatorSuite) TestJSONUnquote(c *C) {
 	}
 	dtbl := tblToDtbl(tbl)
 	for _, t := range dtbl {
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -120,7 +120,7 @@ func (s *testEvaluatorSuite) TestJSONExtract(c *C) {
 	}
 	for _, t := range tbl {
 		args := types.MakeCausets(t.Input...)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(args))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		if t.Success {
@@ -165,7 +165,7 @@ func (s *testEvaluatorSuite) TestJSONSetInsertReplace(c *C) {
 	var d types.Causet
 	for _, t := range tbl {
 		args := types.MakeCausets(t.Input...)
-		f, err = t.fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err = t.fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(args))
 		if t.BuildSuccess {
 			c.Assert(err, IsNil)
 			d, err = evalBuiltinFunc(f, chunk.Event{})
@@ -200,7 +200,7 @@ func (s *testEvaluatorSuite) TestJSONMerge(c *C) {
 	}
 	for _, t := range tbl {
 		args := types.MakeCausets(t.Input...)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(args))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -230,7 +230,7 @@ func (s *testEvaluatorSuite) TestJSONMergePreserve(c *C) {
 	}
 	for _, t := range tbl {
 		args := types.MakeCausets(t.Input...)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(args))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -259,7 +259,7 @@ func (s *testEvaluatorSuite) TestJSONArray(c *C) {
 	}
 	for _, t := range tbl {
 		args := types.MakeCausets(t.Input...)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(args))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -292,7 +292,7 @@ func (s *testEvaluatorSuite) TestJSONObject(c *C) {
 	var d types.Causet
 	for _, t := range tbl {
 		args := types.MakeCausets(t.Input...)
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(args))
 		if t.BuildSuccess {
 			c.Assert(err, IsNil)
 			d, err = evalBuiltinFunc(f, chunk.Event{})
@@ -342,7 +342,7 @@ func (s *testEvaluatorSuite) TestJSONRemove(c *C) {
 	}
 	for _, t := range tbl {
 		args := types.MakeCausets(t.Input...)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(args))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 
@@ -413,7 +413,7 @@ func (s *testEvaluatorSuite) TestJSONContains(c *C) {
 	}
 	for _, t := range tbl {
 		args := types.MakeCausets(t.input...)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(args))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		if t.err == nil {
@@ -438,7 +438,7 @@ func (s *testEvaluatorSuite) TestJSONContains(c *C) {
 		{"", 0.05},
 	}
 	for _, cs := range cases {
-		_, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(cs.arg1, cs.arg2)))
+		_, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(cs.arg1, cs.arg2)))
 		c.Assert(json.ErrInvalidJSONData.Equal(err), IsTrue)
 	}
 }
@@ -485,7 +485,7 @@ func (s *testEvaluatorSuite) TestJSONContainsPath(c *C) {
 	}
 	for _, t := range tbl {
 		args := types.MakeCausets(t.input...)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(args))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		if t.success {
@@ -555,7 +555,7 @@ func (s *testEvaluatorSuite) TestJSONLength(c *C) {
 	}
 	for _, t := range tbl {
 		args := types.MakeCausets(t.input...)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(args))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		if t.success {
@@ -619,7 +619,7 @@ func (s *testEvaluatorSuite) TestJSONKeys(c *C) {
 	}
 	for _, t := range tbl {
 		args := types.MakeCausets(t.input...)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(args))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		if t.success {
@@ -683,7 +683,7 @@ func (s *testEvaluatorSuite) TestJSONDepth(c *C) {
 	}
 	for _, t := range tbl {
 		args := types.MakeCausets(t.input...)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(args))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		if t.success {
@@ -745,8 +745,8 @@ func (s *testEvaluatorSuite) TestJSONArrayAppend(c *C) {
 
 	for i, t := range tbl {
 		args := types.MakeCausets(t.input...)
-		s.ctx.GetStochastikVars().StmtCtx.SetWarnings(nil)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(args))
+		s.ctx.GetStochaseinstein_dbars().StmtCtx.SetWarnings(nil)
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(args))
 		// No error should return in getFunction if t.err is nil.
 		if err != nil {
 			c.Assert(t.err, NotNil)
@@ -756,7 +756,7 @@ func (s *testEvaluatorSuite) TestJSONArrayAppend(c *C) {
 
 		c.Assert(f, NotNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
-		comment := Commentf("case:%v \n input:%v \n output: %s \n expected: %v \n warnings: %v \n expected error %v", i, t.input, d.GetMysqlJSON(), t.expected, s.ctx.GetStochastikVars().StmtCtx.GetWarnings(), t.err)
+		comment := Commentf("case:%v \n input:%v \n output: %s \n expected: %v \n warnings: %v \n expected error %v", i, t.input, d.GetMysqlJSON(), t.expected, s.ctx.GetStochaseinstein_dbars().StmtCtx.GetWarnings(), t.err)
 
 		if t.err != nil {
 			c.Assert(t.err.Equal(err), Equals, true, comment)
@@ -764,7 +764,7 @@ func (s *testEvaluatorSuite) TestJSONArrayAppend(c *C) {
 		}
 
 		c.Assert(err, IsNil, comment)
-		c.Assert(int(s.ctx.GetStochastikVars().StmtCtx.WarningCount()), Equals, 0, comment)
+		c.Assert(int(s.ctx.GetStochaseinstein_dbars().StmtCtx.WarningCount()), Equals, 0, comment)
 
 		if t.expected == nil {
 			c.Assert(d.IsNull(), IsTrue, comment)
@@ -830,7 +830,7 @@ func (s *testEvaluatorSuite) TestJSONSearch(c *C) {
 	}
 	for _, t := range tbl {
 		args := types.MakeCausets(t.input...)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(args))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		if t.success {
@@ -894,7 +894,7 @@ func (s *testEvaluatorSuite) TestJSONArrayInsert(c *C) {
 	}
 	for _, t := range tbl {
 		args := types.MakeCausets(t.input...)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(args))
 		// Parameter count error
 		if err != nil {
 			c.Assert(t.err, NotNil)
@@ -946,7 +946,7 @@ func (s *testEvaluatorSuite) TestJSONValid(c *C) {
 	}
 	dtbl := tblToDtbl(tbl)
 	for _, t := range dtbl {
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -979,7 +979,7 @@ func (s *testEvaluatorSuite) TestJSONStorageSize(c *C) {
 	}
 	for _, t := range tbl {
 		args := types.MakeCausets(t.input...)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(args))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		if t.success {

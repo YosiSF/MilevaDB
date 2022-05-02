@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,16 +19,16 @@ import (
 	"strings"
 	"time"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/israce"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/plancodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testleak"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/soliton/israce"
-	"github.com/whtcorpsinc/milevadb/soliton/plancodec"
-	"github.com/whtcorpsinc/milevadb/soliton/solitonutil"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/soliton/testleak"
 )
 
 var _ = Suite(&testPlanNormalize{})
@@ -71,7 +71,7 @@ func (s *testPlanNormalize) TestNormalizedPlan(c *C) {
 	}
 	s.testData.GetTestCases(c, &input, &output)
 	for i, tt := range input {
-		tk.Se.GetStochastikVars().PlanID = 0
+		tk.Se.GetStochaseinstein_dbars().PlanID = 0
 		tk.MustExec(tt)
 		info := tk.Se.ShowProcess()
 		c.Assert(info, NotNil)
@@ -109,7 +109,7 @@ func (s *testPlanNormalize) TestNormalizedPlanForDiffStore(c *C) {
 	s.testData.GetTestCases(c, &input, &output)
 	lastDigest := ""
 	for i, tt := range input {
-		tk.Se.GetStochastikVars().PlanID = 0
+		tk.Se.GetStochaseinstein_dbars().PlanID = 0
 		tk.MustExec(tt)
 		info := tk.Se.ShowProcess()
 		c.Assert(info, NotNil)
@@ -139,7 +139,7 @@ func (s *testPlanNormalize) TestEncodeDecodePlan(c *C) {
 	tk.MustExec("create block t1 (a int key,b int,c int, index (b));")
 	tk.MustExec("set milevadb_enable_collect_execution_info=1;")
 
-	tk.Se.GetStochastikVars().PlanID = 0
+	tk.Se.GetStochaseinstein_dbars().PlanID = 0
 	getPlanTree := func() string {
 		info := tk.Se.ShowProcess()
 		c.Assert(info, NotNil)
@@ -323,7 +323,7 @@ func (s *testPlanNormalize) TestNormalizedDigest(c *C) {
 }
 
 func testNormalizeDigest(tk *testkit.TestKit, c *C, sql1, sql2 string, isSame bool) {
-	tk.Se.GetStochastikVars().PlanID = 0
+	tk.Se.GetStochaseinstein_dbars().PlanID = 0
 	tk.MustQuery(sql1)
 	info := tk.Se.ShowProcess()
 	c.Assert(info, NotNil)
@@ -331,7 +331,7 @@ func testNormalizeDigest(tk *testkit.TestKit, c *C, sql1, sql2 string, isSame bo
 	c.Assert(ok, IsTrue)
 	normalized1, digest1 := core.NormalizePlan(physicalPlan)
 
-	tk.Se.GetStochastikVars().PlanID = 0
+	tk.Se.GetStochaseinstein_dbars().PlanID = 0
 	tk.MustQuery(sql2)
 	info = tk.Se.ShowProcess()
 	c.Assert(info, NotNil)
@@ -434,14 +434,14 @@ func (s *testPlanNormalize) TestDecodePlanPerformance(c *C) {
 		buf.WriteString(fmt.Sprintf("select count(1) as num,a from t where a='%v' group by a", i))
 	}
 	query := buf.String()
-	tk.Se.GetStochastikVars().PlanID = 0
+	tk.Se.GetStochaseinstein_dbars().PlanID = 0
 	tk.MustExec(query)
 	info := tk.Se.ShowProcess()
 	c.Assert(info, NotNil)
 	p, ok := info.Plan.(core.PhysicalPlan)
 	c.Assert(ok, IsTrue)
 	// TODO: optimize the encode plan performance when encode plan with runtimeStats
-	tk.Se.GetStochastikVars().StmtCtx.RuntimeStatsDefCausl = nil
+	tk.Se.GetStochaseinstein_dbars().StmtCtx.RuntimeStatsDefCausl = nil
 	encodedPlanStr := core.EncodePlan(p)
 	start := time.Now()
 	_, err := plancodec.DecodePlan(encodedPlanStr)

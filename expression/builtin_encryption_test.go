@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,11 +22,11 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/charset"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/defCauslate"
-	"github.com/whtcorpsinc/milevadb/soliton/replog"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/defCauslate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/replog"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 var cryptTests = []struct {
@@ -54,7 +54,7 @@ func (s *testEvaluatorSuite) TestALLEGROSQLDecode(c *C) {
 		str := types.NewCauset(tt.origin)
 		password := types.NewCauset(tt.password)
 
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{str, password}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{str, password}))
 		c.Assert(err, IsNil)
 		crypt, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -69,7 +69,7 @@ func (s *testEvaluatorSuite) TestALLEGROSQLEncode(c *C) {
 		password := types.NewCauset(test.password)
 		cryptStr := fromHex(test.crypt)
 
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{cryptStr, password}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{cryptStr, password}))
 		c.Assert(err, IsNil)
 		str, err := evalBuiltinFunc(f, chunk.Event{})
 
@@ -120,18 +120,18 @@ var aesTests = []struct {
 func (s *testEvaluatorSuite) TestAESEncrypt(c *C) {
 	fc := funcs[ast.AesEncrypt]
 	for _, tt := range aesTests {
-		variable.SetStochastikSystemVar(s.ctx.GetStochastikVars(), variable.BlockEncryptionMode, types.NewCauset(tt.mode))
+		variable.SetStochastikSystemVar(s.ctx.GetStochaseinstein_dbars(), variable.BlockEncryptionMode, types.NewCauset(tt.mode))
 		args := []types.Causet{types.NewCauset(tt.origin)}
 		for _, param := range tt.params {
 			args = append(args, types.NewCauset(param))
 		}
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(args))
 		c.Assert(err, IsNil)
 		crypt, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(toHex(crypt), DeepEquals, types.NewCauset(tt.crypt))
 	}
-	variable.SetStochastikSystemVar(s.ctx.GetStochastikVars(), variable.BlockEncryptionMode, types.NewCauset("aes-128-ecb"))
+	variable.SetStochastikSystemVar(s.ctx.GetStochaseinstein_dbars(), variable.BlockEncryptionMode, types.NewCauset("aes-128-ecb"))
 	s.testNullInput(c, ast.AesEncrypt)
 	s.testAmbiguousInput(c, ast.AesEncrypt)
 }
@@ -139,12 +139,12 @@ func (s *testEvaluatorSuite) TestAESEncrypt(c *C) {
 func (s *testEvaluatorSuite) TestAESDecrypt(c *C) {
 	fc := funcs[ast.AesDecrypt]
 	for _, tt := range aesTests {
-		variable.SetStochastikSystemVar(s.ctx.GetStochastikVars(), variable.BlockEncryptionMode, types.NewCauset(tt.mode))
+		variable.SetStochastikSystemVar(s.ctx.GetStochaseinstein_dbars(), variable.BlockEncryptionMode, types.NewCauset(tt.mode))
 		args := []types.Causet{fromHex(tt.crypt)}
 		for _, param := range tt.params {
 			args = append(args, types.NewCauset(param))
 		}
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(args))
 		c.Assert(err, IsNil)
 		str, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -154,23 +154,23 @@ func (s *testEvaluatorSuite) TestAESDecrypt(c *C) {
 		}
 		c.Assert(str, DeepEquals, types.NewDefCauslationStringCauset(tt.origin.(string), charset.DefCauslationBin, defCauslate.DefaultLen))
 	}
-	variable.SetStochastikSystemVar(s.ctx.GetStochastikVars(), variable.BlockEncryptionMode, types.NewCauset("aes-128-ecb"))
+	variable.SetStochastikSystemVar(s.ctx.GetStochaseinstein_dbars(), variable.BlockEncryptionMode, types.NewCauset("aes-128-ecb"))
 	s.testNullInput(c, ast.AesDecrypt)
 	s.testAmbiguousInput(c, ast.AesDecrypt)
 }
 
 func (s *testEvaluatorSuite) testNullInput(c *C, fnName string) {
-	variable.SetStochastikSystemVar(s.ctx.GetStochastikVars(), variable.BlockEncryptionMode, types.NewCauset("aes-128-ecb"))
+	variable.SetStochastikSystemVar(s.ctx.GetStochaseinstein_dbars(), variable.BlockEncryptionMode, types.NewCauset("aes-128-ecb"))
 	fc := funcs[fnName]
 	arg := types.NewStringCauset("str")
 	var argNull types.Causet
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{arg, argNull}))
+	f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{arg, argNull}))
 	c.Assert(err, IsNil)
 	crypt, err := evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(crypt.IsNull(), IsTrue)
 
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{argNull, arg}))
+	f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{argNull, arg}))
 	c.Assert(err, IsNil)
 	crypt, err = evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
@@ -181,21 +181,21 @@ func (s *testEvaluatorSuite) testAmbiguousInput(c *C, fnName string) {
 	fc := funcs[fnName]
 	arg := types.NewStringCauset("str")
 	// test for modes that require init_vector
-	variable.SetStochastikSystemVar(s.ctx.GetStochastikVars(), variable.BlockEncryptionMode, types.NewCauset("aes-128-cbc"))
-	_, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{arg, arg}))
+	variable.SetStochastikSystemVar(s.ctx.GetStochaseinstein_dbars(), variable.BlockEncryptionMode, types.NewCauset("aes-128-cbc"))
+	_, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{arg, arg}))
 	c.Assert(err, NotNil)
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{arg, arg, types.NewStringCauset("iv < 16 bytes")}))
+	f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{arg, arg, types.NewStringCauset("iv < 16 bytes")}))
 	c.Assert(err, IsNil)
 	_, err = evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, NotNil)
 
 	// test for modes that do not require init_vector
-	variable.SetStochastikSystemVar(s.ctx.GetStochastikVars(), variable.BlockEncryptionMode, types.NewCauset("aes-128-ecb"))
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{arg, arg, arg}))
+	variable.SetStochastikSystemVar(s.ctx.GetStochaseinstein_dbars(), variable.BlockEncryptionMode, types.NewCauset("aes-128-ecb"))
+	f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{arg, arg, arg}))
 	c.Assert(err, IsNil)
 	_, err = evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
-	warnings := s.ctx.GetStochastikVars().StmtCtx.GetWarnings()
+	warnings := s.ctx.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 	c.Assert(len(warnings), GreaterEqual, 1)
 }
 
@@ -235,7 +235,7 @@ func (s *testEvaluatorSuite) TestSha1Hash(c *C) {
 	fc := funcs[ast.SHA]
 	for _, tt := range sha1Tests {
 		in := types.NewCauset(tt.origin)
-		f, _ := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{in}))
+		f, _ := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{in}))
 		crypt, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		res, err := crypt.ToString()
@@ -244,7 +244,7 @@ func (s *testEvaluatorSuite) TestSha1Hash(c *C) {
 	}
 	// test NULL input for sha
 	var argNull types.Causet
-	f, _ := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{argNull}))
+	f, _ := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{argNull}))
 	crypt, err := evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(crypt.IsNull(), IsTrue)
@@ -276,7 +276,7 @@ func (s *testEvaluatorSuite) TestSha2Hash(c *C) {
 	for _, tt := range sha2Tests {
 		str := types.NewCauset(tt.origin)
 		hashLength := types.NewCauset(tt.hashLength)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{str, hashLength}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{str, hashLength}))
 		c.Assert(err, IsNil)
 		crypt, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -307,7 +307,7 @@ func (s *testEvaluatorSuite) TestMD5Hash(c *C) {
 		{nil, "", true, false},
 	}
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.MD5, s.primitiveValsToConstants([]interface{}{t.args})...)
+		f, err := newFunctionForTest(s.ctx, ast.MD5, s.primitiveValsToCouplingConstantWithRadixs([]interface{}{t.args})...)
 		c.Assert(err, IsNil)
 		d, err := f.Eval(chunk.Event{})
 		if t.getErr {
@@ -328,26 +328,26 @@ func (s *testEvaluatorSuite) TestMD5Hash(c *C) {
 
 func (s *testEvaluatorSuite) TestRandomBytes(c *C) {
 	fc := funcs[ast.RandomBytes]
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{types.NewCauset(32)}))
+	f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{types.NewCauset(32)}))
 	c.Assert(err, IsNil)
 	out, err := evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(len(out.GetBytes()), Equals, 32)
 
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{types.NewCauset(1025)}))
+	f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{types.NewCauset(1025)}))
 	c.Assert(err, IsNil)
 	_, err = evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, NotNil)
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{types.NewCauset(-32)}))
+	f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{types.NewCauset(-32)}))
 	c.Assert(err, IsNil)
 	_, err = evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, NotNil)
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{types.NewCauset(0)}))
+	f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{types.NewCauset(0)}))
 	c.Assert(err, IsNil)
 	_, err = evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, NotNil)
 
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{types.NewCauset(nil)}))
+	f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{types.NewCauset(nil)}))
 	c.Assert(err, IsNil)
 	out, err = evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
@@ -375,7 +375,7 @@ func (s *testEvaluatorSuite) TestCompress(c *C) {
 	fc := funcs[ast.Compress]
 	for _, test := range tests {
 		arg := types.NewCauset(test.in)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{arg}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{arg}))
 		c.Assert(err, IsNil, Commentf("%v", test))
 		out, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil, Commentf("%v", test))
@@ -409,7 +409,7 @@ func (s *testEvaluatorSuite) TestUncompress(c *C) {
 	fc := funcs[ast.Uncompress]
 	for _, test := range tests {
 		arg := types.NewCauset(test.in)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{arg}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{arg}))
 		c.Assert(err, IsNil, Commentf("%v", test))
 		out, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil, Commentf("%v", test))
@@ -442,7 +442,7 @@ func (s *testEvaluatorSuite) TestUncompressLength(c *C) {
 	fc := funcs[ast.UncompressedLength]
 	for _, test := range tests {
 		arg := types.NewCauset(test.in)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{arg}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{arg}))
 		c.Assert(err, IsNil, Commentf("%v", test))
 		out, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil, Commentf("%v", test))
@@ -466,9 +466,9 @@ func (s *testEvaluatorSuite) TestPassword(c *C) {
 		{types.NewDecFromFloatForTest(123.123), "*B15B84262DB34BFB2C817A45A55C405DC7C52BB1", false, false, true},
 	}
 
-	warnCount := len(s.ctx.GetStochastikVars().StmtCtx.GetWarnings())
+	warnCount := len(s.ctx.GetStochaseinstein_dbars().StmtCtx.GetWarnings())
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.PasswordFunc, s.primitiveValsToConstants([]interface{}{t.args})...)
+		f, err := newFunctionForTest(s.ctx, ast.PasswordFunc, s.primitiveValsToCouplingConstantWithRadixs([]interface{}{t.args})...)
 		c.Assert(err, IsNil)
 		d, err := f.Eval(chunk.Event{})
 		c.Assert(err, IsNil)
@@ -478,7 +478,7 @@ func (s *testEvaluatorSuite) TestPassword(c *C) {
 			c.Assert(d.GetString(), Equals, t.expected)
 		}
 
-		warnings := s.ctx.GetStochastikVars().StmtCtx.GetWarnings()
+		warnings := s.ctx.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 		if t.getWarn {
 			c.Assert(len(warnings), Equals, warnCount+1)
 

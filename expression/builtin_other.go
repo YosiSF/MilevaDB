@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,13 +20,13 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/defCauslate"
-	"github.com/whtcorpsinc/milevadb/soliton/set"
-	"github.com/whtcorpsinc/milevadb/soliton/stringutil"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/defCauslate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/set"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/stringutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 )
 
 var (
@@ -78,13 +78,13 @@ func (c *inFunctionClass) getFunction(ctx stochastikctx.Context, args []Expressi
 	for i := range args {
 		argTps[i] = args[0].GetType().EvalType()
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, argTps...)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, argTps...)
 	if err != nil {
 		return nil, err
 	}
 	bf.tp.Flen = 1
 	switch args[0].GetType().EvalType() {
-	case types.ETInt:
+	case types.CausetEDN:
 		inInt := builtinInIntSig{baseInSig: baseInSig{baseBuiltinFunc: bf}}
 		err := inInt.buildHashMapForConstArgs(ctx)
 		if err != nil {
@@ -156,7 +156,7 @@ func (b *builtinInIntSig) buildHashMapForConstArgs(ctx stochastikctx.Context) er
 	b.nonConstArgs = []Expression{b.args[0]}
 	b.hashSet = make(map[int64]bool, len(b.args)-1)
 	for i := 1; i < len(b.args); i++ {
-		if b.args[i].ConstItem(b.ctx.GetStochastikVars().StmtCtx) {
+		if b.args[i].ConstItem(b.ctx.GetStochaseinstein_dbars().StmtCtx) {
 			val, isNull, err := b.args[i].EvalInt(ctx, chunk.Event{})
 			if err != nil {
 				return err
@@ -248,7 +248,7 @@ func (b *builtinInStringSig) buildHashMapForConstArgs(ctx stochastikctx.Context)
 	b.hashSet = set.NewStringSet()
 	defCauslator := defCauslate.GetDefCauslator(b.defCauslation)
 	for i := 1; i < len(b.args); i++ {
-		if b.args[i].ConstItem(b.ctx.GetStochastikVars().StmtCtx) {
+		if b.args[i].ConstItem(b.ctx.GetStochaseinstein_dbars().StmtCtx) {
 			val, isNull, err := b.args[i].EvalString(ctx, chunk.Event{})
 			if err != nil {
 				return err
@@ -320,7 +320,7 @@ func (b *builtinInRealSig) buildHashMapForConstArgs(ctx stochastikctx.Context) e
 	b.nonConstArgs = []Expression{b.args[0]}
 	b.hashSet = set.NewFloat64Set()
 	for i := 1; i < len(b.args); i++ {
-		if b.args[i].ConstItem(b.ctx.GetStochastikVars().StmtCtx) {
+		if b.args[i].ConstItem(b.ctx.GetStochaseinstein_dbars().StmtCtx) {
 			val, isNull, err := b.args[i].EvalReal(ctx, chunk.Event{})
 			if err != nil {
 				return err
@@ -389,7 +389,7 @@ func (b *builtinInDecimalSig) buildHashMapForConstArgs(ctx stochastikctx.Context
 	b.nonConstArgs = []Expression{b.args[0]}
 	b.hashSet = set.NewStringSet()
 	for i := 1; i < len(b.args); i++ {
-		if b.args[i].ConstItem(b.ctx.GetStochastikVars().StmtCtx) {
+		if b.args[i].ConstItem(b.ctx.GetStochaseinstein_dbars().StmtCtx) {
 			val, isNull, err := b.args[i].EvalDecimal(ctx, chunk.Event{})
 			if err != nil {
 				return err
@@ -468,7 +468,7 @@ func (b *builtinInTimeSig) buildHashMapForConstArgs(ctx stochastikctx.Context) e
 	b.nonConstArgs = []Expression{b.args[0]}
 	b.hashSet = make(map[types.Time]struct{}, len(b.args)-1)
 	for i := 1; i < len(b.args); i++ {
-		if b.args[i].ConstItem(b.ctx.GetStochastikVars().StmtCtx) {
+		if b.args[i].ConstItem(b.ctx.GetStochaseinstein_dbars().StmtCtx) {
 			val, isNull, err := b.args[i].EvalTime(ctx, chunk.Event{})
 			if err != nil {
 				return err
@@ -537,7 +537,7 @@ func (b *builtinInDurationSig) buildHashMapForConstArgs(ctx stochastikctx.Contex
 	b.nonConstArgs = []Expression{b.args[0]}
 	b.hashSet = make(map[time.Duration]struct{}, len(b.args)-1)
 	for i := 1; i < len(b.args); i++ {
-		if b.args[i].ConstItem(b.ctx.GetStochastikVars().StmtCtx) {
+		if b.args[i].ConstItem(b.ctx.GetStochaseinstein_dbars().StmtCtx) {
 			val, isNull, err := b.args[i].EvalDuration(ctx, chunk.Event{})
 			if err != nil {
 				return err
@@ -695,7 +695,7 @@ func (b *builtinSetVarSig) Clone() builtinFunc {
 
 func (b *builtinSetVarSig) evalString(event chunk.Event) (res string, isNull bool, err error) {
 	var varName string
-	stochastikVars := b.ctx.GetStochastikVars()
+	stochaseinstein_dbars := b.ctx.GetStochaseinstein_dbars()
 	varName, isNull, err = b.args[0].EvalString(b.ctx, event)
 	if isNull || err != nil {
 		return "", isNull, err
@@ -713,9 +713,9 @@ func (b *builtinSetVarSig) evalString(event chunk.Event) (res string, isNull boo
 	}
 
 	varName = strings.ToLower(varName)
-	stochastikVars.UsersLock.Lock()
-	stochastikVars.SetUserVar(varName, stringutil.INTERLOCKy(res), causet.DefCauslation())
-	stochastikVars.UsersLock.Unlock()
+	stochaseinstein_dbars.UsersLock.Lock()
+	stochaseinstein_dbars.SetUserVar(varName, stringutil.INTERLOCKy(res), causet.DefCauslation())
+	stochaseinstein_dbars.UsersLock.Unlock()
 	return res, false, nil
 }
 
@@ -741,18 +741,18 @@ func (c *getVarFunctionClass) getFunction(ctx stochastikctx.Context, args []Expr
 }
 
 func (c *getVarFunctionClass) resolveDefCauslation(ctx stochastikctx.Context, args []Expression, bf *baseBuiltinFunc) (err error) {
-	if constant, ok := args[0].(*Constant); ok {
+	if constant, ok := args[0].(*CouplingConstantWithRadix); ok {
 		varName, err := constant.Value.ToString()
 		if err != nil {
 			return err
 		}
 		varName = strings.ToLower(varName)
-		ctx.GetStochastikVars().UsersLock.RLock()
-		defer ctx.GetStochastikVars().UsersLock.RUnlock()
-		if v, ok := ctx.GetStochastikVars().Users[varName]; ok {
+		ctx.GetStochaseinstein_dbars().UsersLock.RLock()
+		defer ctx.GetStochaseinstein_dbars().UsersLock.RUnlock()
+		if v, ok := ctx.GetStochaseinstein_dbars().Users[varName]; ok {
 			bf.tp.DefCauslate = v.DefCauslation()
 			if len(bf.tp.Charset) <= 0 {
-				charset, _ := ctx.GetStochastikVars().GetCharsetInfo()
+				charset, _ := ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 				bf.tp.Charset = charset
 			}
 			return nil
@@ -773,15 +773,15 @@ func (b *builtinGetVarSig) Clone() builtinFunc {
 }
 
 func (b *builtinGetVarSig) evalString(event chunk.Event) (string, bool, error) {
-	stochastikVars := b.ctx.GetStochastikVars()
+	stochaseinstein_dbars := b.ctx.GetStochaseinstein_dbars()
 	varName, isNull, err := b.args[0].EvalString(b.ctx, event)
 	if isNull || err != nil {
 		return "", isNull, err
 	}
 	varName = strings.ToLower(varName)
-	stochastikVars.UsersLock.RLock()
-	defer stochastikVars.UsersLock.RUnlock()
-	if v, ok := stochastikVars.Users[varName]; ok {
+	stochaseinstein_dbars.UsersLock.RLock()
+	defer stochaseinstein_dbars.UsersLock.RUnlock()
+	if v, ok := stochaseinstein_dbars.Users[varName]; ok {
 		return v.GetString(), false, nil
 	}
 	return "", true, nil
@@ -804,7 +804,7 @@ func (c *valuesFunctionClass) getFunction(ctx stochastikctx.Context, args []Expr
 	}
 	bf.tp = c.tp
 	switch c.tp.EvalType() {
-	case types.ETInt:
+	case types.CausetEDN:
 		sig = &builtinValuesIntSig{bf, c.offset}
 	case types.ETReal:
 		sig = &builtinValuesRealSig{bf, c.offset}
@@ -837,10 +837,10 @@ func (b *builtinValuesIntSig) Clone() builtinFunc {
 // evalInt evals a builtinValuesIntSig.
 // See https://dev.allegrosql.com/doc/refman/5.7/en/miscellaneous-functions.html#function_values
 func (b *builtinValuesIntSig) evalInt(_ chunk.Event) (int64, bool, error) {
-	if !b.ctx.GetStochastikVars().StmtCtx.InInsertStmt {
+	if !b.ctx.GetStochaseinstein_dbars().StmtCtx.InInsertStmt {
 		return 0, true, nil
 	}
-	event := b.ctx.GetStochastikVars().CurrInsertValues
+	event := b.ctx.GetStochaseinstein_dbars().CurrInsertValues
 	if event.IsEmpty() {
 		return 0, true, errors.New("Stochastik current insert values is nil")
 	}
@@ -855,7 +855,7 @@ func (b *builtinValuesIntSig) evalInt(_ chunk.Event) (int64, bool, error) {
 		}
 		if len(val) < 8 {
 			var binary types.BinaryLiteral = val
-			v, err := binary.ToInt(b.ctx.GetStochastikVars().StmtCtx)
+			v, err := binary.ToInt(b.ctx.GetStochaseinstein_dbars().StmtCtx)
 			if err != nil {
 				return 0, true, errors.Trace(err)
 			}
@@ -881,10 +881,10 @@ func (b *builtinValuesRealSig) Clone() builtinFunc {
 // evalReal evals a builtinValuesRealSig.
 // See https://dev.allegrosql.com/doc/refman/5.7/en/miscellaneous-functions.html#function_values
 func (b *builtinValuesRealSig) evalReal(_ chunk.Event) (float64, bool, error) {
-	if !b.ctx.GetStochastikVars().StmtCtx.InInsertStmt {
+	if !b.ctx.GetStochaseinstein_dbars().StmtCtx.InInsertStmt {
 		return 0, true, nil
 	}
-	event := b.ctx.GetStochastikVars().CurrInsertValues
+	event := b.ctx.GetStochaseinstein_dbars().CurrInsertValues
 	if event.IsEmpty() {
 		return 0, true, errors.New("Stochastik current insert values is nil")
 	}
@@ -915,10 +915,10 @@ func (b *builtinValuesDecimalSig) Clone() builtinFunc {
 // evalDecimal evals a builtinValuesDecimalSig.
 // See https://dev.allegrosql.com/doc/refman/5.7/en/miscellaneous-functions.html#function_values
 func (b *builtinValuesDecimalSig) evalDecimal(_ chunk.Event) (*types.MyDecimal, bool, error) {
-	if !b.ctx.GetStochastikVars().StmtCtx.InInsertStmt {
+	if !b.ctx.GetStochaseinstein_dbars().StmtCtx.InInsertStmt {
 		return nil, true, nil
 	}
-	event := b.ctx.GetStochastikVars().CurrInsertValues
+	event := b.ctx.GetStochaseinstein_dbars().CurrInsertValues
 	if event.IsEmpty() {
 		return nil, true, errors.New("Stochastik current insert values is nil")
 	}
@@ -946,10 +946,10 @@ func (b *builtinValuesStringSig) Clone() builtinFunc {
 // evalString evals a builtinValuesStringSig.
 // See https://dev.allegrosql.com/doc/refman/5.7/en/miscellaneous-functions.html#function_values
 func (b *builtinValuesStringSig) evalString(_ chunk.Event) (string, bool, error) {
-	if !b.ctx.GetStochastikVars().StmtCtx.InInsertStmt {
+	if !b.ctx.GetStochaseinstein_dbars().StmtCtx.InInsertStmt {
 		return "", true, nil
 	}
-	event := b.ctx.GetStochastikVars().CurrInsertValues
+	event := b.ctx.GetStochaseinstein_dbars().CurrInsertValues
 	if event.IsEmpty() {
 		return "", true, errors.New("Stochastik current insert values is nil")
 	}
@@ -986,10 +986,10 @@ func (b *builtinValuesTimeSig) Clone() builtinFunc {
 // evalTime evals a builtinValuesTimeSig.
 // See https://dev.allegrosql.com/doc/refman/5.7/en/miscellaneous-functions.html#function_values
 func (b *builtinValuesTimeSig) evalTime(_ chunk.Event) (types.Time, bool, error) {
-	if !b.ctx.GetStochastikVars().StmtCtx.InInsertStmt {
+	if !b.ctx.GetStochaseinstein_dbars().StmtCtx.InInsertStmt {
 		return types.ZeroTime, true, nil
 	}
-	event := b.ctx.GetStochastikVars().CurrInsertValues
+	event := b.ctx.GetStochaseinstein_dbars().CurrInsertValues
 	if event.IsEmpty() {
 		return types.ZeroTime, true, errors.New("Stochastik current insert values is nil")
 	}
@@ -1017,10 +1017,10 @@ func (b *builtinValuesDurationSig) Clone() builtinFunc {
 // evalDuration evals a builtinValuesDurationSig.
 // See https://dev.allegrosql.com/doc/refman/5.7/en/miscellaneous-functions.html#function_values
 func (b *builtinValuesDurationSig) evalDuration(_ chunk.Event) (types.Duration, bool, error) {
-	if !b.ctx.GetStochastikVars().StmtCtx.InInsertStmt {
+	if !b.ctx.GetStochaseinstein_dbars().StmtCtx.InInsertStmt {
 		return types.Duration{}, true, nil
 	}
-	event := b.ctx.GetStochastikVars().CurrInsertValues
+	event := b.ctx.GetStochaseinstein_dbars().CurrInsertValues
 	if event.IsEmpty() {
 		return types.Duration{}, true, errors.New("Stochastik current insert values is nil")
 	}
@@ -1049,10 +1049,10 @@ func (b *builtinValuesJSONSig) Clone() builtinFunc {
 // evalJSON evals a builtinValuesJSONSig.
 // See https://dev.allegrosql.com/doc/refman/5.7/en/miscellaneous-functions.html#function_values
 func (b *builtinValuesJSONSig) evalJSON(_ chunk.Event) (json.BinaryJSON, bool, error) {
-	if !b.ctx.GetStochastikVars().StmtCtx.InInsertStmt {
+	if !b.ctx.GetStochaseinstein_dbars().StmtCtx.InInsertStmt {
 		return json.BinaryJSON{}, true, nil
 	}
-	event := b.ctx.GetStochastikVars().CurrInsertValues
+	event := b.ctx.GetStochaseinstein_dbars().CurrInsertValues
 	if event.IsEmpty() {
 		return json.BinaryJSON{}, true, errors.New("Stochastik current insert values is nil")
 	}
@@ -1073,7 +1073,7 @@ func (c *bitCountFunctionClass) getFunction(ctx stochastikctx.Context, args []Ex
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
@@ -1116,7 +1116,7 @@ func (c *getParamFunctionClass) getFunction(ctx stochastikctx.Context, args []Ex
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
@@ -1136,12 +1136,12 @@ func (b *builtinGetParamStringSig) Clone() builtinFunc {
 }
 
 func (b *builtinGetParamStringSig) evalString(event chunk.Event) (string, bool, error) {
-	stochastikVars := b.ctx.GetStochastikVars()
+	stochaseinstein_dbars := b.ctx.GetStochaseinstein_dbars()
 	idx, isNull, err := b.args[0].EvalInt(b.ctx, event)
 	if isNull || err != nil {
 		return "", isNull, err
 	}
-	v := stochastikVars.PreparedParams[idx]
+	v := stochaseinstein_dbars.PreparedParams[idx]
 
 	str, err := v.ToString()
 	if err != nil {

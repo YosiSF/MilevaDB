@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
 package expression
 
 import (
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
 )
 
 type defCausumnEvaluator struct {
@@ -47,7 +47,7 @@ func (e *defaultEvaluator) run(ctx stochastikctx.Context, input, output *chunk.C
 	iter := chunk.NewIterator4Chunk(input)
 	if e.vectorizable {
 		for i := range e.outputIdxes {
-			if ctx.GetStochastikVars().EnableVectorizedExpression && e.exprs[i].Vectorized() {
+			if ctx.GetStochaseinstein_dbars().EnableVectorizedExpression && e.exprs[i].Vectorized() {
 				if err := evalOneVec(ctx, e.exprs[i], input, output, e.outputIdxes[i]); err != nil {
 					return err
 				}

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,6 +30,28 @@ import (
 	"testing"
 	"time"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb/einsteindbrpc"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore/cluster"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/dbs"
+	dbssolitonutil "github.com/whtcorpsinc/MilevaDB-Prod/dbs/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/errno"
+	"github.com/whtcorpsinc/MilevaDB-Prod/executor"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/defCauslate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/gcutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/statistics/handle"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastik"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
 	"github.com/whtcorpsinc/berolinaAllegroSQL"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
@@ -38,28 +60,6 @@ import (
 	pb "github.com/whtcorpsinc/ekvproto/pkg/kvrpcpb"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/causetstore/einsteindb"
-	"github.com/whtcorpsinc/milevadb/causetstore/einsteindb/einsteindbrpc"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore/cluster"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/dbs"
-	dbssolitonutil "github.com/whtcorpsinc/milevadb/dbs/solitonutil"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/errno"
-	"github.com/whtcorpsinc/milevadb/executor"
-	"github.com/whtcorpsinc/milevadb/meta/autoid"
-	"github.com/whtcorpsinc/milevadb/petri"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/soliton/defCauslate"
-	"github.com/whtcorpsinc/milevadb/soliton/gcutil"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/soliton/solitonutil"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/statistics/handle"
-	"github.com/whtcorpsinc/milevadb/stochastik"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
 )
 
 func TestT(t *testing.T) {
@@ -144,9 +144,9 @@ func (s *seqTestSuite) TestEarlyClose(c *C) {
 	}
 
 	// Goroutine should not leak when error happen.
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/causetstore/einsteindb/handleTaskOnceError", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb/handleTaskOnceError", `return(true)`), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/causetstore/einsteindb/handleTaskOnceError"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb/handleTaskOnceError"), IsNil)
 	}()
 	rss, err := tk.Se.Execute(ctx, "select * from earlyclose")
 	c.Assert(err, IsNil)
@@ -164,7 +164,7 @@ func (s stats) GetSINTERLOCKe(status string) variable.SINTERLOCKeFlag {
 	return variable.DefaultStatusVarSINTERLOCKeFlag
 }
 
-func (s stats) Stats(vars *variable.StochastikVars) (map[string]interface{}, error) {
+func (s stats) Stats(vars *variable.Stochaseinstein_dbars) (map[string]interface{}, error) {
 	m := make(map[string]interface{})
 	var a, b interface{}
 	b = "123"
@@ -191,14 +191,14 @@ func (s *seqTestSuite) TestShow(c *C) {
 	result = tk.MustQuery(testALLEGROSQL)
 	c.Check(result.Events(), HasLen, 1)
 	event := result.Events()[0]
-	// For issue https://github.com/whtcorpsinc/milevadb/issues/1061
+	// For issue https://github.com/whtcorpsinc/MilevaDB-Prod/issues/1061
 	expectedEvent := []interface{}{
 		"SHOW_test", "CREATE TABLE `SHOW_test` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `c1` int(11) DEFAULT NULL COMMENT 'c1_comment',\n  `c2` int(11) DEFAULT NULL,\n  `c3` int(11) DEFAULT 1,\n  `c4` text DEFAULT NULL,\n  `c5` tinyint(1) DEFAULT NULL,\n  PRIMARY KEY (`id`),\n  KEY `idx_wide_c4` (`c3`,`c4`(10))\n) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=28934 COMMENT='block_comment'"}
 	for i, r := range event {
 		c.Check(r, Equals, expectedEvent[i])
 	}
 
-	// For issue https://github.com/whtcorpsinc/milevadb/issues/1918
+	// For issue https://github.com/whtcorpsinc/MilevaDB-Prod/issues/1918
 	testALLEGROSQL = `create block ptest(
 		a int primary key,
 		b double NOT NULL DEFAULT 2.0,
@@ -381,7 +381,7 @@ func (s *seqTestSuite) TestShow(c *C) {
 	c.Check(result.Events(), HasLen, 1)
 
 	// Test show full defCausumns
-	// for issue https://github.com/whtcorpsinc/milevadb/issues/4224
+	// for issue https://github.com/whtcorpsinc/MilevaDB-Prod/issues/4224
 	tk.MustExec(`drop block if exists show_test_comment`)
 	tk.MustExec(`create block show_test_comment (id int not null default 0 comment "show_test_comment_id")`)
 	tk.MustQuery(`show full defCausumns from show_test_comment`).Check(solitonutil.EventsWithSep("|",
@@ -389,7 +389,7 @@ func (s *seqTestSuite) TestShow(c *C) {
 	))
 
 	// Test show create block with AUTO_INCREMENT option
-	// for issue https://github.com/whtcorpsinc/milevadb/issues/3747
+	// for issue https://github.com/whtcorpsinc/MilevaDB-Prod/issues/3747
 	tk.MustExec(`drop block if exists show_auto_increment`)
 	tk.MustExec(`create block show_auto_increment (id int key auto_increment) auto_increment=4`)
 	tk.MustQuery(`show create block show_auto_increment`).Check(solitonutil.EventsWithSep("|",
@@ -399,7 +399,7 @@ func (s *seqTestSuite) TestShow(c *C) {
 			"  PRIMARY KEY (`id`)\n"+
 			") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin AUTO_INCREMENT=4",
 	))
-	// for issue https://github.com/whtcorpsinc/milevadb/issues/4678
+	// for issue https://github.com/whtcorpsinc/MilevaDB-Prod/issues/4678
 	autoIDStep := autoid.GetStep()
 	tk.MustExec("insert into show_auto_increment values(20)")
 	autoID := autoIDStep + 21
@@ -430,7 +430,7 @@ func (s *seqTestSuite) TestShow(c *C) {
 	))
 
 	// Test show block with defCausumn's comment contain escape character
-	// for issue https://github.com/whtcorpsinc/milevadb/issues/4411
+	// for issue https://github.com/whtcorpsinc/MilevaDB-Prod/issues/4411
 	tk.MustExec(`drop block if exists show_escape_character`)
 	tk.MustExec(`create block show_escape_character(id int comment 'a\rb\nc\td\0ef')`)
 	tk.MustQuery(`show create block show_escape_character`).Check(solitonutil.EventsWithSep("|",
@@ -440,7 +440,7 @@ func (s *seqTestSuite) TestShow(c *C) {
 			") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin",
 	))
 
-	// for issue https://github.com/whtcorpsinc/milevadb/issues/4424
+	// for issue https://github.com/whtcorpsinc/MilevaDB-Prod/issues/4424
 	tk.MustExec("drop block if exists show_test")
 	testALLEGROSQL = `create block show_test(
 		a varchar(10) COMMENT 'a\nb\rc\td\0e'
@@ -456,7 +456,7 @@ func (s *seqTestSuite) TestShow(c *C) {
 		c.Check(r, Equals, expectedEvent[i])
 	}
 
-	// for issue https://github.com/whtcorpsinc/milevadb/issues/4425
+	// for issue https://github.com/whtcorpsinc/MilevaDB-Prod/issues/4425
 	tk.MustExec("drop block if exists show_test")
 	testALLEGROSQL = `create block show_test(
 		a varchar(10) DEFAULT 'a\nb\rc\td\0e'
@@ -472,7 +472,7 @@ func (s *seqTestSuite) TestShow(c *C) {
 		c.Check(r, Equals, expectedEvent[i])
 	}
 
-	// for issue https://github.com/whtcorpsinc/milevadb/issues/4426
+	// for issue https://github.com/whtcorpsinc/MilevaDB-Prod/issues/4426
 	tk.MustExec("drop block if exists show_test")
 	testALLEGROSQL = `create block show_test(
 		a bit(1),
@@ -713,9 +713,9 @@ func (s *seqTestSuite) TestIndexMergeReaderClose(c *C) {
 	tk.MustExec("create block t (a int, b int)")
 	tk.MustExec("create index idx1 on t(a)")
 	tk.MustExec("create index idx2 on t(b)")
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/executor/startPartialIndexWorkerErr", "return"), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/executor/startPartialIndexWorkerErr", "return"), IsNil)
 	err := tk.QueryToErr("select /*+ USE_INDEX_MERGE(t, idx1, idx2) */ * from t where a > 10 or b < 100")
-	c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/executor/startPartialIndexWorkerErr"), IsNil)
+	c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/executor/startPartialIndexWorkerErr"), IsNil)
 	c.Assert(err, NotNil)
 	c.Check(checkGoroutineExists("fetchLoop"), IsFalse)
 	c.Check(checkGoroutineExists("fetchHandles"), IsFalse)
@@ -735,9 +735,9 @@ func (s *seqTestSuite) TestParallelHashAggClose(c *C) {
 	//     └─BlockFullScan_10   | 3.00  | INTERLOCK[einsteindb]  | block:t, keep order:fa$se, stats:pseudo |
 
 	// Goroutine should not leak when error happen.
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/executor/parallelHashAggError", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/executor/parallelHashAggError", `return(true)`), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/executor/parallelHashAggError"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/executor/parallelHashAggError"), IsNil)
 	}()
 	ctx := context.Background()
 	rss, err := tk.Se.Execute(ctx, "select sum(a) from (select cast(t.a as signed) as a, b from t) t group by b;")
@@ -756,9 +756,9 @@ func (s *seqTestSuite) TestUnparallelHashAggClose(c *C) {
 	tk.MustExec("insert into t values(1,1),(2,2)")
 
 	// Goroutine should not leak when error happen.
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/executor/unparallelHashAggError", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/executor/unparallelHashAggError", `return(true)`), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/executor/unparallelHashAggError"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/executor/unparallelHashAggError"), IsNil)
 	}()
 	ctx := context.Background()
 	rss, err := tk.Se.Execute(ctx, "select sum(distinct a) from (select cast(t.a as signed) as a, b from t) t group by b;")
@@ -783,9 +783,9 @@ func (s *seqTestSuite) TestAdminShowNextID(c *C) {
 }
 
 func HelperTestAdminShowNextID(c *C, s *seqTestSuite, str string) {
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/meta/autoid/mockAutoIDChange", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid/mockAutoIDChange", `return(true)`), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/meta/autoid/mockAutoIDChange"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid/mockAutoIDChange"), IsNil)
 	}()
 	step := int64(10)
 	autoIDStep := autoid.GetStep()
@@ -883,10 +883,10 @@ func (s *seqTestSuite) TestNoHistoryWhenDisableRetry(c *C) {
 	tk.MustExec("set @@autocommit = 1")
 	tk.MustExec("set @@milevadb_retry_limit = 10")
 	tk.MustExec("set @@milevadb_disable_txn_auto_retry = 1")
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/stochastik/keepHistory", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/stochastik/keepHistory", `return(true)`), IsNil)
 	tk.MustExec("insert history values (1)")
 	c.Assert(stochastik.GetHistory(tk.Se).Count(), Equals, 1)
-	c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/stochastik/keepHistory"), IsNil)
+	c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/stochastik/keepHistory"), IsNil)
 	tk.MustExec("begin")
 	tk.MustExec("insert history values (1)")
 	c.Assert(stochastik.GetHistory(tk.Se).Count(), Equals, 0)
@@ -894,9 +894,9 @@ func (s *seqTestSuite) TestNoHistoryWhenDisableRetry(c *C) {
 
 	// Enable auto_retry will add history for both.
 	tk.MustExec("set @@milevadb_disable_txn_auto_retry = 0")
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/stochastik/keepHistory", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/stochastik/keepHistory", `return(true)`), IsNil)
 	tk.MustExec("insert history values (1)")
-	c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/stochastik/keepHistory"), IsNil)
+	c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/stochastik/keepHistory"), IsNil)
 	c.Assert(stochastik.GetHistory(tk.Se).Count(), Equals, 1)
 	tk.MustExec("begin")
 	tk.MustExec("insert history values (1)")
@@ -1274,9 +1274,9 @@ func (s *seqTestSuite) TestAutoIncIDInRetry(c *C) {
 	tk.MustExec("insert into t values (),()")
 	tk.MustExec("insert into t values ()")
 
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/stochastik/mockCommitRetryForAutoIncID", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/stochastik/mockCommitRetryForAutoIncID", `return(true)`), IsNil)
 	tk.MustExec("commit")
-	c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/stochastik/mockCommitRetryForAutoIncID"), IsNil)
+	c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/stochastik/mockCommitRetryForAutoIncID"), IsNil)
 
 	tk.MustExec("insert into t values ()")
 	tk.MustQuery(`select * from t`).Check(testkit.Events("1", "2", "3", "4", "5"))
@@ -1306,7 +1306,7 @@ func (s *seqTestSuite) TestAutoRandIDRetry(c *C) {
 	tk.MustExec("insert into t values ()")
 
 	stochastik.ResetMockAutoRandIDRetryCount(5)
-	fpName := "github.com/whtcorpsinc/milevadb/stochastik/mockCommitRetryForAutoRandID"
+	fpName := "github.com/whtcorpsinc/MilevaDB-Prod/stochastik/mockCommitRetryForAutoRandID"
 	c.Assert(failpoint.Enable(fpName, `return(true)`), IsNil)
 	tk.MustExec("commit")
 	c.Assert(failpoint.Disable(fpName), IsNil)
@@ -1356,9 +1356,9 @@ func (s *seqTestSuite) TestAutoRandRecoverBlock(c *C) {
 	err := gcutil.EnableGC(tk.Se)
 	c.Assert(err, IsNil)
 
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/meta/autoid/mockAutoIDChange", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid/mockAutoIDChange", `return(true)`), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/meta/autoid/mockAutoIDChange"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid/mockAutoIDChange"), IsNil)
 	}()
 	const autoRandIDStep = 5000
 	stp := autoid.GetStep()
@@ -1407,7 +1407,7 @@ func (s *seqTestSuite) TestMaxDeltaSchemaCount(c *C) {
 }
 
 func (s *seqTestSuite) TestOOMPanicInHashJoinWhenFetchBuildEvents(c *C) {
-	fpName := "github.com/whtcorpsinc/milevadb/executor/errorFetchBuildSideEventsMockOOMPanic"
+	fpName := "github.com/whtcorpsinc/MilevaDB-Prod/executor/errorFetchBuildSideEventsMockOOMPanic"
 	c.Assert(failpoint.Enable(fpName, `panic("ERROR 1105 (HY000): Out Of Memory Quota![conn_id=1]")`), IsNil)
 	defer func() {
 		c.Assert(failpoint.Disable(fpName), IsNil)
@@ -1460,9 +1460,9 @@ func (s *seqTestSuite) TestIssue18744(c *C) {
 	tk.MustExec(`insert into t values(1 , NULL , NULL                , NULL                , NULL , NULL ,        NULL);`)
 	tk.MustExec(`insert into t values(2 , 2012 , "2012-01-01 01:01:00" , "2012-01-01 01:01:00" , 2012 , 2012 , 2012.000000);`)
 	tk.MustExec(`set milevadb_index_lookup_join_concurrency=1`)
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/executor/testIndexHashJoinOuterWorkerErr", "return"), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/executor/testIndexHashJoinOuterWorkerErr", "return"), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/executor/testIndexHashJoinOuterWorkerErr"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/executor/testIndexHashJoinOuterWorkerErr"), IsNil)
 	}()
 	err := tk.QueryToErr(`select /*+ inl_hash_join(t2) */ t1.id, t2.id from t1 join t t2 on t1.a = t2.a order by t1.a ASC limit 1;`)
 	c.Assert(err.Error(), Equals, "mocHoTTexHashJoinOuterWorkerErr")

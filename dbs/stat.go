@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@ package dbs
 
 import (
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/soliton/admin"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/admin"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
 )
 
 var (
@@ -44,7 +44,7 @@ func (d *dbs) GetSINTERLOCKe(status string) variable.SINTERLOCKeFlag {
 }
 
 // Stats returns the DBS statistics.
-func (d *dbs) Stats(vars *variable.StochastikVars) (map[string]interface{}, error) {
+func (d *dbs) Stats(vars *variable.Stochaseinstein_dbars) (map[string]interface{}, error) {
 	m := make(map[string]interface{})
 	m[serverID] = d.uuid
 	var dbsInfo *admin.DBSInfo

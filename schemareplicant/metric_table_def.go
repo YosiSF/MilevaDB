@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -1418,13 +1418,13 @@ var MetricBlockMap = map[string]MetricBlockDef{
 		PromQL: `sum(increase(einsteindb_scheduler_ekv_scan_details{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (tag,instance,req,cf)`,
 		Labels: []string{"instance", "tag", "req", "cf"},
 	},
-	"einsteindb_mvcc_versions": {
-		PromQL:  `sum(rate(einsteindb_storage_mvcc_versions_bucket{$LABEL_CONDITIONS}[$RANGE_DURATION]))`,
+	"einsteindb_mvsr-ooc_versions": {
+		PromQL:  `sum(rate(einsteindb_storage_mvsr-ooc_versions_bucket{$LABEL_CONDITIONS}[$RANGE_DURATION]))`,
 		Labels:  []string{"instance"},
 		Comment: "The number of versions for each key",
 	},
-	"einsteindb_mvcc_delete_versions": {
-		PromQL:  `sum(rate(einsteindb_storage_mvcc_gc_delete_versions_bucket{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance)`,
+	"einsteindb_mvsr-ooc_delete_versions": {
+		PromQL:  `sum(rate(einsteindb_storage_mvsr-ooc_gc_delete_versions_bucket{$LABEL_CONDITIONS}[$RANGE_DURATION])) by (instance)`,
 		Labels:  []string{"instance"},
 		Comment: "The number of versions deleted by GC for each key",
 	},
@@ -1470,7 +1470,7 @@ var MetricBlockMap = map[string]MetricBlockDef{
 		Comment: "The total number of keys in write CF affected during GC",
 	},
 	"einsteindb_gc_speed": {
-		PromQL:  `sum(rate(einsteindb_storage_mvcc_gc_delete_versions_sum[$RANGE_DURATION]))`,
+		PromQL:  `sum(rate(einsteindb_storage_mvsr-ooc_gc_delete_versions_sum[$RANGE_DURATION]))`,
 		Comment: "The GC keys per second",
 	},
 	"einsteindb_auto_gc_working": {

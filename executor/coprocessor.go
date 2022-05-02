@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,20 +17,20 @@ import (
 	"context"
 
 	"github.com/gogo/protobuf/proto"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/privilege"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/codec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/timeutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/auth"
 	"github.com/whtcorpsinc/ekvproto/pkg/einsteindbpb"
 	"github.com/whtcorpsinc/ekvproto/pkg/interlock"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/privilege"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/codec"
-	"github.com/whtcorpsinc/milevadb/soliton/timeutil"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 // interlocking_directoratePosetDagHandler uses to handle INTERLOCK posetPosetDag request.
@@ -138,28 +138,28 @@ func (h *interlocking_directoratePosetDagHandler) buildPosetDagExecutor(req *int
 	if posetPosetDagReq.User != nil {
 		pm := privilege.GetPrivilegeManager(h.sctx)
 		if pm != nil {
-			h.sctx.GetStochastikVars().User = &auth.UserIdentity{
+			h.sctx.GetStochaseinstein_dbars().User = &auth.UserIdentity{
 				Username: posetPosetDagReq.User.UserName,
 				Hostname: posetPosetDagReq.User.UserHost,
 			}
 			authName, authHost, success := pm.GetAuthWithoutVerification(posetPosetDagReq.User.UserName, posetPosetDagReq.User.UserHost)
 			if success {
-				h.sctx.GetStochastikVars().User.AuthUsername = authName
-				h.sctx.GetStochastikVars().User.AuthHostname = authHost
-				h.sctx.GetStochastikVars().ActiveRoles = pm.GetDefaultRoles(authName, authHost)
+				h.sctx.GetStochaseinstein_dbars().User.AuthUsername = authName
+				h.sctx.GetStochaseinstein_dbars().User.AuthHostname = authHost
+				h.sctx.GetStochaseinstein_dbars().ActiveRoles = pm.GetDefaultRoles(authName, authHost)
 			}
 		}
 	}
 
-	stmtCtx := h.sctx.GetStochastikVars().StmtCtx
+	stmtCtx := h.sctx.GetStochaseinstein_dbars().StmtCtx
 	stmtCtx.SetFlagsFromPBFlag(posetPosetDagReq.Flags)
 	stmtCtx.TimeZone, err = timeutil.ConstructTimeZone(posetPosetDagReq.TimeZoneName, int(posetPosetDagReq.TimeZoneOffset))
-	h.sctx.GetStochastikVars().TimeZone = stmtCtx.TimeZone
+	h.sctx.GetStochaseinstein_dbars().TimeZone = stmtCtx.TimeZone
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 	h.posetPosetDagReq = posetPosetDagReq
-	is := h.sctx.GetStochastikVars().TxnCtx.SchemaReplicant.(schemareplicant.SchemaReplicant)
+	is := h.sctx.GetStochaseinstein_dbars().TxnCtx.SchemaReplicant.(schemareplicant.SchemaReplicant)
 	// Build physical plan.
 	bp := core.NewPBPlanBuilder(h.sctx, is)
 	plan, err := bp.Build(posetPosetDagReq.Executors)
@@ -241,7 +241,7 @@ func (h *interlocking_directoratePosetDagHandler) encodeChunk(chk *chunk.Chunk, 
 
 func (h *interlocking_directoratePosetDagHandler) encodeDefault(chk *chunk.Chunk, tps []*types.FieldType) ([]fidelpb.Chunk, error) {
 	defCausOrdinal := h.posetPosetDagReq.OutputOffsets
-	stmtCtx := h.sctx.GetStochastikVars().StmtCtx
+	stmtCtx := h.sctx.GetStochaseinstein_dbars().StmtCtx
 	requestedEvent := make([]byte, 0)
 	chunks := []fidelpb.Chunk{}
 	for i := 0; i < chk.NumEvents(); i++ {

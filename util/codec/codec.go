@@ -27,12 +27,12 @@ import (
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/BerolinaSQL/mysql"
 	"github.com/whtcorpsinc/BerolinaSQL/terror"
-	"github.com/whtcorpsinc/MilevaDB/causetnetctx/stmtctx"
-	"github.com/whtcorpsinc/MilevaDB/types"
-	"github.com/whtcorpsinc/MilevaDB/types/json"
-	"github.com/whtcorpsinc/MilevaDB/util/chunk"
-	"github.com/whtcorpsinc/MilevaDB/util/collate"
-	"github.com/whtcorpsinc/MilevaDB/util/hack"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetnetctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/collate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/hack"
 )
 
 / First byte in the encoded value which specifies the encoding type.
@@ -56,7 +56,7 @@ const (
 	sizeFloat64 = unsafe.Sizeof(float64(0))
 )
 
-func preRealloc(b []byte, vals []types.Datum, comparable bool) []byte {
+func preRealloc(b []byte, vals []types.CausetObjectQL, comparable bool) []byte {
 	var size int
 	for i := range vals {
 		switch vals[i].Kind() {
@@ -81,7 +81,7 @@ func preRealloc(b []byte, vals []types.Datum, comparable bool) []byte {
 
 // encode will encode a datum and append it to a byte slice. If comparable is true, the encoded bytes can be sorted as it's original order.
 // If hash is true, the encoded bytes can be checked equal as it's original value.
-func encode(sc *stmtctx.StatementContext, b []byte, vals []types.Datum, comparable bool) (_ []byte, err error) {
+func encode(sc *stmtctx.StatementContext, b []byte, vals []types.CausetObjectQL, comparable bool) (_ []byte, err error) {
 	b = preRealloc(b, vals, comparable)
 	for i, length := 0, len(vals); i < length; i++ {
 		switch vals[i].Kind() {
@@ -144,7 +144,7 @@ func encode(sc *stmtctx.StatementContext, b []byte, vals []types.Datum, comparab
 }
 
 // EstimateValueSize uses to estimate the value  size of the encoded values.
-func EstimateValueSize(sc *stmtctx.StatementContext, val types.Datum) (int, error) {
+func EstimateValueSize(sc *stmtctx.StatementContext, val types.CausetObjectQL) (int, error) {
 	l := 0
 	switch val.Kind() {
 	case types.KindInt64:
@@ -197,7 +197,7 @@ func EncodeMySQLTime(sc *stmtctx.StatementContext, t types.Time, tp byte, b []by
 	return b, nil
 }
 
-func encodeString(b []byte, val types.Datum, comparable bool) []byte {
+func encodeString(b []byte, val types.CausetObjectQL, comparable bool) []byte {
 	if collate.NewCollationEnabled() && comparable {
 		return encodeBytes(b, collate.GetCollator(val.Collation()).Key(val.GetString()), true)
 	}
@@ -285,12 +285,12 @@ func sizeInt(comparable bool) int {
 // EncodeKey appends the encoded values to byte slice b, returns the appended
 // slice. It guarantees the encoded value is in ascending order for comparison.
 // For Decimal type, datum must set datum's length and frac.
-func EncodeKey(sc *stmtctx.StatementContext, b []byte, v ...types.Datum) ([]byte, error) {
+func EncodeKey(sc *stmtctx.StatementContext, b []byte, v ...types.CausetObjectQL) ([]byte, error) {
 	return encode(sc, b, v, true)
 }
 
 // EncodeValue appends the encoded values to byte slice b, returning the appended
 // slice. It does not guarantee the order for comparison.
-func EncodeValue(sc *stmtctx.StatementContext, b []byte, v ...types.Datum) ([]byte, error) {
+func EncodeValue(sc *stmtctx.StatementContext, b []byte, v ...types.CausetObjectQL) ([]byte, error) {
 	return encode(sc, b, v, false)
 }

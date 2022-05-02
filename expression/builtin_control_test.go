@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ import (
 
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/solitonutil"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 func (s *testEvaluatorSuite) TestCaseWhen(c *C) {
@@ -43,20 +43,20 @@ func (s *testEvaluatorSuite) TestCaseWhen(c *C) {
 	}
 	fc := funcs[ast.Case]
 	for _, t := range tbl {
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(t.Arg...)))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(t.Arg...)))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(d, solitonutil.CausetEquals, types.NewCauset(t.Ret))
 	}
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(errors.New("can't convert string to bool"), 1, true)))
+	f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(errors.New("can't convert string to bool"), 1, true)))
 	c.Assert(err, IsNil)
 	_, err = evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, NotNil)
 }
 
 func (s *testEvaluatorSuite) TestIf(c *C) {
-	stmtCtx := s.ctx.GetStochastikVars().StmtCtx
+	stmtCtx := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	origin := stmtCtx.IgnoreTruncate
 	stmtCtx.IgnoreTruncate = true
 	defer func() {
@@ -88,17 +88,17 @@ func (s *testEvaluatorSuite) TestIf(c *C) {
 
 	fc := funcs[ast.If]
 	for _, t := range tbl {
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(t.Arg1, t.Arg2, t.Arg3)))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(t.Arg1, t.Arg2, t.Arg3)))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(d, solitonutil.CausetEquals, types.NewCauset(t.Ret))
 	}
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(errors.New("must error"), 1, 2)))
+	f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(errors.New("must error"), 1, 2)))
 	c.Assert(err, IsNil)
 	_, err = evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, NotNil)
-	_, err = fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(1, 2)))
+	_, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(1, 2)))
 	c.Assert(err, NotNil)
 }
 
@@ -124,7 +124,7 @@ func (s *testEvaluatorSuite) TestIfNull(c *C) {
 	}
 
 	for _, t := range tbl {
-		f, err := newFunctionForTest(s.ctx, ast.Ifnull, s.primitiveValsToConstants([]interface{}{t.arg1, t.arg2})...)
+		f, err := newFunctionForTest(s.ctx, ast.Ifnull, s.primitiveValsToCouplingConstantWithRadixs([]interface{}{t.arg1, t.arg2})...)
 		c.Assert(err, IsNil)
 		d, err := f.Eval(chunk.Event{})
 		if t.getErr {

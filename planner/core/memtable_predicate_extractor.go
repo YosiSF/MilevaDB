@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,15 +24,15 @@ import (
 	"time"
 
 	"github.com/cznic/mathutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/set"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/stringutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton/set"
-	"github.com/whtcorpsinc/milevadb/soliton/stringutil"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 // MemBlockPredicateExtractor is used to extract some predicates from `WHERE` clause
@@ -73,7 +73,7 @@ func (helper extractHelper) extractDefCausInConsExpr(extractDefCauss map[int64]*
 	// SELECT * FROM t1 WHERE c IN ('1', '2')
 	var results []types.Causet
 	for _, arg := range args[1:] {
-		constant, ok := arg.(*expression.Constant)
+		constant, ok := arg.(*expression.CouplingConstantWithRadix)
 		if !ok || constant.DeferredExpr != nil || constant.ParamMarker != nil {
 			return "", nil
 		}
@@ -107,7 +107,7 @@ func (helper extractHelper) extractDefCausBinaryOpConsExpr(extractDefCauss map[i
 	// The `lhs/rhs` of EQ expression must be a constant
 	// SELECT * FROM t1 WHERE c='rhs'
 	// SELECT * FROM t1 WHERE 'lhs'=c
-	constant, ok := args[1-colIdx].(*expression.Constant)
+	constant, ok := args[1-colIdx].(*expression.CouplingConstantWithRadix)
 	if !ok || constant.DeferredExpr != nil || constant.ParamMarker != nil {
 		return "", nil
 	}
@@ -399,7 +399,7 @@ func (helper extractHelper) extractTimeRange(
 		if colName == extractDefCausName {
 			timeType := types.NewFieldType(allegrosql.TypeDatetime)
 			timeType.Decimal = 6
-			timeCauset, err := datums[0].ConvertTo(ctx.GetStochastikVars().StmtCtx, timeType)
+			timeCauset, err := datums[0].ConvertTo(ctx.GetStochaseinstein_dbars().StmtCtx, timeType)
 			if err != nil || timeCauset.HoTT() == types.HoTTNull {
 				remained = append(remained, expr)
 				continue
@@ -631,11 +631,11 @@ func (e *ClusterLogBlockExtractor) explainInfo(p *PhysicalMemBlock) string {
 	st, et := e.StartTime, e.EndTime
 	if st > 0 {
 		st := time.Unix(0, st*1e6)
-		r.WriteString(fmt.Sprintf("start_time:%v, ", st.In(p.ctx.GetStochastikVars().StmtCtx.TimeZone).Format(MetricBlockTimeFormat)))
+		r.WriteString(fmt.Sprintf("start_time:%v, ", st.In(p.ctx.GetStochaseinstein_dbars().StmtCtx.TimeZone).Format(MetricBlockTimeFormat)))
 	}
 	if et > 0 {
 		et := time.Unix(0, et*1e6)
-		r.WriteString(fmt.Sprintf("end_time:%v, ", et.In(p.ctx.GetStochastikVars().StmtCtx.TimeZone).Format(MetricBlockTimeFormat)))
+		r.WriteString(fmt.Sprintf("end_time:%v, ", et.In(p.ctx.GetStochaseinstein_dbars().StmtCtx.TimeZone).Format(MetricBlockTimeFormat)))
 	}
 	if len(e.NodeTypes) > 0 {
 		r.WriteString(fmt.Sprintf("node_types:[%s], ", extractStringFromStringSet(e.NodeTypes)))
@@ -691,7 +691,7 @@ func (e *MetricBlockExtractor) Extract(
 	}
 
 	// Extract the `time` columns
-	remained, startTime, endTime := e.extractTimeRange(ctx, schemaReplicant, names, remained, "time", ctx.GetStochastikVars().StmtCtx.TimeZone)
+	remained, startTime, endTime := e.extractTimeRange(ctx, schemaReplicant, names, remained, "time", ctx.GetStochaseinstein_dbars().StmtCtx.TimeZone)
 	e.StartTime, e.EndTime = e.getTimeRange(startTime, endTime)
 	e.SkipRequest = e.StartTime.After(e.EndTime)
 	if e.SkipRequest {
@@ -737,11 +737,11 @@ func (e *MetricBlockExtractor) explainInfo(p *PhysicalMemBlock) string {
 	}
 	promQL := e.GetMetricBlockPromQL(p.ctx, p.Block.Name.L)
 	startTime, endTime := e.StartTime, e.EndTime
-	step := time.Second * time.Duration(p.ctx.GetStochastikVars().MetricSchemaStep)
+	step := time.Second * time.Duration(p.ctx.GetStochaseinstein_dbars().MetricSchemaStep)
 	return fmt.Sprintf("PromQL:%v, start_time:%v, end_time:%v, step:%v",
 		promQL,
-		startTime.In(p.ctx.GetStochastikVars().StmtCtx.TimeZone).Format(MetricBlockTimeFormat),
-		endTime.In(p.ctx.GetStochastikVars().StmtCtx.TimeZone).Format(MetricBlockTimeFormat),
+		startTime.In(p.ctx.GetStochaseinstein_dbars().StmtCtx.TimeZone).Format(MetricBlockTimeFormat),
+		endTime.In(p.ctx.GetStochaseinstein_dbars().StmtCtx.TimeZone).Format(MetricBlockTimeFormat),
 		step,
 	)
 }
@@ -951,7 +951,7 @@ func (e *SlowQueryExtractor) Extract(
 	names []*types.FieldName,
 	predicates []expression.Expression,
 ) []expression.Expression {
-	remained, startTime, endTime := e.extractTimeRange(ctx, schemaReplicant, names, predicates, "time", ctx.GetStochastikVars().StmtCtx.TimeZone)
+	remained, startTime, endTime := e.extractTimeRange(ctx, schemaReplicant, names, predicates, "time", ctx.GetStochaseinstein_dbars().StmtCtx.TimeZone)
 	e.setTimeRange(startTime, endTime)
 	e.SkipRequest = e.Enable && e.StartTime.After(e.EndTime)
 	if e.SkipRequest {
@@ -1038,10 +1038,10 @@ func (e *SlowQueryExtractor) explainInfo(p *PhysicalMemBlock) string {
 		return "skip_request: true"
 	}
 	if !e.Enable {
-		return fmt.Sprintf("only search in the current '%v' file", p.ctx.GetStochastikVars().SlowQueryFile)
+		return fmt.Sprintf("only search in the current '%v' file", p.ctx.GetStochaseinstein_dbars().SlowQueryFile)
 	}
-	startTime := e.StartTime.In(p.ctx.GetStochastikVars().StmtCtx.TimeZone)
-	endTime := e.EndTime.In(p.ctx.GetStochastikVars().StmtCtx.TimeZone)
+	startTime := e.StartTime.In(p.ctx.GetStochaseinstein_dbars().StmtCtx.TimeZone)
+	endTime := e.EndTime.In(p.ctx.GetStochaseinstein_dbars().StmtCtx.TimeZone)
 	return fmt.Sprintf("start_time:%v, end_time:%v",
 		types.NewTime(types.FromGoTime(startTime), allegrosql.TypeDatetime, types.MaxFsp).String(),
 		types.NewTime(types.FromGoTime(endTime), allegrosql.TypeDatetime, types.MaxFsp).String())

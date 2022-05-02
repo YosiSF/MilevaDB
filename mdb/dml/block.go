@@ -14,7 +14,7 @@
 package block
 
 import (
-	"github.com/whtcorpsinc/milevadb/BerolinaSQL/fidel/eekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/fidel/eekv"
 )
 
 //type of block, gives us storage options
@@ -37,7 +37,7 @@ const (
 )
 
 //low level record iteration
-type RecordIterFunc func(h int64, rec []types.Datum, cols []*Batch) (more bool, err error)
+type RecordIterFunc func(h int64, rec []types.CausetObjectQL, cols []*Batch) (more bool, err error)
 
 type AddRecordOpt struct {
 	CreateIdxOpt
@@ -56,10 +56,10 @@ type Block interface {
 	IterRecords(ctx stochastiktxn.Context, startKey eekv.Key, cols []*Batch, fn RecordIterFunc) error
 
 	//EventRowWithBatch return a row event that contains given batch
-	EventWithBatch(ctx stochastiktxn.Context, h int64, cols []*Batch) ([]types.Datum, error)
+	EventWithBatch(ctx stochastiktxn.Context, h int64, cols []*Batch) ([]types.CausetObjectQL, error)
 
 	//Event returns a row for all batches == columns
-	Event(ctx stochastiktxn.Context, h int64) ([]types.Datum, error)
+	Event(ctx stochastiktxn.Context, h int64) ([]types.CausetObjectQL, error)
 
 	// Indices returns the indices of the Block.
 	Indices() []Index

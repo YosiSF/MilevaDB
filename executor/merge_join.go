@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,14 +17,14 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/disk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/memory"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/stringutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/disk"
-	"github.com/whtcorpsinc/milevadb/soliton/memory"
-	"github.com/whtcorpsinc/milevadb/soliton/stringutil"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
 )
 
 // MergeJoinExec implements the merge join algorithm.
@@ -105,7 +105,7 @@ func (t *mergeJoinBlock) init(exec *MergeJoinExec) {
 					actionSpill = t.rowContainer.CausetActionSpillForTest()
 				}
 			})
-			exec.ctx.GetStochastikVars().StmtCtx.MemTracker.FallbackOldAndSetNewCausetAction(actionSpill)
+			exec.ctx.GetStochaseinstein_dbars().StmtCtx.MemTracker.FallbackOldAndSetNewCausetAction(actionSpill)
 		}
 		t.memTracker = memory.NewTracker(memory.LabelForInnerBlock, -1)
 	} else {
@@ -305,9 +305,9 @@ func (e *MergeJoinExec) Open(ctx context.Context) error {
 	}
 
 	e.memTracker = memory.NewTracker(e.id, -1)
-	e.memTracker.AttachTo(e.ctx.GetStochastikVars().StmtCtx.MemTracker)
+	e.memTracker.AttachTo(e.ctx.GetStochaseinstein_dbars().StmtCtx.MemTracker)
 	e.diskTracker = disk.NewTracker(e.id, -1)
-	e.diskTracker.AttachTo(e.ctx.GetStochastikVars().StmtCtx.DiskTracker)
+	e.diskTracker.AttachTo(e.ctx.GetStochaseinstein_dbars().StmtCtx.DiskTracker)
 
 	e.innerBlock.init(e)
 	e.outerBlock.init(e)

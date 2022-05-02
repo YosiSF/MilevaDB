@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,14 +24,14 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/soliton/solitonutil"
-	"github.com/whtcorpsinc/milevadb/soliton/timeutil"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/timeutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 func init() {
@@ -105,7 +105,7 @@ func (s *testEvaluatorSuite) TestDate(c *C) {
 	dtblDate := tblToDtbl(tblDate)
 	for _, t := range dtblDate {
 		fc := funcs[ast.Date]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -135,49 +135,49 @@ func (s *testEvaluatorSuite) TestDate(c *C) {
 	dtbl := tblToDtbl(tbl)
 	for ith, t := range dtbl {
 		fc := funcs[ast.Year]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(v, solitonutil.CausetEquals, t["Year"][0])
 
 		fc = funcs[ast.Month]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(v, solitonutil.CausetEquals, t["Month"][0])
 
 		fc = funcs[ast.MonthName]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(v, solitonutil.CausetEquals, t["MonthName"][0])
 
 		fc = funcs[ast.DayOfMonth]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(v, solitonutil.CausetEquals, t["DayOfMonth"][0])
 
 		fc = funcs[ast.DayOfWeek]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(v, solitonutil.CausetEquals, t["DayOfWeek"][0])
 
 		fc = funcs[ast.DayOfYear]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(v, solitonutil.CausetEquals, t["DayOfYear"][0])
 
 		fc = funcs[ast.Weekday]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
@@ -185,28 +185,28 @@ func (s *testEvaluatorSuite) TestDate(c *C) {
 		c.Assert(v, solitonutil.CausetEquals, t["WeekDay"][0])
 
 		fc = funcs[ast.DayName]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(v, solitonutil.CausetEquals, t["DayName"][0])
 
 		fc = funcs[ast.Week]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(v, solitonutil.CausetEquals, t["Week"][0], Commentf("no.%d", ith))
 
 		fc = funcs[ast.WeekOfYear]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(v, solitonutil.CausetEquals, t["WeekOfYear"][0])
 
 		fc = funcs[ast.YearWeek]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -236,49 +236,49 @@ func (s *testEvaluatorSuite) TestDate(c *C) {
 	dtblNil := tblToDtbl(tblNil)
 	for _, t := range dtblNil {
 		fc := funcs[ast.Year]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(v, solitonutil.CausetEquals, t["Year"][0])
 
 		fc = funcs[ast.Month]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(v, solitonutil.CausetEquals, t["Month"][0])
 
 		fc = funcs[ast.MonthName]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(v, solitonutil.CausetEquals, t["MonthName"][0])
 
 		fc = funcs[ast.DayOfMonth]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(v, solitonutil.CausetEquals, t["DayOfMonth"][0])
 
 		fc = funcs[ast.DayOfWeek]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(v, solitonutil.CausetEquals, t["DayOfWeek"][0])
 
 		fc = funcs[ast.DayOfYear]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(v, solitonutil.CausetEquals, t["DayOfYear"][0])
 
 		fc = funcs[ast.Weekday]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
@@ -286,28 +286,28 @@ func (s *testEvaluatorSuite) TestDate(c *C) {
 		c.Assert(v, solitonutil.CausetEquals, t["WeekDay"][0])
 
 		fc = funcs[ast.DayName]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(v, solitonutil.CausetEquals, t["DayName"][0])
 
 		fc = funcs[ast.Week]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(v, solitonutil.CausetEquals, t["Week"][0])
 
 		fc = funcs[ast.WeekOfYear]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(v, solitonutil.CausetEquals, t["WeekOfYear"][0])
 
 		fc = funcs[ast.YearWeek]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -335,52 +335,52 @@ func (s *testEvaluatorSuite) TestDate(c *C) {
 	}
 
 	dtblNil = tblToDtbl(tblNil)
-	s.ctx.GetStochastikVars().SetSystemVar("sql_mode", "NO_ZERO_DATE")
+	s.ctx.GetStochaseinstein_dbars().SetSystemVar("sql_mode", "NO_ZERO_DATE")
 	for _, t := range dtblNil {
 		fc := funcs[ast.Year]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(v, solitonutil.CausetEquals, t["Year"][0])
 
 		fc = funcs[ast.Month]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(v, solitonutil.CausetEquals, t["Month"][0])
 
 		fc = funcs[ast.MonthName]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(v, solitonutil.CausetEquals, t["MonthName"][0])
 
 		fc = funcs[ast.DayOfMonth]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(v, solitonutil.CausetEquals, t["DayOfMonth"][0])
 
 		fc = funcs[ast.DayOfWeek]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(v, solitonutil.CausetEquals, t["DayOfWeek"][0])
 
 		fc = funcs[ast.DayOfYear]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(v, solitonutil.CausetEquals, t["DayOfYear"][0])
 
 		fc = funcs[ast.Weekday]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
@@ -388,28 +388,28 @@ func (s *testEvaluatorSuite) TestDate(c *C) {
 		c.Assert(v, solitonutil.CausetEquals, t["WeekDay"][0])
 
 		fc = funcs[ast.DayName]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(v, solitonutil.CausetEquals, t["DayName"][0])
 
 		fc = funcs[ast.Week]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(v, solitonutil.CausetEquals, t["Week"][0])
 
 		fc = funcs[ast.WeekOfYear]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(v, solitonutil.CausetEquals, t["WeekOfYear"][0])
 
 		fc = funcs[ast.YearWeek]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -418,7 +418,7 @@ func (s *testEvaluatorSuite) TestDate(c *C) {
 }
 
 func (s *testEvaluatorSuite) TestMonthName(c *C) {
-	sc := s.ctx.GetStochastikVars().StmtCtx
+	sc := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	sc.IgnoreZeroInDate = true
 	cases := []struct {
 		args     interface{}
@@ -433,7 +433,7 @@ func (s *testEvaluatorSuite) TestMonthName(c *C) {
 		{"0000-00-00 00:00:11.000000", "", true, false},
 	}
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.MonthName, s.primitiveValsToConstants([]interface{}{t.args})...)
+		f, err := newFunctionForTest(s.ctx, ast.MonthName, s.primitiveValsToCouplingConstantWithRadixs([]interface{}{t.args})...)
 		c.Assert(err, IsNil)
 		d, err := f.Eval(chunk.Event{})
 		if t.getErr {
@@ -453,7 +453,7 @@ func (s *testEvaluatorSuite) TestMonthName(c *C) {
 }
 
 func (s *testEvaluatorSuite) TestDayName(c *C) {
-	sc := s.ctx.GetStochastikVars().StmtCtx
+	sc := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	sc.IgnoreZeroInDate = true
 	cases := []struct {
 		args     interface{}
@@ -470,7 +470,7 @@ func (s *testEvaluatorSuite) TestDayName(c *C) {
 		{"0000-00-00 00:00:11.000000", "", true, false},
 	}
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.DayName, s.primitiveValsToConstants([]interface{}{t.args})...)
+		f, err := newFunctionForTest(s.ctx, ast.DayName, s.primitiveValsToCouplingConstantWithRadixs([]interface{}{t.args})...)
 		c.Assert(err, IsNil)
 		d, err := f.Eval(chunk.Event{})
 		if t.getErr {
@@ -490,7 +490,7 @@ func (s *testEvaluatorSuite) TestDayName(c *C) {
 }
 
 func (s *testEvaluatorSuite) TestDayOfWeek(c *C) {
-	sc := s.ctx.GetStochastikVars().StmtCtx
+	sc := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	sc.IgnoreZeroInDate = true
 	cases := []struct {
 		args     interface{}
@@ -505,7 +505,7 @@ func (s *testEvaluatorSuite) TestDayOfWeek(c *C) {
 		{"0000-00-00 12:12:12", 1, true, false},
 	}
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.DayOfWeek, s.primitiveValsToConstants([]interface{}{t.args})...)
+		f, err := newFunctionForTest(s.ctx, ast.DayOfWeek, s.primitiveValsToCouplingConstantWithRadixs([]interface{}{t.args})...)
 		c.Assert(err, IsNil)
 		d, err := f.Eval(chunk.Event{})
 		if t.getErr {
@@ -525,7 +525,7 @@ func (s *testEvaluatorSuite) TestDayOfWeek(c *C) {
 }
 
 func (s *testEvaluatorSuite) TestDayOfMonth(c *C) {
-	sc := s.ctx.GetStochastikVars().StmtCtx
+	sc := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	sc.IgnoreZeroInDate = true
 	cases := []struct {
 		args     interface{}
@@ -540,7 +540,7 @@ func (s *testEvaluatorSuite) TestDayOfMonth(c *C) {
 		{"0000-00-00 12:12:12", 0, false, false},
 	}
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.DayOfMonth, s.primitiveValsToConstants([]interface{}{t.args})...)
+		f, err := newFunctionForTest(s.ctx, ast.DayOfMonth, s.primitiveValsToCouplingConstantWithRadixs([]interface{}{t.args})...)
 		c.Assert(err, IsNil)
 		d, err := f.Eval(chunk.Event{})
 		if t.getErr {
@@ -560,7 +560,7 @@ func (s *testEvaluatorSuite) TestDayOfMonth(c *C) {
 }
 
 func (s *testEvaluatorSuite) TestDayOfYear(c *C) {
-	sc := s.ctx.GetStochastikVars().StmtCtx
+	sc := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	sc.IgnoreZeroInDate = true
 	cases := []struct {
 		args     interface{}
@@ -575,7 +575,7 @@ func (s *testEvaluatorSuite) TestDayOfYear(c *C) {
 		{"0000-00-00 12:12:12", 0, true, false},
 	}
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.DayOfYear, s.primitiveValsToConstants([]interface{}{t.args})...)
+		f, err := newFunctionForTest(s.ctx, ast.DayOfYear, s.primitiveValsToCouplingConstantWithRadixs([]interface{}{t.args})...)
 		c.Assert(err, IsNil)
 		d, err := f.Eval(chunk.Event{})
 		if t.getErr {
@@ -595,11 +595,11 @@ func (s *testEvaluatorSuite) TestDayOfYear(c *C) {
 }
 
 func (s *testEvaluatorSuite) TestDateFormat(c *C) {
-	// Test case for https://github.com/whtcorpsinc/milevadb/issues/2908
+	// Test case for https://github.com/whtcorpsinc/MilevaDB-Prod/issues/2908
 	// SELECT DATE_FORMAT(null,'%Y-%M-%D')
 	args := []types.Causet{types.NewCauset(nil), types.NewStringCauset("%Y-%M-%D")}
 	fc := funcs[ast.DateFormat]
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants(args))
+	f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(args))
 	c.Assert(err, IsNil)
 	v, err := evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
@@ -630,7 +630,7 @@ func (s *testEvaluatorSuite) TestDateFormat(c *C) {
 	dtblDate := tblToDtbl(tblDate)
 	for i, t := range dtblDate {
 		fc := funcs[ast.DateFormat]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -658,35 +658,35 @@ func (s *testEvaluatorSuite) TestClock(c *C) {
 	dtbl := tblToDtbl(tbl)
 	for _, t := range dtbl {
 		fc := funcs[ast.Hour]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(v, solitonutil.CausetEquals, t["Hour"][0])
 
 		fc = funcs[ast.Minute]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(v, solitonutil.CausetEquals, t["Minute"][0])
 
 		fc = funcs[ast.Second]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(v, solitonutil.CausetEquals, t["Second"][0])
 
 		fc = funcs[ast.MicroSecond]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(v, solitonutil.CausetEquals, t["MicroSecond"][0])
 
 		fc = funcs[ast.Time]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -695,35 +695,35 @@ func (s *testEvaluatorSuite) TestClock(c *C) {
 
 	// nil
 	fc := funcs[ast.Hour]
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(nil)))
+	f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(nil)))
 	c.Assert(err, IsNil)
 	v, err := evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(v.HoTT(), Equals, types.HoTTNull)
 
 	fc = funcs[ast.Minute]
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(nil)))
+	f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(nil)))
 	c.Assert(err, IsNil)
 	v, err = evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(v.HoTT(), Equals, types.HoTTNull)
 
 	fc = funcs[ast.Second]
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(nil)))
+	f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(nil)))
 	c.Assert(err, IsNil)
 	v, err = evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(v.HoTT(), Equals, types.HoTTNull)
 
 	fc = funcs[ast.MicroSecond]
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(nil)))
+	f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(nil)))
 	c.Assert(err, IsNil)
 	v, err = evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(v.HoTT(), Equals, types.HoTTNull)
 
 	fc = funcs[ast.Time]
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(nil)))
+	f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(nil)))
 	c.Assert(err, IsNil)
 	v, err = evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
@@ -737,36 +737,36 @@ func (s *testEvaluatorSuite) TestClock(c *C) {
 	for _, t := range errTbl {
 		td := types.MakeCausets(t)
 		fc := funcs[ast.Hour]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(td))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(td))
 		c.Assert(err, IsNil)
 		_, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 
 		fc = funcs[ast.Minute]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(td))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(td))
 		c.Assert(err, IsNil)
 		_, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 
 		fc = funcs[ast.Second]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(td))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(td))
 		c.Assert(err, IsNil)
 		_, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 
 		fc = funcs[ast.MicroSecond]
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(td))
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(td))
 		c.Assert(err, IsNil)
 		_, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 
 		fc = funcs[ast.Time]
-		preWarningCnt := s.ctx.GetStochastikVars().StmtCtx.WarningCount()
-		f, err = fc.getFunction(s.ctx, s.datumsToConstants(td))
+		preWarningCnt := s.ctx.GetStochaseinstein_dbars().StmtCtx.WarningCount()
+		f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(td))
 		c.Assert(err, IsNil)
 		_, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
-		c.Assert(s.ctx.GetStochastikVars().StmtCtx.WarningCount(), Equals, preWarningCnt+1)
+		c.Assert(s.ctx.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, preWarningCnt+1)
 	}
 }
 
@@ -785,7 +785,7 @@ func (s *testEvaluatorSuite) TestTime(c *C) {
 	}
 
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.Time, s.primitiveValsToConstants([]interface{}{t.args})...)
+		f, err := newFunctionForTest(s.ctx, ast.Time, s.primitiveValsToCouplingConstantWithRadixs([]interface{}{t.args})...)
 		c.Assert(err, IsNil)
 		tp := f.GetType()
 		c.Assert(tp.Tp, Equals, allegrosql.TypeDuration)
@@ -811,7 +811,7 @@ func (s *testEvaluatorSuite) TestTime(c *C) {
 }
 
 func resetStmtContext(ctx stochastikctx.Context) {
-	ctx.GetStochastikVars().StmtCtx.ResetNowTs()
+	ctx.GetStochaseinstein_dbars().StmtCtx.ResetNowTs()
 }
 
 func (s *testEvaluatorSuite) TestNowAndUTCTimestamp(c *C) {
@@ -828,7 +828,7 @@ func (s *testEvaluatorSuite) TestNowAndUTCTimestamp(c *C) {
 		{funcs[ast.Now], func() time.Time { return time.Now() }},
 		{funcs[ast.UTCTimestamp], func() time.Time { return time.Now().UTC() }},
 	} {
-		f, err := x.fc.getFunction(s.ctx, s.datumsToConstants(nil))
+		f, err := x.fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(nil))
 		c.Assert(err, IsNil)
 		resetStmtContext(s.ctx)
 		v, err := evalBuiltinFunc(f, chunk.Event{})
@@ -840,7 +840,7 @@ func (s *testEvaluatorSuite) TestNowAndUTCTimestamp(c *C) {
 		c.Assert(strings.Contains(t.String(), "."), IsFalse)
 		c.Assert(ts.Sub(gotime(t, ts.Location())), LessEqual, time.Second)
 
-		f, err = x.fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(6)))
+		f, err = x.fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(6)))
 		c.Assert(err, IsNil)
 		resetStmtContext(s.ctx)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
@@ -851,32 +851,32 @@ func (s *testEvaluatorSuite) TestNowAndUTCTimestamp(c *C) {
 		c.Assert(ts.Sub(gotime(t, ts.Location())), LessEqual, time.Second)
 
 		resetStmtContext(s.ctx)
-		f, err = x.fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(8)))
+		f, err = x.fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(8)))
 		c.Assert(err, IsNil)
 		_, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, NotNil)
 
 		resetStmtContext(s.ctx)
-		f, err = x.fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(-2)))
+		f, err = x.fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(-2)))
 		c.Assert(err, IsNil)
 		_, err = evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, NotNil)
 	}
 
 	// Test that "timestamp" and "time_zone" variable may affect the result of Now() builtin function.
-	variable.SetStochastikSystemVar(s.ctx.GetStochastikVars(), "time_zone", types.NewCauset("+00:00"))
-	variable.SetStochastikSystemVar(s.ctx.GetStochastikVars(), "timestamp", types.NewCauset(1234))
+	variable.SetStochastikSystemVar(s.ctx.GetStochaseinstein_dbars(), "time_zone", types.NewCauset("+00:00"))
+	variable.SetStochastikSystemVar(s.ctx.GetStochaseinstein_dbars(), "timestamp", types.NewCauset(1234))
 	fc := funcs[ast.Now]
 	resetStmtContext(s.ctx)
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants(nil))
+	f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(nil))
 	c.Assert(err, IsNil)
 	v, err := evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
 	result, err := v.ToString()
 	c.Assert(err, IsNil)
 	c.Assert(result, Equals, "1970-01-01 00:20:34")
-	variable.SetStochastikSystemVar(s.ctx.GetStochastikVars(), "timestamp", types.NewCauset(0))
-	variable.SetStochastikSystemVar(s.ctx.GetStochastikVars(), "time_zone", types.NewCauset("system"))
+	variable.SetStochastikSystemVar(s.ctx.GetStochaseinstein_dbars(), "timestamp", types.NewCauset(0))
+	variable.SetStochastikSystemVar(s.ctx.GetStochaseinstein_dbars(), "time_zone", types.NewCauset("system"))
 }
 
 func (s *testEvaluatorSuite) TestIsDuration(c *C) {
@@ -920,7 +920,7 @@ func (s *testEvaluatorSuite) TestAddTimeSig(c *C) {
 	for _, t := range tbl {
 		tmpInput := types.NewStringCauset(t.Input)
 		tmpInputDuration := types.NewStringCauset(t.InputDuration)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{tmpInput, tmpInputDuration}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{tmpInput, tmpInputDuration}))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -949,11 +949,11 @@ func (s *testEvaluatorSuite) TestAddTimeSig(c *C) {
 		{"-110:00:00", "1 02:00:00", "-84:00:00"},
 	}
 	for _, t := range tbl {
-		dur, err := types.ParseDuration(s.ctx.GetStochastikVars().StmtCtx, t.Input, types.GetFsp(t.Input))
+		dur, err := types.ParseDuration(s.ctx.GetStochaseinstein_dbars().StmtCtx, t.Input, types.GetFsp(t.Input))
 		c.Assert(err, IsNil)
 		tmpInput := types.NewDurationCauset(dur)
 		tmpInputDuration := types.NewStringCauset(t.InputDuration)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{tmpInput, tmpInputDuration}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{tmpInput, tmpInputDuration}))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -972,7 +972,7 @@ func (s *testEvaluatorSuite) TestAddTimeSig(c *C) {
 	for _, t := range tbll {
 		tmpInput := types.NewIntCauset(t.Input)
 		tmpInputDuration := types.NewIntCauset(t.InputDuration)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{tmpInput, tmpInputDuration}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{tmpInput, tmpInputDuration}))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -996,14 +996,14 @@ func (s *testEvaluatorSuite) TestAddTimeSig(c *C) {
 	for i, t := range tblWarning {
 		tmpInput := types.NewCauset(t.Input)
 		tmpInputDuration := types.NewCauset(t.InputDuration)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{tmpInput, tmpInputDuration}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{tmpInput, tmpInputDuration}))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		result, _ := d.ToString()
 		c.Assert(result, Equals, "")
 		c.Assert(d.IsNull(), Equals, true)
-		warnings := s.ctx.GetStochastikVars().StmtCtx.GetWarnings()
+		warnings := s.ctx.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 		c.Assert(len(warnings), Equals, i+1)
 		c.Assert(terror.ErrorEqual(t.warning, warnings[i].Err), IsTrue, Commentf("err %v", warnings[i].Err))
 	}
@@ -1024,7 +1024,7 @@ func (s *testEvaluatorSuite) TestSubTimeSig(c *C) {
 	for _, t := range tbl {
 		tmpInput := types.NewStringCauset(t.Input)
 		tmpInputDuration := types.NewStringCauset(t.InputDuration)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{tmpInput, tmpInputDuration}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{tmpInput, tmpInputDuration}))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -1042,11 +1042,11 @@ func (s *testEvaluatorSuite) TestSubTimeSig(c *C) {
 		{"235959", "00:00:01", "23:59:58"},
 	}
 	for _, t := range tbl {
-		dur, err := types.ParseDuration(s.ctx.GetStochastikVars().StmtCtx, t.Input, types.GetFsp(t.Input))
+		dur, err := types.ParseDuration(s.ctx.GetStochaseinstein_dbars().StmtCtx, t.Input, types.GetFsp(t.Input))
 		c.Assert(err, IsNil)
 		tmpInput := types.NewDurationCauset(dur)
 		tmpInputDuration := types.NewStringCauset(t.InputDuration)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{tmpInput, tmpInputDuration}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{tmpInput, tmpInputDuration}))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -1064,7 +1064,7 @@ func (s *testEvaluatorSuite) TestSubTimeSig(c *C) {
 	for _, t := range tbll {
 		tmpInput := types.NewIntCauset(t.Input)
 		tmpInputDuration := types.NewIntCauset(t.InputDuration)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{tmpInput, tmpInputDuration}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{tmpInput, tmpInputDuration}))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -1088,14 +1088,14 @@ func (s *testEvaluatorSuite) TestSubTimeSig(c *C) {
 	for i, t := range tblWarning {
 		tmpInput := types.NewCauset(t.Input)
 		tmpInputDuration := types.NewCauset(t.InputDuration)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{tmpInput, tmpInputDuration}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{tmpInput, tmpInputDuration}))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		result, _ := d.ToString()
 		c.Assert(result, Equals, "")
 		c.Assert(d.IsNull(), Equals, true)
-		warnings := s.ctx.GetStochastikVars().StmtCtx.GetWarnings()
+		warnings := s.ctx.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 		c.Assert(len(warnings), Equals, i+1)
 		c.Assert(terror.ErrorEqual(t.warning, warnings[i].Err), IsTrue, Commentf("err %v", warnings[i].Err))
 	}
@@ -1105,12 +1105,12 @@ func (s *testEvaluatorSuite) TestSysDate(c *C) {
 	fc := funcs[ast.Sysdate]
 
 	ctx := mock.NewContext()
-	ctx.GetStochastikVars().StmtCtx.TimeZone = timeutil.SystemLocation()
+	ctx.GetStochaseinstein_dbars().StmtCtx.TimeZone = timeutil.SystemLocation()
 	timezones := []types.Causet{types.NewCauset(1234), types.NewCauset(0)}
 	for _, timezone := range timezones {
 		// sysdate() result is not affected by "timestamp" stochastik variable.
-		variable.SetStochastikSystemVar(ctx.GetStochastikVars(), "timestamp", timezone)
-		f, err := fc.getFunction(ctx, s.datumsToConstants(nil))
+		variable.SetStochastikSystemVar(ctx.GetStochaseinstein_dbars(), "timestamp", timezone)
+		f, err := fc.getFunction(ctx, s.datumsToCouplingConstantWithRadixs(nil))
 		c.Assert(err, IsNil)
 		resetStmtContext(s.ctx)
 		v, err := evalBuiltinFunc(f, chunk.Event{})
@@ -1132,11 +1132,11 @@ func (s *testEvaluatorSuite) TestSysDate(c *C) {
 		baseFunc, _, input, output = genVecBuiltinFuncBenchCase(ctx, ast.Sysdate,
 			vecExprBenchCase{
 				retEvalType:   types.ETDatetime,
-				childrenTypes: []types.EvalType{types.ETInt},
+				childrenTypes: []types.EvalType{types.CausetEDN},
 				geners:        []dataGenerator{newRangeInt64Gener(0, 7)},
 			})
 		resetStmtContext(s.ctx)
-		loc := ctx.GetStochastikVars().Location()
+		loc := ctx.GetStochaseinstein_dbars().Location()
 		startTm := time.Now().In(loc)
 		err = baseFunc.vecEvalTime(input, output)
 		c.Assert(err, IsNil)
@@ -1146,7 +1146,7 @@ func (s *testEvaluatorSuite) TestSysDate(c *C) {
 	}
 
 	last := time.Now()
-	f, err := fc.getFunction(ctx, s.datumsToConstants(types.MakeCausets(6)))
+	f, err := fc.getFunction(ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(6)))
 	c.Assert(err, IsNil)
 	resetStmtContext(s.ctx)
 	v, err := evalBuiltinFunc(f, chunk.Event{})
@@ -1154,7 +1154,7 @@ func (s *testEvaluatorSuite) TestSysDate(c *C) {
 	n := v.GetMysqlTime()
 	c.Assert(n.String(), GreaterEqual, last.Format(types.TimeFormat))
 
-	f, err = fc.getFunction(ctx, s.datumsToConstants(types.MakeCausets(-2)))
+	f, err = fc.getFunction(ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(-2)))
 	c.Assert(err, IsNil)
 	_, err = evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, NotNil)
@@ -1190,7 +1190,7 @@ func convertToTime(sc *stmtctx.StatementContext, arg types.Causet, tp byte) (d t
 }
 
 func builtinDateFormat(ctx stochastikctx.Context, args []types.Causet) (d types.Causet, err error) {
-	date, err := convertToTime(ctx.GetStochastikVars().StmtCtx, args[0], allegrosql.TypeDatetime)
+	date, err := convertToTime(ctx.GetStochaseinstein_dbars().StmtCtx, args[0], allegrosql.TypeDatetime)
 	if err != nil {
 		return d, err
 	}
@@ -1225,7 +1225,7 @@ func (s *testEvaluatorSuite) TestFromUnixTime(c *C) {
 		{true, 1451606400, 999999000, 1451606400.999999, `%Y %D %M %h:%i:%s %x`, "2020-01-01 00:00:00.999999"},
 		{true, 1451606400, 999999900, 1451606400.9999999, `%Y %D %M %h:%i:%s %x`, "2020-01-01 00:00:01.000000"},
 	}
-	sc := s.ctx.GetStochastikVars().StmtCtx
+	sc := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	originTZ := sc.TimeZone
 	sc.TimeZone = time.UTC
 	defer func() {
@@ -1241,7 +1241,7 @@ func (s *testEvaluatorSuite) TestFromUnixTime(c *C) {
 		}
 		// result of from_unixtime() is dependent on specific time zone.
 		if len(t.format) == 0 {
-			constants := s.datumsToConstants([]types.Causet{timestamp})
+			constants := s.datumsToCouplingConstantWithRadixs([]types.Causet{timestamp})
 			if !t.isDecimal {
 				constants[0].GetType().Decimal = 0
 			}
@@ -1255,7 +1255,7 @@ func (s *testEvaluatorSuite) TestFromUnixTime(c *C) {
 			c.Assert(ans.String(), Equals, t.expect, Commentf("%+v", t))
 		} else {
 			format := types.NewStringCauset(t.format)
-			constants := s.datumsToConstants([]types.Causet{timestamp, format})
+			constants := s.datumsToCouplingConstantWithRadixs([]types.Causet{timestamp, format})
 			if !t.isDecimal {
 				constants[0].GetType().Decimal = 0
 			}
@@ -1269,13 +1269,13 @@ func (s *testEvaluatorSuite) TestFromUnixTime(c *C) {
 		}
 	}
 
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(-12345)))
+	f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(-12345)))
 	c.Assert(err, IsNil)
 	v, err := evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(v.HoTT(), Equals, types.HoTTNull)
 
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(math.MaxInt32+1)))
+	f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(math.MaxInt32+1)))
 	c.Assert(err, IsNil)
 	_, err = evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
@@ -1285,7 +1285,7 @@ func (s *testEvaluatorSuite) TestFromUnixTime(c *C) {
 func (s *testEvaluatorSuite) TestCurrentDate(c *C) {
 	last := time.Now()
 	fc := funcs[ast.CurrentDate]
-	f, err := fc.getFunction(mock.NewContext(), s.datumsToConstants(nil))
+	f, err := fc.getFunction(mock.NewContext(), s.datumsToCouplingConstantWithRadixs(nil))
 	c.Assert(err, IsNil)
 	resetStmtContext(s.ctx)
 	v, err := evalBuiltinFunc(f, chunk.Event{})
@@ -1299,7 +1299,7 @@ func (s *testEvaluatorSuite) TestCurrentTime(c *C) {
 
 	last := time.Now()
 	fc := funcs[ast.CurrentTime]
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(nil)))
+	f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(nil)))
 	c.Assert(err, IsNil)
 	resetStmtContext(s.ctx)
 	v, err := evalBuiltinFunc(f, chunk.Event{})
@@ -1308,7 +1308,7 @@ func (s *testEvaluatorSuite) TestCurrentTime(c *C) {
 	c.Assert(n.String(), HasLen, 8)
 	c.Assert(n.String(), GreaterEqual, last.Format(tfStr))
 
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(3)))
+	f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(3)))
 	c.Assert(err, IsNil)
 	resetStmtContext(s.ctx)
 	v, err = evalBuiltinFunc(f, chunk.Event{})
@@ -1317,7 +1317,7 @@ func (s *testEvaluatorSuite) TestCurrentTime(c *C) {
 	c.Assert(n.String(), HasLen, 12)
 	c.Assert(n.String(), GreaterEqual, last.Format(tfStr))
 
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(6)))
+	f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(6)))
 	c.Assert(err, IsNil)
 	resetStmtContext(s.ctx)
 	v, err = evalBuiltinFunc(f, chunk.Event{})
@@ -1326,10 +1326,10 @@ func (s *testEvaluatorSuite) TestCurrentTime(c *C) {
 	c.Assert(n.String(), HasLen, 15)
 	c.Assert(n.String(), GreaterEqual, last.Format(tfStr))
 
-	_, err = fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(-1)))
+	_, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(-1)))
 	c.Assert(err, NotNil)
 
-	_, err = fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(7)))
+	_, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(7)))
 	c.Assert(err, NotNil)
 }
 
@@ -1344,7 +1344,7 @@ func (s *testEvaluatorSuite) TestUTCTime(c *C) {
 	}{{0, 8}, {3, 12}, {6, 15}, {-1, 0}, {7, 0}}
 
 	for _, test := range tests {
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(test.param)))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(test.param)))
 		c.Assert(err, IsNil)
 		resetStmtContext(s.ctx)
 		v, err := evalBuiltinFunc(f, chunk.Event{})
@@ -1371,7 +1371,7 @@ func (s *testEvaluatorSuite) TestUTCTime(c *C) {
 func (s *testEvaluatorSuite) TestUTCDate(c *C) {
 	last := time.Now().UTC()
 	fc := funcs[ast.UTCDate]
-	f, err := fc.getFunction(mock.NewContext(), s.datumsToConstants(nil))
+	f, err := fc.getFunction(mock.NewContext(), s.datumsToCouplingConstantWithRadixs(nil))
 	c.Assert(err, IsNil)
 	resetStmtContext(mock.NewContext())
 	v, err := evalBuiltinFunc(f, chunk.Event{})
@@ -1407,7 +1407,7 @@ func (s *testEvaluatorSuite) TestStrToDate(c *C) {
 	for _, test := range tests {
 		date := types.NewStringCauset(test.Date)
 		format := types.NewStringCauset(test.Format)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{date, format}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{date, format}))
 		c.Assert(err, IsNil)
 		result, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -1424,7 +1424,7 @@ func (s *testEvaluatorSuite) TestStrToDate(c *C) {
 }
 
 func (s *testEvaluatorSuite) TestFromDays(c *C) {
-	stmtCtx := s.ctx.GetStochastikVars().StmtCtx
+	stmtCtx := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	origin := stmtCtx.IgnoreTruncate
 	stmtCtx.IgnoreTruncate = true
 	defer func() {
@@ -1453,7 +1453,7 @@ func (s *testEvaluatorSuite) TestFromDays(c *C) {
 	for _, test := range tests {
 		t1 := types.NewIntCauset(test.day)
 
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{t1}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{t1}))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		result, err := evalBuiltinFunc(f, chunk.Event{})
@@ -1474,7 +1474,7 @@ func (s *testEvaluatorSuite) TestFromDays(c *C) {
 	for _, test := range stringTests {
 		t1 := types.NewStringCauset(test.day)
 
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{t1}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{t1}))
 		c.Assert(err, IsNil)
 		result, err := evalBuiltinFunc(f, chunk.Event{})
 
@@ -1502,7 +1502,7 @@ func (s *testEvaluatorSuite) TestDateDiff(c *C) {
 		t1 := types.NewStringCauset(test.t1)
 		t2 := types.NewStringCauset(test.t2)
 
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{t1, t2}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{t1, t2}))
 		c.Assert(err, IsNil)
 		result, err := evalBuiltinFunc(f, chunk.Event{})
 
@@ -1527,7 +1527,7 @@ func (s *testEvaluatorSuite) TestDateDiff(c *C) {
 		t1 := types.NewStringCauset(test.t1)
 		t2 := types.NewStringCauset(test.t2)
 
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{t1, t2}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{t1, t2}))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -1536,7 +1536,7 @@ func (s *testEvaluatorSuite) TestDateDiff(c *C) {
 }
 
 func (s *testEvaluatorSuite) TestTimeDiff(c *C) {
-	sc := s.ctx.GetStochastikVars().StmtCtx
+	sc := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	sc.IgnoreZeroInDate = true
 	// Test cases from https://dev.allegrosql.com/doc/refman/5.7/en/date-and-time-functions.html#function_timediff
 	tests := []struct {
@@ -1555,8 +1555,8 @@ func (s *testEvaluatorSuite) TestTimeDiff(c *C) {
 	}
 
 	for _, t := range tests {
-		preWarningCnt := s.ctx.GetStochastikVars().StmtCtx.WarningCount()
-		f, err := newFunctionForTest(s.ctx, ast.TimeDiff, s.primitiveValsToConstants(t.args)...)
+		preWarningCnt := s.ctx.GetStochaseinstein_dbars().StmtCtx.WarningCount()
+		f, err := newFunctionForTest(s.ctx, ast.TimeDiff, s.primitiveValsToCouplingConstantWithRadixs(t.args)...)
 		c.Assert(err, IsNil)
 		tp := f.GetType()
 		c.Assert(tp.Tp, Equals, allegrosql.TypeDuration)
@@ -1567,7 +1567,7 @@ func (s *testEvaluatorSuite) TestTimeDiff(c *C) {
 		d, err := f.Eval(chunk.Event{})
 		if t.getWarning {
 			c.Assert(err, IsNil)
-			c.Assert(s.ctx.GetStochastikVars().StmtCtx.WarningCount(), Equals, preWarningCnt+1)
+			c.Assert(s.ctx.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, preWarningCnt+1)
 		} else {
 			c.Assert(err, IsNil)
 			if t.isNil {
@@ -1597,7 +1597,7 @@ func (s *testEvaluatorSuite) TestWeek(c *C) {
 	for _, test := range tests {
 		arg1 := types.NewStringCauset(test.t)
 		arg2 := types.NewIntCauset(test.mode)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{arg1, arg2}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{arg1, arg2}))
 		c.Assert(err, IsNil)
 		result, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -1620,20 +1620,20 @@ func (s *testEvaluatorSuite) TestWeekWithoutModeSig(c *C) {
 	fc := funcs[ast.Week]
 	for i, test := range tests {
 		arg1 := types.NewStringCauset(test.t)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{arg1}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{arg1}))
 		c.Assert(err, IsNil)
 		result, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(result.GetInt64(), Equals, test.expect)
 		if i == 1 {
-			s.ctx.GetStochastikVars().SetSystemVar("default_week_format", "6")
+			s.ctx.GetStochaseinstein_dbars().SetSystemVar("default_week_format", "6")
 		} else if i == 3 {
-			s.ctx.GetStochastikVars().SetSystemVar("default_week_format", "")
+			s.ctx.GetStochaseinstein_dbars().SetSystemVar("default_week_format", "")
 		}
 	}
 }
 func (s *testEvaluatorSuite) TestYearWeek(c *C) {
-	sc := s.ctx.GetStochastikVars().StmtCtx
+	sc := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	sc.IgnoreZeroInDate = true
 	// Test cases from https://dev.allegrosql.com/doc/refman/5.7/en/date-and-time-functions.html#function_yearweek
 	tests := []struct {
@@ -1648,14 +1648,14 @@ func (s *testEvaluatorSuite) TestYearWeek(c *C) {
 	for _, test := range tests {
 		arg1 := types.NewStringCauset(test.t)
 		arg2 := types.NewIntCauset(test.mode)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{arg1, arg2}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{arg1, arg2}))
 		c.Assert(err, IsNil)
 		result, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(result.GetInt64(), Equals, test.expect)
 	}
 
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets("2020-00-05")))
+	f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets("2020-00-05")))
 	c.Assert(err, IsNil)
 	result, err := evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
@@ -1682,17 +1682,17 @@ func (s *testEvaluatorSuite) TestTimestamFIDeliff(c *C) {
 			types.NewStringCauset(test.t2),
 		}
 		resetStmtContext(s.ctx)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(args))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
 		c.Assert(d.GetInt64(), Equals, test.expect)
 	}
-	sc := s.ctx.GetStochastikVars().StmtCtx
+	sc := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	sc.IgnoreTruncate = true
 	sc.IgnoreZeroInDate = true
 	resetStmtContext(s.ctx)
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{types.NewStringCauset("DAY"),
+	f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{types.NewStringCauset("DAY"),
 		types.NewStringCauset("2020-01-00"),
 		types.NewStringCauset("2020-01-01")}))
 	c.Assert(err, IsNil)
@@ -1701,7 +1701,7 @@ func (s *testEvaluatorSuite) TestTimestamFIDeliff(c *C) {
 	c.Assert(d.HoTT(), Equals, types.HoTTNull)
 
 	resetStmtContext(s.ctx)
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{types.NewStringCauset("DAY"),
+	f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{types.NewStringCauset("DAY"),
 		{}, types.NewStringCauset("2020-01-01")}))
 	c.Assert(err, IsNil)
 	d, err = evalBuiltinFunc(f, chunk.Event{})
@@ -1720,7 +1720,7 @@ func (s *testEvaluatorSuite) TestUnixTimestamp(c *C) {
 	c.Assert(d.GetInt64()-time.Now().Unix(), GreaterEqual, int64(-1))
 	c.Assert(d.GetInt64()-time.Now().Unix(), LessEqual, int64(1))
 
-	// https://github.com/whtcorpsinc/milevadb/issues/2496
+	// https://github.com/whtcorpsinc/MilevaDB-Prod/issues/2496
 	// Test UNIX_TIMESTAMP(NOW()).
 	resetStmtContext(s.ctx)
 	now, isNull, err := evalNowWithFsp(s.ctx, 0)
@@ -1729,7 +1729,7 @@ func (s *testEvaluatorSuite) TestUnixTimestamp(c *C) {
 	n := types.Causet{}
 	n.SetMysqlTime(now)
 	args := []types.Causet{n}
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants(args))
+	f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(args))
 	c.Assert(err, IsNil)
 	resetStmtContext(s.ctx)
 	d, err = evalBuiltinFunc(f, chunk.Event{})
@@ -1738,19 +1738,19 @@ func (s *testEvaluatorSuite) TestUnixTimestamp(c *C) {
 	c.Assert(val-time.Now().Unix(), GreaterEqual, int64(-1))
 	c.Assert(val-time.Now().Unix(), LessEqual, int64(1))
 
-	// https://github.com/whtcorpsinc/milevadb/issues/2852
+	// https://github.com/whtcorpsinc/MilevaDB-Prod/issues/2852
 	// Test UNIX_TIMESTAMP(NULL).
 	args = []types.Causet{types.NewCauset(nil)}
 	resetStmtContext(s.ctx)
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants(args))
+	f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(args))
 	c.Assert(err, IsNil)
 	d, err = evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(d.IsNull(), Equals, true)
 
 	// Set the time_zone variable, because UnixTimestamp() result depends on it.
-	s.ctx.GetStochastikVars().TimeZone = time.UTC
-	s.ctx.GetStochastikVars().StmtCtx.IgnoreZeroInDate = true
+	s.ctx.GetStochaseinstein_dbars().TimeZone = time.UTC
+	s.ctx.GetStochaseinstein_dbars().StmtCtx.IgnoreZeroInDate = true
 	tests := []struct {
 		inputDecimal int
 		input        types.Causet
@@ -1784,7 +1784,7 @@ func (s *testEvaluatorSuite) TestUnixTimestamp(c *C) {
 	}
 
 	for _, test := range tests {
-		expr := s.datumsToConstants([]types.Causet{test.input})
+		expr := s.datumsToCouplingConstantWithRadixs([]types.Causet{test.input})
 		expr[0].GetType().Decimal = test.inputDecimal
 		resetStmtContext(s.ctx)
 		f, err := fc.getFunction(s.ctx, expr)
@@ -1821,7 +1821,7 @@ func (s *testEvaluatorSuite) TestDateArithFuncs(c *C) {
 	}
 	for _, test := range tests {
 		args := types.MakeCausets(test.inputDate, test.inputDecimal, "DAY")
-		f, err := test.fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err := test.fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(args))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		v, err := evalBuiltinFunc(f, chunk.Event{})
@@ -1830,7 +1830,7 @@ func (s *testEvaluatorSuite) TestDateArithFuncs(c *C) {
 	}
 
 	args := types.MakeCausets(date[0], nil, "DAY")
-	f, err := fcAdd.getFunction(s.ctx, s.datumsToConstants(args))
+	f, err := fcAdd.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(args))
 	c.Assert(err, IsNil)
 	c.Assert(f, NotNil)
 	v, err := evalBuiltinFunc(f, chunk.Event{})
@@ -1838,7 +1838,7 @@ func (s *testEvaluatorSuite) TestDateArithFuncs(c *C) {
 	c.Assert(v.IsNull(), IsTrue)
 
 	args = types.MakeCausets(date[1], nil, "DAY")
-	f, err = fcSub.getFunction(s.ctx, s.datumsToConstants(args))
+	f, err = fcSub.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(args))
 	c.Assert(err, IsNil)
 	c.Assert(f, NotNil)
 	v, err = evalBuiltinFunc(f, chunk.Event{})
@@ -1863,7 +1863,7 @@ func (s *testEvaluatorSuite) TestDateArithFuncs(c *C) {
 
 	for _, test := range testMonths {
 		args = types.MakeCausets(test.input, test.months, "MONTH")
-		f, err = fcAdd.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err = fcAdd.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(args))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
@@ -1886,7 +1886,7 @@ func (s *testEvaluatorSuite) TestDateArithFuncs(c *C) {
 
 	for _, test := range testYears {
 		args = types.MakeCausets(test.input, test.year, "YEAR")
-		f, err = fcAdd.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err = fcAdd.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(args))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
@@ -1904,7 +1904,7 @@ func (s *testEvaluatorSuite) TestDateArithFuncs(c *C) {
 
 	for _, test := range testOverflowYears {
 		args = types.MakeCausets(test.input, test.year, "YEAR")
-		f, err = fcAdd.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err = fcAdd.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(args))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
@@ -1914,7 +1914,7 @@ func (s *testEvaluatorSuite) TestDateArithFuncs(c *C) {
 
 	for _, test := range testOverflowYears {
 		args = types.MakeCausets(test.input, test.year, "YEAR")
-		f, err = fcSub.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err = fcSub.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(args))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
@@ -2024,7 +2024,7 @@ func (s *testEvaluatorSuite) TestDateArithFuncs(c *C) {
 		c.Assert(err, IsNil)
 		c.Assert(ok, IsTrue)
 		args = types.MakeCausets(dur, tt.format, tt.unit)
-		f, err = tt.fc.getFunction(s.ctx, s.datumsToConstants(args))
+		f, err = tt.fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(args))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		v, err = evalBuiltinFunc(f, chunk.Event{})
@@ -2066,7 +2066,7 @@ func (s *testEvaluatorSuite) TestTimestamp(c *C) {
 	fc := funcs[ast.Timestamp]
 	for _, test := range tests {
 		resetStmtContext(s.ctx)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(test.t))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(test.t))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -2076,7 +2076,7 @@ func (s *testEvaluatorSuite) TestTimestamp(c *C) {
 
 	nilCauset := types.NewCauset(nil)
 	resetStmtContext(s.ctx)
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{nilCauset}))
+	f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{nilCauset}))
 	c.Assert(err, IsNil)
 	d, err := evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
@@ -2111,7 +2111,7 @@ func (s *testEvaluatorSuite) TestMakeDate(c *C) {
 	}
 
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.MakeDate, s.primitiveValsToConstants(t.args)...)
+		f, err := newFunctionForTest(s.ctx, ast.MakeDate, s.primitiveValsToCouplingConstantWithRadixs(t.args)...)
 		c.Assert(err, IsNil)
 		tp := f.GetType()
 		c.Assert(tp.Tp, Equals, allegrosql.TypeDate)
@@ -2192,7 +2192,7 @@ func (s *testEvaluatorSuite) TestMakeTime(c *C) {
 	Dtbl := tblToDtbl(tbl)
 	maketime := funcs[ast.MakeTime]
 	for idx, t := range Dtbl {
-		f, err := maketime.getFunction(s.ctx, s.datumsToConstants(t["Args"]))
+		f, err := maketime.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Args"]))
 		c.Assert(err, IsNil)
 		got, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -2213,10 +2213,10 @@ func (s *testEvaluatorSuite) TestMakeTime(c *C) {
 		DefCauslate: charset.DefCauslationBin,
 		Flen:        allegrosql.MaxIntWidth,
 	}
-	f := BuildCastFunction(s.ctx, &Constant{Value: types.NewCauset("-1"), RetType: types.NewFieldType(allegrosql.TypeString)}, tp1)
+	f := BuildCastFunction(s.ctx, &CouplingConstantWithRadix{Value: types.NewCauset("-1"), RetType: types.NewFieldType(allegrosql.TypeString)}, tp1)
 	res, err := f.Eval(chunk.Event{})
 	c.Assert(err, IsNil)
-	f1, err := maketime.getFunction(s.ctx, s.datumsToConstants([]types.Causet{res, makeCausets(0)[0], makeCausets(0)[0]}))
+	f1, err := maketime.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{res, makeCausets(0)[0], makeCausets(0)[0]}))
 	c.Assert(err, IsNil)
 	got, err := evalBuiltinFunc(f1, chunk.Event{})
 	c.Assert(err, IsNil)
@@ -2232,7 +2232,7 @@ func (s *testEvaluatorSuite) TestMakeTime(c *C) {
 	Dtbl = tblToDtbl(tbl)
 	maketime = funcs[ast.MakeTime]
 	for idx, t := range Dtbl {
-		f, err := maketime.getFunction(s.ctx, s.datumsToConstants(t["Args"]))
+		f, err := maketime.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Args"]))
 		c.Assert(err, IsNil)
 		got, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -2243,7 +2243,7 @@ func (s *testEvaluatorSuite) TestMakeTime(c *C) {
 }
 
 func (s *testEvaluatorSuite) TestQuarter(c *C) {
-	sc := s.ctx.GetStochastikVars().StmtCtx
+	sc := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	sc.IgnoreZeroInDate = true
 	tests := []struct {
 		t      string
@@ -2265,7 +2265,7 @@ func (s *testEvaluatorSuite) TestQuarter(c *C) {
 	fc := funcs["quarter"]
 	for _, test := range tests {
 		arg := types.NewStringCauset(test.t)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{arg}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{arg}))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		result, err := evalBuiltinFunc(f, chunk.Event{})
@@ -2275,7 +2275,7 @@ func (s *testEvaluatorSuite) TestQuarter(c *C) {
 
 	// test invalid input
 	argInvalid := types.NewStringCauset("2008-13-01")
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{argInvalid}))
+	f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{argInvalid}))
 	c.Assert(err, IsNil)
 	result, err := evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
@@ -2310,7 +2310,7 @@ func (s *testEvaluatorSuite) TestGetFormat(c *C) {
 	fc := funcs[ast.GetFormat]
 	for _, test := range tests {
 		t := []types.Causet{types.NewStringCauset(test.unit), types.NewStringCauset(test.location)}
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -2320,7 +2320,7 @@ func (s *testEvaluatorSuite) TestGetFormat(c *C) {
 }
 
 func (s *testEvaluatorSuite) TestToSeconds(c *C) {
-	sc := s.ctx.GetStochastikVars().StmtCtx
+	sc := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	sc.IgnoreZeroInDate = true
 	tests := []struct {
 		param  interface{}
@@ -2336,7 +2336,7 @@ func (s *testEvaluatorSuite) TestToSeconds(c *C) {
 	fc := funcs[ast.ToSeconds]
 	for _, test := range tests {
 		t := []types.Causet{types.NewCauset(test.param)}
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -2351,7 +2351,7 @@ func (s *testEvaluatorSuite) TestToSeconds(c *C) {
 
 	for _, i := range testsNull {
 		t := []types.Causet{types.NewCauset(i)}
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -2360,7 +2360,7 @@ func (s *testEvaluatorSuite) TestToSeconds(c *C) {
 }
 
 func (s *testEvaluatorSuite) TestToDays(c *C) {
-	sc := s.ctx.GetStochastikVars().StmtCtx
+	sc := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	sc.IgnoreZeroInDate = true
 	tests := []struct {
 		param  interface{}
@@ -2377,7 +2377,7 @@ func (s *testEvaluatorSuite) TestToDays(c *C) {
 	fc := funcs[ast.ToDays]
 	for _, test := range tests {
 		t := []types.Causet{types.NewCauset(test.param)}
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -2392,7 +2392,7 @@ func (s *testEvaluatorSuite) TestToDays(c *C) {
 
 	for _, i := range testsNull {
 		t := []types.Causet{types.NewCauset(i)}
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -2415,7 +2415,7 @@ func (s *testEvaluatorSuite) TestTimestampAdd(c *C) {
 	fc := funcs[ast.TimestampAdd]
 	for _, test := range tests {
 		t := []types.Causet{types.NewStringCauset(test.unit), types.NewIntCauset(test.interval), types.NewCauset(test.date)}
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -2444,7 +2444,7 @@ func (s *testEvaluatorSuite) TestPeriodAdd(c *C) {
 	for _, test := range tests {
 		period := types.NewIntCauset(test.Period)
 		months := types.NewIntCauset(test.Months)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{period, months}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{period, months}))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		result, err := evalBuiltinFunc(f, chunk.Event{})
@@ -2463,7 +2463,7 @@ func (s *testEvaluatorSuite) TestTimeFormat(c *C) {
 	// SELECT TIME_FORMAT(null,'%H %k %h %I %l')
 	args := []types.Causet{types.NewCauset(nil), types.NewStringCauset(`%H %k %h %I %l`)}
 	fc := funcs[ast.TimeFormat]
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants(args))
+	f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(args))
 	c.Assert(err, IsNil)
 	v, err := evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
@@ -2487,7 +2487,7 @@ func (s *testEvaluatorSuite) TestTimeFormat(c *C) {
 	dtblDate := tblToDtbl(tblDate)
 	for i, t := range dtblDate {
 		fc := funcs[ast.TimeFormat]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		v, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -2501,7 +2501,7 @@ func (s *testEvaluatorSuite) TestTimeToSec(c *C) {
 
 	// test nil
 	nilCauset := types.NewCauset(nil)
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{nilCauset}))
+	f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{nilCauset}))
 	c.Assert(err, IsNil)
 	d, err := evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
@@ -2530,7 +2530,7 @@ func (s *testEvaluatorSuite) TestTimeToSec(c *C) {
 		// {types.NewIntCauset(171222020005), 7205},
 	}
 	for _, test := range tests {
-		expr := s.datumsToConstants([]types.Causet{test.input})
+		expr := s.datumsToCouplingConstantWithRadixs([]types.Causet{test.input})
 		f, err := fc.getFunction(s.ctx, expr)
 		c.Assert(err, IsNil, Commentf("%+v", test))
 		result, err := evalBuiltinFunc(f, chunk.Event{})
@@ -2540,7 +2540,7 @@ func (s *testEvaluatorSuite) TestTimeToSec(c *C) {
 }
 
 func (s *testEvaluatorSuite) TestSecToTime(c *C) {
-	stmtCtx := s.ctx.GetStochastikVars().StmtCtx
+	stmtCtx := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	origin := stmtCtx.IgnoreTruncate
 	stmtCtx.IgnoreTruncate = true
 	defer func() {
@@ -2551,7 +2551,7 @@ func (s *testEvaluatorSuite) TestSecToTime(c *C) {
 
 	// test nil
 	nilCauset := types.NewCauset(nil)
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{nilCauset}))
+	f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{nilCauset}))
 	c.Assert(err, IsNil)
 	d, err := evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
@@ -2575,7 +2575,7 @@ func (s *testEvaluatorSuite) TestSecToTime(c *C) {
 		{0, types.NewStringCauset("abc"), "00:00:00.000000"},
 	}
 	for _, test := range tests {
-		expr := s.datumsToConstants([]types.Causet{test.input})
+		expr := s.datumsToCouplingConstantWithRadixs([]types.Causet{test.input})
 		expr[0].GetType().Decimal = test.inputDecimal
 		f, err := fc.getFunction(s.ctx, expr)
 		c.Assert(err, IsNil, Commentf("%+v", test))
@@ -2620,7 +2620,7 @@ func (s *testEvaluatorSuite) TestConvertTz(c *C) {
 	fc := funcs[ast.ConvertTz]
 	for _, test := range tests {
 		f, err := fc.getFunction(s.ctx,
-			s.datumsToConstants(
+			s.datumsToCouplingConstantWithRadixs(
 				[]types.Causet{
 					types.NewCauset(test.t),
 					types.NewCauset(test.fromTz),
@@ -2668,7 +2668,7 @@ func (s *testEvaluatorSuite) TestPeriodDiff(c *C) {
 	for _, test := range tests {
 		period1 := types.NewIntCauset(test.Period1)
 		period2 := types.NewIntCauset(test.Period2)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{period1, period2}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{period1, period2}))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		result, err := evalBuiltinFunc(f, chunk.Event{})
@@ -2685,7 +2685,7 @@ func (s *testEvaluatorSuite) TestPeriodDiff(c *C) {
 	for _, test := range tests2 {
 		period1 := types.NewIntCauset(test.Period1)
 		period2 := types.NewIntCauset(test.Period2)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{period1, period2}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{period1, period2}))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		_, err = evalBuiltinFunc(f, chunk.Event{})
@@ -2695,14 +2695,14 @@ func (s *testEvaluatorSuite) TestPeriodDiff(c *C) {
 
 	// nil
 	args := []types.Causet{types.NewCauset(nil), types.NewIntCauset(0)}
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants(args))
+	f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(args))
 	c.Assert(err, IsNil)
 	v, err := evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(v.HoTT(), Equals, types.HoTTNull)
 
 	args = []types.Causet{types.NewIntCauset(0), types.NewCauset(nil)}
-	f, err = fc.getFunction(s.ctx, s.datumsToConstants(args))
+	f, err = fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(args))
 	c.Assert(err, IsNil)
 	v, err = evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
@@ -2723,7 +2723,7 @@ func (s *testEvaluatorSuite) TestLastDay(c *C) {
 	fc := funcs[ast.LastDay]
 	for _, test := range tests {
 		t := []types.Causet{types.NewCauset(test.param)}
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -2742,7 +2742,7 @@ func (s *testEvaluatorSuite) TestLastDay(c *C) {
 
 	for _, i := range testsNull {
 		t := []types.Causet{types.NewCauset(i)}
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -2751,7 +2751,7 @@ func (s *testEvaluatorSuite) TestLastDay(c *C) {
 }
 
 func (s *testEvaluatorSuite) TestWithTimeZone(c *C) {
-	sv := s.ctx.GetStochastikVars()
+	sv := s.ctx.GetStochaseinstein_dbars()
 	originTZ := sv.Location()
 	sv.TimeZone, _ = time.LoadLocation("Asia/Tokyo")
 	defer func() {
@@ -2783,7 +2783,7 @@ func (s *testEvaluatorSuite) TestWithTimeZone(c *C) {
 
 	for _, t := range tests {
 		now := time.Now().In(sv.TimeZone)
-		f, err := funcs[t.method].getFunction(s.ctx, s.datumsToConstants(t.Input))
+		f, err := funcs[t.method].getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t.Input))
 		c.Assert(err, IsNil)
 		resetStmtContext(s.ctx)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
@@ -2794,7 +2794,7 @@ func (s *testEvaluatorSuite) TestWithTimeZone(c *C) {
 }
 
 func (s *testEvaluatorSuite) TestMilevaDBParseTso(c *C) {
-	s.ctx.GetStochastikVars().TimeZone = time.UTC
+	s.ctx.GetStochaseinstein_dbars().TimeZone = time.UTC
 	tests := []struct {
 		param  interface{}
 		expect string
@@ -2807,7 +2807,7 @@ func (s *testEvaluatorSuite) TestMilevaDBParseTso(c *C) {
 	fc := funcs[ast.MilevaDBParseTso]
 	for _, test := range tests {
 		t := []types.Causet{types.NewCauset(test.param)}
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -2822,7 +2822,7 @@ func (s *testEvaluatorSuite) TestMilevaDBParseTso(c *C) {
 
 	for _, i := range testsNull {
 		t := []types.Causet{types.NewCauset(i)}
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -2848,7 +2848,7 @@ func (s *testEvaluatorSuite) TestGetIntervalFromDecimal(c *C) {
 	}
 
 	for _, test := range tests {
-		interval, isNull, err := du.getIntervalFromDecimal(s.ctx, s.datumsToConstants([]types.Causet{types.NewCauset("CURRENT DATE"), types.NewDecimalCauset(newMyDecimal(c, test.param))}), chunk.Event{}, test.unit)
+		interval, isNull, err := du.getIntervalFromDecimal(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{types.NewCauset("CURRENT DATE"), types.NewDecimalCauset(newMyDecimal(c, test.param))}), chunk.Event{}, test.unit)
 		c.Assert(isNull, IsFalse)
 		c.Assert(err, IsNil)
 		c.Assert(interval, Equals, test.expect)

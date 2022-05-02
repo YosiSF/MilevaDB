@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,28 +20,28 @@ import (
 	"strings"
 	"time"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/bindinfo"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/metrics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/cascades"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/privilege"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/hint"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/bindinfo"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/metrics"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/planner/cascades"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/privilege"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton/hint"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
 	"go.uber.org/zap"
 )
 
 // GetPreparedStmt extract the prepared statement from the execute statement.
-func GetPreparedStmt(stmt *ast.ExecuteStmt, vars *variable.StochastikVars) (ast.StmtNode, error) {
+func GetPreparedStmt(stmt *ast.ExecuteStmt, vars *variable.Stochaseinstein_dbars) (ast.StmtNode, error) {
 	var ok bool
 	execID := stmt.ExecID
 	if stmt.Name != "" {
@@ -60,7 +60,7 @@ func GetPreparedStmt(stmt *ast.ExecuteStmt, vars *variable.StochastikVars) (ast.
 }
 
 // IsReadOnly check whether the ast.Node is a read only statement.
-func IsReadOnly(node ast.Node, vars *variable.StochastikVars) bool {
+func IsReadOnly(node ast.Node, vars *variable.Stochaseinstein_dbars) bool {
 	if execStmt, isExecStmt := node.(*ast.ExecuteStmt); isExecStmt {
 		s, err := GetPreparedStmt(execStmt, vars)
 		if err != nil {
@@ -75,7 +75,7 @@ func IsReadOnly(node ast.Node, vars *variable.StochastikVars) bool {
 // Optimize does optimization and creates a Plan.
 // The node must be prepared first.
 func Optimize(ctx context.Context, sctx stochastikctx.Context, node ast.Node, is schemareplicant.SchemaReplicant) (plannercore.Plan, types.NameSlice, error) {
-	sessVars := sctx.GetStochastikVars()
+	sessVars := sctx.GetStochaseinstein_dbars()
 
 	// Because for write stmt, TiFlash has a different results when dagger the data in point get plan. We ban the TiFlash
 	// engine in not read only stmt.
@@ -108,7 +108,7 @@ func Optimize(ctx context.Context, sctx stochastikctx.Context, node ast.Node, is
 	stmtHints, warns := handleStmtHints(blockHints)
 	sessVars.StmtCtx.StmtHints = stmtHints
 	for _, warn := range warns {
-		sctx.GetStochastikVars().StmtCtx.AppendWarning(warn)
+		sctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(warn)
 	}
 	warns = warns[:0]
 	bestPlan, names, _, err := optimize(ctx, sctx, node, is)
@@ -126,8 +126,8 @@ func Optimize(ctx context.Context, sctx stochastikctx.Context, node ast.Node, is
 	if bindRecord == nil {
 		return bestPlan, names, nil
 	}
-	if sctx.GetStochastikVars().SelectLimit != math.MaxUint64 {
-		sctx.GetStochastikVars().StmtCtx.AppendWarning(errors.New("sql_select_limit is set, so plan binding is not activated"))
+	if sctx.GetStochaseinstein_dbars().SelectLimit != math.MaxUint64 {
+		sctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errors.New("sql_select_limit is set, so plan binding is not activated"))
 		return bestPlan, names, nil
 	}
 	bestPlanHint := plannercore.GenHintsFromPhysicalPlan(bestPlan)
@@ -144,13 +144,13 @@ func Optimize(ctx context.Context, sctx stochastikctx.Context, node ast.Node, is
 	defer func() {
 		sessVars.StmtCtx.StmtHints = stmtHints
 		for _, warn := range warns {
-			sctx.GetStochastikVars().StmtCtx.AppendWarning(warn)
+			sctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(warn)
 		}
 	}()
 	binding := bindRecord.FindBinding(bestPlanHintStr)
 	// If the best bestPlan is in baselines, just use it.
 	if binding != nil && binding.Status == bindinfo.Using {
-		if sctx.GetStochastikVars().UsePlanBaselines {
+		if sctx.GetStochaseinstein_dbars().UsePlanBaselines {
 			stmtHints, warns = handleStmtHints(binding.Hint.GetFirstBlockHints())
 		}
 		return bestPlan, names, nil
@@ -166,7 +166,7 @@ func Optimize(ctx context.Context, sctx stochastikctx.Context, node ast.Node, is
 		metrics.BindUsageCounter.WithLabelValues(sINTERLOCKe).Inc()
 		hint.BindHint(stmtNode, binding.Hint)
 		curStmtHints, curWarns := handleStmtHints(binding.Hint.GetFirstBlockHints())
-		sctx.GetStochastikVars().StmtCtx.StmtHints = curStmtHints
+		sctx.GetStochaseinstein_dbars().StmtCtx.StmtHints = curStmtHints
 		plan, _, cost, err := optimize(ctx, sctx, node, is)
 		if err != nil {
 			binding.Status = bindinfo.Invalid
@@ -178,7 +178,7 @@ func Optimize(ctx context.Context, sctx stochastikctx.Context, node ast.Node, is
 			continue
 		}
 		if cost < bestCostAmongHints {
-			if sctx.GetStochastikVars().UsePlanBaselines {
+			if sctx.GetStochaseinstein_dbars().UsePlanBaselines {
 				stmtHints, warns = curStmtHints, curWarns
 			}
 			bestCostAmongHints = cost
@@ -188,14 +188,14 @@ func Optimize(ctx context.Context, sctx stochastikctx.Context, node ast.Node, is
 	// 1. If there is already a evolution task, we do not need to handle it again.
 	// 2. If the origin binding contain `read_from_storage` hint, we should ignore the evolve task.
 	// 3. If the best plan contain TiFlash hint, we should ignore the evolve task.
-	if sctx.GetStochastikVars().EvolvePlanBaselines && binding == nil &&
+	if sctx.GetStochaseinstein_dbars().EvolvePlanBaselines && binding == nil &&
 		!originHints.ContainBlockHint(plannercore.HintReadFromStorage) &&
 		!bindRecord.Bindings[0].Hint.ContainBlockHint(plannercore.HintReadFromStorage) {
 		handleEvolveTasks(ctx, sctx, bindRecord, stmtNode, bestPlanHintStr)
 	}
 	// Restore the hint to avoid changing the stmt node.
 	hint.BindHint(stmtNode, originHints)
-	if sctx.GetStochastikVars().UsePlanBaselines && bestPlanAmongHints != nil {
+	if sctx.GetStochaseinstein_dbars().UsePlanBaselines && bestPlanAmongHints != nil {
 		return bestPlanAmongHints, names, nil
 	}
 	return bestPlan, names, nil
@@ -203,23 +203,23 @@ func Optimize(ctx context.Context, sctx stochastikctx.Context, node ast.Node, is
 
 func optimize(ctx context.Context, sctx stochastikctx.Context, node ast.Node, is schemareplicant.SchemaReplicant) (plannercore.Plan, types.NameSlice, float64, error) {
 	// build logical plan
-	sctx.GetStochastikVars().PlanID = 0
-	sctx.GetStochastikVars().PlanDeferredCausetID = 0
+	sctx.GetStochaseinstein_dbars().PlanID = 0
+	sctx.GetStochaseinstein_dbars().PlanDeferredCausetID = 0
 	hintProcessor := &hint.BlockHintProcessor{Ctx: sctx}
 	node.Accept(hintProcessor)
 	builder := plannercore.NewPlanBuilder(sctx, is, hintProcessor)
 
 	// reset fields about rewrite
-	sctx.GetStochastikVars().RewritePhaseInfo.Reset()
+	sctx.GetStochaseinstein_dbars().RewritePhaseInfo.Reset()
 	beginRewrite := time.Now()
 	p, err := builder.Build(ctx, node)
 	if err != nil {
 		return nil, nil, 0, err
 	}
-	sctx.GetStochastikVars().RewritePhaseInfo.DurationRewrite = time.Since(beginRewrite)
+	sctx.GetStochaseinstein_dbars().RewritePhaseInfo.DurationRewrite = time.Since(beginRewrite)
 
-	sctx.GetStochastikVars().StmtCtx.Blocks = builder.GetDBBlockInfo()
-	activeRoles := sctx.GetStochastikVars().ActiveRoles
+	sctx.GetStochaseinstein_dbars().StmtCtx.Blocks = builder.GetDBBlockInfo()
+	activeRoles := sctx.GetStochaseinstein_dbars().ActiveRoles
 	// Check privilege. Maybe it's better to move this to the Preprocess, but
 	// we need the block information to check privilege, which is collected
 	// into the visitInfo in the logical plan builder.
@@ -248,14 +248,14 @@ func optimize(ctx context.Context, sctx stochastikctx.Context, node ast.Node, is
 	}
 
 	// Handle the logical plan statement, use cascades planner if enabled.
-	if sctx.GetStochastikVars().GetEnableCascadesPlanner() {
+	if sctx.GetStochaseinstein_dbars().GetEnableCascadesPlanner() {
 		finalPlan, cost, err := cascades.DefaultOptimizer.FindBestPlan(sctx, logic)
 		return finalPlan, names, cost, err
 	}
 
 	beginOpt := time.Now()
 	finalPlan, cost, err := plannercore.DoOptimize(ctx, sctx, builder.GetOptFlag(), logic)
-	sctx.GetStochastikVars().DurationOptimization = time.Since(beginOpt)
+	sctx.GetStochaseinstein_dbars().DurationOptimization = time.Since(beginOpt)
 	return finalPlan, names, cost, err
 }
 
@@ -289,7 +289,7 @@ func getBindRecord(ctx stochastikctx.Context, stmt ast.StmtNode) (*bindinfo.Bind
 		return nil, ""
 	}
 	stochastikHandle := ctx.Value(bindinfo.StochastikBindInfoKeyType).(*bindinfo.StochastikHandle)
-	bindRecord := stochastikHandle.GetBindRecord(normalizedALLEGROSQL, ctx.GetStochastikVars().CurrentDB)
+	bindRecord := stochastikHandle.GetBindRecord(normalizedALLEGROSQL, ctx.GetStochaseinstein_dbars().CurrentDB)
 	if bindRecord == nil {
 		bindRecord = stochastikHandle.GetBindRecord(normalizedALLEGROSQL, "")
 	}
@@ -303,7 +303,7 @@ func getBindRecord(ctx stochastikctx.Context, stmt ast.StmtNode) (*bindinfo.Bind
 	if globalHandle == nil {
 		return nil, ""
 	}
-	bindRecord = globalHandle.GetBindRecord(hash, normalizedALLEGROSQL, ctx.GetStochastikVars().CurrentDB)
+	bindRecord = globalHandle.GetBindRecord(hash, normalizedALLEGROSQL, ctx.GetStochaseinstein_dbars().CurrentDB)
 	if bindRecord == nil {
 		bindRecord = globalHandle.GetBindRecord(hash, normalizedALLEGROSQL, "")
 	}
@@ -329,7 +329,7 @@ func handleEvolveTasks(ctx context.Context, sctx stochastikctx.Context, br *bind
 	if bindALLEGROSQL == "" {
 		return
 	}
-	charset, collation := sctx.GetStochastikVars().GetCharsetInfo()
+	charset, collation := sctx.GetStochaseinstein_dbars().GetCharsetInfo()
 	binding := bindinfo.Binding{
 		BindALLEGROSQL: bindALLEGROSQL,
 		Status:         bindinfo.PendingVerify,

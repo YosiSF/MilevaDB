@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ import (
 
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 var vecBuiltinMiscellaneousCases = map[string][]vecExprBenchCase{
@@ -30,10 +30,10 @@ var vecBuiltinMiscellaneousCases = map[string][]vecExprBenchCase{
 		{retEvalType: types.ETString, childrenTypes: []types.EvalType{types.ETString}, geners: []dataGenerator{&ipv6StrGener{newDefaultRandGen()}}},
 	},
 	ast.IsIPv6: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETString}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETString}},
 	},
 	ast.Sleep: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETReal}, geners: []dataGenerator{
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETReal}, geners: []dataGenerator{
 			newSelectRealGener([]float64{0, 0.000001}),
 		}},
 	},
@@ -48,9 +48,9 @@ var vecBuiltinMiscellaneousCases = map[string][]vecExprBenchCase{
 			)}},
 	},
 	ast.InetAton: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETString}, geners: []dataGenerator{&ipv4StrGener{newDefaultRandGen()}}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETString}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETString}, geners: []dataGenerator{
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETString}, geners: []dataGenerator{&ipv4StrGener{newDefaultRandGen()}}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETString}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETString}, geners: []dataGenerator{
 			newSelectStringGener(
 				[]string{
 					"11.11.11.11.",    // last char is .
@@ -64,26 +64,26 @@ var vecBuiltinMiscellaneousCases = map[string][]vecExprBenchCase{
 			)}},
 	},
 	ast.IsIPv4Mapped: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETString}, geners: []dataGenerator{&ipv4MappedByteGener{newDefaultRandGen()}}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETString}, geners: []dataGenerator{&ipv6ByteGener{newDefaultRandGen()}}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETString}, geners: []dataGenerator{&ipv4ByteGener{newDefaultRandGen()}}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETString}, geners: []dataGenerator{newDefaultGener(1.0, types.ETString)}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETString}, geners: []dataGenerator{&ipv4MappedByteGener{newDefaultRandGen()}}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETString}, geners: []dataGenerator{&ipv6ByteGener{newDefaultRandGen()}}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETString}, geners: []dataGenerator{&ipv4ByteGener{newDefaultRandGen()}}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETString}, geners: []dataGenerator{newDefaultGener(1.0, types.ETString)}},
 	},
 	ast.IsIPv4Compat: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETString}, geners: []dataGenerator{&ipv4CompatByteGener{newDefaultRandGen()}}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETString}, geners: []dataGenerator{&ipv6ByteGener{newDefaultRandGen()}}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETString}, geners: []dataGenerator{&ipv4ByteGener{newDefaultRandGen()}}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETString}, geners: []dataGenerator{newDefaultGener(1.0, types.ETString)}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETString}, geners: []dataGenerator{&ipv4CompatByteGener{newDefaultRandGen()}}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETString}, geners: []dataGenerator{&ipv6ByteGener{newDefaultRandGen()}}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETString}, geners: []dataGenerator{&ipv4ByteGener{newDefaultRandGen()}}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETString}, geners: []dataGenerator{newDefaultGener(1.0, types.ETString)}},
 	},
 	ast.InetNtoa: {
-		{retEvalType: types.ETString, childrenTypes: []types.EvalType{types.ETInt}},
+		{retEvalType: types.ETString, childrenTypes: []types.EvalType{types.CausetEDN}},
 	},
 	ast.IsIPv4: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETString}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETString}},
 	},
 	ast.AnyValue: {
 		{retEvalType: types.ETDuration, childrenTypes: []types.EvalType{types.ETDuration}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN}},
 		{retEvalType: types.ETDecimal, childrenTypes: []types.EvalType{types.ETDecimal}},
 		{retEvalType: types.ETTimestamp, childrenTypes: []types.EvalType{types.ETTimestamp}},
 		{retEvalType: types.ETReal, childrenTypes: []types.EvalType{types.ETReal}},
@@ -94,7 +94,7 @@ var vecBuiltinMiscellaneousCases = map[string][]vecExprBenchCase{
 		{retEvalType: types.ETDuration, childrenTypes: []types.EvalType{types.ETString, types.ETDuration}},
 		{retEvalType: types.ETString, childrenTypes: []types.EvalType{types.ETString, types.ETString}},
 		{retEvalType: types.ETDecimal, childrenTypes: []types.EvalType{types.ETString, types.ETDecimal}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETString, types.ETInt}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETString, types.CausetEDN}},
 		{retEvalType: types.ETReal, childrenTypes: []types.EvalType{types.ETString, types.ETReal}},
 		{retEvalType: types.ETJson, childrenTypes: []types.EvalType{types.ETString, types.ETJson}},
 		{retEvalType: types.ETTimestamp, childrenTypes: []types.EvalType{types.ETString, types.ETTimestamp}},
@@ -128,7 +128,7 @@ func (c *counter) add(diff int) int {
 
 func (s *testEvaluatorSuite) TestSleepVectorized(c *C) {
 	ctx := mock.NewContext()
-	sessVars := ctx.GetStochastikVars()
+	sessVars := ctx.GetStochaseinstein_dbars()
 
 	fc := funcs[ast.Sleep]
 	ft := eType2FieldType(types.ETReal)
@@ -204,7 +204,7 @@ func (s *testEvaluatorSuite) TestSleepVectorized(c *C) {
 	start = time.Now()
 	go func() {
 		time.Sleep(1 * time.Second)
-		atomic.CompareAndSwapUint32(&ctx.GetStochastikVars().Killed, 0, 1)
+		atomic.CompareAndSwapUint32(&ctx.GetStochaseinstein_dbars().Killed, 0, 1)
 	}()
 	err = f.vecEvalInt(input, result)
 	sub = time.Since(start)

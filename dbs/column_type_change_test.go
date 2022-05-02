@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,16 +21,16 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/block/blocks"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore"
-	"github.com/whtcorpsinc/milevadb/dbs"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	allegrosql "github.com/whtcorpsinc/milevadb/errno"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/stochastik"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block/blocks"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore"
+	"github.com/whtcorpsinc/MilevaDB-Prod/dbs"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	allegrosql "github.com/whtcorpsinc/MilevaDB-Prod/errno"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastik"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
 )
 
 var _ = SerialSuites(&testDeferredCausetTypeChangeSuite{})
@@ -59,9 +59,9 @@ func (s *testDeferredCausetTypeChangeSuite) TestDeferredCausetTypeChangeBetweenI
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustExec("use test")
 	// Enable defCausumn change variable.
-	tk.Se.GetStochastikVars().EnableChangeDeferredCausetType = true
+	tk.Se.GetStochaseinstein_dbars().EnableChangeDeferredCausetType = true
 	defer func() {
-		tk.Se.GetStochastikVars().EnableChangeDeferredCausetType = false
+		tk.Se.GetStochaseinstein_dbars().EnableChangeDeferredCausetType = false
 	}()
 
 	// Modify defCausumn from null to not null.
@@ -131,9 +131,9 @@ func (s *testDeferredCausetTypeChangeSuite) TestDeferredCausetTypeChangeStateBet
 	tk.MustExec("create block t (c1 int, c2 int)")
 	tk.MustExec("insert into t(c1, c2) values (1, 1)")
 	// Enable defCausumn change variable.
-	tk.Se.GetStochastikVars().EnableChangeDeferredCausetType = true
+	tk.Se.GetStochaseinstein_dbars().EnableChangeDeferredCausetType = true
 	defer func() {
-		tk.Se.GetStochastikVars().EnableChangeDeferredCausetType = false
+		tk.Se.GetStochaseinstein_dbars().EnableChangeDeferredCausetType = false
 	}()
 
 	// use new stochastik to check meta in callback function.
@@ -206,9 +206,9 @@ func (s *testDeferredCausetTypeChangeSuite) TestRollbackDeferredCausetTypeChange
 	tk.MustExec("create block t (c1 bigint, c2 bigint)")
 	tk.MustExec("insert into t(c1, c2) values (1, 1)")
 	// Enable defCausumn change variable.
-	tk.Se.GetStochastikVars().EnableChangeDeferredCausetType = true
+	tk.Se.GetStochaseinstein_dbars().EnableChangeDeferredCausetType = true
 	defer func() {
-		tk.Se.GetStochastikVars().EnableChangeDeferredCausetType = false
+		tk.Se.GetStochaseinstein_dbars().EnableChangeDeferredCausetType = false
 	}()
 
 	tbl := testGetBlockByName(c, tk.Se, "test", "t")

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,12 +19,12 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
-func genVecBuiltinRegexpBenchCaseForConstants() (baseFunc builtinFunc, childrenFieldTypes []*types.FieldType, input *chunk.Chunk, output *chunk.DeferredCauset) {
+func genVecBuiltinRegexpBenchCaseForCouplingConstantWithRadixs() (baseFunc builtinFunc, childrenFieldTypes []*types.FieldType, input *chunk.Chunk, output *chunk.DeferredCauset) {
 	const (
 		numArgs = 2
 		batchSz = 1024
@@ -44,7 +44,7 @@ func genVecBuiltinRegexpBenchCaseForConstants() (baseFunc builtinFunc, childrenF
 
 	args := make([]Expression, numArgs)
 	args[0] = &DeferredCauset{Index: 0, RetType: childrenFieldTypes[0]}
-	args[1] = CausetToConstant(types.NewStringCauset(rePat), allegrosql.TypeString)
+	args[1] = CausetToCouplingConstantWithRadix(types.NewStringCauset(rePat), allegrosql.TypeString)
 
 	var err error
 	baseFunc, err = funcs[ast.Regexp].getFunction(mock.NewContext(), args)
@@ -52,14 +52,14 @@ func genVecBuiltinRegexpBenchCaseForConstants() (baseFunc builtinFunc, childrenF
 		panic(err)
 	}
 
-	output = chunk.NewDeferredCauset(eType2FieldType(types.ETInt), batchSz)
+	output = chunk.NewDeferredCauset(eType2FieldType(types.CausetEDN), batchSz)
 	// Mess up the output to make sure vecEvalXXX to call ResizeXXX/ReserveXXX itself.
 	output.AppendNull()
 	return
 }
 
-func (s *testEvaluatorSuite) TestVectorizedBuiltinRegexpForConstants(c *C) {
-	bf, childrenFieldTypes, input, output := genVecBuiltinRegexpBenchCaseForConstants()
+func (s *testEvaluatorSuite) TestVectorizedBuiltinRegexpForCouplingConstantWithRadixs(c *C) {
+	bf, childrenFieldTypes, input, output := genVecBuiltinRegexpBenchCaseForCouplingConstantWithRadixs()
 	err := bf.vecEvalInt(input, output)
 	c.Assert(err, IsNil)
 	i64s := output.Int64s()
@@ -80,9 +80,9 @@ func (s *testEvaluatorSuite) TestVectorizedBuiltinRegexpForConstants(c *C) {
 	}
 }
 
-func BenchmarkVectorizedBuiltinRegexpForConstants(b *testing.B) {
-	bf, _, input, output := genVecBuiltinRegexpBenchCaseForConstants()
-	b.Run("builtinRegexpUTF8Sig-Constants-VecBuiltinFunc", func(b *testing.B) {
+func BenchmarkVectorizedBuiltinRegexpForCouplingConstantWithRadixs(b *testing.B) {
+	bf, _, input, output := genVecBuiltinRegexpBenchCaseForCouplingConstantWithRadixs()
+	b.Run("builtinRegexpUTF8Sig-CouplingConstantWithRadixs-VecBuiltinFunc", func(b *testing.B) {
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
 			if err := bf.vecEvalInt(input, output); err != nil {
@@ -90,11 +90,11 @@ func BenchmarkVectorizedBuiltinRegexpForConstants(b *testing.B) {
 			}
 		}
 	})
-	b.Run("builtinRegexpUTF8Sig-Constants-NonVecBuiltinFunc", func(b *testing.B) {
+	b.Run("builtinRegexpUTF8Sig-CouplingConstantWithRadixs-NonVecBuiltinFunc", func(b *testing.B) {
 		b.ResetTimer()
 		it := chunk.NewIterator4Chunk(input)
 		for i := 0; i < b.N; i++ {
-			output.Reset(types.ETInt)
+			output.Reset(types.CausetEDN)
 			for event := it.Begin(); event != it.End(); event = it.Next() {
 				v, isNull, err := bf.evalInt(event)
 				if err != nil {

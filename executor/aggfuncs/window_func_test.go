@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,12 +20,12 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	. "github.com/whtcorpsinc/check"
 
-	"github.com/whtcorpsinc/milevadb/executor/aggfuncs"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/expression/aggregation"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/executor/aggfuncs"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression/aggregation"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 )
 
 type windowTest struct {
@@ -73,7 +73,7 @@ func (s *testSuite) testWindowFunc(c *C, p windowTest) {
 		err = finalFunc.AppendFinalResult2Chunk(s.ctx, finalPr, resultChk)
 		c.Assert(err, IsNil)
 		dt := resultChk.GetEvent(0).GetCauset(0, desc.RetTp)
-		result, err := dt.CompareCauset(s.ctx.GetStochastikVars().StmtCtx, &p.results[i])
+		result, err := dt.CompareCauset(s.ctx.GetStochaseinstein_dbars().StmtCtx, &p.results[i])
 		c.Assert(err, IsNil)
 		c.Assert(result, Equals, 0)
 		resultChk.Reset()
@@ -133,7 +133,7 @@ func buildWindowTester(funcName string, tp byte, constantArg uint64, orderByDefC
 		pt.args = append(pt.args, &expression.DeferredCauset{RetType: pt.dataType, Index: 0})
 	}
 	if constantArg > 0 {
-		pt.args = append(pt.args, &expression.Constant{Value: types.NewUintCauset(constantArg)})
+		pt.args = append(pt.args, &expression.CouplingConstantWithRadix{Value: types.NewUintCauset(constantArg)})
 	}
 	if orderByDefCauss > 0 {
 		pt.orderByDefCauss = append(pt.orderByDefCauss, &expression.DeferredCauset{RetType: pt.dataType, Index: 0})

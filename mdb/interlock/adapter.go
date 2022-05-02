@@ -52,7 +52,7 @@ func colNames2ResultFields(schema *expression.Schema, names []*types.FieldName, 
 			noedbName:       noedbName,
 		}
 		// This is for compatibility.
-		// See issue https://github.com/whtcorpsinc/milevadb/BerolinaSQL/issues/10513 .
+		// See issue https://github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/issues/10513 .
 		if len(rf.ColumnAsName.O) > mysql.MaxAliasIdentifierLen {
 			rf.ColumnAsName.O = rf.ColumnAsName.O[:mysql.MaxAliasIdentifierLen]
 		}

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,10 +22,10 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/charset"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
-	driver "github.com/whtcorpsinc/milevadb/types/berolinaAllegroSQL_driver"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	driver "github.com/whtcorpsinc/MilevaDB-Prod/types/berolinaAllegroSQL_driver"
 )
 
 func (s *testExpressionSuite) TestGetTimeValue(c *C) {
@@ -36,8 +36,8 @@ func (s *testExpressionSuite) TestGetTimeValue(c *C) {
 	c.Assert(v.HoTT(), Equals, types.HoTTMysqlTime)
 	timeValue := v.GetMysqlTime()
 	c.Assert(timeValue.String(), Equals, "2012-12-12 00:00:00")
-	stochastikVars := ctx.GetStochastikVars()
-	variable.SetStochastikSystemVar(stochastikVars, "timestamp", types.NewStringCauset(""))
+	stochaseinstein_dbars := ctx.GetStochaseinstein_dbars()
+	variable.SetStochastikSystemVar(stochaseinstein_dbars, "timestamp", types.NewStringCauset(""))
 	v, err = GetTimeValue(ctx, "2012-12-12 00:00:00", allegrosql.TypeTimestamp, types.MinFsp)
 	c.Assert(err, IsNil)
 
@@ -45,7 +45,7 @@ func (s *testExpressionSuite) TestGetTimeValue(c *C) {
 	timeValue = v.GetMysqlTime()
 	c.Assert(timeValue.String(), Equals, "2012-12-12 00:00:00")
 
-	variable.SetStochastikSystemVar(stochastikVars, "timestamp", types.NewStringCauset("0"))
+	variable.SetStochastikSystemVar(stochaseinstein_dbars, "timestamp", types.NewStringCauset("0"))
 	v, err = GetTimeValue(ctx, "2012-12-12 00:00:00", allegrosql.TypeTimestamp, types.MinFsp)
 	c.Assert(err, IsNil)
 
@@ -53,7 +53,7 @@ func (s *testExpressionSuite) TestGetTimeValue(c *C) {
 	timeValue = v.GetMysqlTime()
 	c.Assert(timeValue.String(), Equals, "2012-12-12 00:00:00")
 
-	variable.SetStochastikSystemVar(stochastikVars, "timestamp", types.Causet{})
+	variable.SetStochastikSystemVar(stochaseinstein_dbars, "timestamp", types.Causet{})
 	v, err = GetTimeValue(ctx, "2012-12-12 00:00:00", allegrosql.TypeTimestamp, types.MinFsp)
 	c.Assert(err, IsNil)
 
@@ -61,7 +61,7 @@ func (s *testExpressionSuite) TestGetTimeValue(c *C) {
 	timeValue = v.GetMysqlTime()
 	c.Assert(timeValue.String(), Equals, "2012-12-12 00:00:00")
 
-	variable.SetStochastikSystemVar(stochastikVars, "timestamp", types.NewStringCauset("1234"))
+	variable.SetStochastikSystemVar(stochaseinstein_dbars, "timestamp", types.NewStringCauset("1234"))
 
 	tbl := []struct {
 		Expr interface{}
@@ -133,10 +133,10 @@ func (s *testExpressionSuite) TestIsCurrentTimestampExpr(c *C) {
 
 func (s *testExpressionSuite) TestCurrentTimestampTimeZone(c *C) {
 	ctx := mock.NewContext()
-	stochastikVars := ctx.GetStochastikVars()
+	stochaseinstein_dbars := ctx.GetStochaseinstein_dbars()
 
-	variable.SetStochastikSystemVar(stochastikVars, "timestamp", types.NewStringCauset("1234"))
-	variable.SetStochastikSystemVar(stochastikVars, "time_zone", types.NewStringCauset("+00:00"))
+	variable.SetStochastikSystemVar(stochaseinstein_dbars, "timestamp", types.NewStringCauset("1234"))
+	variable.SetStochastikSystemVar(stochaseinstein_dbars, "time_zone", types.NewStringCauset("+00:00"))
 	v, err := GetTimeValue(ctx, ast.CurrentTimestamp, allegrosql.TypeTimestamp, types.MinFsp)
 	c.Assert(err, IsNil)
 	c.Assert(v.GetMysqlTime(), DeepEquals, types.NewTime(
@@ -145,7 +145,7 @@ func (s *testExpressionSuite) TestCurrentTimestampTimeZone(c *C) {
 
 	// CurrentTimestamp from "timestamp" stochastik variable is based on UTC, so change timezone
 	// would get different value.
-	variable.SetStochastikSystemVar(stochastikVars, "time_zone", types.NewStringCauset("+08:00"))
+	variable.SetStochastikSystemVar(stochaseinstein_dbars, "time_zone", types.NewStringCauset("+08:00"))
 	v, err = GetTimeValue(ctx, ast.CurrentTimestamp, allegrosql.TypeTimestamp, types.MinFsp)
 	c.Assert(err, IsNil)
 	c.Assert(v.GetMysqlTime(), DeepEquals, types.NewTime(

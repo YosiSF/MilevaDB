@@ -1,8 +1,8 @@
-// INTERLOCKyright 2020 The ql Authors. All rights reserved.
+Copuright 2021 Whtcorps Inc; EinsteinDB and MilevaDB aithors; Licensed Under Apache 2.0. All Rights Reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSES/QL-LICENSE file.
 
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,15 +31,15 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/charset"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	field_types "github.com/whtcorpsinc/berolinaAllegroSQL/types"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/replog"
-	"github.com/whtcorpsinc/milevadb/soliton/timeutil"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/replog"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/timeutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 	"go.uber.org/zap"
 )
 
@@ -124,7 +124,7 @@ func FindOnUFIDelateDefCauss(defcaus []*DeferredCauset) []*DeferredCauset {
 }
 
 // truncateTrailingSpaces truncates trailing spaces for CHAR[(M)] defCausumn.
-// fix: https://github.com/whtcorpsinc/milevadb/issues/3660
+// fix: https://github.com/whtcorpsinc/MilevaDB-Prod/issues/3660
 func truncateTrailingSpaces(v *types.Causet) {
 	if v.HoTT() == types.HoTTNull {
 		return
@@ -140,18 +140,18 @@ func truncateTrailingSpaces(v *types.Causet) {
 }
 
 func handleWrongASCIIValue(ctx stochastikctx.Context, defCaus *perceptron.DeferredCausetInfo, casted *types.Causet, str string, i int) (types.Causet, error) {
-	sc := ctx.GetStochastikVars().StmtCtx
+	sc := ctx.GetStochaseinstein_dbars().StmtCtx
 	err := ErrTruncatedWrongValueForField.FastGen("incorrect ascii value %x(%s) for defCausumn %s", casted.GetBytes(), str, defCaus.Name)
-	logutil.BgLogger().Error("incorrect ASCII value", zap.Uint64("conn", ctx.GetStochastikVars().ConnectionID), zap.Error(err))
+	logutil.BgLogger().Error("incorrect ASCII value", zap.Uint64("conn", ctx.GetStochaseinstein_dbars().ConnectionID), zap.Error(err))
 	truncateVal := types.NewStringCauset(str[:i])
 	err = sc.HandleTruncate(err)
 	return truncateVal, err
 }
 
 func handleWrongUtf8Value(ctx stochastikctx.Context, defCaus *perceptron.DeferredCausetInfo, casted *types.Causet, str string, i int) (types.Causet, error) {
-	sc := ctx.GetStochastikVars().StmtCtx
+	sc := ctx.GetStochaseinstein_dbars().StmtCtx
 	err := ErrTruncatedWrongValueForField.FastGen("incorrect utf8 value %x(%s) for defCausumn %s", casted.GetBytes(), str, defCaus.Name)
-	logutil.BgLogger().Error("incorrect UTF-8 value", zap.Uint64("conn", ctx.GetStochastikVars().ConnectionID), zap.Error(err))
+	logutil.BgLogger().Error("incorrect UTF-8 value", zap.Uint64("conn", ctx.GetStochaseinstein_dbars().ConnectionID), zap.Error(err))
 	// Truncate to valid utf8 string.
 	truncateVal := types.NewStringCauset(str[:i])
 	err = sc.HandleTruncate(err)
@@ -166,7 +166,7 @@ func handleWrongUtf8Value(ctx stochastikctx.Context, defCaus *perceptron.Deferre
 // If the handle of err is changed latter, the behavior of forceIgnoreTruncate also need to change.
 // TODO: change the third arg to TypeField. Not pass DeferredCausetInfo.
 func CastValue(ctx stochastikctx.Context, val types.Causet, defCaus *perceptron.DeferredCausetInfo, returnOverflow, forceIgnoreTruncate bool) (casted types.Causet, err error) {
-	sc := ctx.GetStochastikVars().StmtCtx
+	sc := ctx.GetStochaseinstein_dbars().StmtCtx
 	casted, err = val.ConvertTo(sc, &defCaus.FieldType)
 	// TODO: make sure all truncate errors are handled by ConvertTo.
 	if returnOverflow && types.ErrOverflow.Equal(err) {
@@ -192,7 +192,7 @@ func CastValue(ctx stochastikctx.Context, val types.Causet, defCaus *perceptron.
 	}
 
 	if defCaus.Charset == charset.CharsetASCII {
-		if ctx.GetStochastikVars().SkipASCIICheck {
+		if ctx.GetStochaseinstein_dbars().SkipASCIICheck {
 			return casted, nil
 		}
 
@@ -209,7 +209,7 @@ func CastValue(ctx stochastikctx.Context, val types.Causet, defCaus *perceptron.
 		return casted, err
 	}
 
-	if ctx.GetStochastikVars().SkipUTF8Check {
+	if ctx.GetStochaseinstein_dbars().SkipUTF8Check {
 		return casted, nil
 	}
 
@@ -296,7 +296,7 @@ func NewDefCausDesc(defCaus *DeferredCauset) *DefCausDesc {
 		extra = "auto_increment"
 	} else if allegrosql.HasOnUFIDelateNowFlag(defCaus.Flag) {
 		//in order to match the rules of allegrosql 8.0.16 version
-		//see https://github.com/whtcorpsinc/milevadb/issues/10337
+		//see https://github.com/whtcorpsinc/MilevaDB-Prod/issues/10337
 		extra = "DEFAULT_GENERATED on uFIDelate CURRENT_TIMESTAMP" + OptionalFsp(&defCaus.FieldType)
 	} else if defCaus.IsGenerated() {
 		if defCaus.GeneratedStored {
@@ -458,7 +458,7 @@ func getDefCausDefaultValue(ctx stochastikctx.Context, defCaus *perceptron.Defer
 	}
 
 	// Check and get timestamp/datetime default value.
-	sc := ctx.GetStochastikVars().StmtCtx
+	sc := ctx.GetStochaseinstein_dbars().StmtCtx
 	var needChangeTimeZone bool
 	// If the defCausumn's default value is not ZeroDatetimeStr nor CurrentTimestamp, should use the time zone of the default value itself.
 	if defCaus.Tp == allegrosql.TypeTimestamp {
@@ -480,7 +480,7 @@ func getDefCausDefaultValue(ctx stochastikctx.Context, defCaus *perceptron.Defer
 	// If the defCausumn's default value is not ZeroDatetimeStr or CurrentTimestamp, convert the default value to the current stochastik time zone.
 	if needChangeTimeZone {
 		t := value.GetMysqlTime()
-		err = t.ConvertTimeZone(sc.TimeZone, ctx.GetStochastikVars().Location())
+		err = t.ConvertTimeZone(sc.TimeZone, ctx.GetStochaseinstein_dbars().Location())
 		if err != nil {
 			return value, err
 		}
@@ -506,7 +506,7 @@ func getDefCausDefaultValueFromNil(ctx stochastikctx.Context, defCaus *perceptro
 		// Auto increment defCausumn doesn't has default value and we should not return error.
 		return GetZeroValue(defCaus), nil
 	}
-	vars := ctx.GetStochastikVars()
+	vars := ctx.GetStochaseinstein_dbars()
 	sc := vars.StmtCtx
 	if sc.BadNullAsWarning {
 		sc.AppendWarning(ErrDeferredCausetCantNull.FastGenByArgs(defCaus.Name))

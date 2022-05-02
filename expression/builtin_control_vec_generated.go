@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ package expression
 import (
 	"time"
 
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
 )
 
 // NOTE: Control expressions optionally evaluate some branches depending on conditions, but vectorization executes all
@@ -55,11 +55,11 @@ func (b *builtinCaseWhenIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.Def
 	var eLse *chunk.DeferredCauset
 	thensSlice := make([][]int64, l/2)
 	var eLseSlice []int64
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 
 	for j := 0; j < l-1; j += 2 {
-		bufWhen, err := b.bufSlabPredictor.get(types.ETInt, n)
+		bufWhen, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 		if err != nil {
 			return err
 		}
@@ -75,7 +75,7 @@ func (b *builtinCaseWhenIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.Def
 		whens[j/2] = bufWhen
 		whensSlice[j/2] = bufWhen.Int64s()
 
-		bufThen, err := b.bufSlabPredictor.get(types.ETInt, n)
+		bufThen, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 		if err != nil {
 			return err
 		}
@@ -95,7 +95,7 @@ func (b *builtinCaseWhenIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.Def
 	// else clause -> args[l-1]
 	// If case clause has else clause, l%2 == 1.
 	if l%2 == 1 {
-		bufElse, err := b.bufSlabPredictor.get(types.ETInt, n)
+		bufElse, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 		if err != nil {
 			return err
 		}
@@ -166,11 +166,11 @@ func (b *builtinCaseWhenRealSig) vecEvalReal(input *chunk.Chunk, result *chunk.D
 	var eLse *chunk.DeferredCauset
 	thensSlice := make([][]float64, l/2)
 	var eLseSlice []float64
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 
 	for j := 0; j < l-1; j += 2 {
-		bufWhen, err := b.bufSlabPredictor.get(types.ETInt, n)
+		bufWhen, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 		if err != nil {
 			return err
 		}
@@ -277,11 +277,11 @@ func (b *builtinCaseWhenDecimalSig) vecEvalDecimal(input *chunk.Chunk, result *c
 	var eLse *chunk.DeferredCauset
 	thensSlice := make([][]types.MyDecimal, l/2)
 	var eLseSlice []types.MyDecimal
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 
 	for j := 0; j < l-1; j += 2 {
-		bufWhen, err := b.bufSlabPredictor.get(types.ETInt, n)
+		bufWhen, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 		if err != nil {
 			return err
 		}
@@ -383,11 +383,11 @@ func (b *builtinCaseWhenStringSig) vecEvalString(input *chunk.Chunk, result *chu
 	whensSlice := make([][]int64, l/2)
 	thens := make([]*chunk.DeferredCauset, l/2)
 	var eLse *chunk.DeferredCauset
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 
 	for j := 0; j < l-1; j += 2 {
-		bufWhen, err := b.bufSlabPredictor.get(types.ETInt, n)
+		bufWhen, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 		if err != nil {
 			return err
 		}
@@ -497,11 +497,11 @@ func (b *builtinCaseWhenTimeSig) vecEvalTime(input *chunk.Chunk, result *chunk.D
 	var eLse *chunk.DeferredCauset
 	thensSlice := make([][]types.Time, l/2)
 	var eLseSlice []types.Time
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 
 	for j := 0; j < l-1; j += 2 {
-		bufWhen, err := b.bufSlabPredictor.get(types.ETInt, n)
+		bufWhen, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 		if err != nil {
 			return err
 		}
@@ -608,11 +608,11 @@ func (b *builtinCaseWhenDurationSig) vecEvalDuration(input *chunk.Chunk, result 
 	var eLse *chunk.DeferredCauset
 	thensSlice := make([][]time.Duration, l/2)
 	var eLseSlice []time.Duration
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 
 	for j := 0; j < l-1; j += 2 {
-		bufWhen, err := b.bufSlabPredictor.get(types.ETInt, n)
+		bufWhen, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 		if err != nil {
 			return err
 		}
@@ -714,11 +714,11 @@ func (b *builtinCaseWhenJSONSig) vecEvalJSON(input *chunk.Chunk, result *chunk.D
 	whensSlice := make([][]int64, l/2)
 	thens := make([]*chunk.DeferredCauset, l/2)
 	var eLse *chunk.DeferredCauset
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 
 	for j := 0; j < l-1; j += 2 {
-		bufWhen, err := b.bufSlabPredictor.get(types.ETInt, n)
+		bufWhen, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 		if err != nil {
 			return err
 		}
@@ -823,12 +823,12 @@ func (b *builtinIfNullIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.Defer
 	if err := b.args[0].VecEvalInt(b.ctx, input, result); err != nil {
 		return err
 	}
-	buf1, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf1, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
 	defer b.bufSlabPredictor.put(buf1)
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 	err = b.args[1].VecEvalInt(b.ctx, input, buf1)
 	afterWarns := sc.WarningCount()
@@ -882,7 +882,7 @@ func (b *builtinIfNullRealSig) vecEvalReal(input *chunk.Chunk, result *chunk.Def
 		return err
 	}
 	defer b.bufSlabPredictor.put(buf1)
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 	err = b.args[1].VecEvalReal(b.ctx, input, buf1)
 	afterWarns := sc.WarningCount()
@@ -936,7 +936,7 @@ func (b *builtinIfNullDecimalSig) vecEvalDecimal(input *chunk.Chunk, result *chu
 		return err
 	}
 	defer b.bufSlabPredictor.put(buf1)
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 	err = b.args[1].VecEvalDecimal(b.ctx, input, buf1)
 	afterWarns := sc.WarningCount()
@@ -993,7 +993,7 @@ func (b *builtinIfNullStringSig) vecEvalString(input *chunk.Chunk, result *chunk
 		return err
 	}
 	defer b.bufSlabPredictor.put(buf1)
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 	err = b.args[1].VecEvalString(b.ctx, input, buf1)
 	afterWarns := sc.WarningCount()
@@ -1050,7 +1050,7 @@ func (b *builtinIfNullTimeSig) vecEvalTime(input *chunk.Chunk, result *chunk.Def
 		return err
 	}
 	defer b.bufSlabPredictor.put(buf1)
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 	err = b.args[1].VecEvalTime(b.ctx, input, buf1)
 	afterWarns := sc.WarningCount()
@@ -1104,7 +1104,7 @@ func (b *builtinIfNullDurationSig) vecEvalDuration(input *chunk.Chunk, result *c
 		return err
 	}
 	defer b.bufSlabPredictor.put(buf1)
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 	err = b.args[1].VecEvalDuration(b.ctx, input, buf1)
 	afterWarns := sc.WarningCount()
@@ -1161,7 +1161,7 @@ func (b *builtinIfNullJSONSig) vecEvalJSON(input *chunk.Chunk, result *chunk.Def
 		return err
 	}
 	defer b.bufSlabPredictor.put(buf1)
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 	err = b.args[1].VecEvalJSON(b.ctx, input, buf1)
 	afterWarns := sc.WarningCount()
@@ -1210,7 +1210,7 @@ func (b *builtinIfIntSig) fallbackEvalInt(input *chunk.Chunk, result *chunk.Defe
 
 func (b *builtinIfIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	buf0, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf0, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -1218,7 +1218,7 @@ func (b *builtinIfIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredC
 	if err := b.args[0].VecEvalInt(b.ctx, input, buf0); err != nil {
 		return err
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 	err = b.args[1].VecEvalInt(b.ctx, input, result)
 	afterWarns := sc.WarningCount()
@@ -1229,7 +1229,7 @@ func (b *builtinIfIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredC
 		return b.fallbackEvalInt(input, result)
 	}
 
-	buf2, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf2, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -1288,7 +1288,7 @@ func (b *builtinIfRealSig) fallbackEvalReal(input *chunk.Chunk, result *chunk.De
 
 func (b *builtinIfRealSig) vecEvalReal(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	buf0, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf0, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -1296,7 +1296,7 @@ func (b *builtinIfRealSig) vecEvalReal(input *chunk.Chunk, result *chunk.Deferre
 	if err := b.args[0].VecEvalInt(b.ctx, input, buf0); err != nil {
 		return err
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 	err = b.args[1].VecEvalReal(b.ctx, input, result)
 	afterWarns := sc.WarningCount()
@@ -1366,7 +1366,7 @@ func (b *builtinIfDecimalSig) fallbackEvalDecimal(input *chunk.Chunk, result *ch
 
 func (b *builtinIfDecimalSig) vecEvalDecimal(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	buf0, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf0, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -1374,7 +1374,7 @@ func (b *builtinIfDecimalSig) vecEvalDecimal(input *chunk.Chunk, result *chunk.D
 	if err := b.args[0].VecEvalInt(b.ctx, input, buf0); err != nil {
 		return err
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 	err = b.args[1].VecEvalDecimal(b.ctx, input, result)
 	afterWarns := sc.WarningCount()
@@ -1442,7 +1442,7 @@ func (b *builtinIfStringSig) fallbackEvalString(input *chunk.Chunk, result *chun
 
 func (b *builtinIfStringSig) vecEvalString(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	buf0, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf0, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -1450,7 +1450,7 @@ func (b *builtinIfStringSig) vecEvalString(input *chunk.Chunk, result *chunk.Def
 	if err := b.args[0].VecEvalInt(b.ctx, input, buf0); err != nil {
 		return err
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 	buf1, err := b.bufSlabPredictor.get(types.ETString, n)
 	if err != nil {
@@ -1528,7 +1528,7 @@ func (b *builtinIfTimeSig) fallbackEvalTime(input *chunk.Chunk, result *chunk.De
 
 func (b *builtinIfTimeSig) vecEvalTime(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	buf0, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf0, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -1536,7 +1536,7 @@ func (b *builtinIfTimeSig) vecEvalTime(input *chunk.Chunk, result *chunk.Deferre
 	if err := b.args[0].VecEvalInt(b.ctx, input, buf0); err != nil {
 		return err
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 	err = b.args[1].VecEvalTime(b.ctx, input, result)
 	afterWarns := sc.WarningCount()
@@ -1606,7 +1606,7 @@ func (b *builtinIfDurationSig) fallbackEvalDuration(input *chunk.Chunk, result *
 
 func (b *builtinIfDurationSig) vecEvalDuration(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	buf0, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf0, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -1614,7 +1614,7 @@ func (b *builtinIfDurationSig) vecEvalDuration(input *chunk.Chunk, result *chunk
 	if err := b.args[0].VecEvalInt(b.ctx, input, buf0); err != nil {
 		return err
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 	err = b.args[1].VecEvalDuration(b.ctx, input, result)
 	afterWarns := sc.WarningCount()
@@ -1682,7 +1682,7 @@ func (b *builtinIfJSONSig) fallbackEvalJSON(input *chunk.Chunk, result *chunk.De
 
 func (b *builtinIfJSONSig) vecEvalJSON(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	buf0, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf0, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -1690,7 +1690,7 @@ func (b *builtinIfJSONSig) vecEvalJSON(input *chunk.Chunk, result *chunk.Deferre
 	if err := b.args[0].VecEvalInt(b.ctx, input, buf0); err != nil {
 		return err
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 	buf1, err := b.bufSlabPredictor.get(types.ETJson, n)
 	if err != nil {

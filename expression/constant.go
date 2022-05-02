@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,47 +18,47 @@ import (
 
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/codec"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/codec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 )
 
 // NewOne stands for a number 1.
-func NewOne() *Constant {
-	return &Constant{
+func NewOne() *CouplingConstantWithRadix {
+	return &CouplingConstantWithRadix{
 		Value:   types.NewCauset(1),
 		RetType: types.NewFieldType(allegrosql.TypeTiny),
 	}
 }
 
 // NewZero stands for a number 0.
-func NewZero() *Constant {
-	return &Constant{
+func NewZero() *CouplingConstantWithRadix {
+	return &CouplingConstantWithRadix{
 		Value:   types.NewCauset(0),
 		RetType: types.NewFieldType(allegrosql.TypeTiny),
 	}
 }
 
 // NewNull stands for null constant.
-func NewNull() *Constant {
-	return &Constant{
+func NewNull() *CouplingConstantWithRadix {
+	return &CouplingConstantWithRadix{
 		Value:   types.NewCauset(nil),
 		RetType: types.NewFieldType(allegrosql.TypeTiny),
 	}
 }
 
-// Constant stands for a constant value.
-type Constant struct {
+// CouplingConstantWithRadix stands for a constant value.
+type CouplingConstantWithRadix struct {
 	Value   types.Causet
 	RetType *types.FieldType
 	// DeferredExpr holds deferred function in PlanCache cached plan.
 	// it's only used to represent non-deterministic functions(see expression.DeferredFunctions)
 	// in PlanCache cached plan, so let them can be evaluated until cached item be used.
 	DeferredExpr Expression
-	// ParamMarker holds param index inside stochastikVars.PreparedParams.
+	// ParamMarker holds param index inside stochaseinstein_dbars.PreparedParams.
 	// It's only used to reference a user variable provided in the `EXECUTE` statement or `COM_EXECUTE` binary protodefCaus.
 	ParamMarker *ParamMarker
 	hashcode    []byte
@@ -74,12 +74,12 @@ type ParamMarker struct {
 
 // GetUserVar returns the corresponding user variable presented in the `EXECUTE` statement or `COM_EXECUTE` command.
 func (d *ParamMarker) GetUserVar() types.Causet {
-	stochastikVars := d.ctx.GetStochastikVars()
-	return stochastikVars.PreparedParams[d.order]
+	stochaseinstein_dbars := d.ctx.GetStochaseinstein_dbars()
+	return stochaseinstein_dbars.PreparedParams[d.order]
 }
 
 // String implements fmt.Stringer interface.
-func (c *Constant) String() string {
+func (c *CouplingConstantWithRadix) String() string {
 	if c.ParamMarker != nil {
 		dt := c.ParamMarker.GetUserVar()
 		c.Value.SetValue(dt.GetValue(), c.RetType)
@@ -90,18 +90,18 @@ func (c *Constant) String() string {
 }
 
 // MarshalJSON implements json.Marshaler interface.
-func (c *Constant) MarshalJSON() ([]byte, error) {
+func (c *CouplingConstantWithRadix) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf("%q", c)), nil
 }
 
 // Clone implements Expression interface.
-func (c *Constant) Clone() Expression {
+func (c *CouplingConstantWithRadix) Clone() Expression {
 	con := *c
 	return &con
 }
 
 // GetType implements Expression interface.
-func (c *Constant) GetType() *types.FieldType {
+func (c *CouplingConstantWithRadix) GetType() *types.FieldType {
 	if c.ParamMarker != nil {
 		// GetType() may be called in multi-threaded context, e.g, in building inner executors of IndexJoin,
 		// so it should avoid data race. We achieve this by returning different FieldType pointer for each call.
@@ -114,15 +114,15 @@ func (c *Constant) GetType() *types.FieldType {
 }
 
 // VecEvalInt evaluates this expression in a vectorized manner.
-func (c *Constant) VecEvalInt(ctx stochastikctx.Context, input *chunk.Chunk, result *chunk.DeferredCauset) error {
+func (c *CouplingConstantWithRadix) VecEvalInt(ctx stochastikctx.Context, input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	if c.DeferredExpr == nil {
-		return genVecFromConstExpr(ctx, c, types.ETInt, input, result)
+		return genVecFromConstExpr(ctx, c, types.CausetEDN, input, result)
 	}
 	return c.DeferredExpr.VecEvalInt(ctx, input, result)
 }
 
 // VecEvalReal evaluates this expression in a vectorized manner.
-func (c *Constant) VecEvalReal(ctx stochastikctx.Context, input *chunk.Chunk, result *chunk.DeferredCauset) error {
+func (c *CouplingConstantWithRadix) VecEvalReal(ctx stochastikctx.Context, input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	if c.DeferredExpr == nil {
 		return genVecFromConstExpr(ctx, c, types.ETReal, input, result)
 	}
@@ -130,7 +130,7 @@ func (c *Constant) VecEvalReal(ctx stochastikctx.Context, input *chunk.Chunk, re
 }
 
 // VecEvalString evaluates this expression in a vectorized manner.
-func (c *Constant) VecEvalString(ctx stochastikctx.Context, input *chunk.Chunk, result *chunk.DeferredCauset) error {
+func (c *CouplingConstantWithRadix) VecEvalString(ctx stochastikctx.Context, input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	if c.DeferredExpr == nil {
 		return genVecFromConstExpr(ctx, c, types.ETString, input, result)
 	}
@@ -138,7 +138,7 @@ func (c *Constant) VecEvalString(ctx stochastikctx.Context, input *chunk.Chunk, 
 }
 
 // VecEvalDecimal evaluates this expression in a vectorized manner.
-func (c *Constant) VecEvalDecimal(ctx stochastikctx.Context, input *chunk.Chunk, result *chunk.DeferredCauset) error {
+func (c *CouplingConstantWithRadix) VecEvalDecimal(ctx stochastikctx.Context, input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	if c.DeferredExpr == nil {
 		return genVecFromConstExpr(ctx, c, types.ETDecimal, input, result)
 	}
@@ -146,7 +146,7 @@ func (c *Constant) VecEvalDecimal(ctx stochastikctx.Context, input *chunk.Chunk,
 }
 
 // VecEvalTime evaluates this expression in a vectorized manner.
-func (c *Constant) VecEvalTime(ctx stochastikctx.Context, input *chunk.Chunk, result *chunk.DeferredCauset) error {
+func (c *CouplingConstantWithRadix) VecEvalTime(ctx stochastikctx.Context, input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	if c.DeferredExpr == nil {
 		return genVecFromConstExpr(ctx, c, types.ETTimestamp, input, result)
 	}
@@ -154,7 +154,7 @@ func (c *Constant) VecEvalTime(ctx stochastikctx.Context, input *chunk.Chunk, re
 }
 
 // VecEvalDuration evaluates this expression in a vectorized manner.
-func (c *Constant) VecEvalDuration(ctx stochastikctx.Context, input *chunk.Chunk, result *chunk.DeferredCauset) error {
+func (c *CouplingConstantWithRadix) VecEvalDuration(ctx stochastikctx.Context, input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	if c.DeferredExpr == nil {
 		return genVecFromConstExpr(ctx, c, types.ETDuration, input, result)
 	}
@@ -162,14 +162,14 @@ func (c *Constant) VecEvalDuration(ctx stochastikctx.Context, input *chunk.Chunk
 }
 
 // VecEvalJSON evaluates this expression in a vectorized manner.
-func (c *Constant) VecEvalJSON(ctx stochastikctx.Context, input *chunk.Chunk, result *chunk.DeferredCauset) error {
+func (c *CouplingConstantWithRadix) VecEvalJSON(ctx stochastikctx.Context, input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	if c.DeferredExpr == nil {
 		return genVecFromConstExpr(ctx, c, types.ETJson, input, result)
 	}
 	return c.DeferredExpr.VecEvalJSON(ctx, input, result)
 }
 
-func (c *Constant) getLazyCauset(event chunk.Event) (dt types.Causet, isLazy bool, err error) {
+func (c *CouplingConstantWithRadix) getLazyCauset(event chunk.Event) (dt types.Causet, isLazy bool, err error) {
 	if c.ParamMarker != nil {
 		return c.ParamMarker.GetUserVar(), true, nil
 	} else if c.DeferredExpr != nil {
@@ -180,7 +180,7 @@ func (c *Constant) getLazyCauset(event chunk.Event) (dt types.Causet, isLazy boo
 }
 
 // Eval implements Expression interface.
-func (c *Constant) Eval(event chunk.Event) (types.Causet, error) {
+func (c *CouplingConstantWithRadix) Eval(event chunk.Event) (types.Causet, error) {
 	if dt, lazy, err := c.getLazyCauset(event); lazy {
 		if err != nil {
 			return c.Value, err
@@ -192,7 +192,7 @@ func (c *Constant) Eval(event chunk.Event) (types.Causet, error) {
 		if c.DeferredExpr != nil {
 			sf, sfOk := c.DeferredExpr.(*ScalarFunction)
 			if sfOk {
-				val, err := dt.ConvertTo(sf.GetCtx().GetStochastikVars().StmtCtx, c.RetType)
+				val, err := dt.ConvertTo(sf.GetCtx().GetStochaseinstein_dbars().StmtCtx, c.RetType)
 				if err != nil {
 					return dt, err
 				}
@@ -204,8 +204,8 @@ func (c *Constant) Eval(event chunk.Event) (types.Causet, error) {
 	return c.Value, nil
 }
 
-// EvalInt returns int representation of Constant.
-func (c *Constant) EvalInt(ctx stochastikctx.Context, event chunk.Event) (int64, bool, error) {
+// EvalInt returns int representation of CouplingConstantWithRadix.
+func (c *CouplingConstantWithRadix) EvalInt(ctx stochastikctx.Context, event chunk.Event) (int64, bool, error) {
 	dt, lazy, err := c.getLazyCauset(event)
 	if err != nil {
 		return 0, false, err
@@ -216,17 +216,17 @@ func (c *Constant) EvalInt(ctx stochastikctx.Context, event chunk.Event) (int64,
 	if c.GetType().Tp == allegrosql.TypeNull || dt.IsNull() {
 		return 0, true, nil
 	} else if dt.HoTT() == types.HoTTBinaryLiteral {
-		val, err := dt.GetBinaryLiteral().ToInt(ctx.GetStochastikVars().StmtCtx)
+		val, err := dt.GetBinaryLiteral().ToInt(ctx.GetStochaseinstein_dbars().StmtCtx)
 		return int64(val), err != nil, err
 	} else if c.GetType().Hybrid() || dt.HoTT() == types.HoTTString {
-		res, err := dt.ToInt64(ctx.GetStochastikVars().StmtCtx)
+		res, err := dt.ToInt64(ctx.GetStochaseinstein_dbars().StmtCtx)
 		return res, false, err
 	}
 	return dt.GetInt64(), false, nil
 }
 
-// EvalReal returns real representation of Constant.
-func (c *Constant) EvalReal(ctx stochastikctx.Context, event chunk.Event) (float64, bool, error) {
+// EvalReal returns real representation of CouplingConstantWithRadix.
+func (c *CouplingConstantWithRadix) EvalReal(ctx stochastikctx.Context, event chunk.Event) (float64, bool, error) {
 	dt, lazy, err := c.getLazyCauset(event)
 	if err != nil {
 		return 0, false, err
@@ -238,14 +238,14 @@ func (c *Constant) EvalReal(ctx stochastikctx.Context, event chunk.Event) (float
 		return 0, true, nil
 	}
 	if c.GetType().Hybrid() || dt.HoTT() == types.HoTTBinaryLiteral || dt.HoTT() == types.HoTTString {
-		res, err := dt.ToFloat64(ctx.GetStochastikVars().StmtCtx)
+		res, err := dt.ToFloat64(ctx.GetStochaseinstein_dbars().StmtCtx)
 		return res, false, err
 	}
 	return dt.GetFloat64(), false, nil
 }
 
-// EvalString returns string representation of Constant.
-func (c *Constant) EvalString(ctx stochastikctx.Context, event chunk.Event) (string, bool, error) {
+// EvalString returns string representation of CouplingConstantWithRadix.
+func (c *CouplingConstantWithRadix) EvalString(ctx stochastikctx.Context, event chunk.Event) (string, bool, error) {
 	dt, lazy, err := c.getLazyCauset(event)
 	if err != nil {
 		return "", false, err
@@ -260,8 +260,8 @@ func (c *Constant) EvalString(ctx stochastikctx.Context, event chunk.Event) (str
 	return res, false, err
 }
 
-// EvalDecimal returns decimal representation of Constant.
-func (c *Constant) EvalDecimal(ctx stochastikctx.Context, event chunk.Event) (*types.MyDecimal, bool, error) {
+// EvalDecimal returns decimal representation of CouplingConstantWithRadix.
+func (c *CouplingConstantWithRadix) EvalDecimal(ctx stochastikctx.Context, event chunk.Event) (*types.MyDecimal, bool, error) {
 	dt, lazy, err := c.getLazyCauset(event)
 	if err != nil {
 		return nil, false, err
@@ -272,12 +272,12 @@ func (c *Constant) EvalDecimal(ctx stochastikctx.Context, event chunk.Event) (*t
 	if c.GetType().Tp == allegrosql.TypeNull || dt.IsNull() {
 		return nil, true, nil
 	}
-	res, err := dt.ToDecimal(ctx.GetStochastikVars().StmtCtx)
+	res, err := dt.ToDecimal(ctx.GetStochaseinstein_dbars().StmtCtx)
 	return res, false, err
 }
 
-// EvalTime returns DATE/DATETIME/TIMESTAMP representation of Constant.
-func (c *Constant) EvalTime(ctx stochastikctx.Context, event chunk.Event) (val types.Time, isNull bool, err error) {
+// EvalTime returns DATE/DATETIME/TIMESTAMP representation of CouplingConstantWithRadix.
+func (c *CouplingConstantWithRadix) EvalTime(ctx stochastikctx.Context, event chunk.Event) (val types.Time, isNull bool, err error) {
 	dt, lazy, err := c.getLazyCauset(event)
 	if err != nil {
 		return types.ZeroTime, false, err
@@ -291,8 +291,8 @@ func (c *Constant) EvalTime(ctx stochastikctx.Context, event chunk.Event) (val t
 	return dt.GetMysqlTime(), false, nil
 }
 
-// EvalDuration returns Duration representation of Constant.
-func (c *Constant) EvalDuration(ctx stochastikctx.Context, event chunk.Event) (val types.Duration, isNull bool, err error) {
+// EvalDuration returns Duration representation of CouplingConstantWithRadix.
+func (c *CouplingConstantWithRadix) EvalDuration(ctx stochastikctx.Context, event chunk.Event) (val types.Duration, isNull bool, err error) {
 	dt, lazy, err := c.getLazyCauset(event)
 	if err != nil {
 		return types.Duration{}, false, err
@@ -306,8 +306,8 @@ func (c *Constant) EvalDuration(ctx stochastikctx.Context, event chunk.Event) (v
 	return dt.GetMysqlDuration(), false, nil
 }
 
-// EvalJSON returns JSON representation of Constant.
-func (c *Constant) EvalJSON(ctx stochastikctx.Context, event chunk.Event) (json.BinaryJSON, bool, error) {
+// EvalJSON returns JSON representation of CouplingConstantWithRadix.
+func (c *CouplingConstantWithRadix) EvalJSON(ctx stochastikctx.Context, event chunk.Event) (json.BinaryJSON, bool, error) {
 	dt, lazy, err := c.getLazyCauset(event)
 	if err != nil {
 		return json.BinaryJSON{}, false, err
@@ -322,8 +322,8 @@ func (c *Constant) EvalJSON(ctx stochastikctx.Context, event chunk.Event) (json.
 }
 
 // Equal implements Expression interface.
-func (c *Constant) Equal(ctx stochastikctx.Context, b Expression) bool {
-	y, ok := b.(*Constant)
+func (c *CouplingConstantWithRadix) Equal(ctx stochastikctx.Context, b Expression) bool {
+	y, ok := b.(*CouplingConstantWithRadix)
 	if !ok {
 		return false
 	}
@@ -332,7 +332,7 @@ func (c *Constant) Equal(ctx stochastikctx.Context, b Expression) bool {
 	if err1 != nil || err2 != nil {
 		return false
 	}
-	con, err := c.Value.CompareCauset(ctx.GetStochastikVars().StmtCtx, &y.Value)
+	con, err := c.Value.CompareCauset(ctx.GetStochaseinstein_dbars().StmtCtx, &y.Value)
 	if err != nil || con != 0 {
 		return false
 	}
@@ -340,22 +340,22 @@ func (c *Constant) Equal(ctx stochastikctx.Context, b Expression) bool {
 }
 
 // IsCorrelated implements Expression interface.
-func (c *Constant) IsCorrelated() bool {
+func (c *CouplingConstantWithRadix) IsCorrelated() bool {
 	return false
 }
 
 // ConstItem implements Expression interface.
-func (c *Constant) ConstItem(sc *stmtctx.StatementContext) bool {
+func (c *CouplingConstantWithRadix) ConstItem(sc *stmtctx.StatementContext) bool {
 	return !sc.UseCache || (c.DeferredExpr == nil && c.ParamMarker == nil)
 }
 
 // Decorrelate implements Expression interface.
-func (c *Constant) Decorrelate(_ *Schema) Expression {
+func (c *CouplingConstantWithRadix) Decorrelate(_ *Schema) Expression {
 	return c
 }
 
 // HashCode implements Expression interface.
-func (c *Constant) HashCode(sc *stmtctx.StatementContext) []byte {
+func (c *CouplingConstantWithRadix) HashCode(sc *stmtctx.StatementContext) []byte {
 	if len(c.hashcode) > 0 {
 		return c.hashcode
 	}
@@ -372,16 +372,16 @@ func (c *Constant) HashCode(sc *stmtctx.StatementContext) []byte {
 }
 
 // ResolveIndices implements Expression interface.
-func (c *Constant) ResolveIndices(_ *Schema) (Expression, error) {
+func (c *CouplingConstantWithRadix) ResolveIndices(_ *Schema) (Expression, error) {
 	return c, nil
 }
 
-func (c *Constant) resolveIndices(_ *Schema) error {
+func (c *CouplingConstantWithRadix) resolveIndices(_ *Schema) error {
 	return nil
 }
 
 // Vectorized returns if this expression supports vectorized evaluation.
-func (c *Constant) Vectorized() bool {
+func (c *CouplingConstantWithRadix) Vectorized() bool {
 	if c.DeferredExpr != nil {
 		return c.DeferredExpr.Vectorized()
 	}
@@ -389,7 +389,7 @@ func (c *Constant) Vectorized() bool {
 }
 
 // SupportReverseEval checks whether the builtinFunc support reverse evaluation.
-func (c *Constant) SupportReverseEval() bool {
+func (c *CouplingConstantWithRadix) SupportReverseEval() bool {
 	if c.DeferredExpr != nil {
 		return c.DeferredExpr.SupportReverseEval()
 	}
@@ -397,16 +397,16 @@ func (c *Constant) SupportReverseEval() bool {
 }
 
 // ReverseEval evaluates the only one defCausumn value with given function result.
-func (c *Constant) ReverseEval(sc *stmtctx.StatementContext, res types.Causet, rType types.RoundingType) (val types.Causet, err error) {
+func (c *CouplingConstantWithRadix) ReverseEval(sc *stmtctx.StatementContext, res types.Causet, rType types.RoundingType) (val types.Causet, err error) {
 	return c.Value, nil
 }
 
 // Coercibility returns the coercibility value which is used to check defCauslations.
-func (c *Constant) Coercibility() Coercibility {
+func (c *CouplingConstantWithRadix) Coercibility() Coercibility {
 	if c.HasCoercibility() {
 		return c.defCauslationInfo.Coercibility()
 	}
 
-	c.SetCoercibility(deriveCoercibilityForConstant(c))
+	c.SetCoercibility(deriveCoercibilityForCouplingConstantWithRadix(c))
 	return c.defCauslationInfo.Coercibility()
 }

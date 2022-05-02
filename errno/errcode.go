@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -212,7 +212,7 @@ const (
 	ErrWarningNotCompleteRollback                                   = 1196
 	ErrTransCacheFull                                               = 1197
 	ErrTooManyUserConnections                                       = 1203
-	ErrSetConstantsOnly                                             = 1204
+	ErrSetCouplingConstantWithRadixsOnly                            = 1204
 	ErrLockWaitTimeout                                              = 1205
 	ErrLockTableFull                                                = 1206
 	ErrReadOnlyTransaction                                          = 1207
@@ -860,7 +860,7 @@ const (
 	ErrWindowRangeFrameOrderType                                    = 3587
 	ErrWindowRangeFrameTemporalType                                 = 3588
 	ErrWindowRangeFrameNumericType                                  = 3589
-	ErrWindowRangeBoundNotConstant                                  = 3590
+	ErrWindowRangeBoundNotCouplingConstantWithRadix                 = 3590
 	ErrWindowDuplicateName                                          = 3591
 	ErrWindowIllegalOrderBy                                         = 3592
 	ErrWindowInvalidWindowFuncUse                                   = 3593

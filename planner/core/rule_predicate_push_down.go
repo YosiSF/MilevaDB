@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,12 +15,12 @@ package core
 import (
 	"context"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 type pFIDelSolver struct{}
@@ -35,7 +35,7 @@ func addSelection(p LogicalPlan, child LogicalPlan, conditions []expression.Expr
 		p.Children()[chIdx] = child
 		return
 	}
-	conditions = expression.PropagateConstant(p.SCtx(), conditions)
+	conditions = expression.PropagateCouplingConstantWithRadix(p.SCtx(), conditions)
 	// Return block dual when filter is constant false or null.
 	dual := Conds2BlockDual(child, conditions)
 	if dual != nil {
@@ -77,7 +77,7 @@ func (p *LogicalSelection) PredicatePushDown(predicates []expression.Expression)
 	retConditions, child := p.children[0].PredicatePushDown(append(canBePushDown, predicates...))
 	retConditions = append(retConditions, canNotBePushDown...)
 	if len(retConditions) > 0 {
-		p.Conditions = expression.PropagateConstant(p.ctx, retConditions)
+		p.Conditions = expression.PropagateCouplingConstantWithRadix(p.ctx, retConditions)
 		// Return block dual when filter is constant false or null.
 		dual := Conds2BlockDual(p, p.Conditions)
 		if dual != nil {
@@ -100,7 +100,7 @@ func (p *LogicalUnionScan) PredicatePushDown(predicates []expression.Expression)
 // PredicatePushDown implements LogicalPlan PredicatePushDown interface.
 func (ds *DataSource) PredicatePushDown(predicates []expression.Expression) ([]expression.Expression, LogicalPlan) {
 	ds.allConds = predicates
-	ds.pushedDownConds, predicates = expression.PushDownExprs(ds.ctx.GetStochastikVars().StmtCtx, predicates, ds.ctx.GetClient(), ekv.UnSpecified)
+	ds.pushedDownConds, predicates = expression.PushDownExprs(ds.ctx.GetStochaseinstein_dbars().StmtCtx, predicates, ds.ctx.GetClient(), ekv.UnSpecified)
 	return predicates, ds
 }
 
@@ -157,7 +157,7 @@ func (p *LogicalJoin) PredicatePushDown(predicates []expression.Expression) (ret
 		tempCond = append(tempCond, p.OtherConditions...)
 		tempCond = append(tempCond, predicates...)
 		tempCond = expression.ExtractFiltersFromDNFs(p.ctx, tempCond)
-		tempCond = expression.PropagateConstant(p.ctx, tempCond)
+		tempCond = expression.PropagateCouplingConstantWithRadix(p.ctx, tempCond)
 		// Return block dual when filter is constant false or null.
 		dual := Conds2BlockDual(p, tempCond)
 		if dual != nil {
@@ -171,7 +171,7 @@ func (p *LogicalJoin) PredicatePushDown(predicates []expression.Expression) (ret
 		leftCond = leftPushCond
 		rightCond = rightPushCond
 	case AntiSemiJoin:
-		predicates = expression.PropagateConstant(p.ctx, predicates)
+		predicates = expression.PropagateCouplingConstantWithRadix(p.ctx, predicates)
 		// Return block dual when filter is constant false or null.
 		dual := Conds2BlockDual(p, predicates)
 		if dual != nil {
@@ -267,7 +267,7 @@ func (p *LogicalProjection) appendExpr(expr expression.Expression) *expression.D
 	p.Exprs = append(p.Exprs, expr)
 
 	col := &expression.DeferredCauset{
-		UniqueID: p.ctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+		UniqueID: p.ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 		RetType:  expr.GetType(),
 	}
 	col.SetCoercibility(expr.Coercibility())
@@ -339,11 +339,11 @@ func simplifyOuterJoin(p *LogicalJoin, predicates []expression.Expression) {
 // If it is a disjunction of null-rejected conditions.
 func isNullRejected(ctx stochastikctx.Context, schemaReplicant *expression.Schema, expr expression.Expression) bool {
 	expr = expression.PushDownNot(ctx, expr)
-	sc := ctx.GetStochastikVars().StmtCtx
+	sc := ctx.GetStochaseinstein_dbars().StmtCtx
 	sc.InNullRejectCheck = true
 	result := expression.EvaluateExprWithNull(ctx, schemaReplicant, expr)
 	sc.InNullRejectCheck = false
-	x, ok := result.(*expression.Constant)
+	x, ok := result.(*expression.CouplingConstantWithRadix)
 	if !ok {
 		return false
 	}
@@ -398,7 +398,7 @@ func (la *LogicalAggregation) PredicatePushDown(predicates []expression.Expressi
 	groupByDeferredCausets := expression.NewSchema(la.groupByDefCauss...)
 	for _, cond := range predicates {
 		switch cond.(type) {
-		case *expression.Constant:
+		case *expression.CouplingConstantWithRadix:
 			condsToPush = append(condsToPush, cond)
 			// Consider ALLEGROALLEGROSQL list "select sum(b) from t group by a having 1=0". "1=0" is a constant predicate which should be
 			// retained and pushed down at the same time. Because we will get a wrong query result that contains one column
@@ -466,7 +466,7 @@ func DeriveOtherConditions(p *LogicalJoin, deriveLeft bool, deriveRight bool) (l
 			// For LeftOuterSemiJoin and AntiLeftOuterSemiJoin, we can actually generate
 			// `col is not null` according to expressions in `OtherConditions` now, but we
 			// are putting column equal condition converted from `in (subq)` into
-			// `OtherConditions`(@sa https://github.com/whtcorpsinc/milevadb/pull/9051), then it would
+			// `OtherConditions`(@sa https://github.com/whtcorpsinc/MilevaDB-Prod/pull/9051), then it would
 			// cause wrong results, so we disable this optimization for outer semi joins now.
 			// TODO enable this optimization for outer semi joins later by checking whether
 			// condition in `OtherConditions` is converted from `in (subq)`.
@@ -511,11 +511,11 @@ func Conds2BlockDual(p LogicalPlan, conds []expression.Expression) LogicalPlan {
 	if len(conds) != 1 {
 		return nil
 	}
-	con, ok := conds[0].(*expression.Constant)
+	con, ok := conds[0].(*expression.CouplingConstantWithRadix)
 	if !ok {
 		return nil
 	}
-	sc := p.SCtx().GetStochastikVars().StmtCtx
+	sc := p.SCtx().GetStochaseinstein_dbars().StmtCtx
 	if expression.ContainMublockConst(p.SCtx(), []expression.Expression{con}) {
 		return nil
 	}

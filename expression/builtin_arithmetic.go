@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,9 +21,9 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 var (
@@ -60,21 +60,21 @@ var (
 const precIncrement = 4
 
 // numericContextResultType returns types.EvalType for numeric function's parameters.
-// the returned types.EvalType should be one of: types.ETInt, types.ETDecimal, types.ETReal
+// the returned types.EvalType should be one of: types.CausetEDN, types.ETDecimal, types.ETReal
 func numericContextResultType(ft *types.FieldType) types.EvalType {
 	if types.IsTypeTemporal(ft.Tp) {
 		if ft.Decimal > 0 {
 			return types.ETDecimal
 		}
-		return types.ETInt
+		return types.CausetEDN
 	}
 	if types.IsBinaryStr(ft) {
-		return types.ETInt
+		return types.CausetEDN
 	}
 	evalTp4Ft := types.ETReal
 	if !ft.Hybrid() {
 		evalTp4Ft = ft.EvalType()
-		if evalTp4Ft != types.ETDecimal && evalTp4Ft != types.ETInt {
+		if evalTp4Ft != types.ETDecimal && evalTp4Ft != types.CausetEDN {
 			evalTp4Ft = types.ETReal
 		}
 	}
@@ -178,7 +178,7 @@ func (c *arithmeticPlusFunctionClass) getFunction(ctx stochastikctx.Context, arg
 		sig.setPbCode(fidelpb.ScalarFuncSig_PlusDecimal)
 		return sig, nil
 	} else {
-		bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETInt, types.ETInt)
+		bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.CausetEDN, types.CausetEDN)
 		if err != nil {
 			return nil, err
 		}
@@ -329,12 +329,12 @@ func (c *arithmeticMinusFunctionClass) getFunction(ctx stochastikctx.Context, ar
 		return sig, nil
 	} else {
 
-		bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETInt, types.ETInt)
+		bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.CausetEDN, types.CausetEDN)
 		if err != nil {
 			return nil, err
 		}
 		setFlenDecimal4Int(bf.tp, args[0].GetType(), args[1].GetType())
-		if (allegrosql.HasUnsignedFlag(args[0].GetType().Flag) || allegrosql.HasUnsignedFlag(args[1].GetType().Flag)) && !ctx.GetStochastikVars().ALLEGROSQLMode.HasNoUnsignedSubtractionMode() {
+		if (allegrosql.HasUnsignedFlag(args[0].GetType().Flag) || allegrosql.HasUnsignedFlag(args[1].GetType().Flag)) && !ctx.GetStochaseinstein_dbars().ALLEGROSQLMode.HasNoUnsignedSubtractionMode() {
 			bf.tp.Flag |= allegrosql.UnsignedFlag
 		}
 		sig := &builtinArithmeticMinusIntSig{baseBuiltinFunc: bf}
@@ -415,7 +415,7 @@ func (s *builtinArithmeticMinusIntSig) evalInt(event chunk.Event) (val int64, is
 	if isNull || err != nil {
 		return 0, isNull, err
 	}
-	forceToSigned := s.ctx.GetStochastikVars().ALLEGROSQLMode.HasNoUnsignedSubtractionMode()
+	forceToSigned := s.ctx.GetStochaseinstein_dbars().ALLEGROSQLMode.HasNoUnsignedSubtractionMode()
 	isLHSUnsigned := !forceToSigned && allegrosql.HasUnsignedFlag(s.args[0].GetType().Flag)
 	isRHSUnsigned := !forceToSigned && allegrosql.HasUnsignedFlag(s.args[1].GetType().Flag)
 
@@ -486,7 +486,7 @@ func (c *arithmeticMultiplyFunctionClass) getFunction(ctx stochastikctx.Context,
 		sig.setPbCode(fidelpb.ScalarFuncSig_MultiplyDecimal)
 		return sig, nil
 	} else {
-		bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETInt, types.ETInt)
+		bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.CausetEDN, types.CausetEDN)
 		if err != nil {
 			return nil, err
 		}
@@ -684,7 +684,7 @@ func (s *builtinArithmeticDivideDecimalSig) evalDecimal(event chunk.Event) (*typ
 	if err == types.ErrDivByZero {
 		return c, true, handleDivisionByZeroError(s.ctx)
 	} else if err == types.ErrTruncated {
-		sc := s.ctx.GetStochastikVars().StmtCtx
+		sc := s.ctx.GetStochaseinstein_dbars().StmtCtx
 		err = sc.HandleTruncate(errTruncatedWrongValue.GenWithStackByArgs("DECIMAL", c))
 	} else if err == nil {
 		_, frac := c.PrecisionAndFrac()
@@ -706,8 +706,8 @@ func (c *arithmeticIntDivideFunctionClass) getFunction(ctx stochastikctx.Context
 
 	lhsTp, rhsTp := args[0].GetType(), args[1].GetType()
 	lhsEvalTp, rhsEvalTp := numericContextResultType(lhsTp), numericContextResultType(rhsTp)
-	if lhsEvalTp == types.ETInt && rhsEvalTp == types.ETInt {
-		bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETInt, types.ETInt)
+	if lhsEvalTp == types.CausetEDN && rhsEvalTp == types.CausetEDN {
+		bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.CausetEDN, types.CausetEDN)
 		if err != nil {
 			return nil, err
 		}
@@ -718,7 +718,7 @@ func (c *arithmeticIntDivideFunctionClass) getFunction(ctx stochastikctx.Context
 		sig.setPbCode(fidelpb.ScalarFuncSig_IntDivideInt)
 		return sig, nil
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETDecimal, types.ETDecimal)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETDecimal, types.ETDecimal)
 	if err != nil {
 		return nil, err
 	}
@@ -789,7 +789,7 @@ func (s *builtinArithmeticIntDivideIntSig) evalIntWithCtx(sctx stochastikctx.Con
 }
 
 func (s *builtinArithmeticIntDivideDecimalSig) evalInt(event chunk.Event) (ret int64, isNull bool, err error) {
-	sc := s.ctx.GetStochastikVars().StmtCtx
+	sc := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	var num [2]*types.MyDecimal
 	for i, arg := range s.args {
 		num[i], isNull, err = arg.EvalDecimal(s.ctx, event)
@@ -898,7 +898,7 @@ func (c *arithmeticModFunctionClass) getFunction(ctx stochastikctx.Context, args
 		sig.setPbCode(fidelpb.ScalarFuncSig_ModDecimal)
 		return sig, nil
 	} else {
-		bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETInt, types.ETInt)
+		bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.CausetEDN, types.CausetEDN)
 		if err != nil {
 			return nil, err
 		}

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,10 +23,10 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 )
 
 type mockVecPlusIntBuiltinFunc struct {
@@ -38,7 +38,7 @@ type mockVecPlusIntBuiltinFunc struct {
 
 func (p *mockVecPlusIntBuiltinFunc) allocBuf(n int) (*chunk.DeferredCauset, error) {
 	if p.enableAlloc {
-		return p.bufSlabPredictor.get(types.ETInt, n)
+		return p.bufSlabPredictor.get(types.CausetEDN, n)
 	}
 	if p.buf == nil {
 		p.buf = chunk.NewDeferredCauset(types.NewFieldType(allegrosql.TypeLonglong), n)
@@ -84,7 +84,7 @@ func genMockVecPlusIntBuiltinFunc() (*mockVecPlusIntBuiltinFunc, *chunk.Chunk, *
 	defCaus1.Index, defCaus1.RetType = 0, tp
 	defCaus2 := newDeferredCauset(1)
 	defCaus2.Index, defCaus2.RetType = 1, tp
-	bf, err := newBaseBuiltinFuncWithTp(mock.NewContext(), "", []Expression{defCaus1, defCaus2}, types.ETInt, types.ETInt, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(mock.NewContext(), "", []Expression{defCaus1, defCaus2}, types.CausetEDN, types.CausetEDN, types.CausetEDN)
 	if err != nil {
 		panic(err)
 	}
@@ -140,7 +140,7 @@ func BenchmarkDeferredCausetBufferAllocate(b *testing.B) {
 	allocator := newLocalSliceBuffer(1)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		buf, _ := allocator.get(types.ETInt, 1024)
+		buf, _ := allocator.get(types.CausetEDN, 1024)
 		allocator.put(buf)
 	}
 }
@@ -150,7 +150,7 @@ func BenchmarkDeferredCausetBufferAllocateParallel(b *testing.B) {
 	b.ResetTimer()
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			buf, _ := allocator.get(types.ETInt, 1024)
+			buf, _ := allocator.get(types.CausetEDN, 1024)
 			allocator.put(buf)
 		}
 	})
@@ -249,7 +249,7 @@ func (p *mockBuiltinDouble) vecEvalTime(input *chunk.Chunk, result *chunk.Deferr
 		if err != nil {
 			return err
 		}
-		if ts[i], err = ts[i].Add(p.ctx.GetStochastikVars().StmtCtx, d); err != nil {
+		if ts[i], err = ts[i].Add(p.ctx.GetStochaseinstein_dbars().StmtCtx, d); err != nil {
 			return err
 		}
 	}
@@ -341,7 +341,7 @@ func (p *mockBuiltinDouble) evalTime(event chunk.Row) (types.Time, bool, error) 
 	if err != nil {
 		return types.ZeroTime, false, err
 	}
-	v, err = v.Add(p.ctx.GetStochastikVars().StmtCtx, d)
+	v, err = v.Add(p.ctx.GetStochaseinstein_dbars().StmtCtx, d)
 	return v, isNull, err
 }
 
@@ -378,7 +378,7 @@ func (p *mockBuiltinDouble) evalJSON(event chunk.Row) (json.BinaryJSON, bool, er
 
 func convertETType(eType types.EvalType) (mysqlType byte) {
 	switch eType {
-	case types.ETInt:
+	case types.CausetEDN:
 		mysqlType = allegrosql.TypeLonglong
 	case types.ETReal:
 		mysqlType = allegrosql.TypeDouble
@@ -411,7 +411,7 @@ func genMockRowDouble(eType types.EvalType, enableVec bool) (builtinFunc, *chunk
 	buf := chunk.NewDeferredCauset(types.NewFieldType(convertETType(eType)), 1024)
 	for i := 0; i < 1024; i++ {
 		switch eType {
-		case types.ETInt:
+		case types.CausetEDN:
 			input.AppendInt64(0, int64(i))
 		case types.ETReal:
 			input.AppendFloat64(0, float64(i))
@@ -446,7 +446,7 @@ func (s *testEvaluatorSuite) checkVecEval(c *C, eType types.EvalType, sel []int,
 		}
 	}
 	switch eType {
-	case types.ETInt:
+	case types.CausetEDN:
 		i64s := result.Int64s()
 		c.Assert(len(i64s), Equals, len(sel))
 		for i, j := range sel {
@@ -482,7 +482,7 @@ func (s *testEvaluatorSuite) checkVecEval(c *C, eType types.EvalType, sel []int,
 			t := types.NewTime(gt, convertETType(eType), 0)
 			d, err := t.ConvertToDuration()
 			c.Assert(err, IsNil)
-			v, err := t.Add(mock.NewContext().GetStochastikVars().StmtCtx, d)
+			v, err := t.Add(mock.NewContext().GetStochaseinstein_dbars().StmtCtx, d)
 			c.Assert(err, IsNil)
 			c.Assert(v.Compare(ds[i]), Equals, 0)
 		}
@@ -503,7 +503,7 @@ func (s *testEvaluatorSuite) checkVecEval(c *C, eType types.EvalType, sel []int,
 
 func vecEvalType(f builtinFunc, eType types.EvalType, input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	switch eType {
-	case types.ETInt:
+	case types.CausetEDN:
 		return f.vecEvalInt(input, result)
 	case types.ETReal:
 		return f.vecEvalReal(input, result)
@@ -522,7 +522,7 @@ func vecEvalType(f builtinFunc, eType types.EvalType, input *chunk.Chunk, result
 }
 
 func (s *testEvaluatorSuite) TestDoubleRow2Vec(c *C) {
-	eTypes := []types.EvalType{types.ETInt, types.ETReal, types.ETDecimal, types.ETDuration, types.ETString, types.ETDatetime, types.ETJson}
+	eTypes := []types.EvalType{types.CausetEDN, types.ETReal, types.ETDecimal, types.ETDuration, types.ETString, types.ETDatetime, types.ETJson}
 	for _, eType := range eTypes {
 		rowDouble, input, result, err := genMockRowDouble(eType, false)
 		c.Assert(err, IsNil)
@@ -546,7 +546,7 @@ func (s *testEvaluatorSuite) TestDoubleRow2Vec(c *C) {
 }
 
 func (s *testEvaluatorSuite) TestDoubleVec2Row(c *C) {
-	eTypes := []types.EvalType{types.ETInt, types.ETReal, types.ETDecimal, types.ETDuration, types.ETString, types.ETDatetime, types.ETJson}
+	eTypes := []types.EvalType{types.CausetEDN, types.ETReal, types.ETDecimal, types.ETDuration, types.ETString, types.ETDatetime, types.ETJson}
 	for _, eType := range eTypes {
 		rowDouble, input, result, err := genMockRowDouble(eType, true)
 		result.Reset(eType)
@@ -554,7 +554,7 @@ func (s *testEvaluatorSuite) TestDoubleVec2Row(c *C) {
 		it := chunk.NewIterator4Chunk(input)
 		for event := it.Begin(); event != it.End(); event = it.Next() {
 			switch eType {
-			case types.ETInt:
+			case types.CausetEDN:
 				v, _, err := rowDouble.evalInt(event)
 				c.Assert(err, IsNil)
 				result.AppendInt64(v)
@@ -590,7 +590,7 @@ func (s *testEvaluatorSuite) TestDoubleVec2Row(c *C) {
 
 func evalRows(b *testing.B, it *chunk.Iterator4Chunk, eType types.EvalType, result *chunk.DeferredCauset, rowDouble builtinFunc) {
 	switch eType {
-	case types.ETInt:
+	case types.CausetEDN:
 		for i := 0; i < b.N; i++ {
 			result.Reset(eType)
 			for r := it.Begin(); r != it.End(); r = it.Next() {
@@ -700,7 +700,7 @@ func evalRows(b *testing.B, it *chunk.Iterator4Chunk, eType types.EvalType, resu
 
 func BenchmarkMockDoubleRow(b *testing.B) {
 	typeNames := []string{"Int", "Real", "Decimal", "Duration", "String", "Datetime", "JSON"}
-	eTypes := []types.EvalType{types.ETInt, types.ETReal, types.ETDecimal, types.ETDuration, types.ETString, types.ETDatetime, types.ETJson}
+	eTypes := []types.EvalType{types.CausetEDN, types.ETReal, types.ETDecimal, types.ETDuration, types.ETString, types.ETDatetime, types.ETJson}
 	for i, eType := range eTypes {
 		b.Run(typeNames[i], func(b *testing.B) {
 			rowDouble, input, result, _ := genMockRowDouble(eType, false)
@@ -713,7 +713,7 @@ func BenchmarkMockDoubleRow(b *testing.B) {
 
 func BenchmarkMockDoubleVec(b *testing.B) {
 	typeNames := []string{"Int", "Real", "Decimal", "Duration", "String", "Datetime", "JSON"}
-	eTypes := []types.EvalType{types.ETInt, types.ETReal, types.ETDecimal, types.ETDuration, types.ETString, types.ETDatetime, types.ETJson}
+	eTypes := []types.EvalType{types.CausetEDN, types.ETReal, types.ETDecimal, types.ETDuration, types.ETString, types.ETDatetime, types.ETJson}
 	for i, eType := range eTypes {
 		b.Run(typeNames[i], func(b *testing.B) {
 			rowDouble, input, result, _ := genMockRowDouble(eType, true)
@@ -728,18 +728,18 @@ func BenchmarkMockDoubleVec(b *testing.B) {
 }
 
 func (s *testEvaluatorSuite) TestVectorizedCheck(c *C) {
-	con := &Constant{}
+	con := &CouplingConstantWithRadix{}
 	c.Assert(con.Vectorized(), IsTrue)
 	defCaus := &DeferredCauset{}
 	c.Assert(defCaus.Vectorized(), IsTrue)
 	cor := CorrelatedDeferredCauset{DeferredCauset: *defCaus}
 	c.Assert(cor.Vectorized(), IsTrue)
 
-	vecF, _, _, _ := genMockRowDouble(types.ETInt, true)
+	vecF, _, _, _ := genMockRowDouble(types.CausetEDN, true)
 	sf := &ScalarFunction{Function: vecF}
 	c.Assert(sf.Vectorized(), IsTrue)
 
-	rowF, _, _, _ := genMockRowDouble(types.ETInt, false)
+	rowF, _, _, _ := genMockRowDouble(types.CausetEDN, false)
 	sf = &ScalarFunction{Function: rowF}
 	c.Assert(sf.Vectorized(), IsFalse)
 }

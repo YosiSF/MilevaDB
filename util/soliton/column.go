@@ -76,7 +76,7 @@ func (c *Column) isFixed() bool {
 // Different from reset, Reset will reset the elemBuf.
 func (c *Column) Reset(eType types.EvalType) {
 	switch eType {
-	case types.ETInt:
+	case types.CausetEDN:
 		c.ResizeInt64(0, false)
 	case types.ETReal:
 		c.ResizeFloat64(0, false)

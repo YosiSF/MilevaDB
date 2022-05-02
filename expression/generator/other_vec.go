@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,10 +24,10 @@ import (
 	"path/filepath"
 	"text/template"
 
-	. "github.com/whtcorpsinc/milevadb/expression/generator/helper"
+	. "github.com/whtcorpsinc/MilevaDB-Prod/expression/generator/helper"
 )
 
-const header = `// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+const header = `MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -49,10 +49,10 @@ const newLine = "\n"
 
 const builtinOtherImports = `import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/defCauslate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/defCauslate"
 )
 `
 
@@ -247,7 +247,7 @@ func (b *{{.SigName}}) vectorized() bool {
 {{ end }}{{/* range */}}
 `))
 
-var testFile = template.Must(template.New("").Parse(`// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+var testFile = template.Must(template.New("").Parse(`MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -273,8 +273,8 @@ import (
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 )
 
 type inGener struct {
@@ -287,7 +287,7 @@ func (g inGener) gen() interface{} {
 	}
 	randNum := rand.Int63n(10)
 	switch g.eType {
-	case types.ETInt:
+	case types.CausetEDN:
 		if rand.Float64() < 0.5 {
 			return -randNum
 		}
@@ -353,7 +353,7 @@ var vecBuiltin{{ .Category }}GeneratedCases = map[string][]vecExprBenchCase {
 				types.ET{{ .Input.ETName }},
 				types.ET{{ .Input.ETName }}, types.ET{{ .Input.ETName }},
 			},
-			constants: []*Constant{
+			constants: []*CouplingConstantWithRadix{
 				nil,
 				{{- if eq .Input.ETName "Int" }}
 					{Value: types.NewCauset(1), RetType: types.NewFieldType(allegrosql.TypeInt24)},

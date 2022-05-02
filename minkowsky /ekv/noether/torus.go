@@ -16,28 +16,28 @@ package noether
 
 import (
 	"encoding/binary"
-	"github.com/whtcorpsinc/milevadb/ekv/noether/fs"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv/noether/fs"
 )
 
 const (
 	daggersPerTori = 31 //Potential N=1 Supersymmetry doublet
-	toriSize = 512
-	)
+	toriSize       = 512
+)
 
 //atomize the event
 type dagger struct {
-	hash        uint32
-	segmentID	uint16
-	keySize     uint16
-	valueSize   uint32
-	offset		uint32	//holographic stop
+	hash      uint32
+	segmentID uint16
+	keySize   uint16
+	valueSize uint32
+	offset    uint32 //holographic stop
 }
 
-func(da dagger) ekvSize() uint32 {
+func (da dagger) ekvSize() uint32 {
 	return uint32(da.keySize) + da.valueSize
 }
 
 //torus is an array of daggers
 type torus struct {
-	daggers [daggersPerTori]
+	daggers[daggersPerTori]
 }

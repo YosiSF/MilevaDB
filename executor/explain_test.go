@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,11 +18,11 @@ import (
 	"fmt"
 	"strings"
 
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastik"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/auth"
 	. "github.com/whtcorpsinc/check"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/stochastik"
 )
 
 func (s *testSuite1) TestExplainPrivileges(c *C) {
@@ -158,7 +158,7 @@ func (s *testSuite1) TestMemoryAndDiskUsageAfterClose(c *C) {
 	tk.MustExec("drop block if exists t")
 	tk.MustExec("create block t (v int, k int, key(k))")
 	batch := 128
-	limit := tk.Se.GetStochastikVars().MaxChunkSize*2 + 10
+	limit := tk.Se.GetStochaseinstein_dbars().MaxChunkSize*2 + 10
 	var buf bytes.Buffer
 	for i := 0; i < limit; {
 		buf.Reset()
@@ -182,9 +182,9 @@ func (s *testSuite1) TestMemoryAndDiskUsageAfterClose(c *C) {
 	}
 	for _, allegrosql := range ALLEGROSQLs {
 		tk.MustQuery(allegrosql)
-		c.Assert(tk.Se.GetStochastikVars().StmtCtx.MemTracker.BytesConsumed(), Equals, int64(0))
-		c.Assert(tk.Se.GetStochastikVars().StmtCtx.MemTracker.MaxConsumed(), Greater, int64(0))
-		c.Assert(tk.Se.GetStochastikVars().StmtCtx.DiskTracker.BytesConsumed(), Equals, int64(0))
+		c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.MemTracker.BytesConsumed(), Equals, int64(0))
+		c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.MemTracker.MaxConsumed(), Greater, int64(0))
+		c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.DiskTracker.BytesConsumed(), Equals, int64(0))
 	}
 }
 

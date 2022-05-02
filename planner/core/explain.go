@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,16 +19,16 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression/aggregation"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/stringutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/statistics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/expression/aggregation"
-	"github.com/whtcorpsinc/milevadb/planner/soliton"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton/stringutil"
-	"github.com/whtcorpsinc/milevadb/statistics"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
 )
 
 // A plan is dataAccesser means it can access underlying data.
@@ -274,7 +274,7 @@ func (p *PhysicalBlockReader) ExplainNormalizedInfo() string {
 func (p *PhysicalBlockReader) accessObject(sctx stochastikctx.Context) string {
 	ts := p.BlockPlans[0].(*PhysicalBlockScan)
 	pi := ts.Block.GetPartitionInfo()
-	if pi == nil || !sctx.GetStochastikVars().UseDynamicPartitionPrune() {
+	if pi == nil || !sctx.GetStochaseinstein_dbars().UseDynamicPartitionPrune() {
 		return ""
 	}
 
@@ -333,7 +333,7 @@ func (p *PhysicalIndexReader) ExplainNormalizedInfo() string {
 func (p *PhysicalIndexReader) accessObject(sctx stochastikctx.Context) string {
 	ts := p.IndexPlans[0].(*PhysicalIndexScan)
 	pi := ts.Block.GetPartitionInfo()
-	if pi == nil || !sctx.GetStochastikVars().UseDynamicPartitionPrune() {
+	if pi == nil || !sctx.GetStochaseinstein_dbars().UseDynamicPartitionPrune() {
 		return ""
 	}
 
@@ -361,7 +361,7 @@ func (p *PhysicalIndexLookUpReader) ExplainInfo() string {
 func (p *PhysicalIndexLookUpReader) accessObject(sctx stochastikctx.Context) string {
 	ts := p.BlockPlans[0].(*PhysicalBlockScan)
 	pi := ts.Block.GetPartitionInfo()
-	if pi == nil || !sctx.GetStochastikVars().UseDynamicPartitionPrune() {
+	if pi == nil || !sctx.GetStochaseinstein_dbars().UseDynamicPartitionPrune() {
 		return ""
 	}
 
@@ -385,7 +385,7 @@ func (p *PhysicalIndexMergeReader) ExplainInfo() string {
 func (p *PhysicalIndexMergeReader) accessObject(sctx stochastikctx.Context) string {
 	ts := p.BlockPlans[0].(*PhysicalBlockScan)
 	pi := ts.Block.GetPartitionInfo()
-	if pi == nil || !sctx.GetStochastikVars().UseDynamicPartitionPrune() {
+	if pi == nil || !sctx.GetStochaseinstein_dbars().UseDynamicPartitionPrune() {
 		return ""
 	}
 

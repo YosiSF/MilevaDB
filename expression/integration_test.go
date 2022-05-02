@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,22 +29,22 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/petri"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/soliton/defCauslate"
-	"github.com/whtcorpsinc/milevadb/soliton/kvcache"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/soliton/solitonutil"
-	"github.com/whtcorpsinc/milevadb/soliton/sqlexec"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/stochastik"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/defCauslate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/kvcache"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/sqlexec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastik"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 var _ = Suite(&testIntegrationSuite{})
@@ -639,7 +639,7 @@ func (s *testIntegrationSuite2) TestMathBuiltin(c *C) {
 	tk.MustExec("drop block if exists t")
 	tk.MustExec("create block t(a int)")
 	tk.MustExec("insert into t values(1),(2),(3)")
-	tk.Se.GetStochastikVars().MaxChunkSize = 1
+	tk.Se.GetStochaseinstein_dbars().MaxChunkSize = 1
 	tk.MustQuery("select rand(1) from t").Sort().Check(testkit.Events("0.1418603212962489", "0.40540353712197724", "0.8716141803857071"))
 	tk.MustQuery("select rand(a) from t").Check(testkit.Events("0.40540353712197724", "0.6555866465490187", "0.9057697559760601"))
 	tk.MustQuery("select rand(1), rand(2), rand(3)").Check(testkit.Events("0.40540353712197724 0.6555866465490187 0.9057697559760601"))
@@ -1236,10 +1236,10 @@ func (s *testIntegrationSuite2) TestEncryptionBuiltin(c *C) {
 }
 
 func (s *testIntegrationSuite2) TestTimeBuiltin(c *C) {
-	originALLEGROSQLMode := s.ctx.GetStochastikVars().StrictALLEGROSQLMode
-	s.ctx.GetStochastikVars().StrictALLEGROSQLMode = true
+	originALLEGROSQLMode := s.ctx.GetStochaseinstein_dbars().StrictALLEGROSQLMode
+	s.ctx.GetStochaseinstein_dbars().StrictALLEGROSQLMode = true
 	defer func() {
-		s.ctx.GetStochastikVars().StrictALLEGROSQLMode = originALLEGROSQLMode
+		s.ctx.GetStochaseinstein_dbars().StrictALLEGROSQLMode = originALLEGROSQLMode
 		s.cleanEnv(c)
 	}()
 	tk := testkit.NewTestKit(c, s.causetstore)
@@ -2724,7 +2724,7 @@ func (s *testIntegrationSuite2) TestBuiltin(c *C) {
 	// NOTE (#17013): make from_unixtime sblock in different timezone: the result of from_unixtime
 	// depends on the local time zone of the test environment, thus the result checking must
 	// consider the time zone convert.
-	tz := tk.Se.GetStochastikVars().StmtCtx.TimeZone
+	tz := tk.Se.GetStochaseinstein_dbars().StmtCtx.TimeZone
 	result = tk.MustQuery("select from_unixtime(1451606400)")
 	unixTime := time.Unix(1451606400, 0).In(tz).String()[:19]
 	result.Check(testkit.Events(unixTime))
@@ -2879,7 +2879,7 @@ func (s *testIntegrationSuite2) TestBuiltin(c *C) {
 	result.Check(testkit.Events("2442"))
 
 	// for regexp, rlike
-	// https://github.com/whtcorpsinc/milevadb/issues/4080
+	// https://github.com/whtcorpsinc/MilevaDB-Prod/issues/4080
 	tk.MustExec(`drop block if exists t;`)
 	tk.MustExec(`create block t (a char(10), b varchar(10), c binary(10), d varbinary(10));`)
 	tk.MustExec(`insert into t values ('text','text','text','text');`)
@@ -3033,25 +3033,25 @@ func (s *testIntegrationSuite) TestInfoBuiltin(c *C) {
 	tk.MustExec("use test")
 
 	// for current_user
-	stochastikVars := tk.Se.GetStochastikVars()
-	originUser := stochastikVars.User
-	stochastikVars.User = &auth.UserIdentity{Username: "root", Hostname: "localhost", AuthUsername: "root", AuthHostname: "127.0.%%"}
+	stochaseinstein_dbars := tk.Se.GetStochaseinstein_dbars()
+	originUser := stochaseinstein_dbars.User
+	stochaseinstein_dbars.User = &auth.UserIdentity{Username: "root", Hostname: "localhost", AuthUsername: "root", AuthHostname: "127.0.%%"}
 	result = tk.MustQuery("select current_user()")
 	result.Check(testkit.Events("root@127.0.%%"))
-	stochastikVars.User = originUser
+	stochaseinstein_dbars.User = originUser
 
 	// for user
-	stochastikVars.User = &auth.UserIdentity{Username: "root", Hostname: "localhost", AuthUsername: "root", AuthHostname: "127.0.%%"}
+	stochaseinstein_dbars.User = &auth.UserIdentity{Username: "root", Hostname: "localhost", AuthUsername: "root", AuthHostname: "127.0.%%"}
 	result = tk.MustQuery("select user()")
 	result.Check(testkit.Events("root@localhost"))
-	stochastikVars.User = originUser
+	stochaseinstein_dbars.User = originUser
 
 	// for connection_id
-	originConnectionID := stochastikVars.ConnectionID
-	stochastikVars.ConnectionID = uint64(1)
+	originConnectionID := stochaseinstein_dbars.ConnectionID
+	stochaseinstein_dbars.ConnectionID = uint64(1)
 	result = tk.MustQuery("select connection_id()")
 	result.Check(testkit.Events("1"))
-	stochastikVars.ConnectionID = originConnectionID
+	stochaseinstein_dbars.ConnectionID = originConnectionID
 
 	// for version
 	result = tk.MustQuery("select version()")
@@ -3499,7 +3499,7 @@ func (s *testIntegrationSuite) TestCompareBuiltin(c *C) {
 	tk.MustExec(`insert into t2 values(1, 1.1, "2020-08-01 12:01:01", "12:01:01", "abcdef", 0b10101)`)
 
 	result = tk.MustQuery("select coalesce(NULL, a), coalesce(NULL, b, a), coalesce(c, NULL, a, b), coalesce(d, NULL), coalesce(d, c), coalesce(NULL, NULL, e, 1), coalesce(f), coalesce(1, a, b, c, d, e, f) from t2")
-	result.Check(testkit.Events(fmt.Sprintf("1 1.1 2020-08-01 12:01:01 12:01:01 %s 12:01:01 abcdef 21 1", time.Now().In(tk.Se.GetStochastikVars().Location()).Format("2006-01-02"))))
+	result.Check(testkit.Events(fmt.Sprintf("1 1.1 2020-08-01 12:01:01 12:01:01 %s 12:01:01 abcdef 21 1", time.Now().In(tk.Se.GetStochaseinstein_dbars().Location()).Format("2006-01-02"))))
 
 	// nullif
 	result = tk.MustQuery(`SELECT NULLIF(NULL, 1), NULLIF(1, NULL), NULLIF(1, 1), NULLIF(NULL, NULL);`)
@@ -4451,7 +4451,7 @@ func (s *testIntegrationSuite) TestFilterExtractFromDNF(c *C) {
 	for _, tt := range tests {
 		allegrosql := "select * from t where " + tt.exprStr
 		sctx := tk.Se.(stochastikctx.Context)
-		sc := sctx.GetStochastikVars().StmtCtx
+		sc := sctx.GetStochaseinstein_dbars().StmtCtx
 		stmts, err := stochastik.Parse(sctx, allegrosql)
 		c.Assert(err, IsNil, Commentf("error %v, for expr %s", err, tt.exprStr))
 		c.Assert(stmts, HasLen, 1)
@@ -4534,7 +4534,7 @@ func (s *testIntegrationSuite) TestMilevaDBInternalFunc(c *C) {
 	// Test invalid record/index key.
 	result = tk.MustQuery("select milevadb_decode_key( '7480000000000000FF2E5F728000000011FFE1A3000000000000' )")
 	result.Check(testkit.Events("7480000000000000FF2E5F728000000011FFE1A3000000000000"))
-	warns := tk.Se.GetStochastikVars().StmtCtx.GetWarnings()
+	warns := tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 	c.Assert(warns, HasLen, 1)
 	c.Assert(warns[0].Err.Error(), Equals, "invalid record/index key: 7480000000000000FF2E5F728000000011FFE1A3000000000000")
 }
@@ -5434,7 +5434,7 @@ func (s *testIntegrationSuite) TestIssue11309And11319(c *C) {
 	tk.MustQuery(`SELECT DATE_ADD('2003-11-18 07:25:13',INTERVAL c MINUTE_SECOND) FROM t`).Check(testkit.Events(`2003-11-18 09:29:13`, `2003-11-18 05:21:13`))
 	tk.MustExec(`drop block if exists t;`)
 
-	// for https://github.com/whtcorpsinc/milevadb/issues/11319
+	// for https://github.com/whtcorpsinc/MilevaDB-Prod/issues/11319
 	tk.MustQuery(`SELECT DATE_ADD('2007-03-28 22:08:28',INTERVAL -2.2 MINUTE_MICROSECOND)`).Check(testkit.Events("2007-03-28 22:08:25.800000"))
 	tk.MustQuery(`SELECT DATE_ADD('2007-03-28 22:08:28',INTERVAL -2.2 SECOND_MICROSECOND)`).Check(testkit.Events("2007-03-28 22:08:25.800000"))
 	tk.MustQuery(`SELECT DATE_ADD('2007-03-28 22:08:28',INTERVAL -2.2 HOUR_MICROSECOND)`).Check(testkit.Events("2007-03-28 22:08:25.800000"))
@@ -5514,7 +5514,7 @@ func (s *testIntegrationSuite) TestDecodetoChunkReuse(c *C) {
 		tk.MustExec(fmt.Sprintf("insert chk values (%d,'%s')", i, strconv.Itoa(i)))
 	}
 
-	tk.Se.GetStochastikVars().SetDistALLEGROSQLScanConcurrency(1)
+	tk.Se.GetStochaseinstein_dbars().SetDistALLEGROSQLScanConcurrency(1)
 	tk.MustExec("set milevadb_init_chunk_size = 2")
 	tk.MustExec("set milevadb_max_chunk_size = 32")
 	defer func() {
@@ -5581,9 +5581,9 @@ func (s *testIntegrationSuite) TestCastStrToInt(c *C) {
 		{"select cast('-123e456' as signed)", -123},
 	}
 	for _, ca := range cases {
-		tk.Se.GetStochastikVars().StmtCtx.SetWarnings(nil)
+		tk.Se.GetStochaseinstein_dbars().StmtCtx.SetWarnings(nil)
 		tk.MustQuery(ca.allegrosql).Check(testkit.Events(fmt.Sprintf("%v", ca.result)))
-		c.Assert(terror.ErrorEqual(tk.Se.GetStochastikVars().StmtCtx.GetWarnings()[0].Err, types.ErrTruncatedWrongVal), IsTrue)
+		c.Assert(terror.ErrorEqual(tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()[0].Err, types.ErrTruncatedWrongVal), IsTrue)
 	}
 }
 
@@ -5888,7 +5888,7 @@ func (s *testIntegrationSerialSuite) TestCacheConstEval(c *C) {
 	tk.MustExec("drop block if exists t")
 	tk.MustExec("create block t(defCaus_double double)")
 	tk.MustExec("insert into t values (1)")
-	tk.Se.GetStochastikVars().EnableVectorizedExpression = false
+	tk.Se.GetStochaseinstein_dbars().EnableVectorizedExpression = false
 	tk.MustExec("insert into allegrosql.expr_pushdown_blacklist values('cast', 'einsteindb,tiflash,milevadb', 'for test')")
 	tk.MustExec("admin reload expr_pushdown_blacklist")
 	tk.MustExec("prepare stmt from 'SELECT * FROM (SELECT defCaus_double AS c0 FROM t) t WHERE (ABS((REPEAT(?, ?) OR 5617780767323292672)) < LN(EXP(c0)) + (? ^ ?))'")
@@ -5899,7 +5899,7 @@ func (s *testIntegrationSerialSuite) TestCacheConstEval(c *C) {
 	// Main purpose here is checking no error is reported. 1 is the result when plan cache is disabled, it is
 	// incompatible with MyALLEGROSQL actually, uFIDelate the result after fixing it.
 	tk.MustQuery("execute stmt using @a1, @a2, @a3, @a4").Check(testkit.Events("1"))
-	tk.Se.GetStochastikVars().EnableVectorizedExpression = true
+	tk.Se.GetStochaseinstein_dbars().EnableVectorizedExpression = true
 	tk.MustExec("delete from allegrosql.expr_pushdown_blacklist where name = 'cast' and store_type = 'einsteindb,tiflash,milevadb' and reason = 'for test'")
 	tk.MustExec("admin reload expr_pushdown_blacklist")
 }
@@ -6051,7 +6051,7 @@ func (s *testIntegrationSerialSuite) TestDefCauslationCreateIndex(c *C) {
 	tk.MustQuery("select * from t order by a").Check(testkit.Events("a", "A", "a", "A", "b", "B", "sa", "ß"))
 }
 
-func (s *testIntegrationSerialSuite) TestDefCauslateConstantPropagation(c *C) {
+func (s *testIntegrationSerialSuite) TestDefCauslateCouplingConstantWithRadixPropagation(c *C) {
 	tk := testkit.NewTestKit(c, s.causetstore)
 	defCauslate.SetNewDefCauslationEnabledForTest(true)
 	defer defCauslate.SetNewDefCauslationEnabledForTest(false)

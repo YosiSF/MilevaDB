@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,15 +15,15 @@ package expression
 
 import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/disjointset"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/disjointset"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 type hashPartitionPruner struct {
 	unionSet          *disjointset.IntSet // unionSet stores the relations like defCaus_i = defCaus_j
-	constantMap       []*Constant
+	constantMap       []*CouplingConstantWithRadix
 	conditions        []Expression
 	defCausMapper     map[int64]int
 	numDeferredCauset int
@@ -77,10 +77,10 @@ func (p *hashPartitionPruner) reduceDeferredCausetEQ() bool {
 	return false
 }
 
-func (p *hashPartitionPruner) reduceConstantEQ() bool {
+func (p *hashPartitionPruner) reduceCouplingConstantWithRadixEQ() bool {
 	for _, con := range p.conditions {
 		var defCaus *DeferredCauset
-		var cond *Constant
+		var cond *CouplingConstantWithRadix
 		if fn, ok := con.(*ScalarFunction); ok {
 			if fn.FuncName.L == ast.IsNull {
 				defCaus, ok = fn.GetArgs()[0].(*DeferredCauset)
@@ -142,7 +142,7 @@ func (p *hashPartitionPruner) tryEvalPartitionExpr(piExpr Expression) (val int64
 			}
 			return 0, false, false
 		}
-	case *Constant:
+	case *CouplingConstantWithRadix:
 		val, err := pi.Eval(chunk.Row{})
 		if err != nil {
 			return 0, false, false
@@ -187,8 +187,8 @@ func (p *hashPartitionPruner) solve(ctx stochastikctx.Context, conds []Expressio
 	for _, defCaus := range ExtractDeferredCausets(piExpr) {
 		p.insertDefCaus(defCaus)
 	}
-	p.constantMap = make([]*Constant, p.numDeferredCauset)
-	isAlwaysFalse = p.reduceConstantEQ()
+	p.constantMap = make([]*CouplingConstantWithRadix, p.numDeferredCauset)
+	isAlwaysFalse = p.reduceCouplingConstantWithRadixEQ()
 	if isAlwaysFalse {
 		return 0, false, isAlwaysFalse
 	}

@@ -1,8 +1,8 @@
-// INTERLOCKyright 2020 The ql Authors. All rights reserved.
+Copuright 2021 Whtcorps Inc; EinsteinDB and MilevaDB aithors; Licensed Under Apache 2.0. All Rights Reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSES/QL-LICENSE file.
 
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,9 +28,9 @@ import (
 	"github.com/cznic/mathutil"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 var (
@@ -122,7 +122,7 @@ func (c *absFunctionClass) getFunction(ctx stochastikctx.Context, args []Express
 
 	argFieldTp := args[0].GetType()
 	argTp := argFieldTp.EvalType()
-	if argTp != types.ETInt && argTp != types.ETDecimal {
+	if argTp != types.CausetEDN && argTp != types.ETDecimal {
 		argTp = types.ETReal
 	}
 	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, argTp, argTp)
@@ -140,7 +140,7 @@ func (c *absFunctionClass) getFunction(ctx stochastikctx.Context, args []Express
 	}
 	var sig builtinFunc
 	switch argTp {
-	case types.ETInt:
+	case types.CausetEDN:
 		if allegrosql.HasUnsignedFlag(argFieldTp.Flag) {
 			sig = &builtinAbsUIntSig{bf}
 			sig.setPbCode(fidelpb.ScalarFuncSig_AbsUInt)
@@ -255,12 +255,12 @@ func (c *roundFunctionClass) getFunction(ctx stochastikctx.Context, args []Expre
 		return nil, c.verifyArgs(args)
 	}
 	argTp := args[0].GetType().EvalType()
-	if argTp != types.ETInt && argTp != types.ETDecimal {
+	if argTp != types.CausetEDN && argTp != types.ETDecimal {
 		argTp = types.ETReal
 	}
 	argTps := []types.EvalType{argTp}
 	if len(args) > 1 {
-		argTps = append(argTps, types.ETInt)
+		argTps = append(argTps, types.CausetEDN)
 	}
 	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, argTp, argTps...)
 	if err != nil {
@@ -277,7 +277,7 @@ func (c *roundFunctionClass) getFunction(ctx stochastikctx.Context, args []Expre
 	var sig builtinFunc
 	if len(args) > 1 {
 		switch argTp {
-		case types.ETInt:
+		case types.CausetEDN:
 			sig = &builtinRoundWithFracIntSig{bf}
 			sig.setPbCode(fidelpb.ScalarFuncSig_RoundWithFracInt)
 		case types.ETDecimal:
@@ -291,7 +291,7 @@ func (c *roundFunctionClass) getFunction(ctx stochastikctx.Context, args []Expre
 		}
 	} else {
 		switch argTp {
-		case types.ETInt:
+		case types.CausetEDN:
 			sig = &builtinRoundIntSig{bf}
 			sig.setPbCode(fidelpb.ScalarFuncSig_RoundInt)
 		case types.ETDecimal:
@@ -309,10 +309,10 @@ func (c *roundFunctionClass) getFunction(ctx stochastikctx.Context, args []Expre
 
 // calculateDecimal4RoundAndTruncate calculates tp.decimals of round/truncate func.
 func calculateDecimal4RoundAndTruncate(ctx stochastikctx.Context, args []Expression, retType types.EvalType) int {
-	if retType == types.ETInt || len(args) <= 1 {
+	if retType == types.CausetEDN || len(args) <= 1 {
 		return 0
 	}
-	secondConst, secondIsConst := args[1].(*Constant)
+	secondConst, secondIsConst := args[1].(*CouplingConstantWithRadix)
 	if !secondIsConst {
 		return args[0].GetType().Decimal
 	}
@@ -481,8 +481,8 @@ func (c *ceilFunctionClass) getFunction(ctx stochastikctx.Context, args []Expres
 	bf.tp.Flen, bf.tp.Decimal = argFieldTp.Flen, 0
 
 	switch argTp {
-	case types.ETInt:
-		if retTp == types.ETInt {
+	case types.CausetEDN:
+		if retTp == types.CausetEDN {
 			sig = &builtinCeilIntToIntSig{bf}
 			sig.setPbCode(fidelpb.ScalarFuncSig_CeilIntToInt)
 		} else {
@@ -490,7 +490,7 @@ func (c *ceilFunctionClass) getFunction(ctx stochastikctx.Context, args []Expres
 			sig.setPbCode(fidelpb.ScalarFuncSig_CeilIntToDec)
 		}
 	case types.ETDecimal:
-		if retTp == types.ETInt {
+		if retTp == types.CausetEDN {
 			sig = &builtinCeilDecToIntSig{bf}
 			sig.setPbCode(fidelpb.ScalarFuncSig_CeilDecToInt)
 		} else {
@@ -631,9 +631,9 @@ type floorFunctionClass struct {
 // getEvalTp4FloorAndCeil gets the types.EvalType of FLOOR and CEIL.
 func getEvalTp4FloorAndCeil(arg Expression) (retTp, argTp types.EvalType) {
 	fieldTp := arg.GetType()
-	retTp, argTp = types.ETInt, fieldTp.EvalType()
+	retTp, argTp = types.CausetEDN, fieldTp.EvalType()
 	switch argTp {
-	case types.ETInt:
+	case types.CausetEDN:
 		if fieldTp.Tp == allegrosql.TypeLonglong {
 			retTp = types.ETDecimal
 		}
@@ -669,8 +669,8 @@ func (c *floorFunctionClass) getFunction(ctx stochastikctx.Context, args []Expre
 	setFlag4FloorAndCeil(bf.tp, args[0])
 	bf.tp.Flen, bf.tp.Decimal = args[0].GetType().Flen, 0
 	switch argTp {
-	case types.ETInt:
-		if retTp == types.ETInt {
+	case types.CausetEDN:
+		if retTp == types.CausetEDN {
 			sig = &builtinFloorIntToIntSig{bf}
 			sig.setPbCode(fidelpb.ScalarFuncSig_FloorIntToInt)
 		} else {
@@ -678,7 +678,7 @@ func (c *floorFunctionClass) getFunction(ctx stochastikctx.Context, args []Expre
 			sig.setPbCode(fidelpb.ScalarFuncSig_FloorIntToDec)
 		}
 	case types.ETDecimal:
-		if retTp == types.ETInt {
+		if retTp == types.CausetEDN {
 			sig = &builtinFloorDecToIntSig{bf}
 			sig.setPbCode(fidelpb.ScalarFuncSig_FloorDecToInt)
 		} else {
@@ -868,7 +868,7 @@ func (b *builtinLog1ArgSig) evalReal(event chunk.Event) (float64, bool, error) {
 		return 0, isNull, err
 	}
 	if val <= 0 {
-		b.ctx.GetStochastikVars().StmtCtx.AppendWarning(ErrInvalidArgumentForLogarithm)
+		b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(ErrInvalidArgumentForLogarithm)
 		return 0, true, nil
 	}
 	return math.Log(val), false, nil
@@ -898,7 +898,7 @@ func (b *builtinLog2ArgsSig) evalReal(event chunk.Event) (float64, bool, error) 
 	}
 
 	if val1 <= 0 || val1 == 1 || val2 <= 0 {
-		b.ctx.GetStochastikVars().StmtCtx.AppendWarning(ErrInvalidArgumentForLogarithm)
+		b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(ErrInvalidArgumentForLogarithm)
 		return 0, true, nil
 	}
 
@@ -940,7 +940,7 @@ func (b *builtinLog2Sig) evalReal(event chunk.Event) (float64, bool, error) {
 		return 0, isNull, err
 	}
 	if val <= 0 {
-		b.ctx.GetStochastikVars().StmtCtx.AppendWarning(ErrInvalidArgumentForLogarithm)
+		b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(ErrInvalidArgumentForLogarithm)
 		return 0, true, nil
 	}
 	return math.Log2(val), false, nil
@@ -981,7 +981,7 @@ func (b *builtinLog10Sig) evalReal(event chunk.Event) (float64, bool, error) {
 		return 0, isNull, err
 	}
 	if val <= 0 {
-		b.ctx.GetStochastikVars().StmtCtx.AppendWarning(ErrInvalidArgumentForLogarithm)
+		b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(ErrInvalidArgumentForLogarithm)
 		return 0, true, nil
 	}
 	return math.Log10(val), false, nil
@@ -998,7 +998,7 @@ func (c *randFunctionClass) getFunction(ctx stochastikctx.Context, args []Expres
 	var sig builtinFunc
 	var argTps []types.EvalType
 	if len(args) > 0 {
-		argTps = []types.EvalType{types.ETInt}
+		argTps = []types.EvalType{types.CausetEDN}
 	}
 	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETReal, argTps...)
 	if err != nil {
@@ -1008,7 +1008,7 @@ func (c *randFunctionClass) getFunction(ctx stochastikctx.Context, args []Expres
 	if len(args) == 0 {
 		sig = &builtinRandSig{bt, &sync.Mutex{}, NewWithTime()}
 		sig.setPbCode(fidelpb.ScalarFuncSig_Rand)
-	} else if _, isConstant := args[0].(*Constant); isConstant {
+	} else if _, isCouplingConstantWithRadix := args[0].(*CouplingConstantWithRadix); isCouplingConstantWithRadix {
 		// According to MyALLEGROSQL manual:
 		// If an integer argument N is specified, it is used as the seed value:
 		// With a constant initializer argument, the seed is initialized once
@@ -1139,11 +1139,11 @@ func (c *convFunctionClass) getFunction(ctx stochastikctx.Context, args []Expres
 		return nil, err
 	}
 
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.ETString, types.ETInt, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.ETString, types.CausetEDN, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
-	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochastikVars().GetCharsetInfo()
+	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 	bf.tp.Flen = 64
 	sig := &builtinConvSig{bf}
 	sig.setPbCode(fidelpb.ScalarFuncSig_Conv)
@@ -1250,7 +1250,7 @@ func (c *crc32FunctionClass) getFunction(ctx stochastikctx.Context, args []Expre
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETString)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETString)
 	if err != nil {
 		return nil, err
 	}
@@ -1290,7 +1290,7 @@ func (c *signFunctionClass) getFunction(ctx stochastikctx.Context, args []Expres
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETReal)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETReal)
 	if err != nil {
 		return nil, err
 	}
@@ -1861,7 +1861,7 @@ func (c *truncateFunctionClass) getFunction(ctx stochastikctx.Context, args []Ex
 		argTp = types.ETReal
 	}
 
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, argTp, argTp, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, argTp, argTp, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
@@ -1872,7 +1872,7 @@ func (c *truncateFunctionClass) getFunction(ctx stochastikctx.Context, args []Ex
 
 	var sig builtinFunc
 	switch argTp {
-	case types.ETInt:
+	case types.CausetEDN:
 		if allegrosql.HasUnsignedFlag(args[0].GetType().Flag) {
 			sig = &builtinTruncateUintSig{bf}
 			sig.setPbCode(fidelpb.ScalarFuncSig_TruncateUint)

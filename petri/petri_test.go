@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,24 +24,24 @@ import (
 
 	"github.com/ngaut/pools"
 	dto "github.com/prometheus/client_perceptron/go"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb/oracle"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore"
+	"github.com/whtcorpsinc/MilevaDB-Prod/dbs"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/errno"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta"
+	"github.com/whtcorpsinc/MilevaDB-Prod/metrics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri/infosync"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testleak"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/causetstore/einsteindb/oracle"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore"
-	"github.com/whtcorpsinc/milevadb/dbs"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/errno"
-	"github.com/whtcorpsinc/milevadb/meta"
-	"github.com/whtcorpsinc/milevadb/metrics"
-	"github.com/whtcorpsinc/milevadb/petri/infosync"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/soliton/testleak"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
 	"go.etcd.io/etcd/integration"
 )
 
@@ -128,7 +128,7 @@ func TestInfo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = failpoint.Enable("github.com/whtcorpsinc/milevadb/petri/MockReplaceDBS", `return(true)`)
+	err = failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/petri/MockReplaceDBS", `return(true)`)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -136,7 +136,7 @@ func TestInfo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = failpoint.Disable("github.com/whtcorpsinc/milevadb/petri/MockReplaceDBS")
+	err = failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/petri/MockReplaceDBS")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -169,12 +169,12 @@ func TestInfo(t *testing.T) {
 	}
 
 	// Test the scene where syncer.Done() gets the information.
-	err = failpoint.Enable("github.com/whtcorpsinc/milevadb/dbs/soliton/ErrorMockStochastikDone", `return(true)`)
+	err = failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/soliton/ErrorMockStochastikDone", `return(true)`)
 	if err != nil {
 		t.Fatal(err)
 	}
 	<-dom.dbs.SchemaSyncer().Done()
-	err = failpoint.Disable("github.com/whtcorpsinc/milevadb/dbs/soliton/ErrorMockStochastikDone")
+	err = failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/soliton/ErrorMockStochastikDone")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -321,7 +321,7 @@ func (*testSuite) TestT(c *C) {
 
 	_, succ := dom.SchemaValidator.Check(ts, schemaVer, nil)
 	c.Assert(succ, Equals, ResultSucc)
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/petri/ErrorMockReloadFailed", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/petri/ErrorMockReloadFailed", `return(true)`), IsNil)
 	err = dom.Reload()
 	c.Assert(err, NotNil)
 	_, succ = dom.SchemaValidator.Check(ts, schemaVer, nil)
@@ -333,7 +333,7 @@ func (*testSuite) TestT(c *C) {
 	ts = ver.Ver
 	_, succ = dom.SchemaValidator.Check(ts, schemaVer, nil)
 	c.Assert(succ, Equals, ResultUnknown)
-	c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/petri/ErrorMockReloadFailed"), IsNil)
+	c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/petri/ErrorMockReloadFailed"), IsNil)
 	err = dom.Reload()
 	c.Assert(err, IsNil)
 	_, succ = dom.SchemaValidator.Check(ts, schemaVer, nil)

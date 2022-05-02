@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,28 +24,28 @@ import (
 	"sync/atomic"
 	"unsafe"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/blockcodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/distsql"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/codec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/defCauslate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/memory"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/ranger"
+	"github.com/whtcorpsinc/MilevaDB-Prod/statistics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/charset"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/blockcodec"
-	"github.com/whtcorpsinc/milevadb/distsql"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/expression"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/codec"
-	"github.com/whtcorpsinc/milevadb/soliton/defCauslate"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/memory"
-	"github.com/whtcorpsinc/milevadb/soliton/ranger"
-	"github.com/whtcorpsinc/milevadb/statistics"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
 	"go.uber.org/zap"
 )
 
@@ -61,11 +61,11 @@ var LookupBlockTaskChannelSize int32 = 50
 // lookupBlockTask is created from a partial result of an index request which
 // contains the handles in those index keys.
 type lookupBlockTask struct {
-	handles []ekv.Handle
-	rowIdx  []int // rowIdx represents the handle index for every event. Only used when keep order.
-	rows    []chunk.Event
+	handles   []ekv.Handle
+	rowIdx    []int // rowIdx represents the handle index for every event. Only used when keep order.
+	rows      []chunk.Event
 	idxEvents *chunk.Chunk
-	cursor  int
+	cursor    int
 
 	doneCh chan error
 
@@ -191,7 +191,7 @@ func splitRanges(ranges []*ranger.Range, keepOrder bool, desc bool) ([]*ranger.R
 func rebuildIndexRanges(ctx stochastikctx.Context, is *plannercore.PhysicalIndexScan, idxDefCauss []*expression.DeferredCauset, defCausLens []int) (ranges []*ranger.Range, err error) {
 	access := make([]expression.Expression, 0, len(is.AccessCondition))
 	for _, cond := range is.AccessCondition {
-		newCond, err1 := expression.SubstituteCorDefCaus2Constant(cond)
+		newCond, err1 := expression.SubstituteCorDefCaus2CouplingConstantWithRadix(cond)
 		if err1 != nil {
 			return nil, err1
 		}
@@ -212,9 +212,9 @@ type IndexReaderExecutor struct {
 	physicalBlockID int64
 	ranges          []*ranger.Range
 	// kvRanges are only used for union scan.
-	kvRanges []ekv.KeyRange
-	posetPosetDagPB    *fidelpb.PosetDagRequest
-	startTS  uint64
+	kvRanges        []ekv.KeyRange
+	posetPosetDagPB *fidelpb.PosetDagRequest
+	startTS         uint64
 
 	// result returns one or more distsql.PartialResult and each PartialResult is returned by one region.
 	result distsql.SelectResult
@@ -233,7 +233,7 @@ type IndexReaderExecutor struct {
 	corDefCausInAccess bool
 	idxDefCauss        []*expression.DeferredCauset
 	defCausLens        []int
-	plans          []plannercore.PhysicalPlan
+	plans              []plannercore.PhysicalPlan
 
 	memTracker *memory.Tracker
 
@@ -266,7 +266,7 @@ func (e *IndexReaderExecutor) Open(ctx context.Context) error {
 			return err
 		}
 	}
-	kvRanges, err := distsql.IndexRangesToKVRanges(e.ctx.GetStochastikVars().StmtCtx, e.physicalBlockID, e.index.ID, e.ranges, e.feedback)
+	kvRanges, err := distsql.IndexRangesToKVRanges(e.ctx.GetStochaseinstein_dbars().StmtCtx, e.physicalBlockID, e.index.ID, e.ranges, e.feedback)
 	if err != nil {
 		e.feedback.Invalidate()
 		return err
@@ -290,7 +290,7 @@ func (e *IndexReaderExecutor) open(ctx context.Context, kvRanges []ekv.KeyRange)
 	e.kvRanges = kvRanges
 
 	e.memTracker = memory.NewTracker(e.id, -1)
-	e.memTracker.AttachTo(e.ctx.GetStochastikVars().StmtCtx.MemTracker)
+	e.memTracker.AttachTo(e.ctx.GetStochaseinstein_dbars().StmtCtx.MemTracker)
 	var builder distsql.RequestBuilder
 	kvReq, err := builder.SetKeyRanges(kvRanges).
 		SetPosetDagRequest(e.posetPosetDagPB).
@@ -298,7 +298,7 @@ func (e *IndexReaderExecutor) open(ctx context.Context, kvRanges []ekv.KeyRange)
 		SetDesc(e.desc).
 		SetKeepOrder(e.keepOrder).
 		SetStreaming(e.streaming).
-		SetFromStochastikVars(e.ctx.GetStochastikVars()).
+		SetFromStochaseinstein_dbars(e.ctx.GetStochaseinstein_dbars()).
 		SetMemTracker(e.memTracker).
 		Build()
 	if err != nil {
@@ -318,14 +318,14 @@ func (e *IndexReaderExecutor) open(ctx context.Context, kvRanges []ekv.KeyRange)
 type IndexLookUpExecutor struct {
 	baseExecutor
 
-	block   block.Block
-	index   *perceptron.IndexInfo
-	ranges  []*ranger.Range
-	posetPosetDagPB   *fidelpb.PosetDagRequest
-	startTS uint64
+	block           block.Block
+	index           *perceptron.IndexInfo
+	ranges          []*ranger.Range
+	posetPosetDagPB *fidelpb.PosetDagRequest
+	startTS         uint64
 	// handleIdx is the index of handle, which is only used for case of keeping order.
 	handleIdx       []int
-	handleDefCauss      []*expression.DeferredCauset
+	handleDefCauss  []*expression.DeferredCauset
 	primaryKeyIndex *perceptron.IndexInfo
 	blockRequest    *fidelpb.PosetDagRequest
 	// defCausumns are only required by union scan.
@@ -359,8 +359,8 @@ type IndexLookUpExecutor struct {
 	corDefCausInIdxSide bool
 	corDefCausInTblSide bool
 	corDefCausInAccess  bool
-	idxPlans        []plannercore.PhysicalPlan
-	tblPlans        []plannercore.PhysicalPlan
+	idxPlans            []plannercore.PhysicalPlan
+	tblPlans            []plannercore.PhysicalPlan
 	idxDefCauss         []*expression.DeferredCauset
 	defCausLens         []int
 	// PushedLimit is used to skip the preceding and tailing handles when Limit is sunk into IndexLookUpReader.
@@ -388,7 +388,7 @@ func (e *IndexLookUpExecutor) Open(ctx context.Context) error {
 			return err
 		}
 	}
-	sc := e.ctx.GetStochastikVars().StmtCtx
+	sc := e.ctx.GetStochaseinstein_dbars().StmtCtx
 	physicalID := getPhysicalBlockID(e.block)
 	if e.index.ID == -1 {
 		e.kvRanges, err = distsql.CommonHandleRangesToKVRanges(sc, physicalID, e.ranges)
@@ -412,7 +412,7 @@ func (e *IndexLookUpExecutor) open(ctx context.Context) error {
 	// constructed by a "IndexLookUpJoin" and "Open" will not be called in that
 	// situation.
 	e.memTracker = memory.NewTracker(e.id, -1)
-	e.memTracker.AttachTo(e.ctx.GetStochastikVars().StmtCtx.MemTracker)
+	e.memTracker.AttachTo(e.ctx.GetStochaseinstein_dbars().StmtCtx.MemTracker)
 
 	e.finished = make(chan struct{})
 	e.resultCh = make(chan *lookupBlockTask, atomic.LoadInt32(&LookupBlockTaskChannelSize))
@@ -481,7 +481,7 @@ func (e *IndexLookUpExecutor) startIndexWorker(ctx context.Context, kvRanges []e
 		SetDesc(e.desc).
 		SetKeepOrder(e.keepOrder).
 		SetStreaming(e.indexStreaming).
-		SetFromStochastikVars(e.ctx.GetStochastikVars()).
+		SetFromStochaseinstein_dbars(e.ctx.GetStochaseinstein_dbars()).
 		SetMemTracker(tracker).
 		Build()
 	if err != nil {
@@ -502,7 +502,7 @@ func (e *IndexLookUpExecutor) startIndexWorker(ctx context.Context, kvRanges []e
 		keepOrder:       e.keepOrder,
 		batchSize:       initBatchSize,
 		checHoTTexValue: e.checHoTTexValue,
-		maxBatchSize:    e.ctx.GetStochastikVars().IndexLookupSize,
+		maxBatchSize:    e.ctx.GetStochaseinstein_dbars().IndexLookupSize,
 		maxChunkSize:    e.maxChunkSize,
 		PushedLimit:     e.PushedLimit,
 	}
@@ -531,7 +531,7 @@ func (e *IndexLookUpExecutor) startIndexWorker(ctx context.Context, kvRanges []e
 
 // startBlockWorker launchs some background goroutines which pick tasks from workCh and execute the task.
 func (e *IndexLookUpExecutor) startBlockWorker(ctx context.Context, workCh <-chan *lookupBlockTask) {
-	lookupConcurrencyLimit := e.ctx.GetStochastikVars().IndexLookupConcurrency()
+	lookupConcurrencyLimit := e.ctx.GetStochaseinstein_dbars().IndexLookupConcurrency()
 	e.tblWorkerWg.Add(lookupConcurrencyLimit)
 	for i := 0; i < lookupConcurrencyLimit; i++ {
 		workerID := i
@@ -558,15 +558,15 @@ func (e *IndexLookUpExecutor) startBlockWorker(ctx context.Context, workCh <-cha
 
 func (e *IndexLookUpExecutor) buildBlockReader(ctx context.Context, handles []ekv.Handle) (Executor, error) {
 	blockReaderExec := &BlockReaderExecutor{
-		baseExecutor:   newBaseExecutor(e.ctx, e.schemaReplicant, 0),
-		block:          e.block,
-		posetPosetDagPB:          e.blockRequest,
-		startTS:        e.startTS,
+		baseExecutor:       newBaseExecutor(e.ctx, e.schemaReplicant, 0),
+		block:              e.block,
+		posetPosetDagPB:    e.blockRequest,
+		startTS:            e.startTS,
 		defCausumns:        e.defCausumns,
-		streaming:      e.blockStreaming,
-		feedback:       statistics.NewQueryFeedback(0, nil, 0, false),
+		streaming:          e.blockStreaming,
+		feedback:           statistics.NewQueryFeedback(0, nil, 0, false),
 		corDefCausInFilter: e.corDefCausInTblSide,
-		plans:          e.tblPlans,
+		plans:              e.tblPlans,
 	}
 	blockReaderExec.buildVirtualDeferredCausetInfo()
 	blockReader, err := e.dataReaderBuilder.buildBlockReaderFromHandles(ctx, blockReaderExec, handles)
@@ -802,7 +802,7 @@ func (w *indexWorker) buildBlockTask(handles []ekv.Handle, retChk *chunk.Chunk) 
 		handles:              handles,
 		indexOrder:           indexOrder,
 		duplicatedIndexOrder: duplicatedIndexOrder,
-		idxEvents:              retChk,
+		idxEvents:            retChk,
 	}
 
 	task.doneCh = make(chan error, 1)
@@ -880,7 +880,7 @@ func (e *IndexLookUpExecutor) getHandle(event chunk.Event, handleIdx []int,
 		if tp == getHandleFromBlock {
 			blockcodec.TruncateIndexValues(e.block.Meta(), e.primaryKeyIndex, datums)
 		}
-		handleEncoded, err = codec.EncodeKey(e.ctx.GetStochastikVars().StmtCtx, nil, datums...)
+		handleEncoded, err = codec.EncodeKey(e.ctx.GetStochaseinstein_dbars().StmtCtx, nil, datums...)
 		if err != nil {
 			return nil, err
 		}

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton/sqlexec"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/sqlexec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
 )
 
 const (
@@ -32,15 +32,15 @@ const (
 )
 
 type profileBuilder struct {
-	sctx        stochastikctx.Context
-	idMap       map[string]uint64
+	sctx            stochastikctx.Context
+	idMap           map[string]uint64
 	idSlabPredictor uint64
-	totalValue  float64
-	uniqueMap   map[string]struct{}
-	buf         *bytes.Buffer
-	start       time.Time
-	end         time.Time
-	valueTP     metricValueType
+	totalValue      float64
+	uniqueMap       map[string]struct{}
+	buf             *bytes.Buffer
+	start           time.Time
+	end             time.Time
+	valueTP         metricValueType
 }
 
 type metricNode struct {
@@ -310,14 +310,14 @@ func NewProfileBuilder(sctx stochastikctx.Context, start, end time.Time, tp stri
 		return nil, fmt.Errorf("unknown metric profile type: %v, expect value should be one of 'sum', 'avg' or 'count'", tp)
 	}
 	return &profileBuilder{
-		sctx:        sctx,
-		idMap:       make(map[string]uint64),
+		sctx:            sctx,
+		idMap:           make(map[string]uint64),
 		idSlabPredictor: uint64(1),
-		buf:         bytes.NewBuffer(make([]byte, 0, 1024)),
-		uniqueMap:   make(map[string]struct{}),
-		start:       start,
-		end:         end,
-		valueTP:     valueTp,
+		buf:             bytes.NewBuffer(make([]byte, 0, 1024)),
+		uniqueMap:       make(map[string]struct{}),
+		start:           start,
+		end:             end,
+		valueTP:         valueTp,
 	}, nil
 }
 

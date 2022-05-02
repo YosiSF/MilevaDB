@@ -1,8 +1,8 @@
-// INTERLOCKyright 2020 The ql Authors. All rights reserved.
+Copuright 2021 Whtcorps Inc; EinsteinDB and MilevaDB aithors; Licensed Under Apache 2.0. All Rights Reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSES/QL-LICENSE file.
 
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,13 +32,13 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/charset"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/defCauslate"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/replog"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/defCauslate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/replog"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"go.uber.org/zap"
 	"golang.org/x/text/transform"
 )
@@ -188,7 +188,7 @@ func (c *lengthFunctionClass) getFunction(ctx stochastikctx.Context, args []Expr
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETString)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETString)
 	if err != nil {
 		return nil, err
 	}
@@ -226,7 +226,7 @@ func (c *asciiFunctionClass) getFunction(ctx stochastikctx.Context, args []Expre
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETString)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETString)
 	if err != nil {
 		return nil, err
 	}
@@ -290,7 +290,7 @@ func (c *concatFunctionClass) getFunction(ctx stochastikctx.Context, args []Expr
 		bf.tp.Flen = allegrosql.MaxBlobWidth
 	}
 
-	valStr, _ := ctx.GetStochastikVars().GetSystemVar(variable.MaxAllowedPacket)
+	valStr, _ := ctx.GetStochaseinstein_dbars().GetSystemVar(variable.MaxAllowedPacket)
 	maxAllowedPacket, err := strconv.ParseUint(valStr, 10, 64)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -323,7 +323,7 @@ func (b *builtinConcatSig) evalString(event chunk.Event) (d string, isNull bool,
 			return d, isNull, err
 		}
 		if uint64(len(s)+len(d)) > b.maxAllowedPacket {
-			b.ctx.GetStochastikVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("concat", b.maxAllowedPacket))
+			b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("concat", b.maxAllowedPacket))
 			return "", true, nil
 		}
 		s = append(s, []byte(d)...)
@@ -372,7 +372,7 @@ func (c *concatWSFunctionClass) getFunction(ctx stochastikctx.Context, args []Ex
 		bf.tp.Flen = allegrosql.MaxBlobWidth
 	}
 
-	valStr, _ := ctx.GetStochastikVars().GetSystemVar(variable.MaxAllowedPacket)
+	valStr, _ := ctx.GetStochaseinstein_dbars().GetSystemVar(variable.MaxAllowedPacket)
 	maxAllowedPacket, err := strconv.ParseUint(valStr, 10, 64)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -428,7 +428,7 @@ func (b *builtinConcatWSSig) evalString(event chunk.Event) (string, bool, error)
 			targetLength += len(sep)
 		}
 		if uint64(targetLength) > b.maxAllowedPacket {
-			b.ctx.GetStochastikVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("concat_ws", b.maxAllowedPacket))
+			b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("concat_ws", b.maxAllowedPacket))
 			return "", true, nil
 		}
 		strs = append(strs, val)
@@ -450,7 +450,7 @@ func (c *leftFunctionClass) getFunction(ctx stochastikctx.Context, args []Expres
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.ETString, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.ETString, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
@@ -535,7 +535,7 @@ func (c *rightFunctionClass) getFunction(ctx stochastikctx.Context, args []Expre
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.ETString, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.ETString, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
@@ -621,13 +621,13 @@ func (c *repeatFunctionClass) getFunction(ctx stochastikctx.Context, args []Expr
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.ETString, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.ETString, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
 	bf.tp.Flen = allegrosql.MaxBlobWidth
 	SetBinFlagOrBinStr(args[0].GetType(), bf.tp)
-	valStr, _ := ctx.GetStochastikVars().GetSystemVar(variable.MaxAllowedPacket)
+	valStr, _ := ctx.GetStochaseinstein_dbars().GetSystemVar(variable.MaxAllowedPacket)
 	maxAllowedPacket, err := strconv.ParseUint(valStr, 10, 64)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -669,7 +669,7 @@ func (b *builtinRepeatSig) evalString(event chunk.Event) (d string, isNull bool,
 	}
 
 	if uint64(byteLength)*uint64(num) > b.maxAllowedPacket {
-		b.ctx.GetStochastikVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("repeat", b.maxAllowedPacket))
+		b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("repeat", b.maxAllowedPacket))
 		return "", true, nil
 	}
 
@@ -801,13 +801,13 @@ func (c *spaceFunctionClass) getFunction(ctx stochastikctx.Context, args []Expre
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
-	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochastikVars().GetCharsetInfo()
+	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 	bf.tp.Flen = allegrosql.MaxBlobWidth
-	valStr, _ := ctx.GetStochastikVars().GetSystemVar(variable.MaxAllowedPacket)
+	valStr, _ := ctx.GetStochaseinstein_dbars().GetSystemVar(variable.MaxAllowedPacket)
 	maxAllowedPacket, err := strconv.ParseUint(valStr, 10, 64)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -842,7 +842,7 @@ func (b *builtinSpaceSig) evalString(event chunk.Event) (d string, isNull bool, 
 		x = 0
 	}
 	if uint64(x) > b.maxAllowedPacket {
-		b.ctx.GetStochastikVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("space", b.maxAllowedPacket))
+		b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("space", b.maxAllowedPacket))
 		return d, true, nil
 	}
 	if x > allegrosql.MaxBlobWidth {
@@ -927,7 +927,7 @@ func (c *strcmpFunctionClass) getFunction(ctx stochastikctx.Context, args []Expr
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETString, types.ETString)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETString, types.ETString)
 	if err != nil {
 		return nil, err
 	}
@@ -1047,7 +1047,7 @@ func (c *convertFunctionClass) getFunction(ctx stochastikctx.Context, args []Exp
 		return nil, err
 	}
 
-	charsetArg, ok := args[1].(*Constant)
+	charsetArg, ok := args[1].(*CouplingConstantWithRadix)
 	if !ok {
 		// `args[1]` is limited by berolinaAllegroSQL to be a constant string,
 		// should never go into here.
@@ -1118,9 +1118,9 @@ func (c *substringFunctionClass) getFunction(ctx stochastikctx.Context, args []E
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	argTps := []types.EvalType{types.ETString, types.ETInt}
+	argTps := []types.EvalType{types.ETString, types.CausetEDN}
 	if len(args) == 3 {
-		argTps = append(argTps, types.ETInt)
+		argTps = append(argTps, types.CausetEDN)
 	}
 	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, argTps...)
 	if err != nil {
@@ -1314,7 +1314,7 @@ func (c *substringIndexFunctionClass) getFunction(ctx stochastikctx.Context, arg
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.ETString, types.ETString, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.ETString, types.ETString, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
@@ -1392,9 +1392,9 @@ func (c *locateFunctionClass) getFunction(ctx stochastikctx.Context, args []Expr
 	}
 	hasStartPos, argTps := len(args) == 3, []types.EvalType{types.ETString, types.ETString}
 	if hasStartPos {
-		argTps = append(argTps, types.ETInt)
+		argTps = append(argTps, types.CausetEDN)
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, argTps...)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, argTps...)
 	if err != nil {
 		return nil, err
 	}
@@ -1587,19 +1587,19 @@ func (c *hexFunctionClass) getFunction(ctx stochastikctx.Context, args []Express
 		if err != nil {
 			return nil, err
 		}
-		bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochastikVars().GetCharsetInfo()
+		bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 		// Use UTF-8 as default
 		bf.tp.Flen = args[0].GetType().Flen * 3 * 2
 		sig := &builtinHexStrArgSig{bf}
 		sig.setPbCode(fidelpb.ScalarFuncSig_HexStrArg)
 		return sig, nil
-	case types.ETInt, types.ETReal, types.ETDecimal:
-		bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.ETInt)
+	case types.CausetEDN, types.ETReal, types.ETDecimal:
+		bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.CausetEDN)
 		if err != nil {
 			return nil, err
 		}
 		bf.tp.Flen = args[0].GetType().Flen * 2
-		bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochastikVars().GetCharsetInfo()
+		bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 		sig := &builtinHexIntArgSig{bf}
 		sig.setPbCode(fidelpb.ScalarFuncSig_HexIntArg)
 		return sig, nil
@@ -1667,7 +1667,7 @@ func (c *unhexFunctionClass) getFunction(ctx stochastikctx.Context, args []Expre
 	case types.ETString, types.ETDatetime, types.ETTimestamp, types.ETDuration, types.ETJson:
 		// Use UTF-8 as default charset, so there're (Flen * 3 + 1) / 2 byte-pairs
 		retFlen = (argType.Flen*3 + 1) / 2
-	case types.ETInt, types.ETReal, types.ETDecimal:
+	case types.CausetEDN, types.ETReal, types.ETDecimal:
 		// For number value, there're (Flen + 1) / 2 byte-pairs
 		retFlen = (argType.Flen + 1) / 2
 	default:
@@ -1754,7 +1754,7 @@ func (c *trimFunctionClass) getFunction(ctx stochastikctx.Context, args []Expres
 		return sig, nil
 
 	case 3:
-		bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.ETString, types.ETString, types.ETInt)
+		bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.ETString, types.ETString, types.CausetEDN)
 		if err != nil {
 			return nil, err
 		}
@@ -1974,7 +1974,7 @@ func trimRight(str, remstr string) string {
 }
 
 func getFlen4LpadAndRpad(ctx stochastikctx.Context, arg Expression) int {
-	if constant, ok := arg.(*Constant); ok {
+	if constant, ok := arg.(*CouplingConstantWithRadix); ok {
 		length, isNull, err := constant.EvalInt(ctx, chunk.Event{})
 		if err != nil {
 			logutil.BgLogger().Error("eval `Flen` for LPAD/RPAD", zap.Error(err))
@@ -1995,7 +1995,7 @@ func (c *lpadFunctionClass) getFunction(ctx stochastikctx.Context, args []Expres
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.ETString, types.ETInt, types.ETString)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.ETString, types.CausetEDN, types.ETString)
 	if err != nil {
 		return nil, err
 	}
@@ -2003,7 +2003,7 @@ func (c *lpadFunctionClass) getFunction(ctx stochastikctx.Context, args []Expres
 	SetBinFlagOrBinStr(args[0].GetType(), bf.tp)
 	SetBinFlagOrBinStr(args[2].GetType(), bf.tp)
 
-	valStr, _ := ctx.GetStochastikVars().GetSystemVar(variable.MaxAllowedPacket)
+	valStr, _ := ctx.GetStochaseinstein_dbars().GetSystemVar(variable.MaxAllowedPacket)
 	maxAllowedPacket, err := strconv.ParseUint(valStr, 10, 64)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -2050,7 +2050,7 @@ func (b *builtinLpadSig) evalString(event chunk.Event) (string, bool, error) {
 	targetLength := int(length)
 
 	if uint64(targetLength) > b.maxAllowedPacket {
-		b.ctx.GetStochastikVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("lpad", b.maxAllowedPacket))
+		b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("lpad", b.maxAllowedPacket))
 		return "", true, nil
 	}
 
@@ -2099,7 +2099,7 @@ func (b *builtinLpadUTF8Sig) evalString(event chunk.Event) (string, bool, error)
 	targetLength := int(length)
 
 	if uint64(targetLength)*uint64(allegrosql.MaxBytesOfCharacter) > b.maxAllowedPacket {
-		b.ctx.GetStochastikVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("lpad", b.maxAllowedPacket))
+		b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("lpad", b.maxAllowedPacket))
 		return "", true, nil
 	}
 
@@ -2128,7 +2128,7 @@ func (c *rpadFunctionClass) getFunction(ctx stochastikctx.Context, args []Expres
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.ETString, types.ETInt, types.ETString)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.ETString, types.CausetEDN, types.ETString)
 	if err != nil {
 		return nil, err
 	}
@@ -2136,7 +2136,7 @@ func (c *rpadFunctionClass) getFunction(ctx stochastikctx.Context, args []Expres
 	SetBinFlagOrBinStr(args[0].GetType(), bf.tp)
 	SetBinFlagOrBinStr(args[2].GetType(), bf.tp)
 
-	valStr, _ := ctx.GetStochastikVars().GetSystemVar(variable.MaxAllowedPacket)
+	valStr, _ := ctx.GetStochaseinstein_dbars().GetSystemVar(variable.MaxAllowedPacket)
 	maxAllowedPacket, err := strconv.ParseUint(valStr, 10, 64)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -2182,7 +2182,7 @@ func (b *builtinRpadSig) evalString(event chunk.Event) (string, bool, error) {
 	}
 	targetLength := int(length)
 	if uint64(targetLength) > b.maxAllowedPacket {
-		b.ctx.GetStochastikVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("rpad", b.maxAllowedPacket))
+		b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("rpad", b.maxAllowedPacket))
 		return "", true, nil
 	}
 
@@ -2231,7 +2231,7 @@ func (b *builtinRpadUTF8Sig) evalString(event chunk.Event) (string, bool, error)
 	targetLength := int(length)
 
 	if uint64(targetLength)*uint64(allegrosql.MaxBytesOfCharacter) > b.maxAllowedPacket {
-		b.ctx.GetStochastikVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("rpad", b.maxAllowedPacket))
+		b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("rpad", b.maxAllowedPacket))
 		return "", true, nil
 	}
 
@@ -2260,7 +2260,7 @@ func (c *bitLengthFunctionClass) getFunction(ctx stochastikctx.Context, args []E
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETString)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETString)
 	if err != nil {
 		return nil, err
 	}
@@ -2301,7 +2301,7 @@ func (c *charFunctionClass) getFunction(ctx stochastikctx.Context, args []Expres
 	}
 	argTps := make([]types.EvalType, 0, len(args))
 	for i := 0; i < len(args)-1; i++ {
-		argTps = append(argTps, types.ETInt)
+		argTps = append(argTps, types.CausetEDN)
 	}
 	argTps = append(argTps, types.ETString)
 	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, argTps...)
@@ -2309,7 +2309,7 @@ func (c *charFunctionClass) getFunction(ctx stochastikctx.Context, args []Expres
 		return nil, err
 	}
 	// The last argument represents the charset name after "using".
-	if _, ok := args[len(args)-1].(*Constant); !ok {
+	if _, ok := args[len(args)-1].(*CouplingConstantWithRadix); !ok {
 		// If we got there, there must be something wrong in other places.
 		logutil.BgLogger().Warn(fmt.Sprintf("The last argument in char function must be constant, but got %T", args[len(args)-1]))
 		return nil, errIncorrectArgs
@@ -2387,7 +2387,7 @@ func (c *charLengthFunctionClass) getFunction(ctx stochastikctx.Context, args []
 	if argsErr := c.verifyArgs(args); argsErr != nil {
 		return nil, argsErr
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETString)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETString)
 	if err != nil {
 		return nil, err
 	}
@@ -2449,7 +2449,7 @@ func (c *findInSetFunctionClass) getFunction(ctx stochastikctx.Context, args []E
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETString, types.ETString)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETString, types.ETString)
 	if err != nil {
 		return nil, err
 	}
@@ -2509,7 +2509,7 @@ func (c *fieldFunctionClass) getFunction(ctx stochastikctx.Context, args []Expre
 	for i, length := 0, len(args); i < length; i++ {
 		argTp := args[i].GetType().EvalType()
 		isAllString = isAllString && (argTp == types.ETString)
-		isAllNumber = isAllNumber && (argTp == types.ETInt)
+		isAllNumber = isAllNumber && (argTp == types.CausetEDN)
 	}
 
 	argTps := make([]types.EvalType, len(args))
@@ -2517,12 +2517,12 @@ func (c *fieldFunctionClass) getFunction(ctx stochastikctx.Context, args []Expre
 	if isAllString {
 		argTp = types.ETString
 	} else if isAllNumber {
-		argTp = types.ETInt
+		argTp = types.CausetEDN
 	}
 	for i, length := 0, len(args); i < length; i++ {
 		argTps[i] = argTp
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, argTps...)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, argTps...)
 	if err != nil {
 		return nil, err
 	}
@@ -2531,7 +2531,7 @@ func (c *fieldFunctionClass) getFunction(ctx stochastikctx.Context, args []Expre
 	case types.ETReal:
 		sig = &builtinFieldRealSig{bf}
 		sig.setPbCode(fidelpb.ScalarFuncSig_FieldReal)
-	case types.ETInt:
+	case types.CausetEDN:
 		sig = &builtinFieldIntSig{bf}
 		sig.setPbCode(fidelpb.ScalarFuncSig_FieldInt)
 	case types.ETString:
@@ -2634,7 +2634,7 @@ type makeSetFunctionClass struct {
 
 func (c *makeSetFunctionClass) getFlen(ctx stochastikctx.Context, args []Expression) int {
 	flen, count := 0, 0
-	if constant, ok := args[0].(*Constant); ok {
+	if constant, ok := args[0].(*CouplingConstantWithRadix); ok {
 		bits, isNull, err := constant.EvalInt(ctx, chunk.Event{})
 		if err == nil && !isNull {
 			for i, length := 1, len(args); i < length; i++ {
@@ -2660,7 +2660,7 @@ func (c *makeSetFunctionClass) getFunction(ctx stochastikctx.Context, args []Exp
 		return nil, err
 	}
 	argTps := make([]types.EvalType, len(args))
-	argTps[0] = types.ETInt
+	argTps[0] = types.CausetEDN
 	for i, length := 1, len(args); i < length; i++ {
 		argTps[i] = types.ETString
 	}
@@ -2724,12 +2724,12 @@ func (c *octFunctionClass) getFunction(ctx stochastikctx.Context, args []Express
 		return nil, err
 	}
 	var sig builtinFunc
-	if IsBinaryLiteral(args[0]) || args[0].GetType().EvalType() == types.ETInt {
-		bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.ETInt)
+	if IsBinaryLiteral(args[0]) || args[0].GetType().EvalType() == types.CausetEDN {
+		bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.CausetEDN)
 		if err != nil {
 			return nil, err
 		}
-		bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochastikVars().GetCharsetInfo()
+		bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 		bf.tp.Flen, bf.tp.Decimal = 64, types.UnspecifiedLength
 		sig = &builtinOctIntSig{bf}
 		sig.setPbCode(fidelpb.ScalarFuncSig_OctInt)
@@ -2738,7 +2738,7 @@ func (c *octFunctionClass) getFunction(ctx stochastikctx.Context, args []Express
 		if err != nil {
 			return nil, err
 		}
-		bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochastikVars().GetCharsetInfo()
+		bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 		bf.tp.Flen, bf.tp.Decimal = 64, types.UnspecifiedLength
 		sig = &builtinOctStringSig{bf}
 		sig.setPbCode(fidelpb.ScalarFuncSig_OctString)
@@ -2817,7 +2817,7 @@ func (c *ordFunctionClass) getFunction(ctx stochastikctx.Context, args []Express
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETString)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETString)
 	if err != nil {
 		return nil, err
 	}
@@ -2968,11 +2968,11 @@ func (c *binFunctionClass) getFunction(ctx stochastikctx.Context, args []Express
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
-	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochastikVars().GetCharsetInfo()
+	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 	bf.tp.Flen = 64
 	sig := &builtinBinSig{bf}
 	sig.setPbCode(fidelpb.ScalarFuncSig_Bin)
@@ -3008,7 +3008,7 @@ func (c *eltFunctionClass) getFunction(ctx stochastikctx.Context, args []Express
 		return nil, argsErr
 	}
 	argTps := make([]types.EvalType, 0, len(args))
-	argTps = append(argTps, types.ETInt)
+	argTps = append(argTps, types.CausetEDN)
 	for i := 1; i < len(args); i++ {
 		argTps = append(argTps, types.ETString)
 	}
@@ -3066,12 +3066,12 @@ func (c *exportSetFunctionClass) getFunction(ctx stochastikctx.Context, args []E
 		return nil, err
 	}
 	argTps := make([]types.EvalType, 0, 5)
-	argTps = append(argTps, types.ETInt, types.ETString, types.ETString)
+	argTps = append(argTps, types.CausetEDN, types.ETString, types.ETString)
 	if len(args) > 3 {
 		argTps = append(argTps, types.ETString)
 	}
 	if len(args) > 4 {
-		argTps = append(argTps, types.ETInt)
+		argTps = append(argTps, types.CausetEDN)
 	}
 	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, argTps...)
 	if err != nil {
@@ -3229,9 +3229,9 @@ func (c *formatFunctionClass) getFunction(ctx stochastikctx.Context, args []Expr
 		return nil, err
 	}
 	argTps := make([]types.EvalType, 2, 3)
-	argTps[1] = types.ETInt
+	argTps[1] = types.CausetEDN
 	argTp := args[0].GetType().EvalType()
-	if argTp == types.ETDecimal || argTp == types.ETInt {
+	if argTp == types.ETDecimal || argTp == types.CausetEDN {
 		argTps[0] = types.ETDecimal
 	} else {
 		argTps[0] = types.ETReal
@@ -3243,7 +3243,7 @@ func (c *formatFunctionClass) getFunction(ctx stochastikctx.Context, args []Expr
 	if err != nil {
 		return nil, err
 	}
-	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochastikVars().GetCharsetInfo()
+	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 	bf.tp.Flen = allegrosql.MaxBlobWidth
 	var sig builtinFunc
 	if len(args) == 3 {
@@ -3369,7 +3369,7 @@ func (b *builtinFormatWithLocaleSig) evalString(event chunk.Event) (string, bool
 		return "", false, err
 	}
 	if isNull {
-		b.ctx.GetStochastikVars().StmtCtx.AppendWarning(errUnknownLocale.GenWithStackByArgs("NULL"))
+		b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errUnknownLocale.GenWithStackByArgs("NULL"))
 		locale = "en_US"
 	}
 	formatString, err := allegrosql.GetLocaleFormatFunction(locale)(x, d)
@@ -3411,7 +3411,7 @@ func (c *fromBase64FunctionClass) getFunction(ctx stochastikctx.Context, args []
 	}
 	bf.tp.Flen = allegrosql.MaxBlobWidth
 
-	valStr, _ := ctx.GetStochastikVars().GetSystemVar(variable.MaxAllowedPacket)
+	valStr, _ := ctx.GetStochaseinstein_dbars().GetSystemVar(variable.MaxAllowedPacket)
 	maxAllowedPacket, err := strconv.ParseUint(valStr, 10, 64)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -3459,7 +3459,7 @@ func (b *builtinFromBase64Sig) evalString(event chunk.Event) (string, bool, erro
 		return "", true, nil
 	}
 	if needDecodeLen > int(b.maxAllowedPacket) {
-		b.ctx.GetStochastikVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("from_base64", b.maxAllowedPacket))
+		b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("from_base64", b.maxAllowedPacket))
 		return "", true, nil
 	}
 
@@ -3485,10 +3485,10 @@ func (c *toBase64FunctionClass) getFunction(ctx stochastikctx.Context, args []Ex
 	if err != nil {
 		return nil, err
 	}
-	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochastikVars().GetCharsetInfo()
+	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 	bf.tp.Flen = base64NeededEncodedLength(bf.args[0].GetType().Flen)
 
-	valStr, _ := ctx.GetStochastikVars().GetSystemVar(variable.MaxAllowedPacket)
+	valStr, _ := ctx.GetStochaseinstein_dbars().GetSystemVar(variable.MaxAllowedPacket)
 	maxAllowedPacket, err := strconv.ParseUint(valStr, 10, 64)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -3545,7 +3545,7 @@ func (b *builtinToBase64Sig) evalString(event chunk.Event) (d string, isNull boo
 		return "", true, nil
 	}
 	if needEncodeLen > int(b.maxAllowedPacket) {
-		b.ctx.GetStochastikVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("to_base64", b.maxAllowedPacket))
+		b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("to_base64", b.maxAllowedPacket))
 		return "", true, nil
 	}
 	if b.tp.Flen == -1 || b.tp.Flen > allegrosql.MaxBlobWidth {
@@ -3584,7 +3584,7 @@ func (c *insertFunctionClass) getFunction(ctx stochastikctx.Context, args []Expr
 	if err = c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.ETString, types.ETInt, types.ETInt, types.ETString)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.ETString, types.CausetEDN, types.CausetEDN, types.ETString)
 	if err != nil {
 		return nil, err
 	}
@@ -3592,7 +3592,7 @@ func (c *insertFunctionClass) getFunction(ctx stochastikctx.Context, args []Expr
 	SetBinFlagOrBinStr(args[0].GetType(), bf.tp)
 	SetBinFlagOrBinStr(args[3].GetType(), bf.tp)
 
-	valStr, _ := ctx.GetStochastikVars().GetSystemVar(variable.MaxAllowedPacket)
+	valStr, _ := ctx.GetStochaseinstein_dbars().GetSystemVar(variable.MaxAllowedPacket)
 	maxAllowedPacket, err := strconv.ParseUint(valStr, 10, 64)
 	if err != nil {
 		return nil, errors.Trace(err)
@@ -3652,7 +3652,7 @@ func (b *builtinInsertSig) evalString(event chunk.Event) (string, bool, error) {
 	}
 
 	if uint64(strLength-length+int64(len(newstr))) > b.maxAllowedPacket {
-		b.ctx.GetStochastikVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("insert", b.maxAllowedPacket))
+		b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("insert", b.maxAllowedPacket))
 		return "", true, nil
 	}
 
@@ -3706,7 +3706,7 @@ func (b *builtinInsertUTF8Sig) evalString(event chunk.Event) (string, bool, erro
 	strHead := string(runes[0 : pos-1])
 	strTail := string(runes[pos+length-1:])
 	if uint64(len(strHead)+len(newstr)+len(strTail)) > b.maxAllowedPacket {
-		b.ctx.GetStochastikVars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("insert", b.maxAllowedPacket))
+		b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errWarnAllowedPacketOverflowed.GenWithStackByArgs("insert", b.maxAllowedPacket))
 		return "", true, nil
 	}
 	return strHead + newstr + strTail, false, nil
@@ -3720,7 +3720,7 @@ func (c *instrFunctionClass) getFunction(ctx stochastikctx.Context, args []Expre
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETString, types.ETString)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETString, types.ETString)
 	if err != nil {
 		return nil, err
 	}
@@ -3833,7 +3833,7 @@ func (c *weightStringFunctionClass) verifyArgs(args []Expression) (weightStringP
 		if args[1].GetType().EvalType() != types.ETString {
 			return weightStringPaddingNone, 0, ErrIncorrectType.GenWithStackByArgs(args[1].String(), c.funcName)
 		}
-		c1, ok := args[1].(*Constant)
+		c1, ok := args[1].(*CouplingConstantWithRadix)
 		if !ok {
 			return weightStringPaddingNone, 0, ErrIncorrectType.GenWithStackByArgs(args[1].String(), c.funcName)
 		}
@@ -3847,10 +3847,10 @@ func (c *weightStringFunctionClass) verifyArgs(args []Expression) (weightStringP
 		default:
 			return weightStringPaddingNone, 0, ErrIncorrectType.GenWithStackByArgs(x, c.funcName)
 		}
-		if args[2].GetType().EvalType() != types.ETInt {
+		if args[2].GetType().EvalType() != types.CausetEDN {
 			return weightStringPaddingNone, 0, ErrIncorrectType.GenWithStackByArgs(args[2].String(), c.funcName)
 		}
-		c2, ok := args[2].(*Constant)
+		c2, ok := args[2].(*CouplingConstantWithRadix)
 		if !ok {
 			return weightStringPaddingNone, 0, ErrIncorrectType.GenWithStackByArgs(args[1].String(), c.funcName)
 		}
@@ -3872,7 +3872,7 @@ func (c *weightStringFunctionClass) getFunction(ctx stochastikctx.Context, args 
 
 	if len(args) == 3 {
 		argTps[1] = types.ETString
-		argTps[2] = types.ETInt
+		argTps[2] = types.CausetEDN
 	}
 
 	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, argTps...)
@@ -3946,7 +3946,7 @@ func (b *builtinWeightStringSig) evalString(event chunk.Event) (string, bool, er
 		lenStr := len(str)
 		if b.length < lenStr {
 			tpInfo := fmt.Sprintf("BINARY(%d)", b.length)
-			b.ctx.GetStochastikVars().StmtCtx.AppendWarning(errTruncatedWrongValue.GenWithStackByArgs(tpInfo, str))
+			b.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errTruncatedWrongValue.GenWithStackByArgs(tpInfo, str))
 			str = str[:b.length]
 		} else if b.length > lenStr {
 			str += strings.Repeat("\x00", b.length-lenStr)

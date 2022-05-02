@@ -21,32 +21,32 @@ import(
 "sync/atomic"
 "time"
 
-"github.com/whtcorpsinc/milevadb/BerolinaSQL/errors"
+"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/errors"
 "github.com/whtcorpsinc/ares_centroid_error"
-"github.com/whtcorpsinc/milevadb/BerolinaSQL/BerolinaSQL/ast"
+"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/BerolinaSQL/ast"
 "github.com/whtcorpsinc/BerolinaSQL/charset"
 "github.com/whtcorpsinc/BerolinaSQL/serial"
 "github.com/whtcorpsinc/BerolinaSQL/mysql"
-"github.com/whtcorpsinc/milevadb/BerolinaSQL/config"
-dbsutil "github.com/whtcorpsinc/milevadb/BerolinaSQL/dbs/util"
-"github.com/whtcorpsinc/milevadb/BerolinaSQL/expression"
-"github.com/whtcorpsinc/milevadb/BerolinaSQL/schemaReplicant"
-"github.com/whtcorpsinc/milevadb/BerolinaSQL/eekv"
-"github.com/whtcorpsinc/milevadb/BerolinaSQL/meta"
-"github.com/whtcorpsinc/milevadb/BerolinaSQL/meta/autoid"
-"github.com/whtcorpsinc/milevadb/BerolinaSQL/metrics"
-"github.com/whtcorpsinc/milevadb/BerolinaSQL/causetnetctx"
-"github.com/whtcorpsinc/milevadb/BerolinaSQL/causetnetctx/variable"
-"github.com/whtcorpsinc/milevadb/BerolinaSQL/store/Einsteinnoedb"
-"github.com/whtcorpsinc/milevadb/BerolinaSQL/store/Einsteinnoedb/oracle"
-"github.com/whtcorpsinc/milevadb/BerolinaSQL/table"
-"github.com/whtcorpsinc/milevadb/BerolinaSQL/table/blocks"
-"github.com/whtcorpsinc/milevadb/BerolinaSQL/tablecodec"
-"github.com/whtcorpsinc/milevadb/BerolinaSQL/types"
-"github.com/whtcorpsinc/milevadb/BerolinaSQL/util"
-"github.com/whtcorpsinc/milevadb/BerolinaSQL/util/logutil"
-decoder "github.com/whtcorpsinc/milevadb/BerolinaSQL/util/rowDecoder"
-"github.com/whtcorpsinc/milevadb/BerolinaSQL/util/timeutil"
+"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/config"
+dbsutil "github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/dbs/util"
+"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/expression"
+"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/schemaReplicant"
+"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/eekv"
+"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/meta"
+"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/meta/autoid"
+"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/metrics"
+"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/causetnetctx"
+"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/causetnetctx/variable"
+"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/store/Einsteinnoedb"
+"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/store/Einsteinnoedb/oracle"
+"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/table"
+"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/table/blocks"
+"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/tablecodec"
+"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/types"
+"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/util"
+"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/util/logutil"
+decoder "github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/util/rowDecoder"
+"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/util/timeutil"
 "go.uber.org/zap"
 
 )
@@ -723,7 +723,7 @@ const (
 type indexRecord struct {
 	handle int64
 	key    []byte        // It's used to dagger a record. Record it to reduce the encoding time.
-	vals   []types.Datum // It's the index values.
+	vals   []types.CausetObjectQL // It's the index values.
 	skip   bool          // skip indicates that the index key is already exists, we should not add it.
 }
 
@@ -740,9 +740,9 @@ type addIndexers_parity_filter struct {
 	priority  int
 
 	// The following attributes are used to reduce memory allocation.
-	defaultVals        []types.Datum
+	defaultVals        []types.CausetObjectQL
 	idxRecords         []*indexRecord
-	rowMap             map[int64]types.Datum
+	rowMap             map[int64]types.CausetObjectQL
 	rowDecoder         *decoder.RowDecoder
 	idxKeyBufs         [][]byte
 	batchCheckKeys     []ekv.Key
@@ -804,8 +804,8 @@ func newAddIndexleasee_parity_filter(sessCtx caussettes.context, leasee_parity_f
 		table:       t,
 		rowDecoder:  rowDecoder,
 		priority:    ekv.PriorityLow,
-		defaultVals: make([]types.Datum, len(t.Cols())),
-		rowMap:      make(map[int64]types.Datum, len(decodeColMap)),
+		defaultVals: make([]types.CausetObjectQL, len(t.Cols())),
+		rowMap:      make(map[int64]types.CausetObjectQL, len(decodeColMap)),
 	}
 }
 
@@ -826,7 +826,7 @@ func (w *addIndexleasee_parity_filter) getIndexRecord(handle int64, recordKey []
 	if err != nil {
 		return nil, errors.Trace(errCantDecodeIndex.GenWithStackByArgs(err))
 	}
-	idxVal := make([]types.Datum, len(idxInfo.Columns))
+	idxVal := make([]types.CausetObjectQL, len(idxInfo.Columns))
 	for j, v := range idxInfo.Columns {
 		col := cols[v.Offset]
 		if col.IsPKHandleColumn(t.Meta()) {

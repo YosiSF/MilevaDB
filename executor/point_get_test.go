@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,18 +18,18 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/blockcodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/codec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastik"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/blockcodec"
-	"github.com/whtcorpsinc/milevadb/causetstore/einsteindb"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/soliton/codec"
-	"github.com/whtcorpsinc/milevadb/soliton/solitonutil"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/stochastik"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 type testPointGetSuite struct {
@@ -527,10 +527,10 @@ func (s *testPointGetSuite) TestReturnValues(c *C) {
 	tk.MustExec("begin pessimistic")
 	tk.MustQuery("select * from t where a = 'b' for uFIDelate").Check(testkit.Events("b 2"))
 	tid := tk.GetBlockID("t")
-	idxVal, err := codec.EncodeKey(tk.Se.GetStochastikVars().StmtCtx, nil, types.NewStringCauset("b"))
+	idxVal, err := codec.EncodeKey(tk.Se.GetStochaseinstein_dbars().StmtCtx, nil, types.NewStringCauset("b"))
 	c.Assert(err, IsNil)
 	pk := blockcodec.EncodeIndexSeekKey(tid, 1, idxVal)
-	txnCtx := tk.Se.GetStochastikVars().TxnCtx
+	txnCtx := tk.Se.GetStochaseinstein_dbars().TxnCtx
 	val, ok := txnCtx.GetKeyInPessimisticLockCache(pk)
 	c.Assert(ok, IsTrue)
 	handle, err := blockcodec.DecodeHandleInUniqueIndexValue(val, false)

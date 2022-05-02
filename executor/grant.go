@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,19 +19,19 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/privilege/privileges"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/sqlexec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/privilege/privileges"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/sqlexec"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
 	"go.uber.org/zap"
 )
 
@@ -67,7 +67,7 @@ func (e *GrantExec) Next(ctx context.Context, req *chunk.Chunk) error {
 
 	dbName := e.Level.DBName
 	if len(dbName) == 0 {
-		dbName = e.ctx.GetStochastikVars().CurrentDB
+		dbName = e.ctx.GetStochaseinstein_dbars().CurrentDB
 	}
 
 	// Make sure the block exist.
@@ -96,7 +96,7 @@ func (e *GrantExec) Next(ctx context.Context, req *chunk.Chunk) error {
 	if err := e.ctx.NewTxn(ctx); err != nil {
 		return err
 	}
-	defer func() { e.ctx.GetStochastikVars().SetStatusFlag(allegrosql.ServerStatusInTrans, false) }()
+	defer func() { e.ctx.GetStochaseinstein_dbars().SetStatusFlag(allegrosql.ServerStatusInTrans, false) }()
 
 	// Create internal stochastik to start internal transaction.
 	isCommit := false
@@ -125,7 +125,7 @@ func (e *GrantExec) Next(ctx context.Context, req *chunk.Chunk) error {
 		if err != nil {
 			return err
 		}
-		if !exists && e.ctx.GetStochastikVars().ALLEGROSQLMode.HasNoAutoCreateUserMode() {
+		if !exists && e.ctx.GetStochaseinstein_dbars().ALLEGROSQLMode.HasNoAutoCreateUserMode() {
 			return ErrCantCreateUserWithGrant
 		} else if !exists {
 			pwd, ok := user.EncodedPassword()
@@ -428,7 +428,7 @@ func (e *GrantExec) grantGlobalLevel(priv *ast.PrivElem, user *ast.UserSpec, int
 func (e *GrantExec) grantDBLevel(priv *ast.PrivElem, user *ast.UserSpec, internalStochastik stochastikctx.Context) error {
 	dbName := e.Level.DBName
 	if len(dbName) == 0 {
-		dbName = e.ctx.GetStochastikVars().CurrentDB
+		dbName = e.ctx.GetStochaseinstein_dbars().CurrentDB
 	}
 	asgns, err := composeDBPrivUFIDelate(priv.Priv, "Y")
 	if err != nil {
@@ -443,7 +443,7 @@ func (e *GrantExec) grantDBLevel(priv *ast.PrivElem, user *ast.UserSpec, interna
 func (e *GrantExec) grantBlockLevel(priv *ast.PrivElem, user *ast.UserSpec, internalStochastik stochastikctx.Context) error {
 	dbName := e.Level.DBName
 	if len(dbName) == 0 {
-		dbName = e.ctx.GetStochastikVars().CurrentDB
+		dbName = e.ctx.GetStochaseinstein_dbars().CurrentDB
 	}
 	tblName := e.Level.BlockName
 	asgns, err := composeBlockPrivUFIDelateForGrant(internalStochastik, priv.Priv, user.User.Username, user.User.Hostname, dbName, tblName)
@@ -552,7 +552,7 @@ func composeBlockPrivUFIDelateForGrant(ctx stochastikctx.Context, priv allegrosq
 			}
 		}
 	}
-	return fmt.Sprintf(`Block_priv='%s', DeferredCauset_priv='%s', Grantor='%s'`, newBlockPriv, newDeferredCausetPriv, ctx.GetStochastikVars().User), nil
+	return fmt.Sprintf(`Block_priv='%s', DeferredCauset_priv='%s', Grantor='%s'`, newBlockPriv, newDeferredCausetPriv, ctx.GetStochaseinstein_dbars().User), nil
 }
 
 func composeBlockPrivUFIDelateForRevoke(ctx stochastikctx.Context, priv allegrosql.PrivilegeType, name string, host string, EDB string, tbl string) (string, error) {
@@ -578,7 +578,7 @@ func composeBlockPrivUFIDelateForRevoke(ctx stochastikctx.Context, priv allegros
 			}
 		}
 	}
-	return fmt.Sprintf(`Block_priv='%s', DeferredCauset_priv='%s', Grantor='%s'`, newBlockPriv, newDeferredCausetPriv, ctx.GetStochastikVars().User), nil
+	return fmt.Sprintf(`Block_priv='%s', DeferredCauset_priv='%s', Grantor='%s'`, newBlockPriv, newDeferredCausetPriv, ctx.GetStochaseinstein_dbars().User), nil
 }
 
 // addToSet add a value to the set, e.g:
@@ -743,7 +743,7 @@ func getDeferredCausetPriv(ctx stochastikctx.Context, name string, host string, 
 // getTargetSchemaAndBlock finds the schemaReplicant and block by dbName and blockName.
 func getTargetSchemaAndBlock(ctx stochastikctx.Context, dbName, blockName string, is schemareplicant.SchemaReplicant) (string, block.Block, error) {
 	if len(dbName) == 0 {
-		dbName = ctx.GetStochastikVars().CurrentDB
+		dbName = ctx.GetStochaseinstein_dbars().CurrentDB
 		if len(dbName) == 0 {
 			return "", nil, errors.New("miss EDB name for grant privilege")
 		}
@@ -792,6 +792,6 @@ func getEventFromRecordSet(ctx context.Context, se stochastikctx.Context, rs sql
 		for r := iter.Begin(); r != iter.End(); r = iter.Next() {
 			rows = append(rows, r)
 		}
-		req = chunk.Renew(req, se.GetStochastikVars().MaxChunkSize)
+		req = chunk.Renew(req, se.GetStochaseinstein_dbars().MaxChunkSize)
 	}
 }

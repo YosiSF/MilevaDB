@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,27 +20,27 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block/blocks"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/metrics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/privilege"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/hint"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/kvcache"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/ranger"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/texttree"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	driver "github.com/whtcorpsinc/MilevaDB-Prod/types/berolinaAllegroSQL_driver"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/block/blocks"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/metrics"
-	"github.com/whtcorpsinc/milevadb/privilege"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/hint"
-	"github.com/whtcorpsinc/milevadb/soliton/kvcache"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/ranger"
-	"github.com/whtcorpsinc/milevadb/soliton/texttree"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
-	driver "github.com/whtcorpsinc/milevadb/types/berolinaAllegroSQL_driver"
 	"go.uber.org/zap"
 )
 
@@ -188,7 +188,7 @@ type Execute struct {
 
 // OptimizePreparedPlan optimizes the prepared statement.
 func (e *Execute) OptimizePreparedPlan(ctx context.Context, sctx stochastikctx.Context, is schemareplicant.SchemaReplicant) error {
-	vars := sctx.GetStochastikVars()
+	vars := sctx.GetStochaseinstein_dbars()
 	if e.Name != "" {
 		e.ExecID = vars.PreparedStmtNameToID[e.Name]
 	}
@@ -259,7 +259,7 @@ func (e *Execute) OptimizePreparedPlan(ctx context.Context, sctx stochastikctx.C
 func (e *Execute) checkPreparedPriv(ctx context.Context, sctx stochastikctx.Context,
 	preparedObj *CachedPrepareStmt, is schemareplicant.SchemaReplicant) error {
 	if pm := privilege.GetPrivilegeManager(sctx); pm != nil {
-		if err := CheckPrivilege(sctx.GetStochastikVars().ActiveRoles, pm, preparedObj.VisitInfos); err != nil {
+		if err := CheckPrivilege(sctx.GetStochaseinstein_dbars().ActiveRoles, pm, preparedObj.VisitInfos); err != nil {
 			return err
 		}
 	}
@@ -268,22 +268,22 @@ func (e *Execute) checkPreparedPriv(ctx context.Context, sctx stochastikctx.Cont
 }
 
 func (e *Execute) setFoundInPlanCache(sctx stochastikctx.Context, opt bool) error {
-	vars := sctx.GetStochastikVars()
+	vars := sctx.GetStochaseinstein_dbars()
 	err := vars.SetSystemVar(variable.MilevaDBFoundInPlanCache, variable.BoolToIntStr(opt))
 	return err
 }
 
 func (e *Execute) getPhysicalPlan(ctx context.Context, sctx stochastikctx.Context, is schemareplicant.SchemaReplicant, preparedStmt *CachedPrepareStmt) error {
-	stmtCtx := sctx.GetStochastikVars().StmtCtx
+	stmtCtx := sctx.GetStochaseinstein_dbars().StmtCtx
 	prepared := preparedStmt.PreparedAst
 	stmtCtx.UseCache = prepared.UseCache
 	var cacheKey kvcache.Key
 	if prepared.UseCache {
-		cacheKey = NewPSTMTPlanCacheKey(sctx.GetStochastikVars(), e.ExecID, prepared.SchemaVersion)
+		cacheKey = NewPSTMTPlanCacheKey(sctx.GetStochaseinstein_dbars(), e.ExecID, prepared.SchemaVersion)
 	}
 	if prepared.CachedPlan != nil {
 		// Rewriting the expression in the select.where condition  will convert its
-		// type from "paramMarker" to "Constant".When Point Select queries are executed,
+		// type from "paramMarker" to "CouplingConstantWithRadix".When Point Select queries are executed,
 		// the expression in the where condition will not be evaluated,
 		// so you don't need to consider whether prepared.useCache is enabled.
 		plan := prepared.CachedPlan.(Plan)
@@ -393,7 +393,7 @@ func (e *Execute) tryCachePointPlan(ctx context.Context, sctx stochastikctx.Cont
 		}
 		if ok {
 			// make constant expression causetstore paramMarker
-			sctx.GetStochastikVars().StmtCtx.PointExec = true
+			sctx.GetStochaseinstein_dbars().StmtCtx.PointExec = true
 			p, names, err = OptimizeAstNode(ctx, sctx, prepared.Stmt, is)
 		}
 	}
@@ -402,14 +402,14 @@ func (e *Execute) tryCachePointPlan(ctx context.Context, sctx stochastikctx.Cont
 		prepared.CachedPlan = p
 		prepared.CachedNames = names
 		preparedStmt.NormalizedPlan, preparedStmt.PlanDigest = NormalizePlan(p)
-		sctx.GetStochastikVars().StmtCtx.SetPlanDigest(preparedStmt.NormalizedPlan, preparedStmt.PlanDigest)
+		sctx.GetStochaseinstein_dbars().StmtCtx.SetPlanDigest(preparedStmt.NormalizedPlan, preparedStmt.PlanDigest)
 	}
 	return err
 }
 
 func (e *Execute) rebuildRange(p Plan) error {
 	sctx := p.SCtx()
-	sc := p.SCtx().GetStochastikVars().StmtCtx
+	sc := p.SCtx().GetStochaseinstein_dbars().StmtCtx
 	var err error
 	switch x := p.(type) {
 	case *PhysicalBlockReader:
@@ -474,7 +474,7 @@ func (e *Execute) rebuildRange(p Plan) error {
 					}
 				}
 				if pkDefCaus != nil {
-					ranges, err := ranger.BuildBlockRange(x.AccessConditions, x.ctx.GetStochastikVars().StmtCtx, pkDefCaus.RetType)
+					ranges, err := ranger.BuildBlockRange(x.AccessConditions, x.ctx.GetStochaseinstein_dbars().StmtCtx, pkDefCaus.RetType)
 					if err != nil {
 						return err
 					}
@@ -523,7 +523,7 @@ func (e *Execute) rebuildRange(p Plan) error {
 					}
 				}
 				if pkDefCaus != nil {
-					ranges, err := ranger.BuildBlockRange(x.AccessConditions, x.ctx.GetStochastikVars().StmtCtx, pkDefCaus.RetType)
+					ranges, err := ranger.BuildBlockRange(x.AccessConditions, x.ctx.GetStochaseinstein_dbars().StmtCtx, pkDefCaus.RetType)
 					if err != nil {
 						return err
 					}
@@ -682,7 +682,7 @@ type Insert struct {
 	// NeedFillDefaultValue is true when expr in value list reference other column.
 	NeedFillDefaultValue bool
 
-	AllAssignmentsAreConstant bool
+	AllAssignmentsAreCouplingConstantWithRadix bool
 }
 
 // UFIDelate represents UFIDelate plan.
@@ -691,7 +691,7 @@ type UFIDelate struct {
 
 	OrderedList []*expression.Assignment
 
-	AllAssignmentsAreConstant bool
+	AllAssignmentsAreCouplingConstantWithRadix bool
 
 	SelectPlan PhysicalPlan
 
@@ -962,7 +962,7 @@ func (e *Explain) explainPlanInRowFormat(p Plan, taskType, driverSide, indent st
 
 	if physPlan, ok := p.(PhysicalPlan); ok {
 		// indicate driven side and driving side of 'join' and 'apply'
-		// See issue https://github.com/whtcorpsinc/milevadb/issues/14602.
+		// See issue https://github.com/whtcorpsinc/MilevaDB-Prod/issues/14602.
 		driverSideInfo := make([]string, len(physPlan.Children()))
 		buildSide := -1
 
@@ -1052,7 +1052,7 @@ func (e *Explain) explainPlanInRowFormat(p Plan, taskType, driverSide, indent st
 }
 
 func getRuntimeInfo(ctx stochastikctx.Context, p Plan) (actRows, analyzeInfo, memoryInfo, diskInfo string) {
-	runtimeStatsDefCausl := ctx.GetStochastikVars().StmtCtx.RuntimeStatsDefCausl
+	runtimeStatsDefCausl := ctx.GetStochaseinstein_dbars().StmtCtx.RuntimeStatsDefCausl
 	if runtimeStatsDefCausl == nil {
 		return
 	}
@@ -1074,13 +1074,13 @@ func getRuntimeInfo(ctx stochastikctx.Context, p Plan) (actRows, analyzeInfo, me
 	}
 
 	memoryInfo = "N/A"
-	memTracker := ctx.GetStochastikVars().StmtCtx.MemTracker.SearchTrackerWithoutLock(p.ID())
+	memTracker := ctx.GetStochaseinstein_dbars().StmtCtx.MemTracker.SearchTrackerWithoutLock(p.ID())
 	if memTracker != nil {
 		memoryInfo = memTracker.BytesToString(memTracker.MaxConsumed())
 	}
 
 	diskInfo = "N/A"
-	diskTracker := ctx.GetStochastikVars().StmtCtx.DiskTracker.SearchTrackerWithoutLock(p.ID())
+	diskTracker := ctx.GetStochaseinstein_dbars().StmtCtx.DiskTracker.SearchTrackerWithoutLock(p.ID())
 	if diskTracker != nil {
 		diskInfo = diskTracker.BytesToString(diskTracker.MaxConsumed())
 	}
@@ -1205,10 +1205,10 @@ func IsPointGetWithPKOrUniqueKeyByAutoCommit(ctx stochastikctx.Context, p Plan) 
 	switch v := p.(type) {
 	case *PhysicalIndexReader:
 		indexScan := v.IndexPlans[0].(*PhysicalIndexScan)
-		return indexScan.IsPointGetByUniqueKey(ctx.GetStochastikVars().StmtCtx), nil
+		return indexScan.IsPointGetByUniqueKey(ctx.GetStochaseinstein_dbars().StmtCtx), nil
 	case *PhysicalBlockReader:
 		blockScan := v.BlockPlans[0].(*PhysicalBlockScan)
-		isPointRange := len(blockScan.Ranges) == 1 && blockScan.Ranges[0].IsPoint(ctx.GetStochastikVars().StmtCtx)
+		isPointRange := len(blockScan.Ranges) == 1 && blockScan.Ranges[0].IsPoint(ctx.GetStochaseinstein_dbars().StmtCtx)
 		if !isPointRange {
 			return false, nil
 		}
@@ -1232,7 +1232,7 @@ func IsPointGetWithPKOrUniqueKeyByAutoCommit(ctx stochastikctx.Context, p Plan) 
 // IsAutoCommitTxn checks if stochastik is in autocommit mode and not InTxn
 // used for fast plan like point get
 func IsAutoCommitTxn(ctx stochastikctx.Context) bool {
-	return ctx.GetStochastikVars().IsAutocommit() && !ctx.GetStochastikVars().InTxn()
+	return ctx.GetStochaseinstein_dbars().IsAutocommit() && !ctx.GetStochaseinstein_dbars().InTxn()
 }
 
 // IsPointUFIDelateByAutoCommit checks if plan p is point uFIDelate and is in autocommit context

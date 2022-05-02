@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,21 +21,21 @@ import (
 
 	"github.com/cznic/mathutil"
 	"github.com/twmb/murmur3"
+	"github.com/whtcorpsinc/MilevaDB-Prod/executor/aggfuncs"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/codec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/execdetails"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/memory"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/set"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/executor/aggfuncs"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/codec"
-	"github.com/whtcorpsinc/milevadb/soliton/execdetails"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/memory"
-	"github.com/whtcorpsinc/milevadb/soliton/set"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
 	"go.uber.org/zap"
 )
 
@@ -248,7 +248,7 @@ func (e *HashAggExec) Close() error {
 		finalConcurrencyInfo := execdetails.NewConcurrencyInfo("FinalConcurrency", finalConcurrency)
 		runtimeStats := &execdetails.RuntimeStatsWithConcurrencyInfo{}
 		runtimeStats.SetConcurrencyInfo(partialConcurrencyInfo, finalConcurrencyInfo)
-		e.ctx.GetStochastikVars().StmtCtx.RuntimeStatsDefCausl.RegisterStats(e.id, runtimeStats)
+		e.ctx.GetStochaseinstein_dbars().StmtCtx.RuntimeStatsDefCausl.RegisterStats(e.id, runtimeStats)
 	}
 	return e.baseExecutor.Close()
 }
@@ -261,7 +261,7 @@ func (e *HashAggExec) Open(ctx context.Context) error {
 	e.prepared = false
 
 	e.memTracker = memory.NewTracker(e.id, -1)
-	e.memTracker.AttachTo(e.ctx.GetStochastikVars().StmtCtx.MemTracker)
+	e.memTracker.AttachTo(e.ctx.GetStochaseinstein_dbars().StmtCtx.MemTracker)
 
 	if e.isUnparallelExec {
 		e.initForUnparallelExec()
@@ -280,9 +280,9 @@ func (e *HashAggExec) initForUnparallelExec() {
 }
 
 func (e *HashAggExec) initForParallelExec(ctx stochastikctx.Context) {
-	stochastikVars := e.ctx.GetStochastikVars()
-	finalConcurrency := stochastikVars.HashAggFinalConcurrency()
-	partialConcurrency := stochastikVars.HashAggPartialConcurrency()
+	stochaseinstein_dbars := e.ctx.GetStochaseinstein_dbars()
+	finalConcurrency := stochaseinstein_dbars.HashAggFinalConcurrency()
+	partialConcurrency := stochaseinstein_dbars.HashAggPartialConcurrency()
 	e.isChildReturnEmpty = true
 	e.finalOutputCh = make(chan *AfFinalResult, finalConcurrency)
 	e.inputCh = make(chan *HashAggInput, partialConcurrency)
@@ -366,7 +366,7 @@ func recoveryHashAgg(output chan *AfFinalResult, r interface{}) {
 }
 
 func (w *HashAggPartialWorker) run(ctx stochastikctx.Context, waitGroup *sync.WaitGroup, finalConcurrency int) {
-	needShuffle, sc := false, ctx.GetStochastikVars().StmtCtx
+	needShuffle, sc := false, ctx.GetStochaseinstein_dbars().StmtCtx
 	defer func() {
 		if r := recover(); r != nil {
 			recoveryHashAgg(w.globalOutputCh, r)
@@ -462,7 +462,7 @@ func getGroupKey(ctx stochastikctx.Context, input *chunk.Chunk, groupKey [][]byt
 			newTp.Flen = 0
 			tp = &newTp
 		}
-		groupKey, err = codec.HashGroupKey(ctx.GetStochastikVars().StmtCtx, input.NumEvents(), buf, groupKey, tp)
+		groupKey, err = codec.HashGroupKey(ctx.GetStochaseinstein_dbars().StmtCtx, input.NumEvents(), buf, groupKey, tp)
 		if err != nil {
 			expression.PutDeferredCauset(buf)
 			return nil, err
@@ -507,7 +507,7 @@ func (w *HashAggFinalWorker) consumeIntermData(sctx stochastikctx.Context) (err 
 		ok               bool
 		intermDataBuffer [][]aggfuncs.PartialResult
 		groupKeys        []string
-		sc               = sctx.GetStochastikVars().StmtCtx
+		sc               = sctx.GetStochaseinstein_dbars().StmtCtx
 	)
 	for {
 		if input, ok = w.getPartialInput(); !ok {
@@ -549,7 +549,7 @@ func (w *HashAggFinalWorker) getFinalResult(sctx stochastikctx.Context) {
 	for groupKey := range w.groupSet {
 		w.groupKeys = append(w.groupKeys, []byte(groupKey))
 	}
-	partialResults := w.getPartialResult(sctx.GetStochastikVars().StmtCtx, w.groupKeys, w.partialResultMap)
+	partialResults := w.getPartialResult(sctx.GetStochaseinstein_dbars().StmtCtx, w.groupKeys, w.partialResultMap)
 	for i := 0; i < len(w.groupSet); i++ {
 		for j, af := range w.aggFuncs {
 			if err := af.AppendFinalResult2Chunk(sctx, partialResults[i][j], result); err != nil {
@@ -857,7 +857,7 @@ func (e *StreamAggExec) Open(ctx context.Context) error {
 
 	// bytesLimit <= 0 means no limit, for now we just track the memory footprint
 	e.memTracker = memory.NewTracker(e.id, -1)
-	e.memTracker.AttachTo(e.ctx.GetStochastikVars().StmtCtx.MemTracker)
+	e.memTracker.AttachTo(e.ctx.GetStochaseinstein_dbars().StmtCtx.MemTracker)
 	e.memTracker.Consume(e.childResult.MemoryUsage())
 	return nil
 }
@@ -1056,12 +1056,12 @@ func (e *vecGroupChecker) splitIntoGroups(chk *chunk.Chunk) (isFirstGroupSameAsP
 			return false, err
 		}
 	}
-	e.firstGroupKey, err = codec.EncodeValue(e.ctx.GetStochastikVars().StmtCtx, e.firstGroupKey, e.firstEventCausets...)
+	e.firstGroupKey, err = codec.EncodeValue(e.ctx.GetStochaseinstein_dbars().StmtCtx, e.firstGroupKey, e.firstEventCausets...)
 	if err != nil {
 		return false, err
 	}
 
-	e.lastGroupKey, err = codec.EncodeValue(e.ctx.GetStochastikVars().StmtCtx, e.lastGroupKey, e.lastEventCausets...)
+	e.lastGroupKey, err = codec.EncodeValue(e.ctx.GetStochaseinstein_dbars().StmtCtx, e.lastGroupKey, e.lastEventCausets...)
 	if err != nil {
 		return false, err
 	}
@@ -1119,7 +1119,7 @@ func (e *vecGroupChecker) getFirstAndLastEventCauset(item expression.Expression,
 	tp := item.GetType()
 	eType := tp.EvalType()
 	switch eType {
-	case types.ETInt:
+	case types.CausetEDN:
 		firstEventVal, firstEventIsNull, err := item.EvalInt(e.ctx, chk.GetEvent(0))
 		if err != nil {
 			return err
@@ -1303,7 +1303,7 @@ func (e *vecGroupChecker) evalGroupItemsAndResolveGroups(item expression.Express
 
 	previousIsNull := defCaus.IsNull(0)
 	switch eType {
-	case types.ETInt:
+	case types.CausetEDN:
 		vals := defCaus.Int64s()
 		for i := 1; i < numEvents; i++ {
 			isNull := defCaus.IsNull(i)

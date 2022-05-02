@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,15 +16,15 @@ package executor
 import (
 	"context"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/memory"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/memory"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 // DeleteExec represents a delete executor.
@@ -81,9 +81,9 @@ func (e *DeleteExec) deleteSingleBlockByChunk(ctx context.Context) error {
 		}
 	}
 
-	batchDMLSize := e.ctx.GetStochastikVars().DMLBatchSize
+	batchDMLSize := e.ctx.GetStochaseinstein_dbars().DMLBatchSize
 	// If milevadb_batch_delete is ON and not in a transaction, we could use BatchDelete mode.
-	batchDelete := e.ctx.GetStochastikVars().BatchDelete && !e.ctx.GetStochastikVars().InTxn() &&
+	batchDelete := e.ctx.GetStochaseinstein_dbars().BatchDelete && !e.ctx.GetStochaseinstein_dbars().InTxn() &&
 		config.GetGlobalConfig().EnableBatchDML && batchDMLSize > 0
 	fields := retTypes(e.children[0])
 	chk := newFirstChunk(e.children[0])
@@ -200,7 +200,7 @@ func (e *DeleteExec) removeEvent(ctx stochastikctx.Context, t block.Block, h ekv
 		return err
 	}
 	e.memTracker.Consume(int64(txnState.Size() - memUsageOfTxnState))
-	ctx.GetStochastikVars().StmtCtx.AddAffectedEvents(1)
+	ctx.GetStochaseinstein_dbars().StmtCtx.AddAffectedEvents(1)
 	return nil
 }
 
@@ -212,7 +212,7 @@ func (e *DeleteExec) Close() error {
 // Open implements the Executor Open interface.
 func (e *DeleteExec) Open(ctx context.Context) error {
 	e.memTracker = memory.NewTracker(e.id, -1)
-	e.memTracker.AttachTo(e.ctx.GetStochastikVars().StmtCtx.MemTracker)
+	e.memTracker.AttachTo(e.ctx.GetStochaseinstein_dbars().StmtCtx.MemTracker)
 
 	return e.children[0].Open(ctx)
 }

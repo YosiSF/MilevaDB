@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,20 +19,20 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/block/blocks"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/executor"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastik"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/block/blocks"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/executor"
-	"github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/soliton/solitonutil"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/stochastik"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 type testBypassSuite struct{}
@@ -1758,7 +1758,7 @@ func (s *testSuite4) TestMultipleBlockUFIDelate(c *C) {
 	r.Check(testkit.Rows("11 month_price_11", "12 items_price_12", "13 month_price_13"))
 	tk.MustExec("commit")
 
-	// fix https://github.com/whtcorpsinc/milevadb/issues/369
+	// fix https://github.com/whtcorpsinc/MilevaDB-Prod/issues/369
 	testALLEGROSQL := `
 		DROP TABLE IF EXISTS t1, t2;
 		create block t1 (c int);
@@ -1769,7 +1769,7 @@ func (s *testSuite4) TestMultipleBlockUFIDelate(c *C) {
 	tk.MustExec(testALLEGROSQL)
 	tk.CheckLastMessage("Rows matched: 4  Changed: 4  Warnings: 0")
 
-	// fix https://github.com/whtcorpsinc/milevadb/issues/376
+	// fix https://github.com/whtcorpsinc/MilevaDB-Prod/issues/376
 	testALLEGROSQL = `DROP TABLE IF EXISTS t1, t2;
 		create block t1 (c1 int);
 		create block t2 (c2 int);
@@ -1782,7 +1782,7 @@ func (s *testSuite4) TestMultipleBlockUFIDelate(c *C) {
 	r = tk.MustQuery("select * from t1")
 	r.Check(testkit.Rows("10", "10"))
 
-	// test https://github.com/whtcorpsinc/milevadb/issues/3604
+	// test https://github.com/whtcorpsinc/MilevaDB-Prod/issues/3604
 	tk.MustExec("drop block if exists t, t")
 	tk.MustExec("create block t (a int, b int)")
 	tk.MustExec("insert into t values(1, 1), (2, 2), (3, 3)")
@@ -2025,8 +2025,8 @@ func (s *testSuite4) TestLoadData(c *C) {
 	deleteALLEGROSQL := "delete from load_data_test"
 	selectALLEGROSQL := "select * from load_data_test;"
 	// data1 = nil, data2 = nil, fields and lines is default
-	ctx.GetStochastikVars().StmtCtx.DupKeyAsWarning = true
-	ctx.GetStochastikVars().StmtCtx.BadNullAsWarning = true
+	ctx.GetStochaseinstein_dbars().StmtCtx.DupKeyAsWarning = true
+	ctx.GetStochaseinstein_dbars().StmtCtx.BadNullAsWarning = true
 	_, reachLimit, err := ld.InsertData(context.Background(), nil, nil)
 	c.Assert(err, IsNil)
 	c.Assert(reachLimit, IsFalse)
@@ -2036,7 +2036,7 @@ func (s *testSuite4) TestLoadData(c *C) {
 	r := tk.MustQuery(selectALLEGROSQL)
 	r.Check(nil)
 
-	sc := ctx.GetStochastikVars().StmtCtx
+	sc := ctx.GetStochaseinstein_dbars().StmtCtx
 	originIgnoreTruncate := sc.IgnoreTruncate
 	defer func() {
 		sc.IgnoreTruncate = originIgnoreTruncate
@@ -2371,7 +2371,7 @@ func (s *testBypassSuite) TestLatch(c *C) {
 	tk1.MustExec("commit")
 }
 
-// TestIssue4067 Test issue https://github.com/whtcorpsinc/milevadb/issues/4067
+// TestIssue4067 Test issue https://github.com/whtcorpsinc/MilevaDB-Prod/issues/4067
 func (s *testSuite7) TestIssue4067(c *C) {
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustExec("use test")
@@ -2554,7 +2554,7 @@ func (s *testSuite7) TestUFIDelateAffectRowCnt(c *C) {
 	tk.MustExec("insert into a values (1, 1001), (2, 1001), (10001, 1), (3, 1)")
 	tk.MustExec("uFIDelate a set id = id*10 where a = 1001")
 	ctx := tk.Se.(stochastikctx.Context)
-	c.Assert(ctx.GetStochastikVars().StmtCtx.AffectedRows(), Equals, uint64(2))
+	c.Assert(ctx.GetStochaseinstein_dbars().StmtCtx.AffectedRows(), Equals, uint64(2))
 	tk.CheckLastMessage("Rows matched: 2  Changed: 2  Warnings: 0")
 
 	tk.MustExec("drop block a")
@@ -2562,7 +2562,7 @@ func (s *testSuite7) TestUFIDelateAffectRowCnt(c *C) {
 	tk.MustExec("insert into a values (1, 1001), (2, 1001), (10001, 1), (3, 1)")
 	tk.MustExec("uFIDelate a set a = a*10 where b = 1001")
 	ctx = tk.Se.(stochastikctx.Context)
-	c.Assert(ctx.GetStochastikVars().StmtCtx.AffectedRows(), Equals, uint64(2))
+	c.Assert(ctx.GetStochaseinstein_dbars().StmtCtx.AffectedRows(), Equals, uint64(2))
 	tk.CheckLastMessage("Rows matched: 2  Changed: 2  Warnings: 0")
 }
 

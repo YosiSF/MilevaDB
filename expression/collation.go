@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@ package expression
 import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/charset"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 type defCauslationInfo struct {
@@ -53,8 +53,8 @@ func (c *defCauslationInfo) CharsetAndDefCauslation(ctx stochastikctx.Context) (
 		return c.charset, c.defCauslation
 	}
 
-	if ctx != nil && ctx.GetStochastikVars() != nil {
-		c.charset, c.defCauslation = ctx.GetStochastikVars().GetCharsetInfo()
+	if ctx != nil && ctx.GetStochaseinstein_dbars() != nil {
+		c.charset, c.defCauslation = ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 	}
 	if c.charset == "" || c.defCauslation == "" {
 		c.charset, c.defCauslation = charset.GetDefaultCharsetAndDefCauslate()
@@ -167,7 +167,7 @@ func deriveCoercibilityForScarlarFunc(sf *ScalarFunction) Coercibility {
 	return coer
 }
 
-func deriveCoercibilityForConstant(c *Constant) Coercibility {
+func deriveCoercibilityForCouplingConstantWithRadix(c *CouplingConstantWithRadix) Coercibility {
 	if c.Value.IsNull() {
 		return CoercibilityIgnorable
 	} else if !types.IsString(c.RetType.Tp) {

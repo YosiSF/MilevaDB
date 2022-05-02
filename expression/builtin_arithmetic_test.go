@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/solitonutil"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 func (s *testEvaluatorSuite) TestSetFlenDecimal4RealOrDecimal(c *C) {
@@ -118,7 +118,7 @@ func (s *testEvaluatorSuite) TestArithmeticPlus(c *C) {
 	// case: 1
 	args := []interface{}{int64(12), int64(1)}
 
-	bf, err := funcs[ast.Plus].getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(args...)))
+	bf, err := funcs[ast.Plus].getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(args...)))
 	c.Assert(err, IsNil)
 	c.Assert(bf, NotNil)
 	intSig, ok := bf.(*builtinArithmeticPlusIntSig)
@@ -133,7 +133,7 @@ func (s *testEvaluatorSuite) TestArithmeticPlus(c *C) {
 	// case 2
 	args = []interface{}{float64(1.01001), float64(-0.01)}
 
-	bf, err = funcs[ast.Plus].getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(args...)))
+	bf, err = funcs[ast.Plus].getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(args...)))
 	c.Assert(err, IsNil)
 	c.Assert(bf, NotNil)
 	realSig, ok := bf.(*builtinArithmeticPlusRealSig)
@@ -148,7 +148,7 @@ func (s *testEvaluatorSuite) TestArithmeticPlus(c *C) {
 	// case 3
 	args = []interface{}{nil, float64(-0.11101)}
 
-	bf, err = funcs[ast.Plus].getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(args...)))
+	bf, err = funcs[ast.Plus].getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(args...)))
 	c.Assert(err, IsNil)
 	c.Assert(bf, NotNil)
 	realSig, ok = bf.(*builtinArithmeticPlusRealSig)
@@ -163,7 +163,7 @@ func (s *testEvaluatorSuite) TestArithmeticPlus(c *C) {
 	// case 4
 	args = []interface{}{nil, nil}
 
-	bf, err = funcs[ast.Plus].getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(args...)))
+	bf, err = funcs[ast.Plus].getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(args...)))
 	c.Assert(err, IsNil)
 	c.Assert(bf, NotNil)
 	realSig, ok = bf.(*builtinArithmeticPlusRealSig)
@@ -180,7 +180,7 @@ func (s *testEvaluatorSuite) TestArithmeticPlus(c *C) {
 	c.Assert(err, IsNil)
 	args = []interface{}{hexStr, int64(1)}
 
-	bf, err = funcs[ast.Plus].getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(args...)))
+	bf, err = funcs[ast.Plus].getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(args...)))
 	c.Assert(err, IsNil)
 	c.Assert(bf, NotNil)
 	intSig, ok = bf.(*builtinArithmeticPlusIntSig)
@@ -196,7 +196,7 @@ func (s *testEvaluatorSuite) TestArithmeticMinus(c *C) {
 	// case: 1
 	args := []interface{}{int64(12), int64(1)}
 
-	bf, err := funcs[ast.Minus].getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(args...)))
+	bf, err := funcs[ast.Minus].getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(args...)))
 	c.Assert(err, IsNil)
 	c.Assert(bf, NotNil)
 	intSig, ok := bf.(*builtinArithmeticMinusIntSig)
@@ -211,7 +211,7 @@ func (s *testEvaluatorSuite) TestArithmeticMinus(c *C) {
 	// case 2
 	args = []interface{}{float64(1.01001), float64(-0.01)}
 
-	bf, err = funcs[ast.Minus].getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(args...)))
+	bf, err = funcs[ast.Minus].getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(args...)))
 	c.Assert(err, IsNil)
 	c.Assert(bf, NotNil)
 	realSig, ok := bf.(*builtinArithmeticMinusRealSig)
@@ -226,7 +226,7 @@ func (s *testEvaluatorSuite) TestArithmeticMinus(c *C) {
 	// case 3
 	args = []interface{}{nil, float64(-0.11101)}
 
-	bf, err = funcs[ast.Minus].getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(args...)))
+	bf, err = funcs[ast.Minus].getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(args...)))
 	c.Assert(err, IsNil)
 	c.Assert(bf, NotNil)
 	realSig, ok = bf.(*builtinArithmeticMinusRealSig)
@@ -241,7 +241,7 @@ func (s *testEvaluatorSuite) TestArithmeticMinus(c *C) {
 	// case 4
 	args = []interface{}{float64(1.01), nil}
 
-	bf, err = funcs[ast.Minus].getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(args...)))
+	bf, err = funcs[ast.Minus].getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(args...)))
 	c.Assert(err, IsNil)
 	c.Assert(bf, NotNil)
 	realSig, ok = bf.(*builtinArithmeticMinusRealSig)
@@ -256,7 +256,7 @@ func (s *testEvaluatorSuite) TestArithmeticMinus(c *C) {
 	// case 5
 	args = []interface{}{nil, nil}
 
-	bf, err = funcs[ast.Minus].getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(args...)))
+	bf, err = funcs[ast.Minus].getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(args...)))
 	c.Assert(err, IsNil)
 	c.Assert(bf, NotNil)
 	realSig, ok = bf.(*builtinArithmeticMinusRealSig)
@@ -302,7 +302,7 @@ func (s *testEvaluatorSuite) TestArithmeticMultiply(c *C) {
 	}
 
 	for _, tc := range testCases {
-		sig, err := funcs[ast.Mul].getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(tc.args...)))
+		sig, err := funcs[ast.Mul].getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(tc.args...)))
 		c.Assert(err, IsNil)
 		c.Assert(sig, NotNil)
 		val, err := evalBuiltinFunc(sig, chunk.Event{})
@@ -363,7 +363,7 @@ func (s *testEvaluatorSuite) TestArithmeticDivide(c *C) {
 	}
 
 	for _, tc := range testCases {
-		sig, err := funcs[ast.Div].getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(tc.args...)))
+		sig, err := funcs[ast.Div].getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(tc.args...)))
 		c.Assert(err, IsNil)
 		c.Assert(sig, NotNil)
 		switch sig.(type) {
@@ -478,7 +478,7 @@ func (s *testEvaluatorSuite) TestArithmeticIntDivide(c *C) {
 	}
 
 	for _, tc := range testCases {
-		sig, err := funcs[ast.IntDiv].getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(tc.args...)))
+		sig, err := funcs[ast.IntDiv].getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(tc.args...)))
 		c.Assert(err, IsNil)
 		c.Assert(sig, NotNil)
 		val, err := evalBuiltinFunc(sig, chunk.Event{})
@@ -591,7 +591,7 @@ func (s *testEvaluatorSuite) TestArithmeticMod(c *C) {
 	}
 
 	for _, tc := range testCases {
-		sig, err := funcs[ast.Mod].getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(tc.args...)))
+		sig, err := funcs[ast.Mod].getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(tc.args...)))
 		c.Assert(err, IsNil)
 		c.Assert(sig, NotNil)
 		val, err := evalBuiltinFunc(sig, chunk.Event{})

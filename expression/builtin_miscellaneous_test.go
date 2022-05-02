@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/solitonutil"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 func (s *testEvaluatorSuite) TestInetAton(c *C) {
@@ -48,7 +48,7 @@ func (s *testEvaluatorSuite) TestInetAton(c *C) {
 	dtbl := tblToDtbl(tbl)
 	fc := funcs[ast.InetAton]
 	for _, t := range dtbl {
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t["Input"]))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Input"]))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -76,7 +76,7 @@ func (s *testEvaluatorSuite) TestIsIPv4(c *C) {
 	fc := funcs[ast.IsIPv4]
 	for _, test := range tests {
 		ip := types.NewStringCauset(test.ip)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{ip}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{ip}))
 		c.Assert(err, IsNil)
 		result, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -84,7 +84,7 @@ func (s *testEvaluatorSuite) TestIsIPv4(c *C) {
 	}
 	// test NULL input for is_ipv4
 	var argNull types.Causet
-	f, _ := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{argNull}))
+	f, _ := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{argNull}))
 	r, err := evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(r, solitonutil.CausetEquals, types.NewCauset(0))
@@ -111,7 +111,7 @@ func (s *testEvaluatorSuite) TestUUID(c *C) {
 			c.Assert(len(p), Equals, 12)
 		}
 	}
-	_, err = funcs[ast.UUID].getFunction(s.ctx, s.datumsToConstants(nil))
+	_, err = funcs[ast.UUID].getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(nil))
 	c.Assert(err, IsNil)
 }
 
@@ -128,7 +128,7 @@ func (s *testEvaluatorSuite) TestAnyValue(c *C) {
 	}
 	for _, t := range tbl {
 		fc := funcs[ast.AnyValue]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(t.arg)))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(t.arg)))
 		c.Assert(err, IsNil)
 		r, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -150,7 +150,7 @@ func (s *testEvaluatorSuite) TestIsIPv6(c *C) {
 	fc := funcs[ast.IsIPv6]
 	for _, test := range tests {
 		ip := types.NewStringCauset(test.ip)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{ip}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{ip}))
 		c.Assert(err, IsNil)
 		result, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -158,7 +158,7 @@ func (s *testEvaluatorSuite) TestIsIPv6(c *C) {
 	}
 	// test NULL input for is_ipv6
 	var argNull types.Causet
-	f, _ := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{argNull}))
+	f, _ := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{argNull}))
 	r, err := evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(r, solitonutil.CausetEquals, types.NewCauset(0))
@@ -179,7 +179,7 @@ func (s *testEvaluatorSuite) TestInetNtoa(c *C) {
 	fc := funcs[ast.InetNtoa]
 	for _, test := range tests {
 		ip := types.NewCauset(test.ip)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{ip}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{ip}))
 		c.Assert(err, IsNil)
 		result, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -187,7 +187,7 @@ func (s *testEvaluatorSuite) TestInetNtoa(c *C) {
 	}
 
 	var argNull types.Causet
-	f, _ := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{argNull}))
+	f, _ := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{argNull}))
 	r, err := evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(r.IsNull(), IsTrue)
@@ -216,7 +216,7 @@ func (s *testEvaluatorSuite) TestInet6NtoA(c *C) {
 	fc := funcs[ast.Inet6Ntoa]
 	for _, test := range tests {
 		ip := types.NewCauset(test.ip)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{ip}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{ip}))
 		c.Assert(err, IsNil)
 		result, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -224,7 +224,7 @@ func (s *testEvaluatorSuite) TestInet6NtoA(c *C) {
 	}
 
 	var argNull types.Causet
-	f, _ := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{argNull}))
+	f, _ := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{argNull}))
 	r, err := evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(r.IsNull(), IsTrue)
@@ -246,7 +246,7 @@ func (s *testEvaluatorSuite) TestInet6AtoN(c *C) {
 	fc := funcs[ast.Inet6Aton]
 	for _, test := range tests {
 		ip := types.NewCauset(test.ip)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{ip}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{ip}))
 		c.Assert(err, IsNil)
 		result, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -254,7 +254,7 @@ func (s *testEvaluatorSuite) TestInet6AtoN(c *C) {
 	}
 
 	var argNull types.Causet
-	f, _ := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{argNull}))
+	f, _ := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{argNull}))
 	r, err := evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(r.IsNull(), IsTrue)
@@ -274,7 +274,7 @@ func (s *testEvaluatorSuite) TestIsIPv4Mapped(c *C) {
 	fc := funcs[ast.IsIPv4Mapped]
 	for _, test := range tests {
 		ip := types.NewCauset(test.ip)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{ip}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{ip}))
 		c.Assert(err, IsNil)
 		result, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -282,7 +282,7 @@ func (s *testEvaluatorSuite) TestIsIPv4Mapped(c *C) {
 	}
 
 	var argNull types.Causet
-	f, _ := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{argNull}))
+	f, _ := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{argNull}))
 	r, err := evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(r, solitonutil.CausetEquals, types.NewCauset(int64(0)))
@@ -303,7 +303,7 @@ func (s *testEvaluatorSuite) TestIsIPv4Compat(c *C) {
 	fc := funcs[ast.IsIPv4Compat]
 	for _, test := range tests {
 		ip := types.NewCauset(test.ip)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{ip}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{ip}))
 		c.Assert(err, IsNil)
 		result, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -311,7 +311,7 @@ func (s *testEvaluatorSuite) TestIsIPv4Compat(c *C) {
 	}
 
 	var argNull types.Causet
-	f, _ := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{argNull}))
+	f, _ := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{argNull}))
 	r, err := evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(r, solitonutil.CausetEquals, types.NewCauset(0))
@@ -351,7 +351,7 @@ func (s *testEvaluatorSuite) TestNameConst(c *C) {
 	}
 
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.NameConst, s.primitiveValsToConstants([]interface{}{t.defCausName, t.arg})...)
+		f, err := newFunctionForTest(s.ctx, ast.NameConst, s.primitiveValsToCouplingConstantWithRadixs([]interface{}{t.defCausName, t.arg})...)
 		c.Assert(err, IsNil)
 		d, err := f.Eval(chunk.Event{})
 		c.Assert(err, IsNil)

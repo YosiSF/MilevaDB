@@ -1,8 +1,8 @@
-// INTERLOCKyright 2020 The ql Authors. All rights reserved.
+Copuright 2021 Whtcorps Inc; EinsteinDB and MilevaDB aithors; Licensed Under Apache 2.0. All Rights Reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSES/QL-LICENSE file.
 
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,27 +36,27 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	field_types "github.com/whtcorpsinc/berolinaAllegroSQL/types"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/block/blocks"
-	"github.com/whtcorpsinc/milevadb/blockcodec"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/dbs/memristed"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/meta/autoid"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/codec"
-	"github.com/whtcorpsinc/milevadb/soliton/defCauslate"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/soliton/petriutil"
-	"github.com/whtcorpsinc/milevadb/soliton/set"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
-	driver "github.com/whtcorpsinc/milevadb/types/berolinaAllegroSQL_driver"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block/blocks"
+	"github.com/whtcorpsinc/MilevaDB-Prod/blockcodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/dbs/memristed"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/codec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/defCauslate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/petriutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/set"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	driver "github.com/whtcorpsinc/MilevaDB-Prod/types/berolinaAllegroSQL_driver"
 	"go.uber.org/zap"
 )
 
@@ -93,7 +93,7 @@ func (d *dbs) CreateSchemaWithInfo(
 		err := schemareplicant.ErrDatabaseExists.GenWithStackByArgs(dbInfo.Name)
 		switch onExist {
 		case OnExistIgnore:
-			ctx.GetStochastikVars().StmtCtx.AppendNote(err)
+			ctx.GetStochaseinstein_dbars().StmtCtx.AppendNote(err)
 			return nil
 		case OnExistError, OnExistReplace:
 			// FIXME: can we implement MariaDB's CREATE OR REPLACE SCHEMA?
@@ -434,7 +434,7 @@ func checkDeferredCausetDefaultValue(ctx stochastikctx.Context, defCaus *block.D
 		defCaus.Tp == allegrosql.TypeTinyBlob || defCaus.Tp == allegrosql.TypeMediumBlob ||
 		defCaus.Tp == allegrosql.TypeLongBlob || defCaus.Tp == allegrosql.TypeBlob) {
 		// In non-strict ALLEGROALLEGROSQL mode.
-		if !ctx.GetStochastikVars().ALLEGROSQLMode.HasStrictMode() && value == "" {
+		if !ctx.GetStochaseinstein_dbars().ALLEGROSQLMode.HasStrictMode() && value == "" {
 			if defCaus.Tp == allegrosql.TypeBlob || defCaus.Tp == allegrosql.TypeLongBlob {
 				// The TEXT/BLOB default value can be ignored.
 				hasDefaultValue = false
@@ -443,15 +443,15 @@ func checkDeferredCausetDefaultValue(ctx stochastikctx.Context, defCaus *block.D
 			if defCaus.Tp == allegrosql.TypeJSON {
 				value = `null`
 			}
-			sc := ctx.GetStochastikVars().StmtCtx
+			sc := ctx.GetStochaseinstein_dbars().StmtCtx
 			sc.AppendWarning(errBlobCantHaveDefault.GenWithStackByArgs(defCaus.Name.O))
 			return hasDefaultValue, value, nil
 		}
 		// In strict ALLEGROALLEGROSQL mode or default value is not an empty string.
 		return hasDefaultValue, value, errBlobCantHaveDefault.GenWithStackByArgs(defCaus.Name.O)
 	}
-	if value != nil && ctx.GetStochastikVars().ALLEGROSQLMode.HasNoZeroDateMode() &&
-		ctx.GetStochastikVars().ALLEGROSQLMode.HasStrictMode() && types.IsTypeTime(defCaus.Tp) {
+	if value != nil && ctx.GetStochaseinstein_dbars().ALLEGROSQLMode.HasNoZeroDateMode() &&
+		ctx.GetStochaseinstein_dbars().ALLEGROSQLMode.HasStrictMode() && types.IsTypeTime(defCaus.Tp) {
 		if vv, ok := value.(string); ok {
 			timeValue, err := expression.GetTimeValue(ctx, vv, defCaus.Tp, int8(defCaus.Decimal))
 			if err != nil {
@@ -478,11 +478,11 @@ func convertTimestamFIDelefaultValToUTC(ctx stochastikctx.Context, defaultVal in
 	}
 	if vv, ok := defaultVal.(string); ok {
 		if vv != types.ZeroDatetimeStr && !strings.EqualFold(vv, ast.CurrentTimestamp) {
-			t, err := types.ParseTime(ctx.GetStochastikVars().StmtCtx, vv, defCaus.Tp, int8(defCaus.Decimal))
+			t, err := types.ParseTime(ctx.GetStochaseinstein_dbars().StmtCtx, vv, defCaus.Tp, int8(defCaus.Decimal))
 			if err != nil {
 				return defaultVal, errors.Trace(err)
 			}
-			err = t.ConvertTimeZone(ctx.GetStochastikVars().Location(), time.UTC)
+			err = t.ConvertTimeZone(ctx.GetStochaseinstein_dbars().Location(), time.UTC)
 			if err != nil {
 				return defaultVal, errors.Trace(err)
 			}
@@ -624,9 +624,9 @@ func defCausumnDefToDefCaus(ctx stochastikctx.Context, offset int, defCausDef *a
 					defCaus.FieldType.DefCauslate = v.StrValue
 				}
 			case ast.DeferredCausetOptionFulltext:
-				ctx.GetStochastikVars().StmtCtx.AppendWarning(ErrTableCantHandleFt)
+				ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(ErrTableCantHandleFt)
 			case ast.DeferredCausetOptionCheck:
-				ctx.GetStochastikVars().StmtCtx.AppendWarning(ErrUnsupportedConstraintCheck.GenWithStackByArgs("DeferredCauset check"))
+				ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(ErrUnsupportedConstraintCheck.GenWithStackByArgs("DeferredCauset check"))
 			}
 		}
 	}
@@ -721,7 +721,7 @@ func getDefaultValue(ctx stochastikctx.Context, defCaus *block.DeferredCauset, c
 			return v.GetBinaryLiteral().ToString(), false, nil
 		}
 		// For other HoTT of fields (e.g. INT), we supply its integer as string value.
-		value, err := v.GetBinaryLiteral().ToInt(ctx.GetStochastikVars().StmtCtx)
+		value, err := v.GetBinaryLiteral().ToInt(ctx.GetStochaseinstein_dbars().StmtCtx)
 		if err != nil {
 			return nil, false, err
 		}
@@ -733,7 +733,7 @@ func getDefaultValue(ctx stochastikctx.Context, defCaus *block.DeferredCauset, c
 		val, err := setSetDefaultValue(v, defCaus)
 		return val, false, err
 	case allegrosql.TypeDuration:
-		if v, err = v.ConvertTo(ctx.GetStochastikVars().StmtCtx, &defCaus.FieldType); err != nil {
+		if v, err = v.ConvertTo(ctx.GetStochaseinstein_dbars().StmtCtx, &defCaus.FieldType); err != nil {
 			return "", false, errors.Trace(err)
 		}
 	case allegrosql.TypeBit:
@@ -1264,7 +1264,7 @@ func setTableAutoRandomBits(ctx stochastikctx.Context, tbInfo *perceptron.TableI
 			tbInfo.AutoRandomBits = autoRandBits
 
 			msg := fmt.Sprintf(autoid.AutoRandomAvailableAllocTimesNote, layout.IncrementalBitsCapacity())
-			ctx.GetStochastikVars().StmtCtx.AppendNote(errors.Errorf(msg))
+			ctx.GetStochaseinstein_dbars().StmtCtx.AppendNote(errors.Errorf(msg))
 		}
 	}
 	return nil
@@ -1342,7 +1342,7 @@ func buildTableInfo(
 			}
 			if !config.GetGlobalConfig().AlterPrimaryKey {
 				singleIntPK := isSingleIntPK(constr, lastDefCaus)
-				clusteredIdx := ctx.GetStochastikVars().EnableClusteredIndex
+				clusteredIdx := ctx.GetStochaseinstein_dbars().EnableClusteredIndex
 				if singleIntPK || clusteredIdx {
 					// Primary key cannot be invisible.
 					if constr.Option != nil && constr.Option.Visibility == ast.IndexVisibilityInvisible {
@@ -1361,7 +1361,7 @@ func buildTableInfo(
 		}
 
 		if constr.Tp == ast.ConstraintFulltext {
-			sc := ctx.GetStochastikVars().StmtCtx
+			sc := ctx.GetStochaseinstein_dbars().StmtCtx
 			sc.AppendWarning(ErrTableCantHandleFt)
 			continue
 		}
@@ -1384,7 +1384,7 @@ func buildTableInfo(
 		}
 		// set index type.
 		if constr.Option != nil {
-			idxInfo.Comment, err = validateCommentLength(ctx.GetStochastikVars(), idxInfo.Name.String(), constr.Option)
+			idxInfo.Comment, err = validateCommentLength(ctx.GetStochaseinstein_dbars(), idxInfo.Name.String(), constr.Option)
 			if err != nil {
 				return nil, errors.Trace(err)
 			}
@@ -1687,7 +1687,7 @@ func (d *dbs) CreateTableWithInfo(
 		err = schemareplicant.ErrTableExists.GenWithStackByArgs(ast.Ident{Schema: schemaReplicant.Name, Name: tbInfo.Name})
 		switch onExist {
 		case OnExistIgnore:
-			ctx.GetStochastikVars().StmtCtx.AppendNote(err)
+			ctx.GetStochaseinstein_dbars().StmtCtx.AppendNote(err)
 			return nil
 		case OnExistReplace:
 			// only CREATE OR REPLACE VIEW is supported at the moment.
@@ -1742,7 +1742,7 @@ func (d *dbs) CreateTableWithInfo(
 	if err != nil {
 		// block exists, but if_not_exists flags is true, so we ignore this error.
 		if onExist == OnExistIgnore && schemareplicant.ErrTableExists.Equal(err) {
-			ctx.GetStochastikVars().StmtCtx.AppendNote(err)
+			ctx.GetStochaseinstein_dbars().StmtCtx.AppendNote(err)
 			err = nil
 		}
 	} else if actionType == perceptron.CausetActionCreateTable {
@@ -1778,7 +1778,7 @@ func (d *dbs) preSplitAndScatter(ctx stochastikctx.Context, tbInfo *perceptron.T
 		preSplit      func()
 		scatterRegion bool
 	)
-	val, err := variable.GetGlobalSystemVar(ctx.GetStochastikVars(), variable.MilevaDBScatterRegion)
+	val, err := variable.GetGlobalSystemVar(ctx.GetStochaseinstein_dbars(), variable.MilevaDBScatterRegion)
 	if err != nil {
 		logutil.BgLogger().Warn("[dbs] won't scatter region", zap.Error(err))
 	} else {
@@ -1844,10 +1844,10 @@ func (d *dbs) CreateView(ctx stochastikctx.Context, s *ast.CreateViewStmt) (err 
 
 	tblCharset := ""
 	tblDefCauslate := ""
-	if v, ok := ctx.GetStochastikVars().GetSystemVar("character_set_client"); ok {
+	if v, ok := ctx.GetStochaseinstein_dbars().GetSystemVar("character_set_client"); ok {
 		tblCharset = v
 	}
-	if v, ok := ctx.GetStochastikVars().GetSystemVar("defCauslation_connection"); ok {
+	if v, ok := ctx.GetStochaseinstein_dbars().GetSystemVar("defCauslation_connection"); ok {
 		tblDefCauslate = v
 	}
 
@@ -2208,7 +2208,7 @@ func resolveAlterTableSpec(ctx stochastikctx.Context, specs []*ast.AlterTableSpe
 				return nil, errors.Trace(err)
 			}
 			// For the compatibility, we return warning instead of error when a better algorithm is chosed by MilevaDB
-			ctx.GetStochastikVars().StmtCtx.AppendError(err)
+			ctx.GetStochaseinstein_dbars().StmtCtx.AppendError(err)
 		}
 
 		spec.Algorithm = resolvedAlgorithm
@@ -2312,9 +2312,9 @@ func (d *dbs) AlterTable(ctx stochastikctx.Context, ident ast.Ident, specs []*as
 			case ast.ConstraintPrimaryKey:
 				err = d.CreatePrimaryKey(ctx, ident, perceptron.NewCIStr(constr.Name), spec.Constraint.Keys, constr.Option)
 			case ast.ConstraintFulltext:
-				ctx.GetStochastikVars().StmtCtx.AppendWarning(ErrTableCantHandleFt)
+				ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(ErrTableCantHandleFt)
 			case ast.ConstraintCheck:
-				ctx.GetStochastikVars().StmtCtx.AppendWarning(ErrUnsupportedConstraintCheck.GenWithStackByArgs("ADD CONSTRAINT CHECK"))
+				ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(ErrUnsupportedConstraintCheck.GenWithStackByArgs("ADD CONSTRAINT CHECK"))
 			default:
 				// Nothing to do now.
 			}
@@ -2386,13 +2386,13 @@ func (d *dbs) AlterTable(ctx stochastikctx.Context, ident ast.Ident, specs []*as
 		case ast.AlterTableIndexInvisible:
 			err = d.AlterIndexVisibility(ctx, ident, spec.IndexName, spec.Visibility)
 		case ast.AlterTableAlterCheck:
-			ctx.GetStochastikVars().StmtCtx.AppendWarning(ErrUnsupportedConstraintCheck.GenWithStackByArgs("ALTER CHECK"))
+			ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(ErrUnsupportedConstraintCheck.GenWithStackByArgs("ALTER CHECK"))
 		case ast.AlterTableDropCheck:
-			ctx.GetStochastikVars().StmtCtx.AppendWarning(ErrUnsupportedConstraintCheck.GenWithStackByArgs("DROP CHECK"))
+			ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(ErrUnsupportedConstraintCheck.GenWithStackByArgs("DROP CHECK"))
 		case ast.AlterTableWithValidation:
-			ctx.GetStochastikVars().StmtCtx.AppendWarning(errUnsupportedAlterTableWithValidation)
+			ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errUnsupportedAlterTableWithValidation)
 		case ast.AlterTableWithoutValidation:
-			ctx.GetStochastikVars().StmtCtx.AppendWarning(errUnsupportedAlterTableWithoutValidation)
+			ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errUnsupportedAlterTableWithoutValidation)
 		default:
 			// Nothing to do now.
 		}
@@ -2532,7 +2532,7 @@ func checkAndCreateNewDeferredCauset(ctx stochastikctx.Context, ti ast.Ident, sc
 	if defCaus != nil {
 		err = schemareplicant.ErrDeferredCausetExists.GenWithStackByArgs(defCausName)
 		if spec.IfNotExists {
-			ctx.GetStochastikVars().StmtCtx.AppendNote(err)
+			ctx.GetStochaseinstein_dbars().StmtCtx.AppendNote(err)
 			return nil, nil
 		}
 		return nil, err
@@ -2649,7 +2649,7 @@ func (d *dbs) AddDeferredCauset(ctx stochastikctx.Context, ti ast.Ident, spec *a
 	err = d.doDBSJob(ctx, job)
 	// defCausumn exists, but if_not_exists flags is true, so we ignore this error.
 	if schemareplicant.ErrDeferredCausetExists.Equal(err) && spec.IfNotExists {
-		ctx.GetStochastikVars().StmtCtx.AppendNote(err)
+		ctx.GetStochaseinstein_dbars().StmtCtx.AppendNote(err)
 		return nil
 	}
 	err = d.callHookOnChanged(err)
@@ -2688,7 +2688,7 @@ func (d *dbs) AddDeferredCausets(ctx stochastikctx.Context, ti ast.Ident, specs 
 		for _, specNewDeferredCauset := range spec.NewDeferredCausets {
 			if spec.IfNotExists && dupDeferredCausetNames[specNewDeferredCauset.Name.Name.L] {
 				err = schemareplicant.ErrDeferredCausetExists.GenWithStackByArgs(specNewDeferredCauset.Name.Name.O)
-				ctx.GetStochastikVars().StmtCtx.AppendNote(err)
+				ctx.GetStochaseinstein_dbars().StmtCtx.AppendNote(err)
 				continue
 			}
 			defCaus, err := checkAndCreateNewDeferredCauset(ctx, ti, schemaReplicant, spec, t, specNewDeferredCauset)
@@ -2762,7 +2762,7 @@ func (d *dbs) AddTablePartitions(ctx stochastikctx.Context, ident ast.Ident, spe
 	meta.Partition = pi
 	if err != nil {
 		if ErrSameNamePartition.Equal(err) && spec.IfNotExists {
-			ctx.GetStochastikVars().StmtCtx.AppendNote(err)
+			ctx.GetStochaseinstein_dbars().StmtCtx.AppendNote(err)
 			return nil
 		}
 		return errors.Trace(err)
@@ -2779,7 +2779,7 @@ func (d *dbs) AddTablePartitions(ctx stochastikctx.Context, ident ast.Ident, spe
 
 	err = d.doDBSJob(ctx, job)
 	if ErrSameNamePartition.Equal(err) && spec.IfNotExists {
-		ctx.GetStochastikVars().StmtCtx.AppendNote(err)
+		ctx.GetStochaseinstein_dbars().StmtCtx.AppendNote(err)
 		return nil
 	}
 	if err == nil {
@@ -2885,7 +2885,7 @@ func (d *dbs) DropTablePartition(ctx stochastikctx.Context, ident ast.Ident, spe
 	err = checkDropTablePartition(meta, partNames)
 	if err != nil {
 		if ErrDropPartitionNonExistent.Equal(err) && spec.IfExists {
-			ctx.GetStochastikVars().StmtCtx.AppendNote(err)
+			ctx.GetStochaseinstein_dbars().StmtCtx.AppendNote(err)
 			return nil
 		}
 		return errors.Trace(err)
@@ -2903,7 +2903,7 @@ func (d *dbs) DropTablePartition(ctx stochastikctx.Context, ident ast.Ident, spe
 	err = d.doDBSJob(ctx, job)
 	if err != nil {
 		if ErrDropPartitionNonExistent.Equal(err) && spec.IfExists {
-			ctx.GetStochastikVars().StmtCtx.AppendNote(err)
+			ctx.GetStochaseinstein_dbars().StmtCtx.AppendNote(err)
 			return nil
 		}
 		return errors.Trace(err)
@@ -3127,7 +3127,7 @@ func (d *dbs) DropDeferredCauset(ctx stochastikctx.Context, ti ast.Ident, spec *
 	err = d.doDBSJob(ctx, job)
 	// defCausumn not exists, but if_exists flags is true, so we ignore this error.
 	if ErrCantDropFieldOrKey.Equal(err) && spec.IfExists {
-		ctx.GetStochastikVars().StmtCtx.AppendNote(err)
+		ctx.GetStochaseinstein_dbars().StmtCtx.AppendNote(err)
 		return nil
 	}
 	err = d.callHookOnChanged(err)
@@ -3161,7 +3161,7 @@ func (d *dbs) DropDeferredCausets(ctx stochastikctx.Context, ti ast.Ident, specs
 	for _, spec := range specs {
 		if spec.IfExists && dupDeferredCausetNames[spec.OldDeferredCausetName.Name.L] {
 			err = ErrCantDropFieldOrKey.GenWithStack("defCausumn %s doesn't exist", spec.OldDeferredCausetName.Name.L)
-			ctx.GetStochastikVars().StmtCtx.AppendNote(err)
+			ctx.GetStochaseinstein_dbars().StmtCtx.AppendNote(err)
 			continue
 		}
 		isDropable, err := checkIsDroppableDeferredCauset(ctx, t, spec)
@@ -3208,7 +3208,7 @@ func checkIsDroppableDeferredCauset(ctx stochastikctx.Context, t block.Block, sp
 	if defCaus == nil {
 		err = ErrCantDropFieldOrKey.GenWithStack("defCausumn %s doesn't exist", defCausName)
 		if spec.IfExists {
-			ctx.GetStochastikVars().StmtCtx.AppendNote(err)
+			ctx.GetStochaseinstein_dbars().StmtCtx.AppendNote(err)
 			return false, nil
 		}
 		return false, err
@@ -3342,7 +3342,7 @@ func CheckModifyTypeCompatible(origin *types.FieldType, to *types.FieldType) (al
 func checkModifyTypes(ctx stochastikctx.Context, origin *types.FieldType, to *types.FieldType, needRewriteDefCauslationData bool) error {
 	changeDeferredCausetValueMsg, err := CheckModifyTypeCompatible(origin, to)
 	if err != nil {
-		enableChangeDeferredCausetType := ctx.GetStochastikVars().EnableChangeDeferredCausetType
+		enableChangeDeferredCausetType := ctx.GetStochaseinstein_dbars().EnableChangeDeferredCausetType
 		if len(changeDeferredCausetValueMsg) == 0 {
 			return errors.Trace(err)
 		}
@@ -3521,7 +3521,7 @@ func (d *dbs) getModifiableDeferredCausetJob(ctx stochastikctx.Context, ident as
 
 	newDefCaus := block.ToDeferredCauset(&perceptron.DeferredCausetInfo{
 		ID: defCaus.ID,
-		// We use this PR(https://github.com/whtcorpsinc/milevadb/pull/6274) as the dividing line to define whether it is a new version or an old version MilevaDB.
+		// We use this PR(https://github.com/whtcorpsinc/MilevaDB-Prod/pull/6274) as the dividing line to define whether it is a new version or an old version MilevaDB.
 		// The old version MilevaDB initializes the defCausumn's offset and state here.
 		// The new version MilevaDB doesn't initialize the defCausumn's offset and state, and it will do the initialization in run DBS function.
 		// When we do the rolling upgrade the following may happen:
@@ -3577,7 +3577,7 @@ func (d *dbs) getModifiableDeferredCausetJob(ctx stochastikctx.Context, ident as
 		}
 		return nil, errors.Trace(err)
 	}
-	if ctx.GetStochastikVars().EnableChangeDeferredCausetType && needChangeDeferredCausetData(defCaus.DeferredCausetInfo, newDefCaus.DeferredCausetInfo) {
+	if ctx.GetStochaseinstein_dbars().EnableChangeDeferredCausetType && needChangeDeferredCausetData(defCaus.DeferredCausetInfo, newDefCaus.DeferredCausetInfo) {
 		if newDefCaus.IsGenerated() || defCaus.IsGenerated() {
 			// TODO: Make it compatible with MyALLEGROSQL error.
 			msg := fmt.Sprintf("milevadb_enable_change_defCausumn_type is true, newDefCaus IsGenerated %v, oldDefCaus IsGenerated %v", newDefCaus.IsGenerated(), defCaus.IsGenerated())
@@ -3600,7 +3600,7 @@ func (d *dbs) getModifiableDeferredCausetJob(ctx stochastikctx.Context, ident as
 		return nil, errUnsupportedModifyDeferredCauset.GenWithStackByArgs("can't set auto_increment")
 	}
 	// Disallow modifying defCausumn from auto_increment to not auto_increment if the stochastik variable `AllowRemoveAutoInc` is false.
-	if !ctx.GetStochastikVars().AllowRemoveAutoInc && allegrosql.HasAutoIncrementFlag(defCaus.Flag) && !allegrosql.HasAutoIncrementFlag(newDefCaus.Flag) {
+	if !ctx.GetStochaseinstein_dbars().AllowRemoveAutoInc && allegrosql.HasAutoIncrementFlag(defCaus.Flag) && !allegrosql.HasAutoIncrementFlag(newDefCaus.Flag) {
 		return nil, errUnsupportedModifyDeferredCauset.GenWithStackByArgs("can't remove auto_increment without @@milevadb_allow_remove_auto_inc enabled")
 	}
 
@@ -3743,7 +3743,7 @@ func (d *dbs) ChangeDeferredCauset(ctx stochastikctx.Context, ident ast.Ident, s
 	job, err := d.getModifiableDeferredCausetJob(ctx, ident, spec.OldDeferredCausetName.Name, spec)
 	if err != nil {
 		if schemareplicant.ErrDeferredCausetNotExists.Equal(err) && spec.IfExists {
-			ctx.GetStochastikVars().StmtCtx.AppendNote(schemareplicant.ErrDeferredCausetNotExists.GenWithStackByArgs(spec.OldDeferredCausetName.Name, ident.Name))
+			ctx.GetStochaseinstein_dbars().StmtCtx.AppendNote(schemareplicant.ErrDeferredCausetNotExists.GenWithStackByArgs(spec.OldDeferredCausetName.Name, ident.Name))
 			return nil
 		}
 		return errors.Trace(err)
@@ -3752,7 +3752,7 @@ func (d *dbs) ChangeDeferredCauset(ctx stochastikctx.Context, ident ast.Ident, s
 	err = d.doDBSJob(ctx, job)
 	// defCausumn not exists, but if_exists flags is true, so we ignore this error.
 	if schemareplicant.ErrDeferredCausetNotExists.Equal(err) && spec.IfExists {
-		ctx.GetStochastikVars().StmtCtx.AppendNote(err)
+		ctx.GetStochaseinstein_dbars().StmtCtx.AppendNote(err)
 		return nil
 	}
 	err = d.callHookOnChanged(err)
@@ -3833,7 +3833,7 @@ func (d *dbs) ModifyDeferredCauset(ctx stochastikctx.Context, ident ast.Ident, s
 	job, err := d.getModifiableDeferredCausetJob(ctx, ident, originalDefCausName, spec)
 	if err != nil {
 		if schemareplicant.ErrDeferredCausetNotExists.Equal(err) && spec.IfExists {
-			ctx.GetStochastikVars().StmtCtx.AppendNote(schemareplicant.ErrDeferredCausetNotExists.GenWithStackByArgs(originalDefCausName, ident.Name))
+			ctx.GetStochaseinstein_dbars().StmtCtx.AppendNote(schemareplicant.ErrDeferredCausetNotExists.GenWithStackByArgs(originalDefCausName, ident.Name))
 			return nil
 		}
 		return errors.Trace(err)
@@ -3842,7 +3842,7 @@ func (d *dbs) ModifyDeferredCauset(ctx stochastikctx.Context, ident ast.Ident, s
 	err = d.doDBSJob(ctx, job)
 	// defCausumn not exists, but if_exists flags is true, so we ignore this error.
 	if schemareplicant.ErrDeferredCausetNotExists.Equal(err) && spec.IfExists {
-		ctx.GetStochastikVars().StmtCtx.AppendNote(err)
+		ctx.GetStochaseinstein_dbars().StmtCtx.AppendNote(err)
 		return nil
 	}
 	err = d.callHookOnChanged(err)
@@ -4437,12 +4437,12 @@ func (d *dbs) CreatePrimaryKey(ctx stochastikctx.Context, ti ast.Ident, indexNam
 	}
 
 	// May be truncate comment here, when index comment too long and sql_mode is't strict.
-	if _, err = validateCommentLength(ctx.GetStochastikVars(), indexName.String(), indexOption); err != nil {
+	if _, err = validateCommentLength(ctx.GetStochaseinstein_dbars(), indexName.String(), indexOption); err != nil {
 		return errors.Trace(err)
 	}
 
 	unique := true
-	sqlMode := ctx.GetStochastikVars().ALLEGROSQLMode
+	sqlMode := ctx.GetStochaseinstein_dbars().ALLEGROSQLMode
 	job := &perceptron.Job{
 		SchemaID:   schemaReplicant.ID,
 		TableID:    t.Meta().ID,
@@ -4450,7 +4450,7 @@ func (d *dbs) CreatePrimaryKey(ctx stochastikctx.Context, ti ast.Ident, indexNam
 		Type:       perceptron.CausetActionAddPrimaryKey,
 		BinlogInfo: &perceptron.HistoryInfo{},
 		Args:       []interface{}{unique, indexName, indexPartSpecifications, indexOption, sqlMode, nil, global},
-		Priority:   ctx.GetStochastikVars().DBSReorgPriority,
+		Priority:   ctx.GetStochaseinstein_dbars().DBSReorgPriority,
 	}
 
 	err = d.doDBSJob(ctx, job)
@@ -4557,7 +4557,7 @@ func (d *dbs) CreateIndex(ctx stochastikctx.Context, ti ast.Ident, keyType ast.I
 			err = ErrDupKeyName.GenWithStack("index already exist %s", indexName)
 		}
 		if ifNotExists {
-			ctx.GetStochastikVars().StmtCtx.AppendNote(err)
+			ctx.GetStochaseinstein_dbars().StmtCtx.AppendNote(err)
 			return nil
 		}
 		return err
@@ -4604,7 +4604,7 @@ func (d *dbs) CreateIndex(ctx stochastikctx.Context, ti ast.Ident, keyType ast.I
 		}
 	}
 	// May be truncate comment here, when index comment too long and sql_mode is't strict.
-	if _, err = validateCommentLength(ctx.GetStochastikVars(), indexName.String(), indexOption); err != nil {
+	if _, err = validateCommentLength(ctx.GetStochaseinstein_dbars(), indexName.String(), indexOption); err != nil {
 		return errors.Trace(err)
 	}
 	job := &perceptron.Job{
@@ -4614,13 +4614,13 @@ func (d *dbs) CreateIndex(ctx stochastikctx.Context, ti ast.Ident, keyType ast.I
 		Type:       perceptron.CausetActionAddIndex,
 		BinlogInfo: &perceptron.HistoryInfo{},
 		Args:       []interface{}{unique, indexName, indexPartSpecifications, indexOption, hiddenDefCauss, global},
-		Priority:   ctx.GetStochastikVars().DBSReorgPriority,
+		Priority:   ctx.GetStochaseinstein_dbars().DBSReorgPriority,
 	}
 
 	err = d.doDBSJob(ctx, job)
 	// key exists, but if_not_exists flags is true, so we ignore this error.
 	if ErrDupKeyName.Equal(err) && ifNotExists {
-		ctx.GetStochastikVars().StmtCtx.AppendNote(err)
+		ctx.GetStochaseinstein_dbars().StmtCtx.AppendNote(err)
 		return nil
 	}
 	err = d.callHookOnChanged(err)
@@ -4796,7 +4796,7 @@ func (d *dbs) DropIndex(ctx stochastikctx.Context, ti ast.Ident, indexName perce
 	if indexInfo == nil {
 		err = ErrCantDropFieldOrKey.GenWithStack("index %s doesn't exist", indexName)
 		if ifExists {
-			ctx.GetStochastikVars().StmtCtx.AppendNote(err)
+			ctx.GetStochaseinstein_dbars().StmtCtx.AppendNote(err)
 			return nil
 		}
 		return err
@@ -4825,7 +4825,7 @@ func (d *dbs) DropIndex(ctx stochastikctx.Context, ti ast.Ident, indexName perce
 	err = d.doDBSJob(ctx, job)
 	// index not exists, but if_exists flags is true, so we ignore this error.
 	if ErrCantDropFieldOrKey.Equal(err) && ifExists {
-		ctx.GetStochastikVars().StmtCtx.AppendNote(err)
+		ctx.GetStochaseinstein_dbars().StmtCtx.AppendNote(err)
 		return nil
 	}
 	err = d.callHookOnChanged(err)
@@ -4859,7 +4859,7 @@ func isDroppableDeferredCauset(tblInfo *perceptron.TableInfo, defCausName percep
 // validateCommentLength checks comment length of block, defCausumn, index and partition.
 // If comment length is more than the standard length truncate it
 // and causetstore the comment length upto the standard comment length size.
-func validateCommentLength(vars *variable.StochastikVars, indexName string, indexOption *ast.IndexOption) (string, error) {
+func validateCommentLength(vars *variable.Stochaseinstein_dbars, indexName string, indexOption *ast.IndexOption) (string, error) {
 	if indexOption == nil {
 		return "", nil
 	}
@@ -4971,7 +4971,7 @@ func (d *dbs) LockTables(ctx stochastikctx.Context, stmt *ast.LockTablesStmt) er
 	lockTables := make([]perceptron.TableLockTpInfo, 0, len(stmt.TableLocks))
 	stochastikInfo := perceptron.StochastikInfo{
 		ServerID:     d.GetID(),
-		StochastikID: ctx.GetStochastikVars().ConnectionID,
+		StochastikID: ctx.GetStochaseinstein_dbars().ConnectionID,
 	}
 	uniqueTableID := make(map[int64]struct{})
 	// Check whether the block was already locked by another.
@@ -5032,7 +5032,7 @@ func (d *dbs) UnlockTables(ctx stochastikctx.Context, unlockTables []perceptron.
 		UnlockTables: unlockTables,
 		StochastikInfo: perceptron.StochastikInfo{
 			ServerID:     d.GetID(),
-			StochastikID: ctx.GetStochastikVars().ConnectionID,
+			StochastikID: ctx.GetStochaseinstein_dbars().ConnectionID,
 		},
 	}
 	job := &perceptron.Job{
@@ -5080,8 +5080,8 @@ func (d *dbs) CleanDeadTableLock(unlockTables []perceptron.TableLockTpInfo, se p
 
 func throwErrIfInMemOrSysDB(ctx stochastikctx.Context, dbLowerName string) error {
 	if soliton.IsMemOrSysDB(dbLowerName) {
-		if ctx.GetStochastikVars().User != nil {
-			return schemareplicant.ErrAccessDenied.GenWithStackByArgs(ctx.GetStochastikVars().User.Username, ctx.GetStochastikVars().User.Hostname)
+		if ctx.GetStochaseinstein_dbars().User != nil {
+			return schemareplicant.ErrAccessDenied.GenWithStackByArgs(ctx.GetStochaseinstein_dbars().User.Username, ctx.GetStochaseinstein_dbars().User.Hostname)
 		}
 		return schemareplicant.ErrAccessDenied.GenWithStackByArgs("", "")
 	}
@@ -5234,7 +5234,7 @@ func (d *dbs) OrderByDeferredCausets(ctx stochastikctx.Context, ident ast.Ident)
 		return errors.Trace(err)
 	}
 	if tb.Meta().GetPkDefCausInfo() != nil {
-		ctx.GetStochastikVars().StmtCtx.AppendWarning(errors.Errorf("ORDER BY ignored as there is a user-defined clustered index in the block '%s'", ident.Name))
+		ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errors.Errorf("ORDER BY ignored as there is a user-defined clustered index in the block '%s'", ident.Name))
 	}
 	return nil
 }
@@ -5269,7 +5269,7 @@ func (d *dbs) DropSequence(ctx stochastikctx.Context, ti ast.Ident, ifExists boo
 	if !tbl.Meta().IsSequence() {
 		err = ErrWrongObject.GenWithStackByArgs(ti.Schema, ti.Name, "SEQUENCE")
 		if ifExists {
-			ctx.GetStochastikVars().StmtCtx.AppendNote(err)
+			ctx.GetStochaseinstein_dbars().StmtCtx.AppendNote(err)
 			return nil
 		}
 		return err

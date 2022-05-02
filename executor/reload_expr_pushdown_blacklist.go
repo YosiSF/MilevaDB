@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,12 +17,12 @@ import (
 	"context"
 	"strings"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/sqlexec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/sqlexec"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
 )
 
 // ReloadExprPushdownBlacklistExec indicates ReloadExprPushdownBlacklist executor.
@@ -187,7 +187,7 @@ var funcName2Alias = map[string]string{
 	"timediff":                   ast.TimeDiff,
 	"timestamp":                  ast.Timestamp,
 	"timestampadd":               ast.TimestampAdd,
-	"timestamFIDeliff":              ast.TimestamFIDeliff,
+	"timestamFIDeliff":           ast.TimestamFIDeliff,
 	"to_days":                    ast.ToDays,
 	"to_seconds":                 ast.ToSeconds,
 	"unix_timestamp":             ast.UnixTimestamp,
@@ -252,7 +252,7 @@ var funcName2Alias = map[string]string{
 	"benchmark":                  ast.Benchmark,
 	"charset":                    ast.Charset,
 	"coercibility":               ast.Coercibility,
-	"defCauslation":                  ast.DefCauslation,
+	"defCauslation":              ast.DefCauslation,
 	"connection_id":              ast.ConnectionID,
 	"current_user":               ast.CurrentUser,
 	"current_role":               ast.CurrentRole,
@@ -260,8 +260,8 @@ var funcName2Alias = map[string]string{
 	"found_rows":                 ast.FoundEvents,
 	"last_insert_id":             ast.LastInsertId,
 	"row_count":                  ast.EventCount,
-	"schemaReplicant":                     ast.Schema,
-	"stochastik_user":               ast.StochastikUser,
+	"schemaReplicant":            ast.Schema,
+	"stochastik_user":            ast.StochastikUser,
 	"system_user":                ast.SystemUser,
 	"user":                       ast.User,
 	"if":                         ast.If,

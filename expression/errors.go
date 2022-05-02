@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@ package expression
 
 import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
-	allegrosql "github.com/whtcorpsinc/milevadb/errno"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
+	allegrosql "github.com/whtcorpsinc/MilevaDB-Prod/errno"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 // Error instances.
@@ -58,9 +58,9 @@ func handleInvalidTimeError(ctx stochastikctx.Context, err error) error {
 		types.ErrDatetimeFunctionOverflow.Equal(err)) {
 		return err
 	}
-	sc := ctx.GetStochastikVars().StmtCtx
+	sc := ctx.GetStochaseinstein_dbars().StmtCtx
 	err = sc.HandleTruncate(err)
-	if ctx.GetStochastikVars().StrictALLEGROSQLMode && (sc.InInsertStmt || sc.InUFIDelateStmt || sc.InDeleteStmt) {
+	if ctx.GetStochaseinstein_dbars().StrictALLEGROSQLMode && (sc.InInsertStmt || sc.InUFIDelateStmt || sc.InDeleteStmt) {
 		return err
 	}
 	return nil
@@ -68,12 +68,12 @@ func handleInvalidTimeError(ctx stochastikctx.Context, err error) error {
 
 // handleDivisionByZeroError reports error or warning depend on the context.
 func handleDivisionByZeroError(ctx stochastikctx.Context) error {
-	sc := ctx.GetStochastikVars().StmtCtx
+	sc := ctx.GetStochaseinstein_dbars().StmtCtx
 	if sc.InInsertStmt || sc.InUFIDelateStmt || sc.InDeleteStmt {
-		if !ctx.GetStochastikVars().ALLEGROSQLMode.HasErrorForDivisionByZeroMode() {
+		if !ctx.GetStochaseinstein_dbars().ALLEGROSQLMode.HasErrorForDivisionByZeroMode() {
 			return nil
 		}
-		if ctx.GetStochastikVars().StrictALLEGROSQLMode && !sc.DividedByZeroAsWarning {
+		if ctx.GetStochaseinstein_dbars().StrictALLEGROSQLMode && !sc.DividedByZeroAsWarning {
 			return ErrDivisionByZero
 		}
 	}

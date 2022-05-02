@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,13 +32,13 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/charset"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/math"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/math"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 )
 
 type benchHelper struct {
@@ -55,9 +55,9 @@ func (h *benchHelper) init() {
 	numEvents := 4 * 1024
 
 	h.ctx = mock.NewContext()
-	h.ctx.GetStochastikVars().StmtCtx.TimeZone = time.Local
-	h.ctx.GetStochastikVars().InitChunkSize = 32
-	h.ctx.GetStochastikVars().MaxChunkSize = numEvents
+	h.ctx.GetStochaseinstein_dbars().StmtCtx.TimeZone = time.Local
+	h.ctx.GetStochaseinstein_dbars().InitChunkSize = 32
+	h.ctx.GetStochaseinstein_dbars().MaxChunkSize = numEvents
 
 	h.inputTypes = make([]*types.FieldType, 0, 10)
 	h.inputTypes = append(h.inputTypes, &types.FieldType{
@@ -239,7 +239,7 @@ func (g *defaultGener) gen() interface{} {
 		return nil
 	}
 	switch g.eType {
-	case types.ETInt:
+	case types.CausetEDN:
 		if g.randGen.Float64() < 0.5 {
 			return -g.randGen.Int63()
 		}
@@ -971,7 +971,7 @@ type vecExprBenchCase struct {
 	// aesModeAttr information, needed by encryption functions
 	aesModes string
 	// constants are used to generate constant data for children[i].
-	constants []*Constant
+	constants []*CouplingConstantWithRadix
 	// chunkSize is used to specify the chunk size of children, the maximum is 1024.
 	// This field is optional, 1024 by default.
 	chunkSize int
@@ -1002,7 +1002,7 @@ func fillDeferredCausetWithGener(eType types.EvalType, chk *chunk.Chunk, defCaus
 			continue
 		}
 		switch eType {
-		case types.ETInt:
+		case types.CausetEDN:
 			defCaus.AppendInt64(v.(int64))
 		case types.ETReal:
 			defCaus.AppendFloat64(v.(float64))
@@ -1038,7 +1038,7 @@ func randString(r *rand.Rand) string {
 
 func eType2FieldType(eType types.EvalType) *types.FieldType {
 	switch eType {
-	case types.ETInt:
+	case types.CausetEDN:
 		return types.NewFieldType(allegrosql.TypeLonglong)
 	case types.ETReal:
 		return types.NewFieldType(allegrosql.TypeDouble)
@@ -1107,7 +1107,7 @@ func testVectorizedEvalOneVec(c *C, vecExprCases vecExprBenchCases) {
 
 			c1, c2 := output.DeferredCauset(0), output2.DeferredCauset(0)
 			switch expr.GetType().EvalType() {
-			case types.ETInt:
+			case types.CausetEDN:
 				for i := 0; i < input.NumEvents(); i++ {
 					c.Assert(c1.IsNull(i), Equals, c2.IsNull(i), commentf(i))
 					if !c1.IsNull(i) {
@@ -1228,7 +1228,7 @@ func genVecBuiltinFuncBenchCase(ctx stochastikctx.Context, funcName string, test
 		var fc functionClass
 		tp := eType2FieldType(testCase.retEvalType)
 		switch testCase.retEvalType {
-		case types.ETInt:
+		case types.CausetEDN:
 			fc = &castAsIntFunctionClass{baseFunctionClass{ast.Cast, 1, 1}, tp}
 		case types.ETDecimal:
 			fc = &castAsDecimalFunctionClass{baseFunctionClass{ast.Cast, 1, 1}, tp}
@@ -1289,10 +1289,10 @@ func testVectorizedBuiltinFunc(c *C, vecExprCases vecExprBenchCases) {
 	for funcName, testCases := range vecExprCases {
 		for _, testCase := range testCases {
 			ctx := mock.NewContext()
-			err := ctx.GetStochastikVars().SetSystemVar(variable.BlockEncryptionMode, testCase.aesModes)
+			err := ctx.GetStochaseinstein_dbars().SetSystemVar(variable.BlockEncryptionMode, testCase.aesModes)
 			c.Assert(err, IsNil)
 			if funcName == ast.CurrentUser || funcName == ast.User {
-				ctx.GetStochastikVars().User = &auth.UserIdentity{
+				ctx.GetStochaseinstein_dbars().User = &auth.UserIdentity{
 					Username:     "milevadb",
 					Hostname:     "localhost",
 					CurrentUser:  true,
@@ -1302,7 +1302,7 @@ func testVectorizedBuiltinFunc(c *C, vecExprCases vecExprBenchCases) {
 			}
 			if funcName == ast.GetParam {
 				testTime := time.Now()
-				ctx.GetStochastikVars().PreparedParams = []types.Causet{
+				ctx.GetStochaseinstein_dbars().PreparedParams = []types.Causet{
 					types.NewIntCauset(1),
 					types.NewDecimalCauset(types.NewDecFromStringForTest("20170118123950.123")),
 					types.NewTimeCauset(types.NewTime(types.FromGoTime(testTime), allegrosql.TypeTimestamp, 6)),
@@ -1334,12 +1334,12 @@ func testVectorizedBuiltinFunc(c *C, vecExprCases vecExprBenchCases) {
 			i := 0
 			var vecWarnCnt uint16
 			switch testCase.retEvalType {
-			case types.ETInt:
+			case types.CausetEDN:
 				err := baseFunc.vecEvalInt(input, output)
 				c.Assert(err, IsNil, Commentf("func: %v, case: %+v", baseFuncName, testCase))
 				// do not forget to call ResizeXXX/ReserveXXX
 				c.Assert(getDeferredCausetLen(output, testCase.retEvalType), Equals, input.NumEvents())
-				vecWarnCnt = ctx.GetStochastikVars().StmtCtx.WarningCount()
+				vecWarnCnt = ctx.GetStochaseinstein_dbars().StmtCtx.WarningCount()
 				i64s := output.Int64s()
 				for event := it.Begin(); event != it.End(); event = it.Next() {
 					val, isNull, err := baseFunc.evalInt(event)
@@ -1355,7 +1355,7 @@ func testVectorizedBuiltinFunc(c *C, vecExprCases vecExprBenchCases) {
 				c.Assert(err, IsNil, Commentf("func: %v, case: %+v", baseFuncName, testCase))
 				// do not forget to call ResizeXXX/ReserveXXX
 				c.Assert(getDeferredCausetLen(output, testCase.retEvalType), Equals, input.NumEvents())
-				vecWarnCnt = ctx.GetStochastikVars().StmtCtx.WarningCount()
+				vecWarnCnt = ctx.GetStochaseinstein_dbars().StmtCtx.WarningCount()
 				f64s := output.Float64s()
 				for event := it.Begin(); event != it.End(); event = it.Next() {
 					val, isNull, err := baseFunc.evalReal(event)
@@ -1371,7 +1371,7 @@ func testVectorizedBuiltinFunc(c *C, vecExprCases vecExprBenchCases) {
 				c.Assert(err, IsNil, Commentf("func: %v, case: %+v", baseFuncName, testCase))
 				// do not forget to call ResizeXXX/ReserveXXX
 				c.Assert(getDeferredCausetLen(output, testCase.retEvalType), Equals, input.NumEvents())
-				vecWarnCnt = ctx.GetStochastikVars().StmtCtx.WarningCount()
+				vecWarnCnt = ctx.GetStochaseinstein_dbars().StmtCtx.WarningCount()
 				d64s := output.Decimals()
 				for event := it.Begin(); event != it.End(); event = it.Next() {
 					val, isNull, err := baseFunc.evalDecimal(event)
@@ -1387,7 +1387,7 @@ func testVectorizedBuiltinFunc(c *C, vecExprCases vecExprBenchCases) {
 				c.Assert(err, IsNil, Commentf("func: %v, case: %+v", baseFuncName, testCase))
 				// do not forget to call ResizeXXX/ReserveXXX
 				c.Assert(getDeferredCausetLen(output, testCase.retEvalType), Equals, input.NumEvents())
-				vecWarnCnt = ctx.GetStochastikVars().StmtCtx.WarningCount()
+				vecWarnCnt = ctx.GetStochaseinstein_dbars().StmtCtx.WarningCount()
 				t64s := output.Times()
 				for event := it.Begin(); event != it.End(); event = it.Next() {
 					val, isNull, err := baseFunc.evalTime(event)
@@ -1403,7 +1403,7 @@ func testVectorizedBuiltinFunc(c *C, vecExprCases vecExprBenchCases) {
 				c.Assert(err, IsNil, Commentf("func: %v, case: %+v", baseFuncName, testCase))
 				// do not forget to call ResizeXXX/ReserveXXX
 				c.Assert(getDeferredCausetLen(output, testCase.retEvalType), Equals, input.NumEvents())
-				vecWarnCnt = ctx.GetStochastikVars().StmtCtx.WarningCount()
+				vecWarnCnt = ctx.GetStochaseinstein_dbars().StmtCtx.WarningCount()
 				d64s := output.GoDurations()
 				for event := it.Begin(); event != it.End(); event = it.Next() {
 					val, isNull, err := baseFunc.evalDuration(event)
@@ -1419,7 +1419,7 @@ func testVectorizedBuiltinFunc(c *C, vecExprCases vecExprBenchCases) {
 				c.Assert(err, IsNil, Commentf("func: %v, case: %+v", baseFuncName, testCase))
 				// do not forget to call ResizeXXX/ReserveXXX
 				c.Assert(getDeferredCausetLen(output, testCase.retEvalType), Equals, input.NumEvents())
-				vecWarnCnt = ctx.GetStochastikVars().StmtCtx.WarningCount()
+				vecWarnCnt = ctx.GetStochaseinstein_dbars().StmtCtx.WarningCount()
 				for event := it.Begin(); event != it.End(); event = it.Next() {
 					val, isNull, err := baseFunc.evalJSON(event)
 					c.Assert(err, IsNil, commentf(i))
@@ -1435,7 +1435,7 @@ func testVectorizedBuiltinFunc(c *C, vecExprCases vecExprBenchCases) {
 				c.Assert(err, IsNil, Commentf("func: %v, case: %+v", baseFuncName, testCase))
 				// do not forget to call ResizeXXX/ReserveXXX
 				c.Assert(getDeferredCausetLen(output, testCase.retEvalType), Equals, input.NumEvents())
-				vecWarnCnt = ctx.GetStochastikVars().StmtCtx.WarningCount()
+				vecWarnCnt = ctx.GetStochaseinstein_dbars().StmtCtx.WarningCount()
 				for event := it.Begin(); event != it.End(); event = it.Next() {
 					val, isNull, err := baseFunc.evalString(event)
 					c.Assert(err, IsNil, commentf(i))
@@ -1450,9 +1450,9 @@ func testVectorizedBuiltinFunc(c *C, vecExprCases vecExprBenchCases) {
 			}
 
 			// check warnings
-			totalWarns := ctx.GetStochastikVars().StmtCtx.WarningCount()
+			totalWarns := ctx.GetStochaseinstein_dbars().StmtCtx.WarningCount()
 			c.Assert(2*vecWarnCnt, Equals, totalWarns)
-			warns := ctx.GetStochastikVars().StmtCtx.GetWarnings()
+			warns := ctx.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 			for i := 0; i < int(vecWarnCnt); i++ {
 				c.Assert(terror.ErrorEqual(warns[i].Err, warns[i+int(vecWarnCnt)].Err), IsTrue)
 			}
@@ -1506,12 +1506,12 @@ func benchmarkVectorizedBuiltinFunc(b *testing.B, vecExprCases vecExprBenchCases
 	}
 	for funcName, testCases := range vecExprCases {
 		for _, testCase := range testCases {
-			err := ctx.GetStochastikVars().SetSystemVar(variable.BlockEncryptionMode, testCase.aesModes)
+			err := ctx.GetStochaseinstein_dbars().SetSystemVar(variable.BlockEncryptionMode, testCase.aesModes)
 			if err != nil {
 				panic(err)
 			}
 			if funcName == ast.CurrentUser || funcName == ast.User {
-				ctx.GetStochastikVars().User = &auth.UserIdentity{
+				ctx.GetStochaseinstein_dbars().User = &auth.UserIdentity{
 					Username:     "milevadb",
 					Hostname:     "localhost",
 					CurrentUser:  true,
@@ -1521,7 +1521,7 @@ func benchmarkVectorizedBuiltinFunc(b *testing.B, vecExprCases vecExprBenchCases
 			}
 			if funcName == ast.GetParam {
 				testTime := time.Now()
-				ctx.GetStochastikVars().PreparedParams = []types.Causet{
+				ctx.GetStochaseinstein_dbars().PreparedParams = []types.Causet{
 					types.NewIntCauset(1),
 					types.NewDecimalCauset(types.NewDecFromStringForTest("20170118123950.123")),
 					types.NewTimeCauset(types.NewTime(types.FromGoTime(testTime), allegrosql.TypeTimestamp, 6)),
@@ -1548,7 +1548,7 @@ func benchmarkVectorizedBuiltinFunc(b *testing.B, vecExprCases vecExprBenchCases
 			b.Run(baseFuncName+"-VecBuiltinFunc", func(b *testing.B) {
 				b.ResetTimer()
 				switch testCase.retEvalType {
-				case types.ETInt:
+				case types.CausetEDN:
 					for i := 0; i < b.N; i++ {
 						if err := baseFunc.vecEvalInt(input, output); err != nil {
 							b.Fatal(err)
@@ -1598,7 +1598,7 @@ func benchmarkVectorizedBuiltinFunc(b *testing.B, vecExprCases vecExprBenchCases
 				b.ResetTimer()
 				it := chunk.NewIterator4Chunk(input)
 				switch testCase.retEvalType {
-				case types.ETInt:
+				case types.CausetEDN:
 					for i := 0; i < b.N; i++ {
 						output.Reset(testCase.retEvalType)
 						for event := it.Begin(); event != it.End(); event = it.Next() {
@@ -1800,7 +1800,7 @@ func BenchmarkVecEvalBool(b *testing.B) {
 	ctx := mock.NewContext()
 	selected := make([]bool, 0, 1024)
 	nulls := make([]bool, 0, 1024)
-	eTypes := []types.EvalType{types.ETInt, types.ETReal, types.ETDecimal, types.ETString, types.ETTimestamp, types.ETDatetime, types.ETDuration}
+	eTypes := []types.EvalType{types.CausetEDN, types.ETReal, types.ETDecimal, types.ETString, types.ETTimestamp, types.ETDatetime, types.ETDuration}
 	tNames := []string{"int", "real", "decimal", "string", "timestamp", "datetime", "duration"}
 	for numDefCauss := 1; numDefCauss <= 2; numDefCauss++ {
 		typeCombination := make([]types.EvalType, numDefCauss)
@@ -1851,7 +1851,7 @@ func BenchmarkVecEvalBool(b *testing.B) {
 
 func (s *testVectorizeSuite2) TestEventBasedFilterAndVectorizedFilter(c *C) {
 	ctx := mock.NewContext()
-	eTypes := []types.EvalType{types.ETInt, types.ETReal, types.ETDecimal, types.ETString, types.ETTimestamp, types.ETDatetime, types.ETDuration}
+	eTypes := []types.EvalType{types.CausetEDN, types.ETReal, types.ETDecimal, types.ETString, types.ETTimestamp, types.ETDatetime, types.ETDuration}
 	for numDefCauss := 1; numDefCauss <= 5; numDefCauss++ {
 		for round := 0; round < 16; round++ {
 			exprs, input := genVecEvalBool(numDefCauss, nil, eTypes)
@@ -1874,7 +1874,7 @@ func BenchmarkEventBasedFilterAndVectorizedFilter(b *testing.B) {
 	ctx := mock.NewContext()
 	selected := make([]bool, 0, 1024)
 	nulls := make([]bool, 0, 1024)
-	eTypes := []types.EvalType{types.ETInt, types.ETReal, types.ETDecimal, types.ETString, types.ETTimestamp, types.ETDatetime, types.ETDuration}
+	eTypes := []types.EvalType{types.CausetEDN, types.ETReal, types.ETDecimal, types.ETString, types.ETTimestamp, types.ETDatetime, types.ETDuration}
 	tNames := []string{"int", "real", "decimal", "string", "timestamp", "datetime", "duration"}
 	for numDefCauss := 1; numDefCauss <= 2; numDefCauss++ {
 		typeCombination := make([]types.EvalType, numDefCauss)
@@ -1922,7 +1922,7 @@ func BenchmarkEventBasedFilterAndVectorizedFilter(b *testing.B) {
 	// Add special case to prove when some calculations are added,
 	// the vectorizedFilter for int types will be more faster than rowBasedFilter.
 	funcName := ast.Least
-	testCase := vecExprBenchCase{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt, types.ETInt}}
+	testCase := vecExprBenchCase{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN, types.CausetEDN}}
 	expr, _, input, _ := genVecExprBenchCase(ctx, funcName, testCase)
 	it := chunk.NewIterator4Chunk(input)
 
@@ -1948,17 +1948,17 @@ func BenchmarkEventBasedFilterAndVectorizedFilter(b *testing.B) {
 
 func (s *testVectorizeSuite2) TestVectorizedFilterConsiderNull(c *C) {
 	ctx := mock.NewContext()
-	dafaultEnableVectorizedExpressionVar := ctx.GetStochastikVars().EnableVectorizedExpression
-	eTypes := []types.EvalType{types.ETInt, types.ETReal, types.ETDecimal, types.ETString, types.ETTimestamp, types.ETDatetime, types.ETDuration}
+	dafaultEnableVectorizedExpressionVar := ctx.GetStochaseinstein_dbars().EnableVectorizedExpression
+	eTypes := []types.EvalType{types.CausetEDN, types.ETReal, types.ETDecimal, types.ETString, types.ETTimestamp, types.ETDatetime, types.ETDuration}
 	for numDefCauss := 1; numDefCauss <= 5; numDefCauss++ {
 		for round := 0; round < 16; round++ {
 			exprs, input := genVecEvalBool(numDefCauss, nil, eTypes)
 			it := chunk.NewIterator4Chunk(input)
 			isNull := make([]bool, it.Len())
-			ctx.GetStochastikVars().EnableVectorizedExpression = false
+			ctx.GetStochaseinstein_dbars().EnableVectorizedExpression = false
 			selected, nulls, err := VectorizedFilterConsiderNull(ctx, exprs, it, nil, isNull)
 			c.Assert(err, IsNil)
-			ctx.GetStochastikVars().EnableVectorizedExpression = true
+			ctx.GetStochaseinstein_dbars().EnableVectorizedExpression = true
 			selected2, nulls2, err2 := VectorizedFilterConsiderNull(ctx, exprs, it, nil, isNull)
 			c.Assert(err2, IsNil)
 			length := it.Len()
@@ -1972,10 +1972,10 @@ func (s *testVectorizeSuite2) TestVectorizedFilterConsiderNull(c *C) {
 			input.SetSel(randomSel)
 			it2 := chunk.NewIterator4Chunk(input)
 			isNull = isNull[:0]
-			ctx.GetStochastikVars().EnableVectorizedExpression = false
+			ctx.GetStochaseinstein_dbars().EnableVectorizedExpression = false
 			selected3, nulls, err := VectorizedFilterConsiderNull(ctx, exprs, it2, nil, isNull)
 			c.Assert(err, IsNil)
-			ctx.GetStochastikVars().EnableVectorizedExpression = true
+			ctx.GetStochaseinstein_dbars().EnableVectorizedExpression = true
 			selected4, nulls2, err2 := VectorizedFilterConsiderNull(ctx, exprs, it2, nil, isNull)
 			c.Assert(err2, IsNil)
 			for i := 0; i < length; i++ {
@@ -2001,5 +2001,5 @@ func (s *testVectorizeSuite2) TestVectorizedFilterConsiderNull(c *C) {
 			}
 		}
 	}
-	ctx.GetStochastikVars().EnableVectorizedExpression = dafaultEnableVectorizedExpressionVar
+	ctx.GetStochaseinstein_dbars().EnableVectorizedExpression = dafaultEnableVectorizedExpressionVar
 }

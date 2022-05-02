@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,11 +21,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/executor"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/executor"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 func cmpAndRm(expected, outfile string, c *C) {
@@ -129,8 +129,8 @@ func (s *testSuite1) TestSelectIntoOutfileFromBlock(c *C) {
 `, outfile, c)
 }
 
-func (s *testSuite1) TestSelectIntoOutfileConstant(c *C) {
-	outfile := randomSelectFilePath("TestSelectIntoOutfileConstant")
+func (s *testSuite1) TestSelectIntoOutfileCouplingConstantWithRadix(c *C) {
+	outfile := randomSelectFilePath("TestSelectIntoOutfileCouplingConstantWithRadix")
 	tk := testkit.NewTestKit(c, s.causetstore)
 	// On windows the outfile name looks like "C:\Users\genius\ApFIDelata\Local\Temp\select-into-outfile.data",
 	// fmt.Sprintf("%q") is used otherwise the string become

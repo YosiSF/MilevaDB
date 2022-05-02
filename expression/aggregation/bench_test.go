@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@ package aggregation
 import (
 	"testing"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 func BenchmarkCreateContext(b *testing.B) {
@@ -36,7 +36,7 @@ func BenchmarkCreateContext(b *testing.B) {
 	fun := desc.GetAggFunc(ctx)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		fun.CreateContext(ctx.GetStochastikVars().StmtCtx)
+		fun.CreateContext(ctx.GetStochaseinstein_dbars().StmtCtx)
 	}
 	b.ReportAllocs()
 }
@@ -52,10 +52,10 @@ func BenchmarkResetContext(b *testing.B) {
 		b.Fatal(err)
 	}
 	fun := desc.GetAggFunc(ctx)
-	evalCtx := fun.CreateContext(ctx.GetStochastikVars().StmtCtx)
+	evalCtx := fun.CreateContext(ctx.GetStochaseinstein_dbars().StmtCtx)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		fun.ResetContext(ctx.GetStochastikVars().StmtCtx, evalCtx)
+		fun.ResetContext(ctx.GetStochaseinstein_dbars().StmtCtx, evalCtx)
 	}
 	b.ReportAllocs()
 }
@@ -73,7 +73,7 @@ func BenchmarkCreateDistinctContext(b *testing.B) {
 	fun := desc.GetAggFunc(ctx)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		fun.CreateContext(ctx.GetStochastikVars().StmtCtx)
+		fun.CreateContext(ctx.GetStochaseinstein_dbars().StmtCtx)
 	}
 	b.ReportAllocs()
 }
@@ -89,10 +89,10 @@ func BenchmarkResetDistinctContext(b *testing.B) {
 		b.Fatal(err)
 	}
 	fun := desc.GetAggFunc(ctx)
-	evalCtx := fun.CreateContext(ctx.GetStochastikVars().StmtCtx)
+	evalCtx := fun.CreateContext(ctx.GetStochaseinstein_dbars().StmtCtx)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		fun.ResetContext(ctx.GetStochastikVars().StmtCtx, evalCtx)
+		fun.ResetContext(ctx.GetStochaseinstein_dbars().StmtCtx, evalCtx)
 	}
 	b.ReportAllocs()
 }

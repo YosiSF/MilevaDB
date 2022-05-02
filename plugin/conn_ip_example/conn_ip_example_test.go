@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@ import (
 	"context"
 	"testing"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/plugin"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/plugin"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
 )
 
 func LoadRunShutdownPluginExample() {
@@ -27,7 +27,7 @@ func LoadRunShutdownPluginExample() {
 	var pluginVarNames []string
 	cfg := plugin.Config{
 		Plugins:        []string{"conn_ip_example-1"},
-		PluginDir:      "/home/robi/Code/go/src/github.com/whtcorpsinc/milevadb/plugin/conn_ip_example",
+		PluginDir:      "/home/robi/Code/go/src/github.com/whtcorpsinc/MilevaDB-Prod/plugin/conn_ip_example",
 		GlobalSysVar:   &variable.SysVars,
 		PluginVarNames: &pluginVarNames,
 	}

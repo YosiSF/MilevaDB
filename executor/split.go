@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,21 +22,21 @@ import (
 	"time"
 
 	"github.com/cznic/mathutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block/blocks"
+	"github.com/whtcorpsinc/MilevaDB-Prod/blockcodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/helper"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/codec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/ekvproto/pkg/metapb"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/block/blocks"
-	"github.com/whtcorpsinc/milevadb/blockcodec"
-	"github.com/whtcorpsinc/milevadb/causetstore/einsteindb"
-	"github.com/whtcorpsinc/milevadb/causetstore/helper"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/codec"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
 	"go.uber.org/zap"
 )
 
@@ -50,7 +50,7 @@ type SplitIndexRegionExec struct {
 	lower          []types.Causet
 	upper          []types.Causet
 	num            int
-	handleDefCauss     core.HandleDefCauss
+	handleDefCauss core.HandleDefCauss
 	valueLists     [][]types.Causet
 	splitIdxKeys   [][]byte
 
@@ -96,7 +96,7 @@ func (e *SplitIndexRegionExec) splitIndexRegion(ctx context.Context) error {
 	}
 
 	start := time.Now()
-	ctxWithTimeout, cancel := context.WithTimeout(ctx, e.ctx.GetStochastikVars().GetSplitRegionTimeout())
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, e.ctx.GetStochaseinstein_dbars().GetSplitRegionTimeout())
 	defer cancel()
 	regionIDs, err := s.SplitRegions(ctxWithTimeout, e.splitIdxKeys, true, &e.blockInfo.ID)
 	if err != nil {
@@ -110,7 +110,7 @@ func (e *SplitIndexRegionExec) splitIndexRegion(ctx context.Context) error {
 		return nil
 	}
 
-	if !e.ctx.GetStochastikVars().WaitSplitRegionFinish {
+	if !e.ctx.GetStochaseinstein_dbars().WaitSplitRegionFinish {
 		return nil
 	}
 	e.finishScatterNum = waitScatterRegionFinish(ctxWithTimeout, e.ctx, start, s, regionIDs, e.blockInfo.Name.L, e.indexInfo.Name.L)
@@ -164,7 +164,7 @@ func (e *SplitIndexRegionExec) getSplitIdxPhysicalKeysFromValueList(physicalID i
 	keys = e.getSplitIdxPhysicalStartAndOtherIdxKeys(physicalID, keys)
 	index := blocks.NewIndex(physicalID, e.blockInfo, e.indexInfo)
 	for _, v := range e.valueLists {
-		idxKey, _, err := index.GenIndexKey(e.ctx.GetStochastikVars().StmtCtx, v, ekv.IntHandle(math.MinInt64), nil)
+		idxKey, _, err := index.GenIndexKey(e.ctx.GetStochaseinstein_dbars().StmtCtx, v, ekv.IntHandle(math.MinInt64), nil)
 		if err != nil {
 			return nil, err
 		}
@@ -225,13 +225,13 @@ func (e *SplitIndexRegionExec) getSplitIdxPhysicalKeysFromBound(physicalID int64
 	keys = e.getSplitIdxPhysicalStartAndOtherIdxKeys(physicalID, keys)
 	index := blocks.NewIndex(physicalID, e.blockInfo, e.indexInfo)
 	// Split index regions by lower, upper value and calculate the step by (upper - lower)/num.
-	lowerIdxKey, _, err := index.GenIndexKey(e.ctx.GetStochastikVars().StmtCtx, e.lower, ekv.IntHandle(math.MinInt64), nil)
+	lowerIdxKey, _, err := index.GenIndexKey(e.ctx.GetStochaseinstein_dbars().StmtCtx, e.lower, ekv.IntHandle(math.MinInt64), nil)
 	if err != nil {
 		return nil, err
 	}
 	// Use math.MinInt64 as handle_id for the upper index key to avoid affecting calculate split point.
 	// If use math.MaxInt64 here, test of `TestSplitIndex` will report error.
-	upperIdxKey, _, err := index.GenIndexKey(e.ctx.GetStochastikVars().StmtCtx, e.upper, ekv.IntHandle(math.MinInt64), nil)
+	upperIdxKey, _, err := index.GenIndexKey(e.ctx.GetStochaseinstein_dbars().StmtCtx, e.upper, ekv.IntHandle(math.MinInt64), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -328,7 +328,7 @@ type SplitBlockRegionExec struct {
 	lower          []types.Causet
 	upper          []types.Causet
 	num            int
-	handleDefCauss     core.HandleDefCauss
+	handleDefCauss core.HandleDefCauss
 	valueLists     [][]types.Causet
 	splitKeys      [][]byte
 
@@ -365,7 +365,7 @@ func (e *SplitBlockRegionExec) splitBlockRegion(ctx context.Context) error {
 	}
 
 	start := time.Now()
-	ctxWithTimeout, cancel := context.WithTimeout(ctx, e.ctx.GetStochastikVars().GetSplitRegionTimeout())
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, e.ctx.GetStochaseinstein_dbars().GetSplitRegionTimeout())
 	defer cancel()
 
 	regionIDs, err := s.SplitRegions(ctxWithTimeout, e.splitKeys, true, &e.blockInfo.ID)
@@ -379,7 +379,7 @@ func (e *SplitBlockRegionExec) splitBlockRegion(ctx context.Context) error {
 		return nil
 	}
 
-	if !e.ctx.GetStochastikVars().WaitSplitRegionFinish {
+	if !e.ctx.GetStochaseinstein_dbars().WaitSplitRegionFinish {
 		return nil
 	}
 
@@ -398,7 +398,7 @@ func waitScatterRegionFinish(ctxWithTimeout context.Context, sctx stochastikctx.
 			// In this case, we should return 2 Regions, instead of 0, have finished scattering.
 			remainMillisecond = checkScatterRegionFinishBackOff
 		} else {
-			remainMillisecond = int((sctx.GetStochastikVars().GetSplitRegionTimeout().Seconds() - time.Since(startTime).Seconds()) * 1000)
+			remainMillisecond = int((sctx.GetStochaseinstein_dbars().GetSplitRegionTimeout().Seconds() - time.Since(startTime).Seconds()) * 1000)
 		}
 
 		err := causetstore.WaitScatterRegionFinish(ctxWithTimeout, regionID, remainMillisecond)
@@ -800,7 +800,7 @@ func getRegionInfo(causetstore einsteindb.CausetStorage, regions []regionMeta) (
 		return regions, nil
 	}
 	einsteindbHelper := &helper.Helper{
-		CausetStore:       causetstore,
+		CausetStore: causetstore,
 		RegionCache: causetstore.GetRegionCache(),
 	}
 	for i := range regions {

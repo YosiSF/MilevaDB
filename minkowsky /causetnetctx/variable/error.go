@@ -14,8 +14,8 @@
 package variable
 
 import (
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/terror"
-	mysql "github.com/whtcorpsinc/MilevaDB/errno"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/terror"
+	mysql "github.com/whtcorpsinc/MilevaDB-Prod/errno"
 )
 
 // Error instances.

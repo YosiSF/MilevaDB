@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,14 +29,14 @@ import (
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/failpoint"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/generatedexpr"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/generatedexpr"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 	"go.uber.org/zap"
 )
 
@@ -160,7 +160,7 @@ type Expression interface {
 
 	// HashCode creates the hashcode for expression which can be used to identify itself from other expression.
 	// It generated as the following:
-	// Constant: ConstantFlag+encoded value
+	// CouplingConstantWithRadix: CouplingConstantWithRadixFlag+encoded value
 	// DeferredCauset: DeferredCausetFlag+encoded value
 	// ScalarFunction: SFFlag+encoded function name + encoded arg_1 + encoded arg_2 + ...
 	HashCode(sc *stmtctx.StatementContext) []byte
@@ -235,9 +235,9 @@ func EvalBool(ctx stochastikctx.Context, exprList CNFExprs, event chunk.Event) (
 			continue
 		}
 
-		i, err := data.ToBool(ctx.GetStochastikVars().StmtCtx)
+		i, err := data.ToBool(ctx.GetStochaseinstein_dbars().StmtCtx)
 		if err != nil {
-			i, err = HandleOverflowOnSelection(ctx.GetStochastikVars().StmtCtx, i, err)
+			i, err = HandleOverflowOnSelection(ctx.GetStochaseinstein_dbars().StmtCtx, i, err)
 			if err != nil {
 				return false, false, err
 
@@ -331,7 +331,7 @@ func VecEvalBool(ctx stochastikctx.Context, exprList CNFExprs, input *chunk.Chun
 			return nil, nil, err
 		}
 
-		err = toBool(ctx.GetStochastikVars().StmtCtx, eType, buf, sel, isZero)
+		err = toBool(ctx.GetStochaseinstein_dbars().StmtCtx, eType, buf, sel, isZero)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -340,7 +340,7 @@ func VecEvalBool(ctx stochastikctx.Context, exprList CNFExprs, input *chunk.Chun
 		isEQCondFromIn := IsEQCondFromIn(expr)
 		for i := range sel {
 			if isZero[i] == -1 {
-				if eType != types.ETInt && !isEQCondFromIn {
+				if eType != types.CausetEDN && !isEQCondFromIn {
 					continue
 				}
 				// In this case, we set this event to null and let it pass this filter.
@@ -373,7 +373,7 @@ func VecEvalBool(ctx stochastikctx.Context, exprList CNFExprs, input *chunk.Chun
 
 func toBool(sc *stmtctx.StatementContext, eType types.EvalType, buf *chunk.DeferredCauset, sel []int, isZero []int8) error {
 	switch eType {
-	case types.ETInt:
+	case types.CausetEDN:
 		i64s := buf.Int64s()
 		for i := range sel {
 			if buf.IsNull(i) {
@@ -475,9 +475,9 @@ func toBool(sc *stmtctx.StatementContext, eType types.EvalType, buf *chunk.Defer
 // the environment variables and whether the expression can be vectorized.
 func EvalExpr(ctx stochastikctx.Context, expr Expression, input *chunk.Chunk, result *chunk.DeferredCauset) (err error) {
 	evalType := expr.GetType().EvalType()
-	if expr.Vectorized() && ctx.GetStochastikVars().EnableVectorizedExpression {
+	if expr.Vectorized() && ctx.GetStochaseinstein_dbars().EnableVectorizedExpression {
 		switch evalType {
-		case types.ETInt:
+		case types.CausetEDN:
 			err = expr.VecEvalInt(ctx, input, result)
 		case types.ETReal:
 			err = expr.VecEvalReal(ctx, input, result)
@@ -498,7 +498,7 @@ func EvalExpr(ctx stochastikctx.Context, expr Expression, input *chunk.Chunk, re
 		ind, n := 0, input.NumEvents()
 		iter := chunk.NewIterator4Chunk(input)
 		switch evalType {
-		case types.ETInt:
+		case types.CausetEDN:
 			result.ResizeInt64(n, false)
 			i64s := result.Int64s()
 			for it := iter.Begin(); it != iter.End(); it = iter.Next() {
@@ -672,7 +672,7 @@ type VarAssignment struct {
 	IsDefault   bool
 	IsGlobal    bool
 	IsSystem    bool
-	ExtendValue *Constant
+	ExtendValue *CouplingConstantWithRadix
 }
 
 // splitNormalFormItems split CNF(conjunctive normal form) like "a and b and c", or DNF(disjunctive normal form) like "a or b or c"
@@ -716,10 +716,10 @@ func EvaluateExprWithNull(ctx stochastikctx.Context, schemaReplicant *Schema, ex
 		if !schemaReplicant.Contains(x) {
 			return x
 		}
-		return &Constant{Value: types.Causet{}, RetType: types.NewFieldType(allegrosql.TypeNull)}
-	case *Constant:
+		return &CouplingConstantWithRadix{Value: types.Causet{}, RetType: types.NewFieldType(allegrosql.TypeNull)}
+	case *CouplingConstantWithRadix:
 		if x.DeferredExpr != nil {
-			return FoldConstant(x)
+			return FoldCouplingConstantWithRadix(x)
 		}
 	}
 	return expr
@@ -787,7 +787,7 @@ func DeferredCausetInfos2DeferredCausetsAndNames(ctx stochastikctx.Context, dbNa
 		newDefCaus := &DeferredCauset{
 			RetType:  &defCaus.FieldType,
 			ID:       defCaus.ID,
-			UniqueID: ctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+			UniqueID: ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 			Index:    defCaus.Offset,
 			OrigName: names[i].String(),
 			IsHidden: defCaus.Hidden,
@@ -797,11 +797,11 @@ func DeferredCausetInfos2DeferredCausetsAndNames(ctx stochastikctx.Context, dbNa
 	// Resolve virtual generated defCausumn.
 	mockSchema := NewSchema(defCausumns...)
 	// Ignore redundant warning here.
-	save := ctx.GetStochastikVars().StmtCtx.IgnoreTruncate
+	save := ctx.GetStochaseinstein_dbars().StmtCtx.IgnoreTruncate
 	defer func() {
-		ctx.GetStochastikVars().StmtCtx.IgnoreTruncate = save
+		ctx.GetStochaseinstein_dbars().StmtCtx.IgnoreTruncate = save
 	}()
-	ctx.GetStochastikVars().StmtCtx.IgnoreTruncate = true
+	ctx.GetStochaseinstein_dbars().StmtCtx.IgnoreTruncate = true
 	for i, defCaus := range defCausInfos {
 		if defCaus.IsGenerated() && !defCaus.GeneratedStored {
 			expr, err := generatedexpr.ParseExpression(defCaus.GeneratedExprString)
@@ -842,7 +842,7 @@ func NewValuesFunc(ctx stochastikctx.Context, offset int, retTp *types.FieldType
 
 // IsBinaryLiteral checks whether an expression is a binary literal
 func IsBinaryLiteral(expr Expression) bool {
-	con, ok := expr.(*Constant)
+	con, ok := expr.(*CouplingConstantWithRadix)
 	return ok && con.Value.HoTT() == types.HoTTBinaryLiteral
 }
 
@@ -1116,7 +1116,7 @@ func canExprPushDown(expr Expression, pc PbConverter, storeType ekv.StoreType) b
 	switch x := expr.(type) {
 	case *CorrelatedDeferredCauset:
 		return pc.conOrCorDefCausToPBExpr(expr) != nil && pc.defCausumnToPBExpr(&x.DeferredCauset) != nil
-	case *Constant:
+	case *CouplingConstantWithRadix:
 		return pc.conOrCorDefCausToPBExpr(expr) != nil
 	case *DeferredCauset:
 		return pc.defCausumnToPBExpr(x) != nil
@@ -1209,7 +1209,7 @@ func scalarExprSupportedByFlash(function *ScalarFunction) bool {
 // The `wrapForInt` indicates whether we need to wrapIsTrue for non-logical Expression with int type.
 // TODO: remove this function. ScalarFunction should be newed in one place.
 func wrapWithIsTrue(ctx stochastikctx.Context, keepNull bool, arg Expression, wrapForInt bool) (Expression, error) {
-	if arg.GetType().EvalType() == types.ETInt {
+	if arg.GetType().EvalType() == types.CausetEDN {
 		if !wrapForInt {
 			return arg, nil
 		}
@@ -1237,5 +1237,5 @@ func wrapWithIsTrue(ctx stochastikctx.Context, keepNull bool, arg Expression, wr
 	if keepNull {
 		sf.FuncName = perceptron.NewCIStr(ast.IsTruthWithNull)
 	}
-	return FoldConstant(sf), nil
+	return FoldCouplingConstantWithRadix(sf), nil
 }

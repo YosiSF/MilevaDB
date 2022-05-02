@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,75 +20,75 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 var vecBuiltinOpCases = map[string][]vecExprBenchCase{
 	ast.IsTruthWithoutNull: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETReal}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDecimal}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETReal}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDecimal}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN}},
 	},
 	ast.IsFalsity: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETReal}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDecimal}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETReal}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDecimal}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN}},
 	},
 	ast.LogicOr: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt, types.ETInt}, geners: makeBinaryLogicOFIDelataGeners()},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDecimal, types.ETReal}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt, types.ETDuration}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN, types.CausetEDN}, geners: makeBinaryLogicOFIDelataGeners()},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDecimal, types.ETReal}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN, types.ETDuration}},
 	},
 	ast.LogicXor: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt, types.ETInt}, geners: makeBinaryLogicOFIDelataGeners()},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN, types.CausetEDN}, geners: makeBinaryLogicOFIDelataGeners()},
 	},
 	ast.Xor: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt, types.ETInt}, geners: makeBinaryLogicOFIDelataGeners()},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN, types.CausetEDN}, geners: makeBinaryLogicOFIDelataGeners()},
 	},
 	ast.LogicAnd: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt, types.ETInt}, geners: makeBinaryLogicOFIDelataGeners()},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDecimal, types.ETReal}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt, types.ETDuration}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN, types.CausetEDN}, geners: makeBinaryLogicOFIDelataGeners()},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDecimal, types.ETReal}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN, types.ETDuration}},
 	},
 	ast.Or: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt, types.ETInt}, geners: makeBinaryLogicOFIDelataGeners()},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN, types.CausetEDN}, geners: makeBinaryLogicOFIDelataGeners()},
 	},
 	ast.BitNeg: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN}},
 	},
 	ast.UnaryNot: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETReal}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDecimal}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETReal}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDecimal}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN}},
 	},
 	ast.And: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt, types.ETInt}, geners: makeBinaryLogicOFIDelataGeners()},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN, types.CausetEDN}, geners: makeBinaryLogicOFIDelataGeners()},
 	},
 	ast.RightShift: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt, types.ETInt}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN, types.CausetEDN}},
 	},
 	ast.LeftShift: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt, types.ETInt}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN, types.CausetEDN}},
 	},
 	ast.UnaryMinus: {
 		{retEvalType: types.ETReal, childrenTypes: []types.EvalType{types.ETReal}},
 		{retEvalType: types.ETDecimal, childrenTypes: []types.EvalType{types.ETDecimal}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN}},
 		{
-			retEvalType:        types.ETInt,
-			childrenTypes:      []types.EvalType{types.ETInt},
+			retEvalType:        types.CausetEDN,
+			childrenTypes:      []types.EvalType{types.CausetEDN},
 			childrenFieldTypes: []*types.FieldType{{Tp: allegrosql.TypeLonglong, Flag: allegrosql.UnsignedFlag}},
 			geners:             []dataGenerator{newRangeInt64Gener(0, math.MaxInt64)},
 		},
 	},
 	ast.IsNull: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETReal}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDecimal}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDuration}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDatetime}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETReal}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDecimal}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDuration}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDatetime}},
 	},
 }
 
@@ -147,8 +147,8 @@ func makeBinaryLogicOFIDelataGeners() []dataGenerator {
 		arg1s[i] = maybeToInt64(p[1])
 	}
 	return []dataGenerator{
-		makeGivenValsOrDefaultGener(arg0s, types.ETInt),
-		makeGivenValsOrDefaultGener(arg1s, types.ETInt)}
+		makeGivenValsOrDefaultGener(arg0s, types.CausetEDN),
+		makeGivenValsOrDefaultGener(arg1s, types.CausetEDN)}
 }
 
 func (s *testEvaluatorSuite) TestVectorizedBuiltinOpFunc(c *C) {
@@ -161,7 +161,7 @@ func BenchmarkVectorizedBuiltinOpFunc(b *testing.B) {
 
 func (s *testEvaluatorSuite) TestBuiltinUnaryMinusIntSig(c *C) {
 	ctx := mock.NewContext()
-	ft := eType2FieldType(types.ETInt)
+	ft := eType2FieldType(types.CausetEDN)
 	defCaus0 := &DeferredCauset{RetType: ft, Index: 0}
 	f, err := funcs[ast.UnaryMinus].getFunction(ctx, []Expression{defCaus0})
 	c.Assert(err, IsNil)

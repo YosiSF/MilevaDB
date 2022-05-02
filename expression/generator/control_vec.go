@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,10 +24,10 @@ import (
 	"path/filepath"
 	"text/template"
 
-	. "github.com/whtcorpsinc/milevadb/expression/generator/helper"
+	. "github.com/whtcorpsinc/MilevaDB-Prod/expression/generator/helper"
 )
 
-const header = `// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+const header = `MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -47,8 +47,8 @@ package expression
 import (
 	"time"
 
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
 )
 
 // NOTE: Control expressions optionally evaluate some branches depending on conditions, but vectorization executes all
@@ -109,11 +109,11 @@ func (b *builtinCaseWhen{{ .TypeName }}Sig) vecEval{{ .TypeName }}(input *chunk.
 	thensSlice := make([][]{{.TypeNameGo}}, l/2)
 	var eLseSlice []{{.TypeNameGo}}
 	{{- end }}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 
 	for j := 0; j < l-1; j+=2 {
-		bufWhen, err := b.bufSlabPredictor.get(types.ETInt, n)
+		bufWhen, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 		if err != nil {
 			return err
 		}
@@ -274,7 +274,7 @@ func (b *builtinIfNull{{ .TypeName }}Sig) vecEval{{ .TypeName }}(input *chunk.Ch
 		return err
 	}
 	defer b.bufSlabPredictor.put(buf1)
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 	err = b.args[1].VecEval{{ .TypeName }}(b.ctx, input, buf1)
 	afterWarns := sc.WarningCount()
@@ -306,7 +306,7 @@ func (b *builtinIfNull{{ .TypeName }}Sig) vecEval{{ .TypeName }}(input *chunk.Ch
 		return err
 	}
 	defer b.bufSlabPredictor.put(buf1)
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 	err = b.args[1].VecEval{{ .TypeName }}(b.ctx, input, buf1)
 	afterWarns := sc.WarningCount()
@@ -380,7 +380,7 @@ func (b *builtinIf{{ .TypeName }}Sig) fallbackEval{{ .TypeName }}(input *chunk.C
 
 func (b *builtinIf{{ .TypeName }}Sig) vecEval{{ .TypeName }}(input *chunk.Chunk, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	buf0, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf0, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -388,7 +388,7 @@ func (b *builtinIf{{ .TypeName }}Sig) vecEval{{ .TypeName }}(input *chunk.Chunk,
 	if err := b.args[0].VecEvalInt(b.ctx, input, buf0); err != nil {
 		return err
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 {{- if .Fixed }}
 	err = b.args[1].VecEval{{ .TypeName }}(b.ctx, input, result)
@@ -469,7 +469,7 @@ func (b *builtinIf{{ .TypeName }}Sig) vectorized() bool {
 {{ end }}{{/* range .Sigs */}}
 `))
 
-var testFile = template.Must(template.New("testFile").Parse(`// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+var testFile = template.Must(template.New("testFile").Parse(`MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -492,10 +492,10 @@ import (
 
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
-var defaultControlIntGener = &controlIntGener{zeroRation: 0.3, defaultGener: *newDefaultGener(0.3, types.ETInt)}
+var defaultControlIntGener = &controlIntGener{zeroRation: 0.3, defaultGener: *newDefaultGener(0.3, types.CausetEDN)}
 
 type controlIntGener struct {
 	zeroRation float64
@@ -514,10 +514,10 @@ var vecBuiltin{{.Category}}Cases = map[string][]vecExprBenchCase{
 {{ with index .Functions 0 }}
 	ast.Case: {
 	{{ range .Sigs }}
-		{retEvalType: types.ET{{ .Arg0.ETName }}, childrenTypes: []types.EvalType{types.ETInt, types.ET{{ .Arg0.ETName }}}, geners: []dataGenerator{defaultControlIntGener}},
-		{retEvalType: types.ET{{ .Arg0.ETName }}, childrenTypes: []types.EvalType{types.ETInt, types.ET{{ .Arg0.ETName }}, types.ET{{ .Arg0.ETName }}}, geners: []dataGenerator{defaultControlIntGener}},
-		{retEvalType: types.ET{{ .Arg0.ETName }}, childrenTypes: []types.EvalType{types.ETInt, types.ET{{ .Arg0.ETName }}, types.ETInt, types.ET{{ .Arg0.ETName }}}, geners: []dataGenerator{defaultControlIntGener, nil, defaultControlIntGener}},
-		{retEvalType: types.ET{{ .Arg0.ETName }}, childrenTypes: []types.EvalType{types.ETInt, types.ET{{ .Arg0.ETName }}, types.ETInt, types.ET{{ .Arg0.ETName }}, types.ET{{ .Arg0.ETName }}}, geners: []dataGenerator{defaultControlIntGener, nil, defaultControlIntGener}},
+		{retEvalType: types.ET{{ .Arg0.ETName }}, childrenTypes: []types.EvalType{types.CausetEDN, types.ET{{ .Arg0.ETName }}}, geners: []dataGenerator{defaultControlIntGener}},
+		{retEvalType: types.ET{{ .Arg0.ETName }}, childrenTypes: []types.EvalType{types.CausetEDN, types.ET{{ .Arg0.ETName }}, types.ET{{ .Arg0.ETName }}}, geners: []dataGenerator{defaultControlIntGener}},
+		{retEvalType: types.ET{{ .Arg0.ETName }}, childrenTypes: []types.EvalType{types.CausetEDN, types.ET{{ .Arg0.ETName }}, types.CausetEDN, types.ET{{ .Arg0.ETName }}}, geners: []dataGenerator{defaultControlIntGener, nil, defaultControlIntGener}},
+		{retEvalType: types.ET{{ .Arg0.ETName }}, childrenTypes: []types.EvalType{types.CausetEDN, types.ET{{ .Arg0.ETName }}, types.CausetEDN, types.ET{{ .Arg0.ETName }}, types.ET{{ .Arg0.ETName }}}, geners: []dataGenerator{defaultControlIntGener, nil, defaultControlIntGener}},
 	{{ end }}
 	},
 {{ end }}
@@ -533,7 +533,7 @@ var vecBuiltin{{.Category}}Cases = map[string][]vecExprBenchCase{
 {{ with index .Functions 2 }}
 	ast.If: {
 	{{ range .Sigs }}
-		{retEvalType: types.ET{{ .Arg0.ETName }}, childrenTypes: []types.EvalType{types.ETInt, types.ET{{ .Arg0.ETName }}, types.ET{{ .Arg0.ETName }}}, geners: []dataGenerator{defaultControlIntGener}},
+		{retEvalType: types.ET{{ .Arg0.ETName }}, childrenTypes: []types.EvalType{types.CausetEDN, types.ET{{ .Arg0.ETName }}, types.ET{{ .Arg0.ETName }}}, geners: []dataGenerator{defaultControlIntGener}},
 	{{ end }}
 	},
 {{ end }}
@@ -557,17 +557,17 @@ func BenchmarkVectorizedBuiltin{{.Category}}FuncGenerated(b *testing.B) {
 `))
 
 type typeContext struct {
-	// Describe the name of "github.com/whtcorpsinc/milevadb/types".ET{{ .ETName }}
+	// Describe the name of "github.com/whtcorpsinc/MilevaDB-Prod/types".ET{{ .ETName }}
 	ETName string
-	// Describe the name of "github.com/whtcorpsinc/milevadb/expression".VecExpr.VecEval{{ .TypeName }}
+	// Describe the name of "github.com/whtcorpsinc/MilevaDB-Prod/expression".VecExpr.VecEval{{ .TypeName }}
 	// If undefined, it's same as ETName.
 	TypeName string
-	// Describe the name of "github.com/whtcorpsinc/milevadb/soliton/chunk".*DeferredCauset.Append{{ .TypeNameInDeferredCauset }},
+	// Describe the name of "github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk".*DeferredCauset.Append{{ .TypeNameInDeferredCauset }},
 	// Resize{{ .TypeNameInDeferredCauset }}, Reserve{{ .TypeNameInDeferredCauset }}, Get{{ .TypeNameInDeferredCauset }} and
 	// {{ .TypeNameInDeferredCauset }}s.
 	// If undefined, it's same as TypeName.
 	TypeNameInDeferredCauset string
-	// Same as "github.com/whtcorpsinc/milevadb/soliton/chunk".getFixedLen()
+	// Same as "github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk".getFixedLen()
 	Fixed bool
 }
 

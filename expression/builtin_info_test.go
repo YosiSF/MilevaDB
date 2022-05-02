@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,12 +21,12 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/auth"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/charset"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/soliton/printer"
-	"github.com/whtcorpsinc/milevadb/soliton/solitonutil"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/printer"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 )
 
 func (s *testEvaluatorSuite) TestDatabase(c *C) {
@@ -37,7 +37,7 @@ func (s *testEvaluatorSuite) TestDatabase(c *C) {
 	d, err := evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(d.HoTT(), Equals, types.HoTTNull)
-	ctx.GetStochastikVars().CurrentDB = "test"
+	ctx.GetStochaseinstein_dbars().CurrentDB = "test"
 	d, err = evalBuiltinFunc(f, chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(d.GetString(), Equals, "test")
@@ -56,8 +56,8 @@ func (s *testEvaluatorSuite) TestDatabase(c *C) {
 
 func (s *testEvaluatorSuite) TestFoundEvents(c *C) {
 	ctx := mock.NewContext()
-	stochastikVars := ctx.GetStochastikVars()
-	stochastikVars.LastFoundEvents = 2
+	stochaseinstein_dbars := ctx.GetStochaseinstein_dbars()
+	stochaseinstein_dbars.LastFoundEvents = 2
 
 	fc := funcs[ast.FoundEvents]
 	f, err := fc.getFunction(ctx, nil)
@@ -69,8 +69,8 @@ func (s *testEvaluatorSuite) TestFoundEvents(c *C) {
 
 func (s *testEvaluatorSuite) TestUser(c *C) {
 	ctx := mock.NewContext()
-	stochastikVars := ctx.GetStochastikVars()
-	stochastikVars.User = &auth.UserIdentity{Username: "root", Hostname: "localhost"}
+	stochaseinstein_dbars := ctx.GetStochaseinstein_dbars()
+	stochaseinstein_dbars.User = &auth.UserIdentity{Username: "root", Hostname: "localhost"}
 
 	fc := funcs[ast.User]
 	f, err := fc.getFunction(ctx, nil)
@@ -83,8 +83,8 @@ func (s *testEvaluatorSuite) TestUser(c *C) {
 
 func (s *testEvaluatorSuite) TestCurrentUser(c *C) {
 	ctx := mock.NewContext()
-	stochastikVars := ctx.GetStochastikVars()
-	stochastikVars.User = &auth.UserIdentity{Username: "root", Hostname: "localhost", AuthUsername: "root", AuthHostname: "localhost"}
+	stochaseinstein_dbars := ctx.GetStochaseinstein_dbars()
+	stochaseinstein_dbars.User = &auth.UserIdentity{Username: "root", Hostname: "localhost", AuthUsername: "root", AuthHostname: "localhost"}
 
 	fc := funcs[ast.CurrentUser]
 	f, err := fc.getFunction(ctx, nil)
@@ -97,10 +97,10 @@ func (s *testEvaluatorSuite) TestCurrentUser(c *C) {
 
 func (s *testEvaluatorSuite) TestCurrentRole(c *C) {
 	ctx := mock.NewContext()
-	stochastikVars := ctx.GetStochastikVars()
-	stochastikVars.ActiveRoles = make([]*auth.RoleIdentity, 0, 10)
-	stochastikVars.ActiveRoles = append(stochastikVars.ActiveRoles, &auth.RoleIdentity{Username: "r_1", Hostname: "%"})
-	stochastikVars.ActiveRoles = append(stochastikVars.ActiveRoles, &auth.RoleIdentity{Username: "r_2", Hostname: "localhost"})
+	stochaseinstein_dbars := ctx.GetStochaseinstein_dbars()
+	stochaseinstein_dbars.ActiveRoles = make([]*auth.RoleIdentity, 0, 10)
+	stochaseinstein_dbars.ActiveRoles = append(stochaseinstein_dbars.ActiveRoles, &auth.RoleIdentity{Username: "r_1", Hostname: "%"})
+	stochaseinstein_dbars.ActiveRoles = append(stochaseinstein_dbars.ActiveRoles, &auth.RoleIdentity{Username: "r_2", Hostname: "localhost"})
 
 	fc := funcs[ast.CurrentRole]
 	f, err := fc.getFunction(ctx, nil)
@@ -113,8 +113,8 @@ func (s *testEvaluatorSuite) TestCurrentRole(c *C) {
 
 func (s *testEvaluatorSuite) TestConnectionID(c *C) {
 	ctx := mock.NewContext()
-	stochastikVars := ctx.GetStochastikVars()
-	stochastikVars.ConnectionID = uint64(1)
+	stochaseinstein_dbars := ctx.GetStochaseinstein_dbars()
+	stochaseinstein_dbars.ConnectionID = uint64(1)
 
 	fc := funcs[ast.ConnectionID]
 	f, err := fc.getFunction(ctx, nil)
@@ -155,7 +155,7 @@ func (s *testEvaluatorSuite) TestBenchMark(c *C) {
 	}
 
 	for _, t := range cases {
-		f, err := newFunctionForTest(s.ctx, ast.Benchmark, s.primitiveValsToConstants([]interface{}{
+		f, err := newFunctionForTest(s.ctx, ast.Benchmark, s.primitiveValsToCouplingConstantWithRadixs([]interface{}{
 			t.LoopCount,
 			t.Expression,
 		})...)
@@ -177,29 +177,29 @@ func (s *testEvaluatorSuite) TestBenchMark(c *C) {
 
 func (s *testEvaluatorSuite) TestCharset(c *C) {
 	fc := funcs[ast.Charset]
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(nil)))
+	f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(nil)))
 	c.Assert(f, IsNil)
 	c.Assert(err, ErrorMatches, "*FUNCTION CHARSET does not exist")
 }
 
 func (s *testEvaluatorSuite) TestCoercibility(c *C) {
 	fc := funcs[ast.Coercibility]
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(nil)))
+	f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(nil)))
 	c.Assert(f, NotNil)
 	c.Assert(err, IsNil)
 }
 
 func (s *testEvaluatorSuite) TestDefCauslation(c *C) {
 	fc := funcs[ast.DefCauslation]
-	f, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(nil)))
+	f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(nil)))
 	c.Assert(f, NotNil)
 	c.Assert(err, IsNil)
 }
 
 func (s *testEvaluatorSuite) TestEventCount(c *C) {
 	ctx := mock.NewContext()
-	stochastikVars := ctx.GetStochastikVars()
-	stochastikVars.StmtCtx.PrevAffectedEvents = 10
+	stochaseinstein_dbars := ctx.GetStochaseinstein_dbars()
+	stochaseinstein_dbars.StmtCtx.PrevAffectedEvents = 10
 
 	f, err := funcs[ast.EventCount].getFunction(ctx, nil)
 	c.Assert(err, IsNil)
@@ -216,7 +216,7 @@ func (s *testEvaluatorSuite) TestEventCount(c *C) {
 
 // TestMilevaDBVersion for milevadb_server().
 func (s *testEvaluatorSuite) TestMilevaDBVersion(c *C) {
-	f, err := newFunctionForTest(s.ctx, ast.MilevaDBVersion, s.primitiveValsToConstants([]interface{}{})...)
+	f, err := newFunctionForTest(s.ctx, ast.MilevaDBVersion, s.primitiveValsToCouplingConstantWithRadixs([]interface{}{})...)
 	c.Assert(err, IsNil)
 	v, err := f.Eval(chunk.Event{})
 	c.Assert(err, IsNil)
@@ -246,11 +246,11 @@ func (s *testEvaluatorSuite) TestLastInsertID(c *C) {
 			err error
 		)
 		if t.insertID > 0 {
-			s.ctx.GetStochastikVars().StmtCtx.PrevLastInsertID = t.insertID
+			s.ctx.GetStochaseinstein_dbars().StmtCtx.PrevLastInsertID = t.insertID
 		}
 
 		if t.args != nil {
-			f, err = newFunctionForTest(s.ctx, ast.LastInsertId, s.primitiveValsToConstants([]interface{}{t.args})...)
+			f, err = newFunctionForTest(s.ctx, ast.LastInsertId, s.primitiveValsToCouplingConstantWithRadixs([]interface{}{t.args})...)
 		} else {
 			f, err = newFunctionForTest(s.ctx, ast.LastInsertId)
 		}
@@ -298,7 +298,7 @@ func (s *testEvaluatorSuite) TestFormatBytes(c *C) {
 
 	for _, t := range Dtbl {
 		fc := funcs[ast.FormatBytes]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t["Arg"]))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Arg"]))
 		c.Assert(err, IsNil)
 		v, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)
@@ -326,7 +326,7 @@ func (s *testEvaluatorSuite) TestFormatNanoTime(c *C) {
 
 	for _, t := range Dtbl {
 		fc := funcs[ast.FormatNanoTime]
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants(t["Arg"]))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(t["Arg"]))
 		c.Assert(err, IsNil)
 		v, err := evalBuiltinFunc(f, chunk.Event{})
 		c.Assert(err, IsNil)

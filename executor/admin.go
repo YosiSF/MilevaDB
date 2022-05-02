@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,27 +17,27 @@ import (
 	"context"
 	"math"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block/blocks"
+	"github.com/whtcorpsinc/MilevaDB-Prod/blockcodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/distsql"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/codec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/ranger"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/timeutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/statistics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/block/blocks"
-	"github.com/whtcorpsinc/milevadb/blockcodec"
-	"github.com/whtcorpsinc/milevadb/distsql"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/codec"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/ranger"
-	"github.com/whtcorpsinc/milevadb/soliton/timeutil"
-	"github.com/whtcorpsinc/milevadb/statistics"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/types"
 	"go.uber.org/zap"
 )
 
@@ -59,8 +59,8 @@ type ChecHoTTexRangeExec struct {
 	handleRanges []ast.HandleRange
 	srcChunk     *chunk.Chunk
 
-	result distsql.SelectResult
-	defcaus   []*perceptron.DeferredCausetInfo
+	result  distsql.SelectResult
+	defcaus []*perceptron.DeferredCausetInfo
 }
 
 // Next implements the Executor Next interface.
@@ -111,7 +111,7 @@ func (e *ChecHoTTexRangeExec) Open(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	sc := e.ctx.GetStochastikVars().StmtCtx
+	sc := e.ctx.GetStochaseinstein_dbars().StmtCtx
 	txn, err := e.ctx.Txn(true)
 	if err != nil {
 		return nil
@@ -121,7 +121,7 @@ func (e *ChecHoTTexRangeExec) Open(ctx context.Context) error {
 		SetPosetDagRequest(posetPosetDagPB).
 		SetStartTS(txn.StartTS()).
 		SetKeepOrder(true).
-		SetFromStochastikVars(e.ctx.GetStochastikVars()).
+		SetFromStochaseinstein_dbars(e.ctx.GetStochaseinstein_dbars()).
 		Build()
 	if err != nil {
 		return err
@@ -137,8 +137,8 @@ func (e *ChecHoTTexRangeExec) Open(ctx context.Context) error {
 
 func (e *ChecHoTTexRangeExec) buildPosetDagPB() (*fidelpb.PosetDagRequest, error) {
 	posetPosetDagReq := &fidelpb.PosetDagRequest{}
-	posetPosetDagReq.TimeZoneName, posetPosetDagReq.TimeZoneOffset = timeutil.Zone(e.ctx.GetStochastikVars().Location())
-	sc := e.ctx.GetStochastikVars().StmtCtx
+	posetPosetDagReq.TimeZoneName, posetPosetDagReq.TimeZoneOffset = timeutil.Zone(e.ctx.GetStochaseinstein_dbars().Location())
+	sc := e.ctx.GetStochaseinstein_dbars().StmtCtx
 	posetPosetDagReq.Flags = sc.PushDownFlags()
 	for i := range e.schemaReplicant.DeferredCausets {
 		posetPosetDagReq.OutputOffsets = append(posetPosetDagReq.OutputOffsets, uint32(i))
@@ -156,8 +156,8 @@ func (e *ChecHoTTexRangeExec) buildPosetDagPB() (*fidelpb.PosetDagRequest, error
 
 func (e *ChecHoTTexRangeExec) constructIndexScanPB() *fidelpb.Executor {
 	idxExec := &fidelpb.IndexScan{
-		BlockId: e.block.ID,
-		IndexId: e.index.ID,
+		BlockId:         e.block.ID,
+		IndexId:         e.index.ID,
 		DeferredCausets: soliton.DeferredCausetsToProto(e.defcaus, e.block.PKIsHandle),
 	}
 	return &fidelpb.Executor{Tp: fidelpb.ExecType_TypeIndexScan, IdxScan: idxExec}
@@ -183,14 +183,14 @@ type RecoverIndexExec struct {
 
 	defCausumns       []*perceptron.DeferredCausetInfo
 	defCausFieldTypes []*types.FieldType
-	srcChunk      *chunk.Chunk
+	srcChunk          *chunk.Chunk
 	handleDefCauss    plannercore.HandleDefCauss
 
 	// below buf is used to reduce allocations.
 	recoverEvents []recoverEvents
-	idxValsBufs [][]types.Causet
-	idxKeyBufs  [][]byte
-	batchKeys   []ekv.Key
+	idxValsBufs   [][]types.Causet
+	idxKeyBufs    [][]byte
+	batchKeys     []ekv.Key
 }
 
 func (e *RecoverIndexExec) defCausumnsTypes() []*types.FieldType {
@@ -235,8 +235,8 @@ func (e *RecoverIndexExec) constructLimitPB(count uint64) *fidelpb.Executor {
 
 func (e *RecoverIndexExec) buildPosetDagPB(txn ekv.Transaction, limitCnt uint64) (*fidelpb.PosetDagRequest, error) {
 	posetPosetDagReq := &fidelpb.PosetDagRequest{}
-	posetPosetDagReq.TimeZoneName, posetPosetDagReq.TimeZoneOffset = timeutil.Zone(e.ctx.GetStochastikVars().Location())
-	sc := e.ctx.GetStochastikVars().StmtCtx
+	posetPosetDagReq.TimeZoneName, posetPosetDagReq.TimeZoneOffset = timeutil.Zone(e.ctx.GetStochaseinstein_dbars().Location())
+	sc := e.ctx.GetStochaseinstein_dbars().StmtCtx
 	posetPosetDagReq.Flags = sc.PushDownFlags()
 	for i := range e.defCausumns {
 		posetPosetDagReq.OutputOffsets = append(posetPosetDagReq.OutputOffsets, uint32(i))
@@ -260,7 +260,7 @@ func (e *RecoverIndexExec) buildBlockScan(ctx context.Context, txn ekv.Transacti
 		return nil, err
 	}
 	var builder distsql.RequestBuilder
-	builder.KeyRanges, err = buildRecoverIndexKeyRanges(e.ctx.GetStochastikVars().StmtCtx, e.physicalID, startHandle)
+	builder.KeyRanges, err = buildRecoverIndexKeyRanges(e.ctx.GetStochaseinstein_dbars().StmtCtx, e.physicalID, startHandle)
 	if err != nil {
 		return nil, err
 	}
@@ -268,7 +268,7 @@ func (e *RecoverIndexExec) buildBlockScan(ctx context.Context, txn ekv.Transacti
 		SetPosetDagRequest(posetPosetDagPB).
 		SetStartTS(txn.StartTS()).
 		SetKeepOrder(true).
-		SetFromStochastikVars(e.ctx.GetStochastikVars()).
+		SetFromStochaseinstein_dbars(e.ctx.GetStochaseinstein_dbars()).
 		Build()
 	if err != nil {
 		return nil, err
@@ -302,17 +302,17 @@ func buildRecoverIndexKeyRanges(sctx *stmtctx.StatementContext, tid int64, start
 }
 
 type backfillResult struct {
-	currentHandle ekv.Handle
-	addedCount    int64
-	scanEventCount  int64
+	currentHandle  ekv.Handle
+	addedCount     int64
+	scanEventCount int64
 }
 
 func (e *RecoverIndexExec) backfillIndex(ctx context.Context) (int64, int64, error) {
 	var (
 		currentHandle ekv.Handle = nil
-		totalAddedCnt           = int64(0)
-		totalScanCnt            = int64(0)
-		lastLogCnt              = int64(0)
+		totalAddedCnt            = int64(0)
+		totalScanCnt             = int64(0)
+		lastLogCnt               = int64(0)
 		result        backfillResult
 	)
 	for {
@@ -387,7 +387,7 @@ func (e *RecoverIndexExec) batchMarkDup(txn ekv.Transaction, rows []recoverEvent
 		return nil
 	}
 	e.batchKeys = e.batchKeys[:0]
-	sc := e.ctx.GetStochastikVars().StmtCtx
+	sc := e.ctx.GetStochaseinstein_dbars().StmtCtx
 	distinctFlags := make([]bool, len(rows))
 	for i, event := range rows {
 		idxKey, distinct, err := e.index.GenIndexKey(sc, event.idxVals, event.handle, e.idxKeyBufs[i])
@@ -447,7 +447,7 @@ func (e *RecoverIndexExec) backfillIndexInTxn(ctx context.Context, txn ekv.Trans
 	}
 
 	// Constrains is already checked.
-	e.ctx.GetStochastikVars().StmtCtx.BatchCheck = true
+	e.ctx.GetStochaseinstein_dbars().StmtCtx.BatchCheck = true
 	for _, event := range rows {
 		if event.skip {
 			continue
@@ -525,15 +525,15 @@ type CleanupIndexExec struct {
 
 	defCausumns          []*perceptron.DeferredCausetInfo
 	idxDefCausFieldTypes []*types.FieldType
-	idxChunk         *chunk.Chunk
+	idxChunk             *chunk.Chunk
 	handleDefCauss       plannercore.HandleDefCauss
 
-	idxValues   *ekv.HandleMap // ekv.Handle -> [][]types.Causet
-	batchSize   uint64
-	batchKeys   []ekv.Key
-	idxValsBufs [][]types.Causet
-	lastIdxKey  []byte
-	scanEventCnt  uint64
+	idxValues    *ekv.HandleMap // ekv.Handle -> [][]types.Causet
+	batchSize    uint64
+	batchKeys    []ekv.Key
+	idxValsBufs  [][]types.Causet
+	lastIdxKey   []byte
+	scanEventCnt uint64
 }
 
 func (e *CleanupIndexExec) getIdxDefCausTypes() []*types.FieldType {
@@ -571,7 +571,7 @@ func (e *CleanupIndexExec) deleteDanglingIdx(txn ekv.Transaction, values map[str
 				return errors.Trace(errors.Errorf("batch keys are inconsistent with handles"))
 			}
 			for _, handleIdxVals := range handleIdxValsGroup.([][]types.Causet) {
-				if err := e.index.Delete(e.ctx.GetStochastikVars().StmtCtx, txn, handleIdxVals, handle); err != nil {
+				if err := e.index.Delete(e.ctx.GetStochaseinstein_dbars().StmtCtx, txn, handleIdxVals, handle); err != nil {
 					return err
 				}
 				e.removeCnt++
@@ -607,7 +607,7 @@ func (e *CleanupIndexExec) fetchIndex(ctx context.Context, txn ekv.Transaction) 
 	}
 	defer terror.Call(result.Close)
 
-	sc := e.ctx.GetStochastikVars().StmtCtx
+	sc := e.ctx.GetStochaseinstein_dbars().StmtCtx
 	idxDefCausLen := len(e.index.Meta().DeferredCausets)
 	for {
 		err := result.Next(ctx, e.idxChunk)
@@ -723,14 +723,14 @@ func (e *CleanupIndexExec) buildIndexScan(ctx context.Context, txn ekv.Transacti
 	if err != nil {
 		return nil, err
 	}
-	sc := e.ctx.GetStochastikVars().StmtCtx
+	sc := e.ctx.GetStochaseinstein_dbars().StmtCtx
 	var builder distsql.RequestBuilder
 	ranges := ranger.FullRange()
 	kvReq, err := builder.SetIndexRanges(sc, e.physicalID, e.index.Meta().ID, ranges).
 		SetPosetDagRequest(posetPosetDagPB).
 		SetStartTS(txn.StartTS()).
 		SetKeepOrder(true).
-		SetFromStochastikVars(e.ctx.GetStochastikVars()).
+		SetFromStochaseinstein_dbars(e.ctx.GetStochaseinstein_dbars()).
 		Build()
 	if err != nil {
 		return nil, err
@@ -759,7 +759,7 @@ func (e *CleanupIndexExec) init() error {
 	e.idxValues = ekv.NewHandleMap()
 	e.batchKeys = make([]ekv.Key, 0, e.batchSize)
 	e.idxValsBufs = make([][]types.Causet, e.batchSize)
-	sc := e.ctx.GetStochastikVars().StmtCtx
+	sc := e.ctx.GetStochaseinstein_dbars().StmtCtx
 	idxKey, _, err := e.index.GenIndexKey(sc, []types.Causet{{}}, ekv.IntHandle(math.MinInt64), nil)
 	if err != nil {
 		return err
@@ -770,8 +770,8 @@ func (e *CleanupIndexExec) init() error {
 
 func (e *CleanupIndexExec) buildIdxPosetDagPB(txn ekv.Transaction) (*fidelpb.PosetDagRequest, error) {
 	posetPosetDagReq := &fidelpb.PosetDagRequest{}
-	posetPosetDagReq.TimeZoneName, posetPosetDagReq.TimeZoneOffset = timeutil.Zone(e.ctx.GetStochastikVars().Location())
-	sc := e.ctx.GetStochastikVars().StmtCtx
+	posetPosetDagReq.TimeZoneName, posetPosetDagReq.TimeZoneOffset = timeutil.Zone(e.ctx.GetStochaseinstein_dbars().Location())
+	sc := e.ctx.GetStochaseinstein_dbars().StmtCtx
 	posetPosetDagReq.Flags = sc.PushDownFlags()
 	for i := range e.defCausumns {
 		posetPosetDagReq.OutputOffsets = append(posetPosetDagReq.OutputOffsets, uint32(i))
@@ -792,8 +792,8 @@ func (e *CleanupIndexExec) buildIdxPosetDagPB(txn ekv.Transaction) (*fidelpb.Pos
 
 func (e *CleanupIndexExec) constructIndexScanPB() *fidelpb.Executor {
 	idxExec := &fidelpb.IndexScan{
-		BlockId:          e.physicalID,
-		IndexId:          e.index.Meta().ID,
+		BlockId:                  e.physicalID,
+		IndexId:                  e.index.Meta().ID,
 		DeferredCausets:          soliton.DeferredCausetsToProto(e.defCausumns, e.block.Meta().PKIsHandle),
 		PrimaryDeferredCausetIds: blocks.TryGetCommonPkDeferredCausetIds(e.block.Meta()),
 	}

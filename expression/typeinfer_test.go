@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,14 +20,14 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/charset"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/petri"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/soliton/printer"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/stochastik"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/printer"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastik"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"golang.org/x/net/context"
 )
 
@@ -104,7 +104,7 @@ func (s *testInferTypeSuite) TestInferType(c *C) {
 	testKit.MustExec(`set milevadb_enable_noop_functions=1;`)
 
 	var tests []typeInferTestCase
-	tests = append(tests, s.createTestCase4Constants()...)
+	tests = append(tests, s.createTestCase4CouplingConstantWithRadixs()...)
 	tests = append(tests, s.createTestCase4Cast()...)
 	tests = append(tests, s.createTestCase4DeferredCausets()...)
 	tests = append(tests, s.createTestCase4StrFuncs()...)
@@ -126,8 +126,8 @@ func (s *testInferTypeSuite) TestInferType(c *C) {
 	tests = append(tests, s.createTestCase4MiscellaneousFunc()...)
 
 	sctx := testKit.Se.(stochastikctx.Context)
-	c.Assert(sctx.GetStochastikVars().SetSystemVar(variable.CharacterSetConnection, allegrosql.DefaultCharset), IsNil)
-	c.Assert(sctx.GetStochastikVars().SetSystemVar(variable.DefCauslationConnection, allegrosql.DefaultDefCauslationName), IsNil)
+	c.Assert(sctx.GetStochaseinstein_dbars().SetSystemVar(variable.CharacterSetConnection, allegrosql.DefaultCharset), IsNil)
+	c.Assert(sctx.GetStochaseinstein_dbars().SetSystemVar(variable.DefCauslationConnection, allegrosql.DefaultDefCauslationName), IsNil)
 
 	ctx := context.Background()
 	for _, tt := range tests {
@@ -154,7 +154,7 @@ func (s *testInferTypeSuite) TestInferType(c *C) {
 	}
 }
 
-func (s *testInferTypeSuite) createTestCase4Constants() []typeInferTestCase {
+func (s *testInferTypeSuite) createTestCase4CouplingConstantWithRadixs() []typeInferTestCase {
 	return []typeInferTestCase{
 		{"1", allegrosql.TypeLonglong, charset.CharsetBin, allegrosql.BinaryFlag, 1, 0},
 		{"-1", allegrosql.TypeLonglong, charset.CharsetBin, allegrosql.BinaryFlag, 2, 0},

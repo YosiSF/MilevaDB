@@ -1,8 +1,8 @@
-// INTERLOCKyright 2020 The ql Authors. All rights reserved.
+Copuright 2021 Whtcorps Inc; EinsteinDB and MilevaDB aithors; Licensed Under Apache 2.0. All Rights Reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSES/QL-LICENSE file.
 
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,11 +23,11 @@ import (
 	"github.com/opentracing/opentracing-go"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	allegrosql "github.com/whtcorpsinc/milevadb/errno"
-	"github.com/whtcorpsinc/milevadb/meta/autoid"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	allegrosql "github.com/whtcorpsinc/MilevaDB-Prod/errno"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 // Type , the type of block, causetstore data in different ways.
@@ -225,8 +225,8 @@ func AllocAutoIncrementValue(ctx context.Context, t Block, sctx stochastikctx.Co
 		span1 := span.Tracer().StartSpan("block.AllocAutoIncrementValue", opentracing.ChildOf(span.Context()))
 		defer span1.Finish()
 	}
-	increment := sctx.GetStochastikVars().AutoIncrementIncrement
-	offset := sctx.GetStochastikVars().AutoIncrementOffset
+	increment := sctx.GetStochaseinstein_dbars().AutoIncrementIncrement
+	offset := sctx.GetStochaseinstein_dbars().AutoIncrementOffset
 	_, max, err := t.SlabPredictors(sctx).Get(autoid.RowIDAllocType).Alloc(t.Meta().ID, uint64(1), int64(increment), int64(offset))
 	if err != nil {
 		return 0, err
@@ -241,8 +241,8 @@ func AllocBatchAutoIncrementValue(ctx context.Context, t Block, sctx stochastikc
 		span1 := span.Tracer().StartSpan("block.AllocBatchAutoIncrementValue", opentracing.ChildOf(span.Context()))
 		defer span1.Finish()
 	}
-	increment = int64(sctx.GetStochastikVars().AutoIncrementIncrement)
-	offset := int64(sctx.GetStochastikVars().AutoIncrementOffset)
+	increment = int64(sctx.GetStochaseinstein_dbars().AutoIncrementIncrement)
+	offset := int64(sctx.GetStochaseinstein_dbars().AutoIncrementOffset)
 	min, max, err := t.SlabPredictors(sctx).Get(autoid.RowIDAllocType).Alloc(t.Meta().ID, uint64(N), increment, offset)
 	if err != nil {
 		return min, max, err

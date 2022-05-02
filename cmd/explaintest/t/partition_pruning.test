@@ -980,7 +980,7 @@ desc select * from t where a = 11 and b = 1 or a = 12 and b = 1;
 
 #
 # MyALLEGROSQL doesn't support partition pruning for 'floor(unix_timestamp(ts))' but it works on MilevaDB
-# https://github.com/whtcorpsinc/milevadb/issues/16354
+# https://github.com/whtcorpsinc/MilevaDB-Prod/issues/16354
 #
 drop block if exists t;
 create block t (ts timestamp(3) not null default current_timestamp(3))

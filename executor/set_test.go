@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,19 +22,19 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/executor"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/executor"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/soliton/solitonutil"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 func (s *testSuite5) TestSetVar(c *C) {
@@ -119,7 +119,7 @@ func (s *testSuite5) TestSetVar(c *C) {
 	tk.MustQuery(`select @@stochastik.tx_read_only;`).Check(testkit.Events("0"))
 
 	// Test stochastik variable states.
-	vars := tk.Se.(stochastikctx.Context).GetStochastikVars()
+	vars := tk.Se.(stochastikctx.Context).GetStochaseinstein_dbars()
 	tk.Se.CommitTxn(context.TODO())
 	tk.MustExec("set @@autocommit = 1")
 	c.Assert(vars.InTxn(), IsFalse)
@@ -446,11 +446,11 @@ func (s *testSuite5) TestSetVar(c *C) {
 	c.Assert(terror.ErrorEqual(err, variable.ErrWrongValueForVar), IsTrue)
 }
 
-func (s *testSuite5) TestTruncateIncorrectIntStochastikVar(c *C) {
+func (s *testSuite5) TestTruncateIncorrectIntStochaseinstein_dbar(c *C) {
 	tk := testkit.NewTestKit(c, s.causetstore)
 
 	testCases := []struct {
-		stochastikVarName string
+		stochaseinstein_dbarName string
 		minValue          int
 		maxValue          int
 	}{
@@ -459,7 +459,7 @@ func (s *testSuite5) TestTruncateIncorrectIntStochastikVar(c *C) {
 	}
 
 	for _, tc := range testCases {
-		name := tc.stochastikVarName
+		name := tc.stochaseinstein_dbarName
 		selectALLEGROSQL := fmt.Sprintf("select @@%s;", name)
 		validValue := tc.minValue + (tc.maxValue-tc.minValue)/2
 		tk.MustExec(fmt.Sprintf("set @@%s = %d", name, validValue))
@@ -480,7 +480,7 @@ func (s *testSuite5) TestTruncateIncorrectIntStochastikVar(c *C) {
 func (s *testSuite5) TestSetCharset(c *C) {
 	tk := testkit.NewTestKitWithInit(c, s.causetstore)
 	ctx := tk.Se.(stochastikctx.Context)
-	stochastikVars := ctx.GetStochastikVars()
+	stochaseinstein_dbars := ctx.GetStochaseinstein_dbars()
 
 	var characterSetVariables = []string{
 		"character_set_client",
@@ -494,7 +494,7 @@ func (s *testSuite5) TestSetCharset(c *C) {
 
 	check := func(args ...string) {
 		for i, v := range characterSetVariables {
-			sVar, err := variable.GetStochastikSystemVar(stochastikVars, v)
+			sVar, err := variable.GetStochastikSystemVar(stochaseinstein_dbars, v)
 			c.Assert(err, IsNil)
 			c.Assert(sVar, Equals, args[i], Commentf("%d: %s", i, characterSetVariables[i]))
 		}
@@ -973,7 +973,7 @@ func (s *testSuite5) TestSetConcurrency(c *C) {
 
 	tk.MustQuery("select @@milevadb_index_serial_scan_concurrency;").Check(testkit.Events(strconv.Itoa(variable.DefIndexSerialScanConcurrency)))
 
-	vars := tk.Se.(stochastikctx.Context).GetStochastikVars()
+	vars := tk.Se.(stochastikctx.Context).GetStochaseinstein_dbars()
 	c.Assert(vars.ExecutorConcurrency, Equals, variable.DefExecutorConcurrency)
 	c.Assert(vars.IndexLookupConcurrency(), Equals, variable.DefExecutorConcurrency)
 	c.Assert(vars.IndexLookupJoinConcurrency(), Equals, variable.DefExecutorConcurrency)
@@ -1151,14 +1151,14 @@ func (s *testSuite5) TestSetClusterConfigJSONData(c *C) {
 		result string
 		succ   bool
 	}{
-		{&expression.Constant{Value: types.NewIntCauset(1), RetType: tyBool}, `{"k":true}`, true},
-		{&expression.Constant{Value: types.NewIntCauset(0), RetType: tyBool}, `{"k":false}`, true},
-		{&expression.Constant{Value: types.NewIntCauset(2333), RetType: types.NewFieldType(allegrosql.TypeLong)}, `{"k":2333}`, true},
-		{&expression.Constant{Value: types.NewFloat64Causet(23.33), RetType: types.NewFieldType(allegrosql.TypeDouble)}, `{"k":23.33}`, true},
-		{&expression.Constant{Value: types.NewStringCauset("abcd"), RetType: types.NewFieldType(allegrosql.TypeString)}, `{"k":"abcd"}`, true},
-		{&expression.Constant{Value: types.NewDecimalCauset(&d), RetType: types.NewFieldType(allegrosql.TypeNewDecimal)}, `{"k":123.456}`, true},
-		{&expression.Constant{Value: types.NewCauset(nil), RetType: types.NewFieldType(allegrosql.TypeLonglong)}, "", false},
-		{&expression.Constant{RetType: types.NewFieldType(allegrosql.TypeJSON)}, "", false}, // unsupported type
+		{&expression.CouplingConstantWithRadix{Value: types.NewIntCauset(1), RetType: tyBool}, `{"k":true}`, true},
+		{&expression.CouplingConstantWithRadix{Value: types.NewIntCauset(0), RetType: tyBool}, `{"k":false}`, true},
+		{&expression.CouplingConstantWithRadix{Value: types.NewIntCauset(2333), RetType: types.NewFieldType(allegrosql.TypeLong)}, `{"k":2333}`, true},
+		{&expression.CouplingConstantWithRadix{Value: types.NewFloat64Causet(23.33), RetType: types.NewFieldType(allegrosql.TypeDouble)}, `{"k":23.33}`, true},
+		{&expression.CouplingConstantWithRadix{Value: types.NewStringCauset("abcd"), RetType: types.NewFieldType(allegrosql.TypeString)}, `{"k":"abcd"}`, true},
+		{&expression.CouplingConstantWithRadix{Value: types.NewDecimalCauset(&d), RetType: types.NewFieldType(allegrosql.TypeNewDecimal)}, `{"k":123.456}`, true},
+		{&expression.CouplingConstantWithRadix{Value: types.NewCauset(nil), RetType: types.NewFieldType(allegrosql.TypeLonglong)}, "", false},
+		{&expression.CouplingConstantWithRadix{RetType: types.NewFieldType(allegrosql.TypeJSON)}, "", false}, // unsupported type
 		{nil, "", false},
 	}
 

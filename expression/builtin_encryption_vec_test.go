@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import (
 
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 var vecBuiltinEncryptionCases = map[string][]vecExprBenchCase{
@@ -50,8 +50,8 @@ var vecBuiltinEncryptionCases = map[string][]vecExprBenchCase{
 	},
 	ast.RandomBytes: {},
 	ast.UncompressedLength: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETString}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETString}, geners: []dataGenerator{newRandLenStrGener(1, 5)}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETString}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETString}, geners: []dataGenerator{newRandLenStrGener(1, 5)}},
 	},
 	ast.SHA1: {
 		{retEvalType: types.ETString, childrenTypes: []types.EvalType{types.ETString}},
@@ -60,11 +60,11 @@ var vecBuiltinEncryptionCases = map[string][]vecExprBenchCase{
 		{retEvalType: types.ETString, childrenTypes: []types.EvalType{types.ETString}, geners: []dataGenerator{newRandLenStrGener(10, 20)}},
 	},
 	ast.SHA2: {
-		{retEvalType: types.ETString, childrenTypes: []types.EvalType{types.ETString, types.ETInt}, geners: []dataGenerator{newRandLenStrGener(10, 20), newRangeInt64Gener(SHA0, SHA0+1)}},
-		{retEvalType: types.ETString, childrenTypes: []types.EvalType{types.ETString, types.ETInt}, geners: []dataGenerator{newRandLenStrGener(10, 20), newRangeInt64Gener(SHA224, SHA224+1)}},
-		{retEvalType: types.ETString, childrenTypes: []types.EvalType{types.ETString, types.ETInt}, geners: []dataGenerator{newRandLenStrGener(10, 20), newRangeInt64Gener(SHA256, SHA256+1)}},
-		{retEvalType: types.ETString, childrenTypes: []types.EvalType{types.ETString, types.ETInt}, geners: []dataGenerator{newRandLenStrGener(10, 20), newRangeInt64Gener(SHA384, SHA384+1)}},
-		{retEvalType: types.ETString, childrenTypes: []types.EvalType{types.ETString, types.ETInt}, geners: []dataGenerator{newRandLenStrGener(10, 20), newRangeInt64Gener(SHA512, SHA512+1)}},
+		{retEvalType: types.ETString, childrenTypes: []types.EvalType{types.ETString, types.CausetEDN}, geners: []dataGenerator{newRandLenStrGener(10, 20), newRangeInt64Gener(SHA0, SHA0+1)}},
+		{retEvalType: types.ETString, childrenTypes: []types.EvalType{types.ETString, types.CausetEDN}, geners: []dataGenerator{newRandLenStrGener(10, 20), newRangeInt64Gener(SHA224, SHA224+1)}},
+		{retEvalType: types.ETString, childrenTypes: []types.EvalType{types.ETString, types.CausetEDN}, geners: []dataGenerator{newRandLenStrGener(10, 20), newRangeInt64Gener(SHA256, SHA256+1)}},
+		{retEvalType: types.ETString, childrenTypes: []types.EvalType{types.ETString, types.CausetEDN}, geners: []dataGenerator{newRandLenStrGener(10, 20), newRangeInt64Gener(SHA384, SHA384+1)}},
+		{retEvalType: types.ETString, childrenTypes: []types.EvalType{types.ETString, types.CausetEDN}, geners: []dataGenerator{newRandLenStrGener(10, 20), newRangeInt64Gener(SHA512, SHA512+1)}},
 	},
 	ast.Encode: {
 		{retEvalType: types.ETString, childrenTypes: []types.EvalType{types.ETString, types.ETString}},

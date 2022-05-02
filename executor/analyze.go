@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,6 +27,24 @@ import (
 	"time"
 
 	"github.com/cznic/mathutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/blockcodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb"
+	"github.com/whtcorpsinc/MilevaDB-Prod/distsql"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/metrics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/codec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/ranger"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/sqlexec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/statistics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
@@ -34,24 +52,6 @@ import (
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/failpoint"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/blockcodec"
-	"github.com/whtcorpsinc/milevadb/causetstore/einsteindb"
-	"github.com/whtcorpsinc/milevadb/distsql"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/metrics"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/codec"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/ranger"
-	"github.com/whtcorpsinc/milevadb/soliton/sqlexec"
-	"github.com/whtcorpsinc/milevadb/statistics"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
 	"go.uber.org/zap"
 )
 
@@ -138,8 +138,8 @@ func (e *AnalyzeExec) Next(ctx context.Context, req *chunk.Chunk) error {
 }
 
 func getBuildStatsConcurrency(ctx stochastikctx.Context) (int, error) {
-	stochastikVars := ctx.GetStochastikVars()
-	concurrency, err := variable.GetStochastikSystemVar(stochastikVars, variable.MilevaDBBuildStatsConcurrency)
+	stochaseinstein_dbars := ctx.GetStochaseinstein_dbars()
+	concurrency, err := variable.GetStochastikSystemVar(stochaseinstein_dbars, variable.MilevaDBBuildStatsConcurrency)
 	if err != nil {
 		return 0, err
 	}
@@ -158,13 +158,13 @@ const (
 )
 
 type analyzeTask struct {
-	taskType           taskType
-	idxExec            *AnalyzeIndexExec
+	taskType               taskType
+	idxExec                *AnalyzeIndexExec
 	defCausExec            *AnalyzeDeferredCausetsExec
-	fastExec           *AnalyzeFastExec
-	idxIncrementalExec *analyzeIndexIncrementalExec
+	fastExec               *AnalyzeFastExec
+	idxIncrementalExec     *analyzeIndexIncrementalExec
 	defCausIncrementalExec *analyzePKIncrementalExec
-	job                *statistics.AnalyzeJob
+	job                    *statistics.AnalyzeJob
 }
 
 var errAnalyzeWorkerPanic = errors.New("analyze worker panic")
@@ -269,9 +269,9 @@ func (e *AnalyzeIndexExec) fetchAnalyzeResult(ranges []*ranger.Range, isNullRang
 	var builder distsql.RequestBuilder
 	var kvReqBuilder *distsql.RequestBuilder
 	if e.isCommonHandle && e.idxInfo.Primary {
-		kvReqBuilder = builder.SetCommonHandleRanges(e.ctx.GetStochastikVars().StmtCtx, e.blockID.DefCauslectIDs[0], ranges)
+		kvReqBuilder = builder.SetCommonHandleRanges(e.ctx.GetStochaseinstein_dbars().StmtCtx, e.blockID.DefCauslectIDs[0], ranges)
 	} else {
-		kvReqBuilder = builder.SetIndexRanges(e.ctx.GetStochastikVars().StmtCtx, e.blockID.DefCauslectIDs[0], e.idxInfo.ID, ranges)
+		kvReqBuilder = builder.SetIndexRanges(e.ctx.GetStochaseinstein_dbars().StmtCtx, e.blockID.DefCauslectIDs[0], e.idxInfo.ID, ranges)
 	}
 	kvReq, err := kvReqBuilder.
 		SetAnalyzeRequest(e.analyzePB).
@@ -283,7 +283,7 @@ func (e *AnalyzeIndexExec) fetchAnalyzeResult(ranges []*ranger.Range, isNullRang
 		return err
 	}
 	ctx := context.TODO()
-	result, err := distsql.Analyze(ctx, e.ctx.GetClient(), kvReq, e.ctx.GetStochastikVars().KVVars, e.ctx.GetStochastikVars().InRestrictedALLEGROSQL)
+	result, err := distsql.Analyze(ctx, e.ctx.GetClient(), kvReq, e.ctx.GetStochaseinstein_dbars().KVVars, e.ctx.GetStochaseinstein_dbars().InRestrictedALLEGROSQL)
 	if err != nil {
 		return err
 	}
@@ -337,7 +337,7 @@ func (e *AnalyzeIndexExec) buildStatsFromResult(result distsql.SelectResult, nee
 		}
 		respHist := statistics.HistogramFromProto(resp.Hist)
 		e.job.UFIDelate(int64(respHist.TotalEventCount()))
-		hist, err = statistics.MergeHistograms(e.ctx.GetStochastikVars().StmtCtx, hist, respHist, int(e.opts[ast.AnalyzeOptNumBuckets]))
+		hist, err = statistics.MergeHistograms(e.ctx.GetStochaseinstein_dbars().StmtCtx, hist, respHist, int(e.opts[ast.AnalyzeOptNumBuckets]))
 		if err != nil {
 			return nil, nil, err
 		}
@@ -415,16 +415,16 @@ func analyzeDeferredCausetsPushdown(defCausExec *AnalyzeDeferredCausetsExec) ana
 
 // AnalyzeDeferredCausetsExec represents Analyze defCausumns push down executor.
 type AnalyzeDeferredCausetsExec struct {
-	ctx           stochastikctx.Context
-	blockID       core.AnalyzeBlockID
-	defcausInfo      []*perceptron.DeferredCausetInfo
-	handleDefCauss    core.HandleDefCauss
-	concurrency   int
-	priority      int
-	analyzePB     *fidelpb.AnalyzeReq
-	resultHandler *blockResultHandler
-	opts          map[ast.AnalyzeOptionType]uint64
-	job           *statistics.AnalyzeJob
+	ctx            stochastikctx.Context
+	blockID        core.AnalyzeBlockID
+	defcausInfo    []*perceptron.DeferredCausetInfo
+	handleDefCauss core.HandleDefCauss
+	concurrency    int
+	priority       int
+	analyzePB      *fidelpb.AnalyzeReq
+	resultHandler  *blockResultHandler
+	opts           map[ast.AnalyzeOptionType]uint64
+	job            *statistics.AnalyzeJob
 }
 
 func (e *AnalyzeDeferredCausetsExec) open(ranges []*ranger.Range) error {
@@ -452,7 +452,7 @@ func (e *AnalyzeDeferredCausetsExec) buildResp(ranges []*ranger.Range) (distsql.
 	var builder distsql.RequestBuilder
 	var reqBuilder *distsql.RequestBuilder
 	if e.handleDefCauss != nil && !e.handleDefCauss.IsInt() {
-		reqBuilder = builder.SetCommonHandleRanges(e.ctx.GetStochastikVars().StmtCtx, e.blockID.DefCauslectIDs[0], ranges)
+		reqBuilder = builder.SetCommonHandleRanges(e.ctx.GetStochaseinstein_dbars().StmtCtx, e.blockID.DefCauslectIDs[0], ranges)
 	} else {
 		reqBuilder = builder.SetBlockRanges(e.blockID.DefCauslectIDs[0], ranges, nil)
 	}
@@ -468,7 +468,7 @@ func (e *AnalyzeDeferredCausetsExec) buildResp(ranges []*ranger.Range) (distsql.
 		return nil, err
 	}
 	ctx := context.TODO()
-	result, err := distsql.Analyze(ctx, e.ctx.GetClient(), kvReq, e.ctx.GetStochastikVars().KVVars, e.ctx.GetStochastikVars().InRestrictedALLEGROSQL)
+	result, err := distsql.Analyze(ctx, e.ctx.GetClient(), kvReq, e.ctx.GetStochaseinstein_dbars().KVVars, e.ctx.GetStochaseinstein_dbars().InRestrictedALLEGROSQL)
 	if err != nil {
 		return nil, err
 	}
@@ -511,7 +511,7 @@ func (e *AnalyzeDeferredCausetsExec) buildStats(ranges []*ranger.Range, needExtS
 		if err != nil {
 			return nil, nil, nil, err
 		}
-		sc := e.ctx.GetStochastikVars().StmtCtx
+		sc := e.ctx.GetStochaseinstein_dbars().StmtCtx
 		rowCount := int64(0)
 		if hasPkHist(e.handleDefCauss) {
 			respHist := statistics.HistogramFromProto(resp.PkHist)
@@ -528,7 +528,7 @@ func (e *AnalyzeDeferredCausetsExec) buildStats(ranges []*ranger.Range, needExtS
 		}
 		e.job.UFIDelate(rowCount)
 	}
-	timeZone := e.ctx.GetStochastikVars().Location()
+	timeZone := e.ctx.GetStochaseinstein_dbars().Location()
 	if hasPkHist(e.handleDefCauss) {
 		pkInfo := e.handleDefCauss.GetDefCaus(0)
 		pkHist.ID = pkInfo.ID
@@ -540,7 +540,7 @@ func (e *AnalyzeDeferredCausetsExec) buildStats(ranges []*ranger.Range, needExtS
 		cms = append(cms, nil)
 	}
 	for i, defCaus := range e.defcausInfo {
-		err := defCauslectors[i].ExtractTopN(uint32(e.opts[ast.AnalyzeOptNumTopN]), e.ctx.GetStochastikVars().StmtCtx, &defCaus.FieldType, timeZone)
+		err := defCauslectors[i].ExtractTopN(uint32(e.opts[ast.AnalyzeOptNumTopN]), e.ctx.GetStochaseinstein_dbars().StmtCtx, &defCaus.FieldType, timeZone)
 		if err != nil {
 			return nil, nil, nil, err
 		}
@@ -632,24 +632,24 @@ func analyzeFastExec(exec *AnalyzeFastExec) []analyzeResult {
 
 // AnalyzeFastExec represents Fast Analyze executor.
 type AnalyzeFastExec struct {
-	ctx         stochastikctx.Context
-	blockID     core.AnalyzeBlockID
-	handleDefCauss  core.HandleDefCauss
+	ctx            stochastikctx.Context
+	blockID        core.AnalyzeBlockID
+	handleDefCauss core.HandleDefCauss
 	defcausInfo    []*perceptron.DeferredCausetInfo
-	idxsInfo    []*perceptron.IndexInfo
-	concurrency int
-	opts        map[ast.AnalyzeOptionType]uint64
-	tblInfo     *perceptron.BlockInfo
-	cache       *einsteindb.RegionCache
-	wg          *sync.WaitGroup
-	rowCount    int64
-	sampCursor  int32
-	sampTasks   []*einsteindb.KeyLocation
-	scanTasks   []*einsteindb.KeyLocation
-	defCauslectors  []*statistics.SampleDefCauslector
-	randSeed    int64
-	job         *statistics.AnalyzeJob
-	estSampStep uint32
+	idxsInfo       []*perceptron.IndexInfo
+	concurrency    int
+	opts           map[ast.AnalyzeOptionType]uint64
+	tblInfo        *perceptron.BlockInfo
+	cache          *einsteindb.RegionCache
+	wg             *sync.WaitGroup
+	rowCount       int64
+	sampCursor     int32
+	sampTasks      []*einsteindb.KeyLocation
+	scanTasks      []*einsteindb.KeyLocation
+	defCauslectors []*statistics.SampleDefCauslector
+	randSeed       int64
+	job            *statistics.AnalyzeJob
+	estSampStep    uint32
 }
 
 func (e *AnalyzeFastExec) calculateEstimateSampleStep() (err error) {
@@ -784,7 +784,7 @@ func (e *AnalyzeFastExec) buildSampTask() (err error) {
 }
 
 func (e *AnalyzeFastExec) decodeValues(handle ekv.Handle, sValue []byte, wantDefCauss map[int64]*types.FieldType) (values map[int64]types.Causet, err error) {
-	loc := e.ctx.GetStochastikVars().Location()
+	loc := e.ctx.GetStochaseinstein_dbars().Location()
 	values, err = blockcodec.DecodeEventToCausetMap(sValue, wantDefCauss, loc)
 	if err != nil || e.handleDefCauss == nil {
 		return values, err
@@ -875,7 +875,7 @@ func (e *AnalyzeFastExec) uFIDelateDefCauslectorSamples(sValue []byte, sKey ekv.
 			idxVals = append(idxVals, v)
 		}
 		var bytes []byte
-		bytes, err = codec.EncodeKey(e.ctx.GetStochastikVars().StmtCtx, bytes, idxVals...)
+		bytes, err = codec.EncodeKey(e.ctx.GetStochaseinstein_dbars().StmtCtx, bytes, idxVals...)
 		if err != nil {
 			return err
 		}
@@ -937,7 +937,7 @@ func (e *AnalyzeFastExec) handleScanTasks(bo *einsteindb.Backoffer) (keysSize in
 	if err != nil {
 		return 0, err
 	}
-	if e.ctx.GetStochastikVars().GetReplicaRead().IsFollowerRead() {
+	if e.ctx.GetStochaseinstein_dbars().GetReplicaRead().IsFollowerRead() {
 		snapshot.SetOption(ekv.ReplicaRead, ekv.ReplicaReadFollower)
 	}
 	for _, t := range e.scanTasks {
@@ -964,7 +964,7 @@ func (e *AnalyzeFastExec) handleSampTasks(workID int, step uint32, err *error) {
 	snapshot.SetOption(ekv.NotFillCache, true)
 	snapshot.SetOption(ekv.IsolationLevel, ekv.RC)
 	snapshot.SetOption(ekv.Priority, ekv.PriorityLow)
-	if e.ctx.GetStochastikVars().GetReplicaRead().IsFollowerRead() {
+	if e.ctx.GetStochaseinstein_dbars().GetReplicaRead().IsFollowerRead() {
 		snapshot.SetOption(ekv.ReplicaRead, ekv.ReplicaReadFollower)
 	}
 
@@ -1007,7 +1007,7 @@ func (e *AnalyzeFastExec) buildDeferredCausetStats(ID int64, defCauslector *stat
 			defCauslector.NullCount++
 			continue
 		}
-		bytes, err := blockcodec.EncodeValue(e.ctx.GetStochastikVars().StmtCtx, nil, sample.Value)
+		bytes, err := blockcodec.EncodeValue(e.ctx.GetStochaseinstein_dbars().StmtCtx, nil, sample.Value)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -1097,7 +1097,9 @@ func (e *AnalyzeFastExec) runTasks() ([]*statistics.Histogram, []*statistics.CMS
 		// Build defCauslector properties.
 		defCauslector := e.defCauslectors[i]
 		defCauslector.Samples = defCauslector.Samples[:e.sampCursor]
-		sort.Slice(defCauslector.Samples, func(i, j int) bool { return defCauslector.Samples[i].Handle.Compare(defCauslector.Samples[j].Handle) < 0 })
+		sort.Slice(defCauslector.Samples, func(i, j int) bool {
+			return defCauslector.Samples[i].Handle.Compare(defCauslector.Samples[j].Handle) < 0
+		})
 		defCauslector.CalcTotalSize()
 		// Adjust the event count in case the count of `tblStats` is not accurate and too small.
 		rowCount = mathutil.MaxInt64(rowCount, int64(len(defCauslector.Samples)))
@@ -1142,11 +1144,11 @@ type AnalyzeTestFastExec struct {
 	AnalyzeFastExec
 	Ctx             stochastikctx.Context
 	PhysicalBlockID int64
-	HandleDefCauss      core.HandleDefCauss
-	DefCaussInfo        []*perceptron.DeferredCausetInfo
+	HandleDefCauss  core.HandleDefCauss
+	DefCaussInfo    []*perceptron.DeferredCausetInfo
 	IdxsInfo        []*perceptron.IndexInfo
 	Concurrency     int
-	DefCauslectors      []*statistics.SampleDefCauslector
+	DefCauslectors  []*statistics.SampleDefCauslector
 	TblInfo         *perceptron.BlockInfo
 	Opts            map[ast.AnalyzeOptionType]uint64
 }
@@ -1185,7 +1187,7 @@ func analyzeIndexIncremental(idxExec *analyzeIndexIncrementalExec) analyzeResult
 	if err != nil {
 		return analyzeResult{Err: err, job: idxExec.job}
 	}
-	hist, err = statistics.MergeHistograms(idxExec.ctx.GetStochastikVars().StmtCtx, idxExec.oldHist, hist, int(idxExec.opts[ast.AnalyzeOptNumBuckets]))
+	hist, err = statistics.MergeHistograms(idxExec.ctx.GetStochaseinstein_dbars().StmtCtx, idxExec.oldHist, hist, int(idxExec.opts[ast.AnalyzeOptNumBuckets]))
 	if err != nil {
 		return analyzeResult{Err: err, job: idxExec.job}
 	}
@@ -1230,7 +1232,7 @@ func analyzePKIncremental(defCausExec *analyzePKIncrementalExec) analyzeResult {
 		return analyzeResult{Err: err, job: defCausExec.job}
 	}
 	hist := hists[0]
-	hist, err = statistics.MergeHistograms(defCausExec.ctx.GetStochastikVars().StmtCtx, defCausExec.oldHist, hist, int(defCausExec.opts[ast.AnalyzeOptNumBuckets]))
+	hist, err = statistics.MergeHistograms(defCausExec.ctx.GetStochaseinstein_dbars().StmtCtx, defCausExec.oldHist, hist, int(defCausExec.opts[ast.AnalyzeOptNumBuckets]))
 	if err != nil {
 		return analyzeResult{Err: err, job: defCausExec.job}
 	}

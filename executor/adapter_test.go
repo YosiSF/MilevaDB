@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,15 +16,15 @@ package executor_test
 import (
 	"time"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
 )
 
 func (s *testSuiteP2) TestQueryTime(c *C) {
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustExec("use test")
 
-	costTime := time.Since(tk.Se.GetStochastikVars().StartTime)
+	costTime := time.Since(tk.Se.GetStochaseinstein_dbars().StartTime)
 	c.Assert(costTime < 1*time.Second, IsTrue)
 
 	tk.MustExec("drop block if exists t")
@@ -32,6 +32,6 @@ func (s *testSuiteP2) TestQueryTime(c *C) {
 	tk.MustExec("insert into t values(1), (1), (1), (1), (1)")
 	tk.MustExec("select * from t t1 join t t2 on t1.a = t2.a")
 
-	costTime = time.Since(tk.Se.GetStochastikVars().StartTime)
+	costTime = time.Since(tk.Se.GetStochaseinstein_dbars().StartTime)
 	c.Assert(costTime < 1*time.Second, IsTrue)
 }

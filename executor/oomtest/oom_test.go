@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,15 +20,15 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testleak"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastik"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/log"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/soliton/testleak"
-	"github.com/whtcorpsinc/milevadb/stochastik"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -77,7 +77,7 @@ func (s *testOOMSuite) TestMemTracker4UFIDelateExec(c *C) {
 	s.oom.tracker = ""
 	tk.MustExec("insert into t_MemTracker4UFIDelateExec values (1,1,1), (2,2,2), (3,3,3)")
 	c.Assert(s.oom.tracker, Equals, "")
-	tk.Se.GetStochastikVars().MemQuotaQuery = 244
+	tk.Se.GetStochaseinstein_dbars().MemQuotaQuery = 244
 	tk.MustExec("uFIDelate t_MemTracker4UFIDelateExec set a = 4")
 	c.Assert(s.oom.tracker, Matches, "expensive_query during bootstrap phase")
 }
@@ -94,52 +94,52 @@ func (s *testOOMSuite) TestMemTracker4InsertAndReplaceExec(c *C) {
 	s.oom.tracker = ""
 	tk.MustExec("insert into t_MemTracker4InsertAndReplaceExec values (1,1,1), (2,2,2), (3,3,3)")
 	c.Assert(s.oom.tracker, Equals, "")
-	tk.Se.GetStochastikVars().MemQuotaQuery = 1
+	tk.Se.GetStochaseinstein_dbars().MemQuotaQuery = 1
 	tk.MustExec("insert into t_MemTracker4InsertAndReplaceExec values (1,1,1), (2,2,2), (3,3,3)")
 	c.Assert(s.oom.tracker, Matches, "expensive_query during bootstrap phase")
-	tk.Se.GetStochastikVars().MemQuotaQuery = -1
+	tk.Se.GetStochaseinstein_dbars().MemQuotaQuery = -1
 
 	s.oom.tracker = ""
 	tk.MustExec("replace into t_MemTracker4InsertAndReplaceExec values (1,1,1), (2,2,2), (3,3,3)")
 	c.Assert(s.oom.tracker, Equals, "")
-	tk.Se.GetStochastikVars().MemQuotaQuery = 1
+	tk.Se.GetStochaseinstein_dbars().MemQuotaQuery = 1
 	tk.MustExec("replace into t_MemTracker4InsertAndReplaceExec values (1,1,1), (2,2,2), (3,3,3)")
 	c.Assert(s.oom.tracker, Matches, "expensive_query during bootstrap phase")
-	tk.Se.GetStochastikVars().MemQuotaQuery = -1
+	tk.Se.GetStochaseinstein_dbars().MemQuotaQuery = -1
 
 	s.oom.tracker = ""
 	tk.MustExec("insert into t_MemTracker4InsertAndReplaceExec select * from t")
 	c.Assert(s.oom.tracker, Equals, "")
-	tk.Se.GetStochastikVars().MemQuotaQuery = 1
+	tk.Se.GetStochaseinstein_dbars().MemQuotaQuery = 1
 	tk.MustExec("insert into t_MemTracker4InsertAndReplaceExec select * from t")
 	c.Assert(s.oom.tracker, Matches, "expensive_query during bootstrap phase")
-	tk.Se.GetStochastikVars().MemQuotaQuery = -1
+	tk.Se.GetStochaseinstein_dbars().MemQuotaQuery = -1
 
 	s.oom.tracker = ""
 	tk.MustExec("replace into t_MemTracker4InsertAndReplaceExec select * from t")
 	c.Assert(s.oom.tracker, Equals, "")
-	tk.Se.GetStochastikVars().MemQuotaQuery = 1
+	tk.Se.GetStochaseinstein_dbars().MemQuotaQuery = 1
 	tk.MustExec("replace into t_MemTracker4InsertAndReplaceExec select * from t")
 	c.Assert(s.oom.tracker, Matches, "expensive_query during bootstrap phase")
-	tk.Se.GetStochastikVars().MemQuotaQuery = -1
+	tk.Se.GetStochaseinstein_dbars().MemQuotaQuery = -1
 
-	tk.Se.GetStochastikVars().DMLBatchSize = 1
-	tk.Se.GetStochastikVars().BatchInsert = true
+	tk.Se.GetStochaseinstein_dbars().DMLBatchSize = 1
+	tk.Se.GetStochaseinstein_dbars().BatchInsert = true
 	s.oom.tracker = ""
 	tk.MustExec("insert into t_MemTracker4InsertAndReplaceExec values (1,1,1), (2,2,2), (3,3,3)")
 	c.Assert(s.oom.tracker, Equals, "")
-	tk.Se.GetStochastikVars().MemQuotaQuery = 1
+	tk.Se.GetStochaseinstein_dbars().MemQuotaQuery = 1
 	tk.MustExec("insert into t_MemTracker4InsertAndReplaceExec values (1,1,1), (2,2,2), (3,3,3)")
 	c.Assert(s.oom.tracker, Matches, "expensive_query during bootstrap phase")
-	tk.Se.GetStochastikVars().MemQuotaQuery = -1
+	tk.Se.GetStochaseinstein_dbars().MemQuotaQuery = -1
 
 	s.oom.tracker = ""
 	tk.MustExec("replace into t_MemTracker4InsertAndReplaceExec values (1,1,1), (2,2,2), (3,3,3)")
 	c.Assert(s.oom.tracker, Equals, "")
-	tk.Se.GetStochastikVars().MemQuotaQuery = 1
+	tk.Se.GetStochaseinstein_dbars().MemQuotaQuery = 1
 	tk.MustExec("replace into t_MemTracker4InsertAndReplaceExec values (1,1,1), (2,2,2), (3,3,3)")
 	c.Assert(s.oom.tracker, Matches, "expensive_query during bootstrap phase")
-	tk.Se.GetStochastikVars().MemQuotaQuery = -1
+	tk.Se.GetStochaseinstein_dbars().MemQuotaQuery = -1
 }
 
 func (s *testOOMSuite) TestMemTracker4DeleteExec(c *C) {
@@ -155,12 +155,12 @@ func (s *testOOMSuite) TestMemTracker4DeleteExec(c *C) {
 	tk.MustExec("delete from MemTracker4DeleteExec1")
 	c.Assert(s.oom.tracker, Equals, "")
 	tk.MustExec("insert into MemTracker4DeleteExec1 values (1,1,1), (2,2,2), (3,3,3)")
-	tk.Se.GetStochastikVars().MemQuotaQuery = 1
+	tk.Se.GetStochaseinstein_dbars().MemQuotaQuery = 1
 	tk.MustExec("delete from MemTracker4DeleteExec1")
 	c.Assert(s.oom.tracker, Matches, "expensive_query during bootstrap phase")
 
 	// delete from multiple block
-	tk.Se.GetStochastikVars().MemQuotaQuery = 100000
+	tk.Se.GetStochaseinstein_dbars().MemQuotaQuery = 100000
 	tk.MustExec("insert into MemTracker4DeleteExec1 values(1,1,1)")
 	tk.MustExec("insert into MemTracker4DeleteExec2 values(1,1,1)")
 	s.oom.tracker = ""
@@ -169,7 +169,7 @@ func (s *testOOMSuite) TestMemTracker4DeleteExec(c *C) {
 	tk.MustExec("insert into MemTracker4DeleteExec1 values(1,1,1)")
 	tk.MustExec("insert into MemTracker4DeleteExec2 values(1,1,1)")
 	s.oom.tracker = ""
-	tk.Se.GetStochastikVars().MemQuotaQuery = 10000
+	tk.Se.GetStochaseinstein_dbars().MemQuotaQuery = 10000
 	tk.MustExec("delete MemTracker4DeleteExec1, MemTracker4DeleteExec2 from MemTracker4DeleteExec1 join MemTracker4DeleteExec2 on MemTracker4DeleteExec1.a=MemTracker4DeleteExec2.a")
 	c.Assert(s.oom.tracker, Equals, "expensive_query during bootstrap phase")
 }

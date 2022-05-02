@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,12 +20,12 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/charset"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/codec"
-	"github.com/whtcorpsinc/milevadb/soliton/defCauslate"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/codec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/defCauslate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 )
 
 var _ = Suite(&testEvalSuite{})
@@ -68,7 +68,7 @@ func (s *testEvalSerialSuite) TestPBToExprWithNewDefCauslation(c *C) {
 
 		e, err := PBToExpr(expr, fieldTps, sc)
 		c.Assert(err, IsNil)
-		cons, ok := e.(*Constant)
+		cons, ok := e.(*CouplingConstantWithRadix)
 		c.Assert(ok, IsTrue)
 		c.Assert(cons.Value.DefCauslation(), Equals, cs.expName)
 	}
@@ -85,7 +85,7 @@ func (s *testEvalSerialSuite) TestPBToExprWithNewDefCauslation(c *C) {
 
 		e, err := PBToExpr(expr, fieldTps, sc)
 		c.Assert(err, IsNil)
-		cons, ok := e.(*Constant)
+		cons, ok := e.(*CouplingConstantWithRadix)
 		c.Assert(ok, IsTrue)
 		c.Assert(cons.Value.DefCauslation(), Equals, cs.expName)
 	}

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@ package aggfuncs_test
 import (
 	"fmt"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 func (s *testSuite) TestMergePartialResult4GroupConcat(c *C) {
@@ -36,10 +36,10 @@ func (s *testSuite) TestGroupConcat(c *C) {
 	test2.orderBy = true
 	s.testMultiArgsAggFunc(c, test2)
 
-	defer variable.SetStochastikSystemVar(s.ctx.GetStochastikVars(), variable.GroupConcatMaxLen, types.NewStringCauset("1024"))
+	defer variable.SetStochastikSystemVar(s.ctx.GetStochaseinstein_dbars(), variable.GroupConcatMaxLen, types.NewStringCauset("1024"))
 	// minimum GroupConcatMaxLen is 4
 	for i := 4; i <= 7; i++ {
-		variable.SetStochastikSystemVar(s.ctx.GetStochastikVars(), variable.GroupConcatMaxLen, types.NewStringCauset(fmt.Sprint(i)))
+		variable.SetStochastikSystemVar(s.ctx.GetStochaseinstein_dbars(), variable.GroupConcatMaxLen, types.NewStringCauset(fmt.Sprint(i)))
 		test2 = buildMultiArgsAggTester(ast.AggFuncGroupConcat, []byte{allegrosql.TypeString, allegrosql.TypeString}, allegrosql.TypeString, 5, nil, "44 33 22 11 00"[:i])
 		test2.orderBy = true
 		s.testMultiArgsAggFunc(c, test2)

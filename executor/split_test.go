@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,17 +21,17 @@ import (
 	"sort"
 	"time"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/block/blocks"
+	"github.com/whtcorpsinc/MilevaDB-Prod/blockcodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/block/blocks"
-	"github.com/whtcorpsinc/milevadb/blockcodec"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 var _ = Suite(&testSplitIndex{})
@@ -171,13 +171,13 @@ func (s *testSplitIndex) TestSplitIndex(c *C) {
 	index := blocks.NewIndex(tbInfo.ID, tbInfo, idxInfo)
 	for _, ca := range cases {
 		// test for minInt64 handle
-		idxValue, _, err := index.GenIndexKey(ctx.GetStochastikVars().StmtCtx, []types.Causet{types.NewCauset(ca.value)}, ekv.IntHandle(math.MinInt64), nil)
+		idxValue, _, err := index.GenIndexKey(ctx.GetStochaseinstein_dbars().StmtCtx, []types.Causet{types.NewCauset(ca.value)}, ekv.IntHandle(math.MinInt64), nil)
 		c.Assert(err, IsNil)
 		idx := searchLessEqualIdx(valueList, idxValue)
 		c.Assert(idx, Equals, ca.lessEqualIdx, Commentf("%#v", ca))
 
 		// Test for max int64 handle.
-		idxValue, _, err = index.GenIndexKey(ctx.GetStochastikVars().StmtCtx, []types.Causet{types.NewCauset(ca.value)}, ekv.IntHandle(math.MaxInt64), nil)
+		idxValue, _, err = index.GenIndexKey(ctx.GetStochaseinstein_dbars().StmtCtx, []types.Causet{types.NewCauset(ca.value)}, ekv.IntHandle(math.MaxInt64), nil)
 		c.Assert(err, IsNil)
 		idx = searchLessEqualIdx(valueList, idxValue)
 		c.Assert(idx, Equals, ca.lessEqualIdx, Commentf("%#v", ca))
@@ -219,13 +219,13 @@ func (s *testSplitIndex) TestSplitIndex(c *C) {
 
 	for _, ca := range cases2 {
 		// test for minInt64 handle
-		idxValue, _, err := index.GenIndexKey(ctx.GetStochastikVars().StmtCtx, []types.Causet{types.NewCauset(ca.value)}, ekv.IntHandle(math.MinInt64), nil)
+		idxValue, _, err := index.GenIndexKey(ctx.GetStochaseinstein_dbars().StmtCtx, []types.Causet{types.NewCauset(ca.value)}, ekv.IntHandle(math.MinInt64), nil)
 		c.Assert(err, IsNil)
 		idx := searchLessEqualIdx(valueList, idxValue)
 		c.Assert(idx, Equals, ca.lessEqualIdx, Commentf("%#v", ca))
 
 		// Test for max int64 handle.
-		idxValue, _, err = index.GenIndexKey(ctx.GetStochastikVars().StmtCtx, []types.Causet{types.NewCauset(ca.value)}, ekv.IntHandle(math.MaxInt64), nil)
+		idxValue, _, err = index.GenIndexKey(ctx.GetStochaseinstein_dbars().StmtCtx, []types.Causet{types.NewCauset(ca.value)}, ekv.IntHandle(math.MaxInt64), nil)
 		c.Assert(err, IsNil)
 		idx = searchLessEqualIdx(valueList, idxValue)
 		c.Assert(idx, Equals, ca.lessEqualIdx, Commentf("%#v", ca))
@@ -277,13 +277,13 @@ func (s *testSplitIndex) TestSplitIndex(c *C) {
 	for _, ca := range cases3 {
 		value := types.NewTime(ca.value, allegrosql.TypeTimestamp, types.DefaultFsp)
 		// test for min int64 handle
-		idxValue, _, err := index.GenIndexKey(ctx.GetStochastikVars().StmtCtx, []types.Causet{types.NewCauset(value)}, ekv.IntHandle(math.MinInt64), nil)
+		idxValue, _, err := index.GenIndexKey(ctx.GetStochaseinstein_dbars().StmtCtx, []types.Causet{types.NewCauset(value)}, ekv.IntHandle(math.MinInt64), nil)
 		c.Assert(err, IsNil)
 		idx := searchLessEqualIdx(valueList, idxValue)
 		c.Assert(idx, Equals, ca.lessEqualIdx, Commentf("%#v", ca))
 
 		// Test for max int64 handle.
-		idxValue, _, err = index.GenIndexKey(ctx.GetStochastikVars().StmtCtx, []types.Causet{types.NewCauset(value)}, ekv.IntHandle(math.MaxInt64), nil)
+		idxValue, _, err = index.GenIndexKey(ctx.GetStochaseinstein_dbars().StmtCtx, []types.Causet{types.NewCauset(value)}, ekv.IntHandle(math.MaxInt64), nil)
 		c.Assert(err, IsNil)
 		idx = searchLessEqualIdx(valueList, idxValue)
 		c.Assert(idx, Equals, ca.lessEqualIdx, Commentf("%#v", ca))

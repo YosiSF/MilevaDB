@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,13 +20,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastik"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/config"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/stochastik"
 )
 
 type testSuiteJoin1 struct {
@@ -96,10 +96,10 @@ func (s *testSuiteJoin2) TestJoin(c *C) {
 	tk := testkit.NewTestKit(c, s.causetstore)
 
 	tk.MustExec("set @@milevadb_index_lookup_join_concurrency = 200")
-	c.Assert(tk.Se.GetStochastikVars().IndexLookupJoinConcurrency(), Equals, 200)
+	c.Assert(tk.Se.GetStochaseinstein_dbars().IndexLookupJoinConcurrency(), Equals, 200)
 
 	tk.MustExec("set @@milevadb_index_lookup_join_concurrency = 4")
-	c.Assert(tk.Se.GetStochastikVars().IndexLookupJoinConcurrency(), Equals, 4)
+	c.Assert(tk.Se.GetStochaseinstein_dbars().IndexLookupJoinConcurrency(), Equals, 4)
 
 	tk.MustExec("set @@milevadb_index_lookup_size = 2")
 	tk.MustExec("use test")
@@ -215,11 +215,11 @@ func (s *testSuiteJoin2) TestJoin(c *C) {
 
 	// Test that two conflict hints will return warning.
 	tk.MustExec("select /*+ MilevaDB_INLJ(t) MilevaDB_SMJ(t) */ * from t join t1 on t.a=t1.a")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.GetWarnings(), HasLen, 1)
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings(), HasLen, 1)
 	tk.MustExec("select /*+ MilevaDB_INLJ(t) MilevaDB_HJ(t) */ * from t join t1 on t.a=t1.a")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.GetWarnings(), HasLen, 1)
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings(), HasLen, 1)
 	tk.MustExec("select /*+ MilevaDB_SMJ(t) MilevaDB_HJ(t) */ * from t join t1 on t.a=t1.a")
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.GetWarnings(), HasLen, 1)
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings(), HasLen, 1)
 
 	tk.MustExec("drop block if exists t")
 	tk.MustExec("create block t(a int)")
@@ -1025,16 +1025,16 @@ func (s *testSuiteJoin1) TestIssue15850JoinNullValue(c *C) {
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustExec("use test")
 	tk.MustQuery("SELECT * FROM (select null) v NATURAL LEFT JOIN (select null) v1;").Check(testkit.Events("<nil>"))
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(0))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(0))
 
 	tk.MustExec("drop block if exists t0;")
 	tk.MustExec("drop view if exists v0;")
 	tk.MustExec("CREATE TABLE t0(c0 TEXT);")
 	tk.MustExec("CREATE VIEW v0(c0) AS SELECT NULL;")
 	tk.MustQuery("SELECT /*+ HASH_JOIN(v0) */ * FROM v0 NATURAL LEFT JOIN t0;").Check(testkit.Events("<nil>"))
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(0))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(0))
 	tk.MustQuery("SELECT /*+ MERGE_JOIN(v0) */ * FROM v0 NATURAL LEFT JOIN t0;").Check(testkit.Events("<nil>"))
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(0))
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(0))
 }
 
 func (s *testSuiteJoin1) TestIndexLookupJoin(c *C) {
@@ -1260,9 +1260,9 @@ func (s *testSuiteJoinSerial) TestIndexNestedLoopHashJoin(c *C) {
 	}
 
 	// index hash join with semi join
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/planner/core/MockOnlyEnableIndexHashJoin", "return(true)"), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/planner/core/MockOnlyEnableIndexHashJoin", "return(true)"), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/planner/core/MockOnlyEnableIndexHashJoin"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/planner/core/MockOnlyEnableIndexHashJoin"), IsNil)
 	}()
 	tk.MustExec("drop block t")
 	tk.MustExec("CREATE TABLE `t` (	`l_orderkey` int(11) NOT NULL,`l_linenumber` int(11) NOT NULL,`l_partkey` int(11) DEFAULT NULL,`l_suppkey` int(11) DEFAULT NULL,PRIMARY KEY (`l_orderkey`,`l_linenumber`))")
@@ -1279,8 +1279,8 @@ func (s *testSuiteJoinSerial) TestIndexNestedLoopHashJoin(c *C) {
 	tk.MustExec("analyze block t")
 
 	// test semi join
-	tk.Se.GetStochastikVars().InitChunkSize = 2
-	tk.Se.GetStochastikVars().MaxChunkSize = 2
+	tk.Se.GetStochaseinstein_dbars().InitChunkSize = 2
+	tk.Se.GetStochaseinstein_dbars().MaxChunkSize = 2
 	tk.MustExec("set @@milevadb_index_join_batch_size=2")
 	tk.MustQuery("desc select * from t l1 where exists ( select * from t l2 where l2.l_orderkey = l1.l_orderkey and l2.l_suppkey <> l1.l_suppkey ) order by `l_orderkey`,`l_linenumber`;").Check(testkit.Events(
 		"Sort_9 7.20 root  test.t.l_orderkey, test.t.l_linenumber",
@@ -2044,7 +2044,7 @@ func (s *testSuiteJoinSerial) TestOuterMatchStatusIssue14742(c *C) {
 	tk.MustExec("use test")
 	tk.MustExec("drop block if exists testjoin;")
 	tk.MustExec("create block testjoin(a int);")
-	tk.Se.GetStochastikVars().MaxChunkSize = 2
+	tk.Se.GetStochaseinstein_dbars().MaxChunkSize = 2
 
 	tk.MustExec("insert into testjoin values (NULL);")
 	tk.MustExec("insert into testjoin values (1);")
@@ -2107,7 +2107,7 @@ func (s *testSuiteJoinSerial) TestIssue18070(c *C) {
 	err := tk.QueryToErr("select /*+ inl_hash_join(t1)*/ * from t1 join t2 on t1.a = t2.a;")
 	c.Assert(strings.Contains(err.Error(), "Out Of Memory Quota!"), IsTrue)
 
-	fpName := "github.com/whtcorpsinc/milevadb/executor/mocHoTTexMergeJoinOOMPanic"
+	fpName := "github.com/whtcorpsinc/MilevaDB-Prod/executor/mocHoTTexMergeJoinOOMPanic"
 	c.Assert(failpoint.Enable(fpName, `panic("ERROR 1105 (HY000): Out Of Memory Quota![conn_id=1]")`), IsNil)
 	defer func() {
 		c.Assert(failpoint.Disable(fpName), IsNil)
@@ -2134,9 +2134,9 @@ func (s *testSuite9) TestIssue18572_1(c *C) {
 	tk.MustExec("insert into t1 values(1, 1);")
 	tk.MustExec("insert into t1 select * from t1;")
 
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/executor/testIndexHashJoinInnerWorkerErr", "return"), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/executor/testIndexHashJoinInnerWorkerErr", "return"), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/executor/testIndexHashJoinInnerWorkerErr"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/executor/testIndexHashJoinInnerWorkerErr"), IsNil)
 	}()
 
 	rs, err := tk.Exec("select /*+ inl_hash_join(t1) */ * from t1 right join t1 t2 on t1.b=t2.b;")
@@ -2152,9 +2152,9 @@ func (s *testSuite9) TestIssue18572_2(c *C) {
 	tk.MustExec("insert into t1 values(1, 1);")
 	tk.MustExec("insert into t1 select * from t1;")
 
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/executor/testIndexHashJoinOuterWorkerErr", "return"), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/executor/testIndexHashJoinOuterWorkerErr", "return"), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/executor/testIndexHashJoinOuterWorkerErr"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/executor/testIndexHashJoinOuterWorkerErr"), IsNil)
 	}()
 
 	rs, err := tk.Exec("select /*+ inl_hash_join(t1) */ * from t1 right join t1 t2 on t1.b=t2.b;")
@@ -2170,9 +2170,9 @@ func (s *testSuite9) TestIssue18572_3(c *C) {
 	tk.MustExec("insert into t1 values(1, 1);")
 	tk.MustExec("insert into t1 select * from t1;")
 
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/executor/testIndexHashJoinBuildErr", "return"), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/executor/testIndexHashJoinBuildErr", "return"), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/executor/testIndexHashJoinBuildErr"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/executor/testIndexHashJoinBuildErr"), IsNil)
 	}()
 
 	rs, err := tk.Exec("select /*+ inl_hash_join(t1) */ * from t1 right join t1 t2 on t1.b=t2.b;")

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,14 +17,14 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression/aggregation"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/expression/aggregation"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 // Build is used to build a specific AggFunc implementation according to the
@@ -156,9 +156,9 @@ func buildCount(aggFuncDesc *aggregation.AggFuncDesc, ordinal int) AggFunc {
 			// TODO: because Time and JSON does not have `hashcode()` or similar method
 			// so they're in exception for now.
 			// TODO: add hashCode method for all evaluate types (Decimal, Time, Duration, JSON).
-			// https://github.com/whtcorpsinc/milevadb/issues/15857
+			// https://github.com/whtcorpsinc/MilevaDB-Prod/issues/15857
 			switch aggFuncDesc.Args[0].GetType().EvalType() {
-			case types.ETInt:
+			case types.CausetEDN:
 				return &countOriginalWithDistinct4Int{baseCount{base}}
 			case types.ETReal:
 				return &countOriginalWithDistinct4Real{baseCount{base}}
@@ -176,7 +176,7 @@ func buildCount(aggFuncDesc *aggregation.AggFuncDesc, ordinal int) AggFunc {
 	switch aggFuncDesc.Mode {
 	case aggregation.CompleteMode, aggregation.Partial1Mode:
 		switch aggFuncDesc.Args[0].GetType().EvalType() {
-		case types.ETInt:
+		case types.CausetEDN:
 			return &countOriginal4Int{baseCount{base}}
 		case types.ETReal:
 			return &countOriginal4Real{baseCount{base}}
@@ -220,7 +220,7 @@ func buildSum(ctx stochastikctx.Context, aggFuncDesc *aggregation.AggFuncDesc, o
 			if aggFuncDesc.HasDistinct {
 				return &sum4DistinctFloat64{base}
 			}
-			if ctx.GetStochastikVars().WindowingUseHighPrecision {
+			if ctx.GetStochaseinstein_dbars().WindowingUseHighPrecision {
 				return &sum4Float64HighPrecision{baseSum4Float64{base}}
 			}
 			return &sum4Float64{baseSum4Float64{base}}
@@ -253,7 +253,7 @@ func buildAvg(ctx stochastikctx.Context, aggFuncDesc *aggregation.AggFuncDesc, o
 			if aggFuncDesc.HasDistinct {
 				return &avgOriginal4DistinctFloat64{base}
 			}
-			if ctx.GetStochastikVars().WindowingUseHighPrecision {
+			if ctx.GetStochaseinstein_dbars().WindowingUseHighPrecision {
 				return &avgOriginal4Float64HighPrecision{baseAvgFloat64{base}}
 			}
 			return &avgOriginal4Float64{avgOriginal4Float64HighPrecision{baseAvgFloat64{base}}}
@@ -294,7 +294,7 @@ func buildFirstEvent(aggFuncDesc *aggregation.AggFuncDesc, ordinal int) AggFunc 
 		}
 
 		switch evalType {
-		case types.ETInt:
+		case types.CausetEDN:
 			return &firstEvent4Int{base}
 		case types.ETReal:
 			switch fieldType.Tp {
@@ -343,7 +343,7 @@ func buildMaxMin(aggFuncDesc *aggregation.AggFuncDesc, ordinal int, isMax bool) 
 		}
 
 		switch evalType {
-		case types.ETInt:
+		case types.CausetEDN:
 			if allegrosql.HasUnsignedFlag(fieldType.Flag) {
 				return &maxMin4Uint{base}
 			}
@@ -402,14 +402,14 @@ func buildGroupConcat(ctx stochastikctx.Context, aggFuncDesc *aggregation.AggFun
 		return nil
 	default:
 		// The last arg is promised to be a not-null string constant, so the error can be ignored.
-		c, _ := aggFuncDesc.Args[len(aggFuncDesc.Args)-1].(*expression.Constant)
+		c, _ := aggFuncDesc.Args[len(aggFuncDesc.Args)-1].(*expression.CouplingConstantWithRadix)
 		sep, _, err := c.EvalString(nil, chunk.Event{})
 		// This err should never happen.
 		if err != nil {
 			panic(fmt.Sprintf("Error happened when buildGroupConcat: %s", err.Error()))
 		}
 		var s string
-		s, err = variable.GetStochastikSystemVar(ctx.GetStochastikVars(), variable.GroupConcatMaxLen)
+		s, err = variable.GetStochastikSystemVar(ctx.GetStochaseinstein_dbars(), variable.GroupConcatMaxLen)
 		if err != nil {
 			panic(fmt.Sprintf("Error happened when buildGroupConcat: no system variable named '%s'", variable.GroupConcatMaxLen))
 		}
@@ -606,7 +606,7 @@ func buildNthValue(aggFuncDesc *aggregation.AggFuncDesc, ordinal int) AggFunc {
 		ordinal: ordinal,
 	}
 	// Already checked when building the function description.
-	nth, _, _ := expression.GetUint64FromConstant(aggFuncDesc.Args[1])
+	nth, _, _ := expression.GetUint64FromCouplingConstantWithRadix(aggFuncDesc.Args[1])
 	return &nthValue{baseAggFunc: base, tp: aggFuncDesc.RetTp, nth: nth}
 }
 
@@ -615,7 +615,7 @@ func buildNtile(aggFuncDes *aggregation.AggFuncDesc, ordinal int) AggFunc {
 		args:    aggFuncDes.Args,
 		ordinal: ordinal,
 	}
-	n, _, _ := expression.GetUint64FromConstant(aggFuncDes.Args[0])
+	n, _, _ := expression.GetUint64FromCouplingConstantWithRadix(aggFuncDes.Args[0])
 	return &ntile{baseAggFunc: base, n: n}
 }
 
@@ -629,7 +629,7 @@ func buildPercenRank(ordinal int, orderByDefCauss []*expression.DeferredCauset) 
 func buildLeadLag(aggFuncDesc *aggregation.AggFuncDesc, ordinal int) baseLeadLag {
 	offset := uint64(1)
 	if len(aggFuncDesc.Args) >= 2 {
-		offset, _, _ = expression.GetUint64FromConstant(aggFuncDesc.Args[1])
+		offset, _, _ = expression.GetUint64FromCouplingConstantWithRadix(aggFuncDesc.Args[1])
 	}
 	var defaultExpr expression.Expression
 	defaultExpr = expression.NewNull()

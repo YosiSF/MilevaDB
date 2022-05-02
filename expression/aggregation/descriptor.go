@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,13 +19,13 @@ import (
 	"math"
 	"strconv"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/planner/soliton"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 // AggFuncDesc describes an aggregation function signature, only used in planner.
@@ -209,7 +209,7 @@ func (a *AggFuncDesc) GetAggFunc(ctx stochastikctx.Context) Aggregation {
 		var s string
 		var err error
 		var maxLen uint64
-		s, err = variable.GetStochastikSystemVar(ctx.GetStochastikVars(), variable.GroupConcatMaxLen)
+		s, err = variable.GetStochastikSystemVar(ctx.GetStochaseinstein_dbars(), variable.GroupConcatMaxLen)
 		if err != nil {
 			panic(fmt.Sprintf("Error happened when GetAggFunc: no system variable named '%s'", variable.GroupConcatMaxLen))
 		}
@@ -238,7 +238,7 @@ func (a *AggFuncDesc) GetAggFunc(ctx stochastikctx.Context) Aggregation {
 func (a *AggFuncDesc) evalNullValueInOuterJoin4Count(ctx stochastikctx.Context, schemaReplicant *expression.Schema) (types.Causet, bool) {
 	for _, arg := range a.Args {
 		result := expression.EvaluateExprWithNull(ctx, schemaReplicant, arg)
-		con, ok := result.(*expression.Constant)
+		con, ok := result.(*expression.CouplingConstantWithRadix)
 		if !ok || con.Value.IsNull() {
 			return types.Causet{}, ok
 		}
@@ -248,7 +248,7 @@ func (a *AggFuncDesc) evalNullValueInOuterJoin4Count(ctx stochastikctx.Context, 
 
 func (a *AggFuncDesc) evalNullValueInOuterJoin4Sum(ctx stochastikctx.Context, schemaReplicant *expression.Schema) (types.Causet, bool) {
 	result := expression.EvaluateExprWithNull(ctx, schemaReplicant, a.Args[0])
-	con, ok := result.(*expression.Constant)
+	con, ok := result.(*expression.CouplingConstantWithRadix)
 	if !ok || con.Value.IsNull() {
 		return types.Causet{}, ok
 	}
@@ -257,7 +257,7 @@ func (a *AggFuncDesc) evalNullValueInOuterJoin4Sum(ctx stochastikctx.Context, sc
 
 func (a *AggFuncDesc) evalNullValueInOuterJoin4BitAnd(ctx stochastikctx.Context, schemaReplicant *expression.Schema) (types.Causet, bool) {
 	result := expression.EvaluateExprWithNull(ctx, schemaReplicant, a.Args[0])
-	con, ok := result.(*expression.Constant)
+	con, ok := result.(*expression.CouplingConstantWithRadix)
 	if !ok || con.Value.IsNull() {
 		return types.NewCauset(uint64(math.MaxUint64)), true
 	}
@@ -266,7 +266,7 @@ func (a *AggFuncDesc) evalNullValueInOuterJoin4BitAnd(ctx stochastikctx.Context,
 
 func (a *AggFuncDesc) evalNullValueInOuterJoin4BitOr(ctx stochastikctx.Context, schemaReplicant *expression.Schema) (types.Causet, bool) {
 	result := expression.EvaluateExprWithNull(ctx, schemaReplicant, a.Args[0])
-	con, ok := result.(*expression.Constant)
+	con, ok := result.(*expression.CouplingConstantWithRadix)
 	if !ok || con.Value.IsNull() {
 		return types.NewCauset(0), true
 	}

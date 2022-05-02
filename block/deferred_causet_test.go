@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,13 +21,13 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/charset"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/soliton/testleak"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testleak"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 )
 
 func TestT(t *testing.T) {
@@ -443,7 +443,7 @@ func (t *testBlockSuite) TestGetDefaultValue(c *C) {
 	}()
 
 	for _, tt := range tests {
-		ctx.GetStochastikVars().StmtCtx.BadNullAsWarning = !tt.strict
+		ctx.GetStochaseinstein_dbars().StmtCtx.BadNullAsWarning = !tt.strict
 		val, err := GetDefCausDefaultValue(ctx, tt.defCausInfo)
 		if err != nil {
 			c.Assert(tt.err, NotNil, Commentf("%v", err))
@@ -457,7 +457,7 @@ func (t *testBlockSuite) TestGetDefaultValue(c *C) {
 	}
 
 	for _, tt := range tests {
-		ctx.GetStochastikVars().StmtCtx.BadNullAsWarning = !tt.strict
+		ctx.GetStochaseinstein_dbars().StmtCtx.BadNullAsWarning = !tt.strict
 		val, err := GetDefCausOriginDefaultValue(ctx, tt.defCausInfo)
 		if err != nil {
 			c.Assert(tt.err, NotNil, Commentf("%v", err))

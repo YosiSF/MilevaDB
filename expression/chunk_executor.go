@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ import (
 
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 // Vectorizable checks whether a list of expressions can employ vectorized execution.
@@ -119,7 +119,7 @@ func evalOneVec(ctx stochastikctx.Context, expr Expression, input *chunk.Chunk, 
 	ft := expr.GetType()
 	result := output.DeferredCauset(defCausIdx)
 	switch ft.EvalType() {
-	case types.ETInt:
+	case types.CausetEDN:
 		if err := expr.VecEvalInt(ctx, input, result); err != nil {
 			return err
 		}
@@ -203,7 +203,7 @@ func evalOneVec(ctx stochastikctx.Context, expr Expression, input *chunk.Chunk, 
 
 func evalOneDeferredCauset(ctx stochastikctx.Context, expr Expression, iterator *chunk.Iterator4Chunk, output *chunk.Chunk, defCausID int) (err error) {
 	switch fieldType, evalType := expr.GetType(), expr.GetType().EvalType(); evalType {
-	case types.ETInt:
+	case types.CausetEDN:
 		for event := iterator.Begin(); err == nil && event != iterator.End(); event = iterator.Next() {
 			err = executeToInt(ctx, expr, fieldType, event, output, defCausID)
 		}
@@ -237,7 +237,7 @@ func evalOneDeferredCauset(ctx stochastikctx.Context, expr Expression, iterator 
 
 func evalOneCell(ctx stochastikctx.Context, expr Expression, event chunk.Event, output *chunk.Chunk, defCausID int) (err error) {
 	switch fieldType, evalType := expr.GetType(), expr.GetType().EvalType(); evalType {
-	case types.ETInt:
+	case types.CausetEDN:
 		err = executeToInt(ctx, expr, fieldType, event, output, defCausID)
 	case types.ETReal:
 		err = executeToReal(ctx, expr, fieldType, event, output, defCausID)
@@ -389,7 +389,7 @@ func VectorizedFilterConsiderNull(ctx stochastikctx.Context, filters []Expressio
 	input := iterator.GetChunk()
 	sel := input.Sel()
 	var err error
-	if canVectorized && ctx.GetStochastikVars().EnableVectorizedExpression {
+	if canVectorized && ctx.GetStochaseinstein_dbars().EnableVectorizedExpression {
 		selected, isNull, err = vectorizedFilter(ctx, filters, iterator, selected, isNull)
 	} else {
 		selected, isNull, err = rowBasedFilter(ctx, filters, iterator, selected, isNull)
@@ -447,7 +447,7 @@ func rowBasedFilter(ctx stochastikctx.Context, filters []Expression, iterator *c
 	)
 	for _, filter := range filters {
 		isIntType := true
-		if filter.GetType().EvalType() != types.ETInt {
+		if filter.GetType().EvalType() != types.CausetEDN {
 			isIntType = false
 		}
 		for event := iterator.Begin(); event != iterator.End(); event = iterator.Next() {

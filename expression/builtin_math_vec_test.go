@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,18 +19,18 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 var vecBuiltinMathCases = map[string][]vecExprBenchCase{
 	ast.Conv: {
 		{
 			retEvalType:   types.ETString,
-			childrenTypes: []types.EvalType{types.ETString, types.ETInt, types.ETInt},
+			childrenTypes: []types.EvalType{types.ETString, types.CausetEDN, types.CausetEDN},
 		},
 	},
 	ast.Sign: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETReal}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETReal}},
 	},
 	ast.Log: {
 		{retEvalType: types.ETReal, childrenTypes: []types.EvalType{types.ETReal}},
@@ -81,49 +81,49 @@ var vecBuiltinMathCases = map[string][]vecExprBenchCase{
 	ast.Abs: {
 		{retEvalType: types.ETDecimal, childrenTypes: []types.EvalType{types.ETDecimal}},
 		{retEvalType: types.ETReal, childrenTypes: []types.EvalType{types.ETReal}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt}, childrenFieldTypes: []*types.FieldType{{Tp: allegrosql.TypeInt24, Flag: allegrosql.UnsignedFlag}}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN}, childrenFieldTypes: []*types.FieldType{{Tp: allegrosql.TypeInt24, Flag: allegrosql.UnsignedFlag}}},
 	},
 	ast.Round: {
 		{retEvalType: types.ETReal, childrenTypes: []types.EvalType{types.ETReal}},
-		{retEvalType: types.ETReal, childrenTypes: []types.EvalType{types.ETReal, types.ETInt}, geners: []dataGenerator{nil, newRangeInt64Gener(-100, 100)}},
+		{retEvalType: types.ETReal, childrenTypes: []types.EvalType{types.ETReal, types.CausetEDN}, geners: []dataGenerator{nil, newRangeInt64Gener(-100, 100)}},
 		{retEvalType: types.ETDecimal, childrenTypes: []types.EvalType{types.ETDecimal}},
-		{retEvalType: types.ETDecimal, childrenTypes: []types.EvalType{types.ETDecimal, types.ETInt}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt, types.ETInt}, geners: []dataGenerator{nil, newRangeInt64Gener(-100, 100)}},
+		{retEvalType: types.ETDecimal, childrenTypes: []types.EvalType{types.ETDecimal, types.CausetEDN}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN, types.CausetEDN}, geners: []dataGenerator{nil, newRangeInt64Gener(-100, 100)}},
 	},
 	ast.Pow: {
 		{retEvalType: types.ETReal, childrenTypes: []types.EvalType{types.ETReal, types.ETReal}, geners: []dataGenerator{newRangeRealGener(0, 10, 0.5), newRangeRealGener(0, 100, 0.5)}},
 	},
 	ast.Floor: {
 		{retEvalType: types.ETReal, childrenTypes: []types.EvalType{types.ETReal}, geners: nil},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt}, childrenFieldTypes: []*types.FieldType{{Tp: allegrosql.TypeInt24}}, geners: nil},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDecimal}, geners: nil},
-		{retEvalType: types.ETDecimal, childrenTypes: []types.EvalType{types.ETInt}, geners: nil},
-		{retEvalType: types.ETDecimal, childrenTypes: []types.EvalType{types.ETInt}, childrenFieldTypes: []*types.FieldType{{Tp: allegrosql.TypeLonglong, Flag: allegrosql.UnsignedFlag}}, geners: nil},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN}, childrenFieldTypes: []*types.FieldType{{Tp: allegrosql.TypeInt24}}, geners: nil},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDecimal}, geners: nil},
+		{retEvalType: types.ETDecimal, childrenTypes: []types.EvalType{types.CausetEDN}, geners: nil},
+		{retEvalType: types.ETDecimal, childrenTypes: []types.EvalType{types.CausetEDN}, childrenFieldTypes: []*types.FieldType{{Tp: allegrosql.TypeLonglong, Flag: allegrosql.UnsignedFlag}}, geners: nil},
 		{retEvalType: types.ETDecimal, childrenTypes: []types.EvalType{types.ETDecimal}, childrenFieldTypes: []*types.FieldType{{Tp: allegrosql.TypeNewDecimal, Flen: 32, Decimal: 2}}, geners: nil},
 	},
 	ast.Ceil: {
 		{retEvalType: types.ETReal, childrenTypes: []types.EvalType{types.ETReal}, geners: nil},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt}, childrenFieldTypes: []*types.FieldType{{Tp: allegrosql.TypeInt24}}, geners: nil},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETDecimal}, geners: nil},
-		{retEvalType: types.ETDecimal, childrenTypes: []types.EvalType{types.ETInt}, geners: nil},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN}, childrenFieldTypes: []*types.FieldType{{Tp: allegrosql.TypeInt24}}, geners: nil},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETDecimal}, geners: nil},
+		{retEvalType: types.ETDecimal, childrenTypes: []types.EvalType{types.CausetEDN}, geners: nil},
 		{retEvalType: types.ETDecimal, childrenTypes: []types.EvalType{types.ETDecimal}, childrenFieldTypes: []*types.FieldType{{Tp: allegrosql.TypeNewDecimal, Flen: 32, Decimal: 2}}, geners: nil},
 	},
 	ast.PI: {
 		{retEvalType: types.ETReal},
 	},
 	ast.Truncate: {
-		{retEvalType: types.ETReal, childrenTypes: []types.EvalType{types.ETReal, types.ETInt}, geners: []dataGenerator{nil, newRangeInt64Gener(-10, 10)}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt, types.ETInt}, geners: []dataGenerator{nil, newRangeInt64Gener(-10, 10)}},
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETInt, types.ETInt}, childrenFieldTypes: []*types.FieldType{{Tp: allegrosql.TypeInt24, Flag: allegrosql.UnsignedFlag}}, geners: []dataGenerator{nil, newRangeInt64Gener(-10, 10)}},
-		{retEvalType: types.ETDecimal, childrenTypes: []types.EvalType{types.ETDecimal, types.ETInt}},
+		{retEvalType: types.ETReal, childrenTypes: []types.EvalType{types.ETReal, types.CausetEDN}, geners: []dataGenerator{nil, newRangeInt64Gener(-10, 10)}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN, types.CausetEDN}, geners: []dataGenerator{nil, newRangeInt64Gener(-10, 10)}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.CausetEDN, types.CausetEDN}, childrenFieldTypes: []*types.FieldType{{Tp: allegrosql.TypeInt24, Flag: allegrosql.UnsignedFlag}}, geners: []dataGenerator{nil, newRangeInt64Gener(-10, 10)}},
+		{retEvalType: types.ETDecimal, childrenTypes: []types.EvalType{types.ETDecimal, types.CausetEDN}},
 	},
 	ast.Rand: {
-		{retEvalType: types.ETReal, childrenTypes: []types.EvalType{types.ETInt}, geners: []dataGenerator{newDefaultGener(0, types.ETInt)}},
+		{retEvalType: types.ETReal, childrenTypes: []types.EvalType{types.CausetEDN}, geners: []dataGenerator{newDefaultGener(0, types.CausetEDN)}},
 	},
 	ast.CRC32: {
-		{retEvalType: types.ETInt, childrenTypes: []types.EvalType{types.ETString}},
+		{retEvalType: types.CausetEDN, childrenTypes: []types.EvalType{types.ETString}},
 	},
 }
 

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,15 +18,15 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/codec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/kvcache"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/replog"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/soliton/codec"
-	"github.com/whtcorpsinc/milevadb/soliton/kvcache"
-	"github.com/whtcorpsinc/milevadb/soliton/replog"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
 	atomic2 "go.uber.org/atomic"
 )
 
@@ -125,23 +125,23 @@ func SetPstmtIDSchemaVersion(key kvcache.Key, pstmtID uint32, schemaVersion int6
 }
 
 // NewPSTMTPlanCacheKey creates a new pstmtPlanCacheKey object.
-func NewPSTMTPlanCacheKey(stochastikVars *variable.StochastikVars, pstmtID uint32, schemaVersion int64) kvcache.Key {
+func NewPSTMTPlanCacheKey(stochaseinstein_dbars *variable.Stochaseinstein_dbars, pstmtID uint32, schemaVersion int64) kvcache.Key {
 	timezoneOffset := 0
-	if stochastikVars.TimeZone != nil {
-		_, timezoneOffset = time.Now().In(stochastikVars.TimeZone).Zone()
+	if stochaseinstein_dbars.TimeZone != nil {
+		_, timezoneOffset = time.Now().In(stochaseinstein_dbars.TimeZone).Zone()
 	}
 	key := &pstmtPlanCacheKey{
-		database:             stochastikVars.CurrentDB,
-		connID:               stochastikVars.ConnectionID,
+		database:             stochaseinstein_dbars.CurrentDB,
+		connID:               stochaseinstein_dbars.ConnectionID,
 		pstmtID:              pstmtID,
-		snapshot:             stochastikVars.SnapshotTS,
+		snapshot:             stochaseinstein_dbars.SnapshotTS,
 		schemaVersion:        schemaVersion,
-		sqlMode:              stochastikVars.ALLEGROSQLMode,
+		sqlMode:              stochaseinstein_dbars.ALLEGROSQLMode,
 		timezoneOffset:       timezoneOffset,
 		isolationReadEngines: make(map[ekv.StoreType]struct{}),
-		selectLimit:          stochastikVars.SelectLimit,
+		selectLimit:          stochaseinstein_dbars.SelectLimit,
 	}
-	for k, v := range stochastikVars.IsolationReadEngines {
+	for k, v := range stochaseinstein_dbars.IsolationReadEngines {
 		key.isolationReadEngines[k] = v
 	}
 	return key

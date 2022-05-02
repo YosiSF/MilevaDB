@@ -5,18 +5,18 @@ import (
 	"strings"
 
 	"github.com/opentracing/opentracing-go"
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/ast"
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/mysql"
-	"github.com/whtcorpsinc/MilevaDB/causetnetctx"
-	"github.com/whtcorpsinc/MilevaDB/ekv"
-	"github.com/whtcorpsinc/MilevaDB/expression"
-	"github.com/whtcorpsinc/MilevaDB/meta/autoid"
-	"github.com/whtcorpsinc/MilevaDB/table"
-	"github.com/whtcorpsinc/MilevaDB/table/blocks"
-	"github.com/whtcorpsinc/MilevaDB/tablecodec"
-	"github.com/whtcorpsinc/MilevaDB/types"
-	"github.com/whtcorpsinc/MilevaDB/util/codec"
-	"github.com/whtcorpsinc/MilevaDB/util/memory"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/ast"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/mysql"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetnetctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid"
+	"github.com/whtcorpsinc/MilevaDB-Prod/table"
+	"github.com/whtcorpsinc/MilevaDB-Prod/table/blocks"
+	"github.com/whtcorpsinc/MilevaDB-Prod/tablecodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/codec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/memory"
 )
 
 var (
@@ -33,7 +33,7 @@ var (
 // The return values:
 //     1. changed (bool) : does the update really change the row values. e.g. update set i = 1 where i = 1;
 //     2. err (error) : error in the update.
-func updateRecord(ctx context.Context, sctx causetnetctx.Context, h ekv.Handle, oldData, newData []types.Datum, modified []bool, t table.Block,
+func updateRecord(ctx context.Context, sctx causetnetctx.Context, h ekv.Handle, oldData, newData []types.CausetObjectQL, modified []bool, t table.Block,
 	onDup bool, memTracker *memory.Tracker) (bool, error) {
 	if span := opentracing.SpanFromContext(ctx); span != nil && span.Tracer() != nil {
 		span1 := span.Tracer().StartSpan("Interlock.updateRecord", opentracing.ChildOf(span.Context()))
@@ -78,7 +78,7 @@ func updateRecord(ctx context.Context, sctx causetnetctx.Context, h ekv.Handle, 
 
 	// 3. Compare datum, then handle some flags.
 	for i, col := range t.Cols() {
-		cmp, err := newData[i].CompareDatum(sc, &oldData[i])
+		cmp, err := newData[i].CompareCausetObjectQL(sc, &oldData[i])
 		if err != nil {
 			return false, err
 		}
@@ -106,7 +106,7 @@ func updateRecord(ctx context.Context, sctx causetnetctx.Context, h ekv.Handle, 
 			if col.IsCommonHandleColumn(t.Meta()) {
 				pkIdx := blocks.FindPrimaryIndex(t.Meta())
 				handleChanged = true
-				pkDts := make([]types.Datum, 0, len(pkIdx.Columns))
+				pkDts := make([]types.CausetObjectQL, 0, len(pkIdx.Columns))
 				for _, idxCol := range pkIdx.Columns {
 					pkDts = append(pkDts, newData[idxCol.Offset])
 				}
@@ -208,7 +208,7 @@ func updateRecord(ctx context.Context, sctx causetnetctx.Context, h ekv.Handle, 
 	return true, nil
 }
 
-func rebaseAutoRandomValue(sctx causetnetctx.Context, t table.Block, newData *types.Datum, col *table.Column) error {
+func rebaseAutoRandomValue(sctx causetnetctx.Context, t table.Block, newData *types.CausetObjectQL, col *table.Column) error {
 	tableInfo := t.Meta()
 	if !tableInfo.ContainsAutoRandomBits() {
 		return nil

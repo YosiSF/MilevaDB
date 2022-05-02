@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/property"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/planner/property"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
 )
 
 var _ = Suite(&testFindBestTaskSuite{})
@@ -113,7 +113,7 @@ func (p *mockLogicalPlan4Test) exhaustPhysicalPlans(prop *property.PhysicalPrope
 	if p.hasHintForPlan2 {
 		// The hint cannot work.
 		if prop.IsEmpty() {
-			p.ctx.GetStochastikVars().StmtCtx.AppendWarning(fmt.Errorf("the hint is inapplicable for plan2"))
+			p.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(fmt.Errorf("the hint is inapplicable for plan2"))
 		}
 		return plan1, false
 	}
@@ -251,7 +251,7 @@ func (s *testFindBestTaskSuite) TestHintCannotFitProperty(c *C) {
 	task, _, err = mockPlan1.findBestTask(prop2, &PlanCounterDisabled)
 	c.Assert(err, IsNil)
 	c.Assert(task.invalid(), IsFalse)
-	c.Assert(ctx.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(1))
+	c.Assert(ctx.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(1))
 	// Because physicalPlan1 can match the property, so we should get it.
 	mockPhysicalPlan, ok = task.plan().(*mockPhysicalPlan4Test)
 	c.Assert(ok, IsTrue)
@@ -259,7 +259,7 @@ func (s *testFindBestTaskSuite) TestHintCannotFitProperty(c *C) {
 
 	// case 4, Similar to case 3, but the property is enforced now. Ths result should be
 	// the same with case 3.
-	ctx.GetStochastikVars().StmtCtx.SetWarnings(nil)
+	ctx.GetStochaseinstein_dbars().StmtCtx.SetWarnings(nil)
 	prop3 := &property.PhysicalProperty{
 		Items:    items,
 		Enforced: true,
@@ -267,7 +267,7 @@ func (s *testFindBestTaskSuite) TestHintCannotFitProperty(c *C) {
 	task, _, err = mockPlan1.findBestTask(prop3, &PlanCounterDisabled)
 	c.Assert(err, IsNil)
 	c.Assert(task.invalid(), IsFalse)
-	c.Assert(ctx.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(1))
+	c.Assert(ctx.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(1))
 	// Because physicalPlan1 can match the property, so we don't need to enforce a sort.
 	mockPhysicalPlan, ok = task.plan().(*mockPhysicalPlan4Test)
 	c.Assert(ok, IsTrue)

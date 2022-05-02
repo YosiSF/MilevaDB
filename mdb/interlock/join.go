@@ -6,20 +6,20 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/terror"
-	"github.com/whtcorpsinc/MilevaDB/causetnetctx"
-	"github.com/whtcorpsinc/MilevaDB/config"
-	"github.com/whtcorpsinc/MilevaDB/expression"
-	plannercore "github.com/whtcorpsinc/MilevaDB/rel-planner/core"
-	"github.com/whtcorpsinc/MilevaDB/types"
-	"github.com/whtcorpsinc/MilevaDB/util"
-	"github.com/whtcorpsinc/MilevaDB/util/bitmap"
-	"github.com/whtcorpsinc/MilevaDB/util/chunk"
-	"github.com/whtcorpsinc/MilevaDB/util/codec"
-	"github.com/whtcorpsinc/MilevaDB/util/disk"
-	"github.com/whtcorpsinc/MilevaDB/util/execdetails"
-	"github.com/whtcorpsinc/MilevaDB/util/memory"
-	"github.com/whtcorpsinc/MilevaDB/util/stringutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/terror"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetnetctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/rel-planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/bitmap"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/codec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/disk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/execdetails"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/memory"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/stringutil"
 	"github.com/whtcorpsinc/ares_centroid_error"
 	"github.com/whtcorpsinc/errors"
 )
@@ -882,7 +882,7 @@ func (e *NestedLoopApplyExec) Next(ctx context.Context, req *chunk.Chunk) (err e
 			if e.canUseCache {
 				var key []byte
 				for _, col := range e.outerSchema {
-					*col.Data = e.outerRow.GetDatum(col.Index, col.RetType)
+					*col.Data = e.outerRow.GetCausetObjectQL(col.Index, col.RetType)
 					key, err = codec.EncodeKey(e.ctx.GetCausetNetVars().StmtCtx, key, *col.Data)
 					if err != nil {
 						return err
@@ -907,7 +907,7 @@ func (e *NestedLoopApplyExec) Next(ctx context.Context, req *chunk.Chunk) (err e
 				}
 			} else {
 				for _, col := range e.outerSchema {
-					*col.Data = e.outerRow.GetDatum(col.Index, col.RetType)
+					*col.Data = e.outerRow.GetCausetObjectQL(col.Index, col.RetType)
 				}
 				err = e.fetchAllInners(ctx)
 				if err != nil {

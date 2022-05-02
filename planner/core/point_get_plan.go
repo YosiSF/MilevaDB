@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,6 +18,19 @@ import (
 	"fmt"
 	math2 "math"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/block/blocks"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/property"
+	"github.com/whtcorpsinc/MilevaDB-Prod/privilege"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/math"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/plancodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/stringutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/berolinaAllegroSQL_driver"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/charset"
@@ -26,19 +39,6 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/block/blocks"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/planner/property"
-	"github.com/whtcorpsinc/milevadb/privilege"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton/math"
-	"github.com/whtcorpsinc/milevadb/soliton/plancodec"
-	"github.com/whtcorpsinc/milevadb/soliton/stringutil"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/berolinaAllegroSQL_driver"
 )
 
 // PointGetPlan is a fast plan for simple point get.
@@ -213,7 +213,7 @@ func (p *PointGetPlan) SetOutputNames(names types.NameSlice) {
 
 // GetCost returns cost of the PointGetPlan.
 func (p *PointGetPlan) GetCost(defcaus []*expression.DeferredCauset) float64 {
-	sessVars := p.ctx.GetStochastikVars()
+	sessVars := p.ctx.GetStochaseinstein_dbars()
 	var rowSize float64
 	cost := 0.0
 	if p.IndexInfo == nil {
@@ -368,7 +368,7 @@ func (p *BatchPointGetPlan) SetOutputNames(names types.NameSlice) {
 
 // GetCost returns cost of the PointGetPlan.
 func (p *BatchPointGetPlan) GetCost(defcaus []*expression.DeferredCauset) float64 {
-	sessVars := p.ctx.GetStochastikVars()
+	sessVars := p.ctx.GetStochaseinstein_dbars()
 	var rowSize, rowCount float64
 	cost := 0.0
 	if p.IndexInfo == nil {
@@ -395,13 +395,13 @@ type PointPlanVal struct {
 
 // TryFastPlan tries to use the PointGetPlan for the query.
 func TryFastPlan(ctx stochastikctx.Context, node ast.Node) (p Plan) {
-	ctx.GetStochastikVars().PlanID = 0
-	ctx.GetStochastikVars().PlanDeferredCausetID = 0
+	ctx.GetStochaseinstein_dbars().PlanID = 0
+	ctx.GetStochaseinstein_dbars().PlanDeferredCausetID = 0
 	switch x := node.(type) {
 	case *ast.SelectStmt:
 		defer func() {
-			if ctx.GetStochastikVars().SelectLimit != math2.MaxUint64 && p != nil {
-				ctx.GetStochastikVars().StmtCtx.AppendWarning(errors.New("sql_select_limit is set, so point get plan is not activated"))
+			if ctx.GetStochaseinstein_dbars().SelectLimit != math2.MaxUint64 && p != nil {
+				ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errors.New("sql_select_limit is set, so point get plan is not activated"))
 				p = nil
 			}
 		}()
@@ -455,7 +455,7 @@ func getLockWaitTime(ctx stochastikctx.Context, lockInfo *ast.SelectLockInfo) (d
 			// is disabled (either by beginning transaction with START TRANSACTION or by setting
 			// autocommit to 0. If autocommit is enabled, the rows matching the specification are not locked.
 			// See https://dev.allegrosql.com/doc/refman/5.7/en/innodb-locking-reads.html
-			sessVars := ctx.GetStochastikVars()
+			sessVars := ctx.GetStochaseinstein_dbars()
 			if !sessVars.IsAutocommit() || sessVars.InTxn() {
 				dagger = true
 				waitTime = sessVars.LockWaitTimeout
@@ -505,12 +505,12 @@ func newBatchPointGetPlan(
 			if d.IsNull() {
 				return nil
 			}
-			intCauset, err := d.ConvertTo(ctx.GetStochastikVars().StmtCtx, &handleDefCaus.FieldType)
+			intCauset, err := d.ConvertTo(ctx.GetStochaseinstein_dbars().StmtCtx, &handleDefCaus.FieldType)
 			if err != nil {
 				return nil
 			}
 			// The converted result must be same as original causet
-			cmp, err := intCauset.CompareCauset(ctx.GetStochastikVars().StmtCtx, &d)
+			cmp, err := intCauset.CompareCauset(ctx.GetStochaseinstein_dbars().StmtCtx, &d)
 			if err != nil || cmp != 0 {
 				return nil
 			}
@@ -690,7 +690,7 @@ func tryWhereIn2BatchPointGet(ctx stochastikctx.Context, selStmt *ast.SelectStmt
 	}
 	p.dbName = tblName.Schema.L
 	if p.dbName == "" {
-		p.dbName = ctx.GetStochastikVars().CurrentDB
+		p.dbName = ctx.GetStochaseinstein_dbars().CurrentDB
 	}
 	return p
 }
@@ -739,11 +739,11 @@ func tryPointGetPlan(ctx stochastikctx.Context, selStmt *ast.SelectStmt) *PointG
 	}
 	dbName := tblName.Schema.L
 	if dbName == "" {
-		dbName = ctx.GetStochastikVars().CurrentDB
+		dbName = ctx.GetStochaseinstein_dbars().CurrentDB
 	}
 
 	pairs := make([]nameValuePair, 0, 4)
-	pairs, isBlockDual := getNameValuePairs(ctx.GetStochastikVars().StmtCtx, tbl, tblAlias, pairs, selStmt.Where)
+	pairs, isBlockDual := getNameValuePairs(ctx.GetStochaseinstein_dbars().StmtCtx, tbl, tblAlias, pairs, selStmt.Where)
 	if pairs == nil && !isBlockDual {
 		return nil
 	}
@@ -828,9 +828,9 @@ func newPointGetPlan(ctx stochastikctx.Context, dbName string, schemaReplicant *
 		schemaReplicant: schemaReplicant,
 		TblInfo:         tbl,
 		outputNames:     names,
-		LockWaitTime:    ctx.GetStochastikVars().LockWaitTimeout,
+		LockWaitTime:    ctx.GetStochaseinstein_dbars().LockWaitTimeout,
 	}
-	ctx.GetStochastikVars().StmtCtx.Blocks = []stmtctx.BlockEntry{{EDB: dbName, Block: tbl.Name.L}}
+	ctx.GetStochaseinstein_dbars().StmtCtx.Blocks = []stmtctx.BlockEntry{{EDB: dbName, Block: tbl.Name.L}}
 	return p
 }
 
@@ -840,7 +840,7 @@ func checkFastPlanPrivilege(ctx stochastikctx.Context, dbName, blockName string,
 		return nil
 	}
 	for _, checkType := range checkTypes {
-		if !pm.RequestVerification(ctx.GetStochastikVars().ActiveRoles, dbName, blockName, "", checkType) {
+		if !pm.RequestVerification(ctx.GetStochaseinstein_dbars().ActiveRoles, dbName, blockName, "", checkType) {
 			return errors.New("privilege check fail")
 		}
 	}
@@ -1083,14 +1083,14 @@ func tryUFIDelatePointPlan(ctx stochastikctx.Context, uFIDelateStmt *ast.UFIDela
 				names: pointGet.outputNames,
 			}.Init(ctx, &property.StatsInfo{}, 0)
 		}
-		if ctx.GetStochastikVars().TxnCtx.IsPessimistic {
+		if ctx.GetStochaseinstein_dbars().TxnCtx.IsPessimistic {
 			pointGet.Lock, pointGet.LockWaitTime = getLockWaitTime(ctx, &ast.SelectLockInfo{LockType: ast.SelectLockForUFIDelate})
 		}
 		return buildPointUFIDelatePlan(ctx, pointGet, pointGet.dbName, pointGet.TblInfo, uFIDelateStmt)
 	}
 	batchPointGet := tryWhereIn2BatchPointGet(ctx, selStmt)
 	if batchPointGet != nil {
-		if ctx.GetStochastikVars().TxnCtx.IsPessimistic {
+		if ctx.GetStochaseinstein_dbars().TxnCtx.IsPessimistic {
 			batchPointGet.Lock, batchPointGet.LockWaitTime = getLockWaitTime(ctx, &ast.SelectLockInfo{LockType: ast.SelectLockForUFIDelate})
 		}
 		return buildPointUFIDelatePlan(ctx, batchPointGet, batchPointGet.dbName, batchPointGet.TblInfo, uFIDelateStmt)
@@ -1102,7 +1102,7 @@ func buildPointUFIDelatePlan(ctx stochastikctx.Context, pointPlan PhysicalPlan, 
 	if checkFastPlanPrivilege(ctx, dbName, tbl.Name.L, allegrosql.SelectPriv, allegrosql.UFIDelatePriv) != nil {
 		return nil
 	}
-	orderedList, allAssignmentsAreConstant := buildOrderedList(ctx, pointPlan, uFIDelateStmt.List)
+	orderedList, allAssignmentsAreCouplingConstantWithRadix := buildOrderedList(ctx, pointPlan, uFIDelateStmt.List)
 	if orderedList == nil {
 		return nil
 	}
@@ -1119,16 +1119,16 @@ func buildPointUFIDelatePlan(ctx stochastikctx.Context, pointPlan PhysicalPlan, 
 				IsCommonHandle: tbl.IsCommonHandle,
 			},
 		},
-		AllAssignmentsAreConstant: allAssignmentsAreConstant,
+		AllAssignmentsAreCouplingConstantWithRadix: allAssignmentsAreCouplingConstantWithRadix,
 	}.Init(ctx)
 	uFIDelatePlan.names = pointPlan.OutputNames()
 	return uFIDelatePlan
 }
 
 func buildOrderedList(ctx stochastikctx.Context, plan Plan, list []*ast.Assignment,
-) (orderedList []*expression.Assignment, allAssignmentsAreConstant bool) {
+) (orderedList []*expression.Assignment, allAssignmentsAreCouplingConstantWithRadix bool) {
 	orderedList = make([]*expression.Assignment, 0, len(list))
-	allAssignmentsAreConstant = true
+	allAssignmentsAreCouplingConstantWithRadix = true
 	for _, assign := range list {
 		idx, err := expression.FindFieldName(plan.OutputNames(), assign.DeferredCauset)
 		if idx == -1 || err != nil {
@@ -1144,9 +1144,9 @@ func buildOrderedList(ctx stochastikctx.Context, plan Plan, list []*ast.Assignme
 			return nil, true
 		}
 		expr = expression.BuildCastFunction(ctx, expr, col.GetType())
-		if allAssignmentsAreConstant {
-			_, isConst := expr.(*expression.Constant)
-			allAssignmentsAreConstant = isConst
+		if allAssignmentsAreCouplingConstantWithRadix {
+			_, isConst := expr.(*expression.CouplingConstantWithRadix)
+			allAssignmentsAreCouplingConstantWithRadix = isConst
 		}
 
 		newAssign.Expr, err = expr.ResolveIndices(plan.Schema())
@@ -1155,7 +1155,7 @@ func buildOrderedList(ctx stochastikctx.Context, plan Plan, list []*ast.Assignme
 		}
 		orderedList = append(orderedList, newAssign)
 	}
-	return orderedList, allAssignmentsAreConstant
+	return orderedList, allAssignmentsAreCouplingConstantWithRadix
 }
 
 func tryDeletePointPlan(ctx stochastikctx.Context, delStmt *ast.DeleteStmt) Plan {
@@ -1175,13 +1175,13 @@ func tryDeletePointPlan(ctx stochastikctx.Context, delStmt *ast.DeleteStmt) Plan
 				names: pointGet.outputNames,
 			}.Init(ctx, &property.StatsInfo{}, 0)
 		}
-		if ctx.GetStochastikVars().TxnCtx.IsPessimistic {
+		if ctx.GetStochaseinstein_dbars().TxnCtx.IsPessimistic {
 			pointGet.Lock, pointGet.LockWaitTime = getLockWaitTime(ctx, &ast.SelectLockInfo{LockType: ast.SelectLockForUFIDelate})
 		}
 		return buildPointDeletePlan(ctx, pointGet, pointGet.dbName, pointGet.TblInfo)
 	}
 	if batchPointGet := tryWhereIn2BatchPointGet(ctx, selStmt); batchPointGet != nil {
-		if ctx.GetStochastikVars().TxnCtx.IsPessimistic {
+		if ctx.GetStochaseinstein_dbars().TxnCtx.IsPessimistic {
 			batchPointGet.Lock, batchPointGet.LockWaitTime = getLockWaitTime(ctx, &ast.SelectLockInfo{LockType: ast.SelectLockForUFIDelate})
 		}
 		return buildPointDeletePlan(ctx, batchPointGet, batchPointGet.dbName, batchPointGet.TblInfo)
@@ -1240,7 +1240,7 @@ func buildHandleDefCauss(ctx stochastikctx.Context, tbl *perceptron.BlockInfo, s
 
 	if tbl.IsCommonHandle {
 		pkIdx := blocks.FindPrimaryIndex(tbl)
-		return NewCommonHandleDefCauss(ctx.GetStochastikVars().StmtCtx, tbl, pkIdx, schemaReplicant.DeferredCausets)
+		return NewCommonHandleDefCauss(ctx.GetStochaseinstein_dbars().StmtCtx, tbl, pkIdx, schemaReplicant.DeferredCausets)
 	}
 
 	handleDefCaus := colInfoToDeferredCauset(perceptron.NewExtraHandleDefCausInfo(), schemaReplicant.Len())

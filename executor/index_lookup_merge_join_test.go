@@ -3,17 +3,17 @@ package executor_test
 import (
 	"strings"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/plancodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/soliton/plancodec"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
 )
 
 func (s *testSuite9) TestIndexLookupMergeJoinHang(c *C) {
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/executor/IndexMergeJoinMockOOM", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/executor/IndexMergeJoinMockOOM", `return(true)`), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/executor/IndexMergeJoinMockOOM"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/executor/IndexMergeJoinMockOOM"), IsNil)
 	}()
 
 	tk := testkit.NewTestKitWithInit(c, s.causetstore)
@@ -29,9 +29,9 @@ func (s *testSuite9) TestIndexLookupMergeJoinHang(c *C) {
 }
 
 func (s *testSuite9) TestIssue18068(c *C) {
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/executor/testIssue18068", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/executor/testIssue18068", `return(true)`), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/executor/testIssue18068"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/executor/testIssue18068"), IsNil)
 	}()
 
 	tk := testkit.NewTestKitWithInit(c, s.causetstore)

@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,19 +17,19 @@ import (
 	"context"
 	"math"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/dagger"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/property"
+	"github.com/whtcorpsinc/MilevaDB-Prod/privilege"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	utilhint "github.com/whtcorpsinc/MilevaDB-Prod/soliton/hint"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/set"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/auth"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/dagger"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/planner/property"
-	"github.com/whtcorpsinc/milevadb/privilege"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	utilhint "github.com/whtcorpsinc/milevadb/soliton/hint"
-	"github.com/whtcorpsinc/milevadb/soliton/set"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
 	"go.uber.org/atomic"
 )
 
@@ -81,8 +81,8 @@ type logicalOptMemrule interface {
 
 // BuildLogicalPlan used to build logical plan from ast.Node.
 func BuildLogicalPlan(ctx context.Context, sctx stochastikctx.Context, node ast.Node, is schemareplicant.SchemaReplicant) (Plan, types.NameSlice, error) {
-	sctx.GetStochastikVars().PlanID = 0
-	sctx.GetStochastikVars().PlanDeferredCausetID = 0
+	sctx.GetStochaseinstein_dbars().PlanID = 0
+	sctx.GetStochaseinstein_dbars().PlanDeferredCausetID = 0
 	builder := NewPlanBuilder(sctx, is, &utilhint.BlockHintProcessor{})
 	p, err := builder.Build(ctx, node)
 	if err != nil {
@@ -132,7 +132,7 @@ func DoOptimize(ctx context.Context, sctx stochastikctx.Context, flag uint64, lo
 	if !AllowCartesianProduct.Load() && existsCartesianProduct(logic) {
 		return nil, 0, errors.Trace(ErrCartesianProductUnsupported)
 	}
-	planCounter := PlanCounterTp(sctx.GetStochastikVars().StmtCtx.StmtHints.ForceNthPlan)
+	planCounter := PlanCounterTp(sctx.GetStochaseinstein_dbars().StmtCtx.StmtHints.ForceNthPlan)
 	if planCounter == 0 {
 		planCounter = -1
 	}
@@ -153,7 +153,7 @@ func postOptimize(sctx stochastikctx.Context, plan PhysicalPlan) PhysicalPlan {
 }
 
 func enableParallelApply(sctx stochastikctx.Context, plan PhysicalPlan) PhysicalPlan {
-	if !sctx.GetStochastikVars().EnableParallelApply {
+	if !sctx.GetStochaseinstein_dbars().EnableParallelApply {
 		return plan
 	}
 	// the parallel apply has three limitation:
@@ -168,7 +168,7 @@ func enableParallelApply(sctx stochastikctx.Context, plan PhysicalPlan) Physical
 		_, err := SafeClone(apply.Children()[apply.InnerChildIdx])
 		supportClone := err == nil // limitation 2
 		if noOrder && supportClone {
-			apply.Concurrency = sctx.GetStochastikVars().ExecutorConcurrency
+			apply.Concurrency = sctx.GetStochaseinstein_dbars().ExecutorConcurrency
 		}
 
 		// because of the limitation 3, we cannot parallelize Apply operators in this Apply's inner size,
@@ -216,13 +216,13 @@ func physicalOptimize(logic LogicalPlan, planCounter *PlanCounterTp) (PhysicalPl
 		ExpectedCnt: math.MaxFloat64,
 	}
 
-	logic.SCtx().GetStochastikVars().StmtCtx.TaskMapBakTS = 0
+	logic.SCtx().GetStochaseinstein_dbars().StmtCtx.TaskMapBakTS = 0
 	t, _, err := logic.findBestTask(prop, planCounter)
 	if err != nil {
 		return nil, 0, err
 	}
 	if *planCounter > 0 {
-		logic.SCtx().GetStochastikVars().StmtCtx.AppendWarning(errors.Errorf("The parameter of nth_plan() is out of range."))
+		logic.SCtx().GetStochaseinstein_dbars().StmtCtx.AppendWarning(errors.Errorf("The parameter of nth_plan() is out of range."))
 	}
 	if t.invalid() {
 		return nil, 0, ErrInternal.GenWithStackByArgs("Can't find a proper physical plan for this query")

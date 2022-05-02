@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,10 +15,10 @@ package executor
 
 import (
 	"github.com/cznic/mathutil"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/kvcache"
-	"github.com/whtcorpsinc/milevadb/soliton/memory"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/kvcache"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/memory"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
 )
 
 // applyCache is used in the apply executor. When we get the same value of the outer event.
@@ -45,7 +45,7 @@ func newApplyCache(ctx stochastikctx.Context) (*applyCache, error) {
 	cache := kvcache.NewSimpleLRUCache(mathutil.MaxUint, 0.1, 0)
 	c := applyCache{
 		cache:       cache,
-		memCapacity: ctx.GetStochastikVars().NestedLoopJoinCacheCapacity,
+		memCapacity: ctx.GetStochaseinstein_dbars().NestedLoopJoinCacheCapacity,
 		memTracker:  memory.NewTracker(memory.LabelForApplyCache, -1),
 	}
 	return &c, nil

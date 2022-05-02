@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import (
 	"time"
 
 	fidel "github.com/einsteindb/fidel/client"
+	filter "github.com/whtcorpsinc/MilevaDB-Prod-tools/pkg/block-filter"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
@@ -30,19 +31,18 @@ import (
 	"github.com/whtcorpsinc/br/pkg/storage"
 	"github.com/whtcorpsinc/br/pkg/task"
 	"github.com/whtcorpsinc/errors"
-	filter "github.com/whtcorpsinc/milevadb-tools/pkg/block-filter"
 
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/dbs"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/sqlexec"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/dbs"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/sqlexec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 // brieTaskProgress tracks a task's current progress.
@@ -155,7 +155,7 @@ func (bq *brieQueue) cancelTask(taskID uint64) {
 }
 
 func (b *executorBuilder) parseTSString(ts string) (uint64, error) {
-	sc := &stmtctx.StatementContext{TimeZone: b.ctx.GetStochastikVars().Location()}
+	sc := &stmtctx.StatementContext{TimeZone: b.ctx.GetStochaseinstein_dbars().Location()}
 	t, err := types.ParseTime(sc, ts, allegrosql.TypeTimestamp, types.MaxFsp)
 	if err != nil {
 		return 0, err
@@ -306,7 +306,7 @@ func (e *BRIEExec) Next(ctx context.Context, req *chunk.Chunk) error {
 
 	bq := globalBRIEQueue
 
-	e.info.connID = e.ctx.GetStochastikVars().ConnectionID
+	e.info.connID = e.ctx.GetStochaseinstein_dbars().ConnectionID
 	e.info.queueTime = types.CurrentTime(allegrosql.TypeDatetime)
 	taskCtx, taskID := bq.registerTask(ctx, e.info)
 	defer bq.cancelTask(taskID)
@@ -318,7 +318,7 @@ func (e *BRIEExec) Next(ctx context.Context, req *chunk.Chunk) error {
 		for {
 			select {
 			case <-ticker.C:
-				if atomic.LoadUint32(&e.ctx.GetStochastikVars().Killed) == 1 {
+				if atomic.LoadUint32(&e.ctx.GetStochaseinstein_dbars().Killed) == 1 {
 					bq.cancelTask(taskID)
 					return
 				}

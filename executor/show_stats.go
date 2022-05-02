@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@ package executor
 import (
 	"time"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb/oracle"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/statistics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/causetstore/einsteindb/oracle"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/statistics"
-	"github.com/whtcorpsinc/milevadb/types"
 )
 
 func (e *ShowExec) fetchShowStatsMeta() error {
@@ -168,11 +168,11 @@ func (e *ShowExec) bucketsToEvents(dbName, tblName, partitionName, defCausName s
 		isIndex = 1
 	}
 	for i := 0; i < hist.Len(); i++ {
-		lowerBoundStr, err := statistics.ValueToString(e.ctx.GetStochastikVars(), hist.GetLower(i), numOfDefCauss, idxDeferredCausetTypes)
+		lowerBoundStr, err := statistics.ValueToString(e.ctx.GetStochaseinstein_dbars(), hist.GetLower(i), numOfDefCauss, idxDeferredCausetTypes)
 		if err != nil {
 			return errors.Trace(err)
 		}
-		upperBoundStr, err := statistics.ValueToString(e.ctx.GetStochastikVars(), hist.GetUpper(i), numOfDefCauss, idxDeferredCausetTypes)
+		upperBoundStr, err := statistics.ValueToString(e.ctx.GetStochaseinstein_dbars(), hist.GetUpper(i), numOfDefCauss, idxDeferredCausetTypes)
 		if err != nil {
 			return errors.Trace(err)
 		}

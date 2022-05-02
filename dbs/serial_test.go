@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,26 +28,26 @@ import (
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore/cluster"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/dbs"
-	dbsutil "github.com/whtcorpsinc/milevadb/dbs/soliton"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/errno"
-	"github.com/whtcorpsinc/milevadb/meta"
-	"github.com/whtcorpsinc/milevadb/meta/autoid"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton/admin"
-	"github.com/whtcorpsinc/milevadb/soliton/defCauslate"
-	"github.com/whtcorpsinc/milevadb/soliton/gcutil"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	. "github.com/whtcorpsinc/milevadb/soliton/solitonutil"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/stochastik"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore/cluster"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/dbs"
+	dbsutil "github.com/whtcorpsinc/MilevaDB-Prod/dbs/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/errno"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta/autoid"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/admin"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/defCauslate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/gcutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	. "github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastik"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
 )
 
 // Make it serial because config is modified in test cases.
@@ -533,9 +533,9 @@ func (s *testSerialSuite) TestCreateBlockWithLike(c *C) {
 
 // TestCancelAddIndex1 tests canceling dbs job when the add index worker is not started.
 func (s *testSerialSuite) TestCancelAddIndexPanic(c *C) {
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/dbs/errorMockPanic", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/errorMockPanic", `return(true)`), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/dbs/errorMockPanic"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/errorMockPanic"), IsNil)
 	}()
 	tk := testkit.NewTestKit(c, s.causetstore)
 	tk.MustExec("use test")
@@ -755,8 +755,8 @@ func (s *testSerialSuite) TestRecoverBlockByJobIDFail(c *C) {
 	hook := &dbs.TestDBSCallback{}
 	hook.OnJobRunBeforeExported = func(job *perceptron.Job) {
 		if job.Type == perceptron.CausetActionRecoverBlock {
-			c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/causetstore/einsteindb/mockCommitError", `return(true)`), IsNil)
-			c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/dbs/mockRecoverBlockCommitErr", `return(true)`), IsNil)
+			c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb/mockCommitError", `return(true)`), IsNil)
+			c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/mockRecoverBlockCommitErr", `return(true)`), IsNil)
 		}
 	}
 	origHook := s.dom.DBS().GetHook()
@@ -765,8 +765,8 @@ func (s *testSerialSuite) TestRecoverBlockByJobIDFail(c *C) {
 
 	// do recover block.
 	tk.MustExec(fmt.Sprintf("recover block by job %d", jobID))
-	c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/causetstore/einsteindb/mockCommitError"), IsNil)
-	c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/dbs/mockRecoverBlockCommitErr"), IsNil)
+	c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb/mockCommitError"), IsNil)
+	c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/mockRecoverBlockCommitErr"), IsNil)
 
 	// make sure enable GC after recover block.
 	enable, err := gcutil.CheckGCEnable(tk.Se)
@@ -815,8 +815,8 @@ func (s *testSerialSuite) TestRecoverBlockByBlockNameFail(c *C) {
 	hook := &dbs.TestDBSCallback{}
 	hook.OnJobRunBeforeExported = func(job *perceptron.Job) {
 		if job.Type == perceptron.CausetActionRecoverBlock {
-			c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/causetstore/einsteindb/mockCommitError", `return(true)`), IsNil)
-			c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/dbs/mockRecoverBlockCommitErr", `return(true)`), IsNil)
+			c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb/mockCommitError", `return(true)`), IsNil)
+			c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/mockRecoverBlockCommitErr", `return(true)`), IsNil)
 		}
 	}
 	origHook := s.dom.DBS().GetHook()
@@ -825,8 +825,8 @@ func (s *testSerialSuite) TestRecoverBlockByBlockNameFail(c *C) {
 
 	// do recover block.
 	tk.MustExec("recover block t_recover")
-	c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/causetstore/einsteindb/mockCommitError"), IsNil)
-	c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/dbs/mockRecoverBlockCommitErr"), IsNil)
+	c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb/mockCommitError"), IsNil)
+	c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/mockRecoverBlockCommitErr"), IsNil)
 
 	// make sure enable GC after recover block.
 	enable, err := gcutil.CheckGCEnable(tk.Se)
@@ -842,9 +842,9 @@ func (s *testSerialSuite) TestRecoverBlockByBlockNameFail(c *C) {
 
 func (s *testSerialSuite) TestCancelJobByErrorCountLimit(c *C) {
 	tk := testkit.NewTestKit(c, s.causetstore)
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/dbs/mockExceedErrorLimit", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/mockExceedErrorLimit", `return(true)`), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/dbs/mockExceedErrorLimit"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/mockExceedErrorLimit"), IsNil)
 	}()
 	tk.MustExec("use test")
 	tk.MustExec("drop block if exists t")
@@ -862,7 +862,7 @@ func (s *testSerialSuite) TestCancelJobByErrorCountLimit(c *C) {
 
 func (s *testSerialSuite) TestTruncateBlockUFIDelateSchemaVersionErr(c *C) {
 	tk := testkit.NewTestKit(c, s.causetstore)
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/dbs/mockTruncateBlockUFIDelateVersionError", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/mockTruncateBlockUFIDelateVersionError", `return(true)`), IsNil)
 	tk.MustExec("use test")
 	tk.MustExec("drop block if exists t")
 
@@ -877,7 +877,7 @@ func (s *testSerialSuite) TestTruncateBlockUFIDelateSchemaVersionErr(c *C) {
 	c.Assert(err, NotNil)
 	c.Assert(err.Error(), Equals, "[dbs:-1]DBS job rollback, error msg: mock uFIDelate version error")
 	// Disable fail point.
-	c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/dbs/mockTruncateBlockUFIDelateVersionError"), IsNil)
+	c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/mockTruncateBlockUFIDelateVersionError"), IsNil)
 	tk.MustExec("truncate block t")
 }
 
@@ -1131,7 +1131,7 @@ func (s *testSerialSuite) TestAutoRandom(c *C) {
 			note := fmt.Sprintf(autoid.AutoRandomAvailableAllocTimesNote, times)
 			result := fmt.Sprintf("Note|1105|%s", note)
 			tk.MustQuery("show warnings").Check(RowsWithSep("|", result))
-			c.Assert(tk.Se.GetStochastikVars().StmtCtx.WarningCount(), Equals, uint16(0))
+			c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.WarningCount(), Equals, uint16(0))
 		})
 	}
 	assertShowWarningCorrect("create block t (a bigint auto_random(15) primary key)", 281474976710655)
@@ -1241,8 +1241,8 @@ func (s *testSerialSuite) TestAutoRandomIncBitsIncrementAndOffset(c *C) {
 		case truncate:
 			truncateBlock()
 		}
-		tk.Se.GetStochastikVars().AutoIncrementIncrement = tc.increment
-		tk.Se.GetStochastikVars().AutoIncrementOffset = tc.offset
+		tk.Se.GetStochaseinstein_dbars().AutoIncrementIncrement = tc.increment
+		tk.Se.GetStochaseinstein_dbars().AutoIncrementOffset = tc.offset
 		for range tc.results {
 			insertBlock()
 		}
@@ -1404,7 +1404,7 @@ func (s *testSerialSuite) TestInvisibleIndex(c *C) {
 
 func (s *testSerialSuite) TestCreateClusteredIndex(c *C) {
 	tk := testkit.NewTestKitWithInit(c, s.causetstore)
-	tk.Se.GetStochastikVars().EnableClusteredIndex = true
+	tk.Se.GetStochaseinstein_dbars().EnableClusteredIndex = true
 	tk.MustExec("CREATE TABLE t1 (a int primary key, b int)")
 	tk.MustExec("CREATE TABLE t2 (a varchar(255) primary key, b int)")
 	tk.MustExec("CREATE TABLE t3 (a int, b int, c int, primary key (a, b))")
@@ -1451,7 +1451,7 @@ func (s *testSerialSuite) TestCreateClusteredIndex(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(tbl.Meta().IsCommonHandle, IsTrue)
 
-	tk.Se.GetStochastikVars().EnableClusteredIndex = false
+	tk.Se.GetStochaseinstein_dbars().EnableClusteredIndex = false
 	tk.MustExec("CREATE TABLE t7 (a varchar(255) primary key, b int)")
 	is = petri.GetPetri(ctx).SchemaReplicant()
 	tbl, err = is.BlockByName(perceptron.NewCIStr("test"), perceptron.NewCIStr("t7"))
@@ -1461,9 +1461,9 @@ func (s *testSerialSuite) TestCreateClusteredIndex(c *C) {
 
 func (s *testSerialSuite) TestCreateBlockNoBlock(c *C) {
 	tk := testkit.NewTestKitWithInit(c, s.causetstore)
-	c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/dbs/checkOwnerCheckAllVersionsWaitTime", `return(true)`), IsNil)
+	c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/checkOwnerCheckAllVersionsWaitTime", `return(true)`), IsNil)
 	defer func() {
-		c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/dbs/checkOwnerCheckAllVersionsWaitTime"), IsNil)
+		c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/checkOwnerCheckAllVersionsWaitTime"), IsNil)
 	}()
 	save := variable.GetDBSErrorCountLimit()
 	variable.SetDBSErrorCountLimit(1)

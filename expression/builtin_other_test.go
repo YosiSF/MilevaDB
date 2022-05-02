@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,16 +20,16 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/defCauslate"
-	"github.com/whtcorpsinc/milevadb/soliton/replog"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/defCauslate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/replog"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 )
 
 func (s *testEvaluatorSuite) TestBitCount(c *C) {
-	stmtCtx := s.ctx.GetStochastikVars().StmtCtx
+	stmtCtx := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	origin := stmtCtx.IgnoreTruncate
 	stmtCtx.IgnoreTruncate = true
 	defer func() {
@@ -56,7 +56,7 @@ func (s *testEvaluatorSuite) TestBitCount(c *C) {
 	}
 	for _, test := range bitCountCases {
 		in := types.NewCauset(test.origin)
-		f, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{in}))
+		f, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{in}))
 		c.Assert(err, IsNil)
 		c.Assert(f, NotNil)
 		count, err := evalBuiltinFunc(f, chunk.Event{})
@@ -119,7 +119,7 @@ func (s *testEvaluatorSuite) TestInFunc(c *C) {
 		{[]interface{}{json1, json1, json3, json4}, int64(1)},
 	}
 	for _, tc := range testCases {
-		fn, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(tc.args...)))
+		fn, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(tc.args...)))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(fn, chunk.MutEventFromCausets(types.MakeCausets(tc.args...)).ToEvent())
 		c.Assert(err, IsNil)
@@ -128,7 +128,7 @@ func (s *testEvaluatorSuite) TestInFunc(c *C) {
 	defCauslate.SetNewDefCauslationEnabledForTest(true)
 	strD1 := types.NewDefCauslationStringCauset("a", "utf8_general_ci", 0)
 	strD2 := types.NewDefCauslationStringCauset("Á", "utf8_general_ci", 0)
-	fn, err := fc.getFunction(s.ctx, s.datumsToConstants([]types.Causet{strD1, strD2}))
+	fn, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs([]types.Causet{strD1, strD2}))
 	c.Assert(err, IsNil)
 	d, isNull, err := fn.evalInt(chunk.Event{})
 	c.Assert(isNull, IsFalse)
@@ -145,7 +145,7 @@ func (s *testEvaluatorSuite) TestInFunc(c *C) {
 
 func (s *testEvaluatorSuite) TestEventFunc(c *C) {
 	fc := funcs[ast.EventFunc]
-	_, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets([]interface{}{"1", 1.2, true, 120}...)))
+	_, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets([]interface{}{"1", 1.2, true, 120}...)))
 	c.Assert(err, IsNil)
 }
 
@@ -162,7 +162,7 @@ func (s *testEvaluatorSuite) TestSetVar(c *C) {
 		{[]interface{}{"c", "dEf"}, "dEf"},
 	}
 	for _, tc := range testCases {
-		fn, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(tc.args...)))
+		fn, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(tc.args...)))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(fn, chunk.MutEventFromCausets(types.MakeCausets(tc.args...)).ToEvent())
 		c.Assert(err, IsNil)
@@ -172,9 +172,9 @@ func (s *testEvaluatorSuite) TestSetVar(c *C) {
 			c.Assert(ok, Equals, true)
 			val, ok := tc.res.(string)
 			c.Assert(ok, Equals, true)
-			stochastikVar, ok := s.ctx.GetStochastikVars().Users[key]
+			stochaseinstein_dbar, ok := s.ctx.GetStochaseinstein_dbars().Users[key]
 			c.Assert(ok, Equals, true)
-			c.Assert(stochastikVar.GetString(), Equals, val)
+			c.Assert(stochaseinstein_dbar.GetString(), Equals, val)
 		}
 	}
 }
@@ -182,7 +182,7 @@ func (s *testEvaluatorSuite) TestSetVar(c *C) {
 func (s *testEvaluatorSuite) TestGetVar(c *C) {
 	fc := funcs[ast.GetVar]
 
-	stochastikVars := []struct {
+	stochaseinstein_dbars := []struct {
 		key string
 		val string
 	}{
@@ -190,8 +190,8 @@ func (s *testEvaluatorSuite) TestGetVar(c *C) {
 		{"b", "文字符chuan"},
 		{"c", ""},
 	}
-	for _, ekv := range stochastikVars {
-		s.ctx.GetStochastikVars().Users[ekv.key] = types.NewStringCauset(ekv.val)
+	for _, ekv := range stochaseinstein_dbars {
+		s.ctx.GetStochaseinstein_dbars().Users[ekv.key] = types.NewStringCauset(ekv.val)
 	}
 
 	testCases := []struct {
@@ -204,7 +204,7 @@ func (s *testEvaluatorSuite) TestGetVar(c *C) {
 		{[]interface{}{"d"}, ""},
 	}
 	for _, tc := range testCases {
-		fn, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets(tc.args...)))
+		fn, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets(tc.args...)))
 		c.Assert(err, IsNil)
 		d, err := evalBuiltinFunc(fn, chunk.MutEventFromCausets(types.MakeCausets(tc.args...)).ToEvent())
 		c.Assert(err, IsNil)
@@ -213,31 +213,31 @@ func (s *testEvaluatorSuite) TestGetVar(c *C) {
 }
 
 func (s *testEvaluatorSuite) TestValues(c *C) {
-	origin := s.ctx.GetStochastikVars().StmtCtx.InInsertStmt
-	s.ctx.GetStochastikVars().StmtCtx.InInsertStmt = false
+	origin := s.ctx.GetStochaseinstein_dbars().StmtCtx.InInsertStmt
+	s.ctx.GetStochaseinstein_dbars().StmtCtx.InInsertStmt = false
 	defer func() {
-		s.ctx.GetStochastikVars().StmtCtx.InInsertStmt = origin
+		s.ctx.GetStochaseinstein_dbars().StmtCtx.InInsertStmt = origin
 	}()
 
 	fc := &valuesFunctionClass{baseFunctionClass{ast.Values, 0, 0}, 1, types.NewFieldType(allegrosql.TypeVarchar)}
-	_, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets("")))
+	_, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets("")))
 	c.Assert(err, ErrorMatches, "*Incorrect parameter count in the call to native function 'values'")
 
-	sig, err := fc.getFunction(s.ctx, s.datumsToConstants(types.MakeCausets()))
+	sig, err := fc.getFunction(s.ctx, s.datumsToCouplingConstantWithRadixs(types.MakeCausets()))
 	c.Assert(err, IsNil)
 
 	ret, err := evalBuiltinFunc(sig, chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(ret.IsNull(), IsTrue)
 
-	s.ctx.GetStochastikVars().CurrInsertValues = chunk.MutEventFromCausets(types.MakeCausets("1")).ToEvent()
+	s.ctx.GetStochaseinstein_dbars().CurrInsertValues = chunk.MutEventFromCausets(types.MakeCausets("1")).ToEvent()
 	ret, err = evalBuiltinFunc(sig, chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(ret.IsNull(), IsTrue)
 
 	currInsertValues := types.MakeCausets("1", "2")
-	s.ctx.GetStochastikVars().StmtCtx.InInsertStmt = true
-	s.ctx.GetStochastikVars().CurrInsertValues = chunk.MutEventFromCausets(currInsertValues).ToEvent()
+	s.ctx.GetStochaseinstein_dbars().StmtCtx.InInsertStmt = true
+	s.ctx.GetStochaseinstein_dbars().CurrInsertValues = chunk.MutEventFromCausets(currInsertValues).ToEvent()
 	ret, err = evalBuiltinFunc(sig, chunk.Event{})
 	c.Assert(err, IsNil)
 
@@ -248,7 +248,7 @@ func (s *testEvaluatorSuite) TestValues(c *C) {
 
 func (s *testEvaluatorSuite) TestSetVarFromDeferredCauset(c *C) {
 	// Construct arguments.
-	argVarName := &Constant{
+	argVarName := &CouplingConstantWithRadix{
 		Value:   types.NewStringCauset("a"),
 		RetType: &types.FieldType{Tp: allegrosql.TypeVarString, Flen: 20},
 	}
@@ -281,10 +281,10 @@ func (s *testEvaluatorSuite) TestSetVarFromDeferredCauset(c *C) {
 	inputChunk.AppendString(0, "b")
 
 	// Check whether the user variable changed.
-	stochastikVars := s.ctx.GetStochastikVars()
-	stochastikVars.UsersLock.RLock()
-	defer stochastikVars.UsersLock.RUnlock()
-	stochastikVar, ok := stochastikVars.Users["a"]
+	stochaseinstein_dbars := s.ctx.GetStochaseinstein_dbars()
+	stochaseinstein_dbars.UsersLock.RLock()
+	defer stochaseinstein_dbars.UsersLock.RUnlock()
+	stochaseinstein_dbar, ok := stochaseinstein_dbars.Users["a"]
 	c.Assert(ok, Equals, true)
-	c.Assert(stochastikVar.GetString(), Equals, "a")
+	c.Assert(stochaseinstein_dbar.GetString(), Equals, "a")
 }

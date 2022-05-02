@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,23 +20,23 @@ import (
 	"sync/atomic"
 	"unsafe"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/distsql"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/memory"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/ranger"
+	"github.com/whtcorpsinc/MilevaDB-Prod/statistics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/failpoint"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/distsql"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/expression"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/memory"
-	"github.com/whtcorpsinc/milevadb/soliton/ranger"
-	"github.com/whtcorpsinc/milevadb/statistics"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
 	"go.uber.org/zap"
 )
 
@@ -111,7 +111,7 @@ func (e *IndexMergeReaderExecutor) Open(ctx context.Context) error {
 		_, ok := plan[0].(*plannercore.PhysicalIndexScan)
 		if !ok {
 			if e.block.Meta().IsCommonHandle {
-				keyRanges, err := distsql.CommonHandleRangesToKVRanges(e.ctx.GetStochastikVars().StmtCtx, getPhysicalBlockID(e.block), e.ranges[i])
+				keyRanges, err := distsql.CommonHandleRangesToKVRanges(e.ctx.GetStochaseinstein_dbars().StmtCtx, getPhysicalBlockID(e.block), e.ranges[i])
 				if err != nil {
 					return err
 				}
@@ -121,7 +121,7 @@ func (e *IndexMergeReaderExecutor) Open(ctx context.Context) error {
 			}
 			continue
 		}
-		keyRange, err := distsql.IndexRangesToKVRanges(e.ctx.GetStochastikVars().StmtCtx, getPhysicalBlockID(e.block), e.indexes[i].ID, e.ranges[i], e.feedbacks[i])
+		keyRange, err := distsql.IndexRangesToKVRanges(e.ctx.GetStochaseinstein_dbars().StmtCtx, getPhysicalBlockID(e.block), e.indexes[i].ID, e.ranges[i], e.feedbacks[i])
 		if err != nil {
 			return err
 		}
@@ -196,7 +196,7 @@ func (e *IndexMergeReaderExecutor) startPartialIndexWorker(ctx context.Context, 
 		SetDesc(e.descs[workID]).
 		SetKeepOrder(false).
 		SetStreaming(e.partialStreamings[workID]).
-		SetFromStochastikVars(e.ctx.GetStochastikVars()).
+		SetFromStochaseinstein_dbars(e.ctx.GetStochaseinstein_dbars()).
 		SetMemTracker(e.memTracker).
 		Build()
 	if err != nil {
@@ -212,7 +212,7 @@ func (e *IndexMergeReaderExecutor) startPartialIndexWorker(ctx context.Context, 
 	worker := &partialIndexWorker{
 		sc:           e.ctx,
 		batchSize:    e.maxChunkSize,
-		maxBatchSize: e.ctx.GetStochastikVars().IndexLookupSize,
+		maxBatchSize: e.ctx.GetStochaseinstein_dbars().IndexLookupSize,
 		maxChunkSize: e.maxChunkSize,
 	}
 
@@ -274,7 +274,7 @@ func (e *IndexMergeReaderExecutor) startPartialBlockWorker(ctx context.Context, 
 	worker := &partialBlockWorker{
 		sc:           e.ctx,
 		batchSize:    e.maxChunkSize,
-		maxBatchSize: e.ctx.GetStochastikVars().IndexLookupSize,
+		maxBatchSize: e.ctx.GetStochaseinstein_dbars().IndexLookupSize,
 		maxChunkSize: e.maxChunkSize,
 		blockReader:  partialBlockReader,
 		blockInfo:    blockInfo,
@@ -383,7 +383,7 @@ func (w *partialBlockWorker) buildBlockTask(handles []ekv.Handle, retChk *chunk.
 }
 
 func (e *IndexMergeReaderExecutor) startIndexMergeBlockScanWorker(ctx context.Context, workCh <-chan *lookupBlockTask) {
-	lookupConcurrencyLimit := e.ctx.GetStochastikVars().IndexLookupConcurrency()
+	lookupConcurrencyLimit := e.ctx.GetStochaseinstein_dbars().IndexLookupConcurrency()
 	e.tblWorkerWg.Add(lookupConcurrencyLimit)
 	for i := 0; i < lookupConcurrencyLimit; i++ {
 		worker := &indexMergeBlockScanWorker{

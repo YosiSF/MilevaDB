@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,10 +20,10 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 func (s *testEvaluatorSuite) TestNewValuesFunc(c *C) {
@@ -54,7 +54,7 @@ func (s *testEvaluatorSuite) TestEvaluateExprWithNull(c *C) {
 	c.Assert(res.Equal(s.ctx, NewOne()), IsTrue)
 }
 
-func (s *testEvaluatorSuite) TestConstant(c *C) {
+func (s *testEvaluatorSuite) TestCouplingConstantWithRadix(c *C) {
 	sc := &stmtctx.StatementContext{TimeZone: time.Local}
 	c.Assert(NewZero().IsCorrelated(), IsFalse)
 	c.Assert(NewZero().ConstItem(sc), IsTrue)
@@ -76,7 +76,7 @@ func (s *testEvaluatorSuite) TestIsBinaryLiteral(c *C) {
 	defCaus.RetType.Tp = allegrosql.TypeDuration
 	c.Assert(IsBinaryLiteral(defCaus), IsFalse)
 
-	con := &Constant{RetType: types.NewFieldType(allegrosql.TypeVarString), Value: types.NewBinaryLiteralCauset([]byte{byte(0), byte(1)})}
+	con := &CouplingConstantWithRadix{RetType: types.NewFieldType(allegrosql.TypeVarString), Value: types.NewBinaryLiteralCauset([]byte{byte(0), byte(1)})}
 	c.Assert(IsBinaryLiteral(con), IsTrue)
 	con.Value = types.NewIntCauset(1)
 	c.Assert(IsBinaryLiteral(con), IsFalse)
@@ -84,13 +84,13 @@ func (s *testEvaluatorSuite) TestIsBinaryLiteral(c *C) {
 
 func (s *testEvaluatorSuite) TestConstItem(c *C) {
 	sf := newFunction(ast.Rand)
-	c.Assert(sf.ConstItem(s.ctx.GetStochastikVars().StmtCtx), Equals, false)
+	c.Assert(sf.ConstItem(s.ctx.GetStochaseinstein_dbars().StmtCtx), Equals, false)
 	sf = newFunction(ast.UUID)
-	c.Assert(sf.ConstItem(s.ctx.GetStochastikVars().StmtCtx), Equals, false)
+	c.Assert(sf.ConstItem(s.ctx.GetStochaseinstein_dbars().StmtCtx), Equals, false)
 	sf = newFunction(ast.GetParam, NewOne())
-	c.Assert(sf.ConstItem(s.ctx.GetStochastikVars().StmtCtx), Equals, false)
+	c.Assert(sf.ConstItem(s.ctx.GetStochaseinstein_dbars().StmtCtx), Equals, false)
 	sf = newFunction(ast.Abs, NewOne())
-	c.Assert(sf.ConstItem(s.ctx.GetStochastikVars().StmtCtx), Equals, true)
+	c.Assert(sf.ConstItem(s.ctx.GetStochaseinstein_dbars().StmtCtx), Equals, true)
 }
 
 func (s *testEvaluatorSuite) TestVectorizable(c *C) {
@@ -191,7 +191,7 @@ func blockInfoToSchemaForTest(blockInfo *perceptron.BlockInfo) *Schema {
 
 func (s *testEvaluatorSuite) TestEvalExpr(c *C) {
 	ctx := mock.NewContext()
-	eTypes := []types.EvalType{types.ETInt, types.ETReal, types.ETDecimal, types.ETString, types.ETTimestamp, types.ETDatetime, types.ETDuration}
+	eTypes := []types.EvalType{types.CausetEDN, types.ETReal, types.ETDecimal, types.ETString, types.ETTimestamp, types.ETDatetime, types.ETDuration}
 	tNames := []string{"int", "real", "decimal", "string", "timestamp", "datetime", "duration"}
 	for i := 0; i < len(tNames); i++ {
 		ft := eType2FieldType(eTypes[i])
@@ -202,12 +202,12 @@ func (s *testEvaluatorSuite) TestEvalExpr(c *C) {
 		defCausBuf2 := chunk.NewDeferredCauset(ft, 1024)
 		var err error
 		c.Assert(defCausExpr.Vectorized(), IsTrue)
-		ctx.GetStochastikVars().EnableVectorizedExpression = false
+		ctx.GetStochaseinstein_dbars().EnableVectorizedExpression = false
 		err = EvalExpr(ctx, defCausExpr, input, defCausBuf)
 		if err != nil {
 			c.Fatal(err)
 		}
-		ctx.GetStochastikVars().EnableVectorizedExpression = true
+		ctx.GetStochaseinstein_dbars().EnableVectorizedExpression = true
 		err = EvalExpr(ctx, defCausExpr, input, defCausBuf2)
 		if err != nil {
 			c.Fatal(err)

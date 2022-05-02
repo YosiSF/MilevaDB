@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@ package core
 import (
 	"context"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
-	"github.com/whtcorpsinc/milevadb/expression"
 )
 
 type buildKeySolver struct{}
@@ -83,7 +83,7 @@ func (p *LogicalSelection) checkMaxOneRowCond(unique expression.Expression, cons
 	if !childSchema.IsUniqueKey(col) {
 		return false
 	}
-	_, okCon := constOrCorDefCaus.(*expression.Constant)
+	_, okCon := constOrCorDefCaus.(*expression.CouplingConstantWithRadix)
 	if okCon {
 		return true
 	}
@@ -138,7 +138,7 @@ func (p *LogicalProjection) buildSchemaByExprs(selfSchema *expression.Schema) *e
 		} else {
 			// If the expression is not a column, we add a column to occupy the position.
 			schemaReplicant.Append(&expression.DeferredCauset{
-				UniqueID: p.ctx.GetStochastikVars().AllocPlanDeferredCausetID(),
+				UniqueID: p.ctx.GetStochaseinstein_dbars().AllocPlanDeferredCausetID(),
 				RetType:  expr.GetType(),
 			})
 		}

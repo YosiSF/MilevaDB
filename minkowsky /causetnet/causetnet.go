@@ -14,41 +14,41 @@ import (
 
 	"github.com/ngaut/pools"
 	"github.com/opentracing/opentracing-go"
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL"
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/ast"
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/auth"
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/charset"
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/mysql"
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/serial"
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/terror"
-	"github.com/whtcorpsinc/MilevaDB/Interlock"
-	"github.com/whtcorpsinc/MilevaDB/bindinfo"
-	"github.com/whtcorpsinc/MilevaDB/causetnetctx"
-	"github.com/whtcorpsinc/MilevaDB/causetnetctx/binloginfo"
-	"github.com/whtcorpsinc/MilevaDB/causetnetctx/stmtctx"
-	"github.com/whtcorpsinc/MilevaDB/causetnetctx/variable"
-	"github.com/whtcorpsinc/MilevaDB/config"
-	"github.com/whtcorpsinc/MilevaDB/ekv"
-	"github.com/whtcorpsinc/MilevaDB/meta"
-	"github.com/whtcorpsinc/MilevaDB/metrics"
-	"github.com/whtcorpsinc/MilevaDB/owner"
-	"github.com/whtcorpsinc/MilevaDB/planner"
-	plannercore "github.com/whtcorpsinc/MilevaDB/planner/core"
-	"github.com/whtcorpsinc/MilevaDB/plugin"
-	"github.com/whtcorpsinc/MilevaDB/privilege"
-	"github.com/whtcorpsinc/MilevaDB/privilege/privileges"
-	"github.com/whtcorpsinc/MilevaDB/schemareplicant"
-	"github.com/whtcorpsinc/MilevaDB/statistics/handle"
-	"github.com/whtcorpsinc/MilevaDB/store/einsteindb"
-	"github.com/whtcorpsinc/MilevaDB/types"
-	"github.com/whtcorpsinc/MilevaDB/util"
-	"github.com/whtcorpsinc/MilevaDB/util/chunk"
-	"github.com/whtcorpsinc/MilevaDB/util/collate"
-	"github.com/whtcorpsinc/MilevaDB/util/execdetails"
-	"github.com/whtcorpsinc/MilevaDB/util/kvcache"
-	"github.com/whtcorpsinc/MilevaDB/util/logutil"
-	"github.com/whtcorpsinc/MilevaDB/util/sqlexec"
-	"github.com/whtcorpsinc/MilevaDB/util/timeutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/ast"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/auth"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/charset"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/mysql"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/serial"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/terror"
+	"github.com/whtcorpsinc/MilevaDB-Prod/Interlock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/bindinfo"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetnetctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetnetctx/binloginfo"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetnetctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetnetctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta"
+	"github.com/whtcorpsinc/MilevaDB-Prod/metrics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/owner"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/plugin"
+	"github.com/whtcorpsinc/MilevaDB-Prod/privilege"
+	"github.com/whtcorpsinc/MilevaDB-Prod/privilege/privileges"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/statistics/handle"
+	"github.com/whtcorpsinc/MilevaDB-Prod/store/einsteindb"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/collate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/execdetails"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/kvcache"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/sqlexec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/timeutil"
 	"github.com/whtcorpsinc/ares_centroid_error"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/noether/go-binlog"
@@ -89,7 +89,7 @@ type Causetnet interface {
 	// PrepareStmt executes prepare statement in binary protocol.
 	PrepareStmt(sql string) (stmtID uint32, paramCount int, fields []*ast.ResultField, err error)
 	// ExecutePreparedStmt executes a prepared statement.
-	ExecutePreparedStmt(ctx context.Context, stmtID uint32, param []types.Datum) (sqlexec.RecordSet, error)
+	ExecutePreparedStmt(ctx context.Context, stmtID uint32, param []types.CausetObjectQL) (sqlexec.RecordSet, error)
 	DropPreparedStmt(stmtID uint32) error
 	SetClientCapability(uint32) // Set client capability flags.
 	SetConnectionID(uint64)
@@ -848,15 +848,15 @@ func createCausetnetFunc(store ekv.Storage) pools.Factory {
 		if err != nil {
 			return nil, err
 		}
-		err = variable.SetCausetnetSystemVar(se.causetnetVars, variable.AutoCommit, types.NewStringDatum("1"))
+		err = variable.SetCausetnetSystemVar(se.causetnetVars, variable.AutoCommit, types.NewStringCausetObjectQL("1"))
 		if err != nil {
 			return nil, err
 		}
-		err = variable.SetCausetnetSystemVar(se.causetnetVars, variable.MaxExecutionTime, types.NewUintDatum(0))
+		err = variable.SetCausetnetSystemVar(se.causetnetVars, variable.MaxExecutionTime, types.NewUintCausetObjectQL(0))
 		if err != nil {
 			return nil, errors.Trace(err)
 		}
-		err = variable.SetCausetnetSystemVar(se.causetnetVars, variable.MaxAllowedPacket, types.NewStringDatum("67108864"))
+		err = variable.SetCausetnetSystemVar(se.causetnetVars, variable.MaxAllowedPacket, types.NewStringCausetObjectQL("67108864"))
 		if err != nil {
 			return nil, errors.Trace(err)
 		}
@@ -872,11 +872,11 @@ func createCausetnetWithDomainFunc(store ekv.Storage) func(*domain.Domain) (pool
 		if err != nil {
 			return nil, err
 		}
-		err = variable.SetCausetnetSystemVar(se.causetnetVars, variable.AutoCommit, types.NewStringDatum("1"))
+		err = variable.SetCausetnetSystemVar(se.causetnetVars, variable.AutoCommit, types.NewStringCausetObjectQL("1"))
 		if err != nil {
 			return nil, err
 		}
-		err = variable.SetCausetnetSystemVar(se.causetnetVars, variable.MaxExecutionTime, types.NewUintDatum(0))
+		err = variable.SetCausetnetSystemVar(se.causetnetVars, variable.MaxExecutionTime, types.NewUintCausetObjectQL(0))
 		if err != nil {
 			return nil, errors.Trace(err)
 		}
@@ -912,7 +912,7 @@ func (s *causetnet) getExecRet(ctx causetnetctx.Context, sql string) (string, er
 	if len(rows) == 0 {
 		return "", Interlock.ErrResultIsEmpty
 	}
-	d := rows[0].GetDatum(0, &fields[0].Column.FieldType)
+	d := rows[0].GetCausetObjectQL(0, &fields[0].Column.FieldType)
 	value, err := d.ToString()
 	if err != nil {
 		return "", err
@@ -1267,7 +1267,7 @@ func (s *causetnet) PrepareStmt(sql string) (stmtID uint32, paramCount int, fiel
 }
 
 func (s *causetnet) preparedStmtExec(ctx context.Context,
-	stmtID uint32, prepareStmt *plannercore.CachedPrepareStmt, args []types.Datum) (sqlexec.RecordSet, error) {
+	stmtID uint32, prepareStmt *plannercore.CachedPrepareStmt, args []types.CausetObjectQL) (sqlexec.RecordSet, error) {
 	st, err := Interlock.CompileExecutePreparedStmt(ctx, s, stmtID, args)
 	if err != nil {
 		return nil, err
@@ -1279,7 +1279,7 @@ func (s *causetnet) preparedStmtExec(ctx context.Context,
 
 // cachedPlanExec short path currently ONLY for cached "point select plan" execution
 func (s *causetnet) cachedPlanExec(ctx context.Context,
-	stmtID uint32, prepareStmt *plannercore.CachedPrepareStmt, args []types.Datum) (sqlexec.RecordSet, error) {
+	stmtID uint32, prepareStmt *plannercore.CachedPrepareStmt, args []types.CausetObjectQL) (sqlexec.RecordSet, error) {
 	prepared := prepareStmt.PreparedAst
 	// compile ExecStmt
 	is := schemareplicant.Getschemareplicant(s)
@@ -1370,7 +1370,7 @@ func (s *causetnet) IsCachedExecOk(ctx context.Context, preparedStmt *plannercor
 }
 
 // ExecutePreparedStmt executes a prepared statement.
-func (s *causetnet) ExecutePreparedStmt(ctx context.Context, stmtID uint32, args []types.Datum) (sqlexec.RecordSet, error) {
+func (s *causetnet) ExecutePreparedStmt(ctx context.Context, stmtID uint32, args []types.CausetObjectQL) (sqlexec.RecordSet, error) {
 	s.PrepareTxnCtx(ctx)
 	var err error
 	s.causetnetVars.StartTime = time.Now()
@@ -2090,7 +2090,7 @@ func (s *causetnet) loadCommonGlobalVariablesIfNeeded() error {
 
 	for _, row := range rows {
 		varName := row.GetString(0)
-		varVal := row.GetDatum(1, &fields[1].Column.FieldType)
+		varVal := row.GetCausetObjectQL(1, &fields[1].Column.FieldType)
 		if _, ok := vars.GetSystemVar(varName); !ok {
 			err = variable.SetCausetnetSystemVar(s.causetnetVars, varName, varVal)
 			if err != nil {

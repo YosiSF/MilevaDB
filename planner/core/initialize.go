@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
 package core
 
 import (
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/planner/property"
-	"github.com/whtcorpsinc/milevadb/soliton/plancodec"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/property"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/plancodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 // Init initializes LogicalAggregation.
@@ -443,18 +443,18 @@ func (p PhysicalIndexJoin) Init(ctx stochastikctx.Context, stats *property.Stats
 
 // Init initializes PhysicalIndexMergeJoin.
 func (p PhysicalIndexMergeJoin) Init(ctx stochastikctx.Context) *PhysicalIndexMergeJoin {
-	ctx.GetStochastikVars().PlanID++
+	ctx.GetStochaseinstein_dbars().PlanID++
 	p.tp = plancodec.TypeIndexMergeJoin
-	p.id = ctx.GetStochastikVars().PlanID
+	p.id = ctx.GetStochaseinstein_dbars().PlanID
 	p.ctx = ctx
 	return &p
 }
 
 // Init initializes PhysicalIndexHashJoin.
 func (p PhysicalIndexHashJoin) Init(ctx stochastikctx.Context) *PhysicalIndexHashJoin {
-	ctx.GetStochastikVars().PlanID++
+	ctx.GetStochaseinstein_dbars().PlanID++
 	p.tp = plancodec.TypeIndexHashJoin
-	p.id = ctx.GetStochastikVars().PlanID
+	p.id = ctx.GetStochaseinstein_dbars().PlanID
 	p.ctx = ctx
 	return &p
 }

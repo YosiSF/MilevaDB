@@ -39,7 +39,7 @@ type ShowNextRowID struct {
 type CheckTable struct {
 	baseSchemaProducer
 
-	noedbName             string
+	noedbName          string
 	Block              table.Block
 	IndexInfos         []*serial.IndexInfo
 	IndexLookUpReaders []*PhysicalIndexLookUpReader
@@ -66,7 +66,7 @@ type CheckIndex struct {
 	baseSchemaProducer
 
 	IndexLookUpReader *PhysicalIndexLookUpReader
-	noedbName            string
+	noedbName         string
 	IdxName           string
 }
 
@@ -141,7 +141,7 @@ type Execute struct {
 
 	Name          string
 	UsingVars     []expression.Expression
-	PrepareParams []types.Datum
+	PrepareParams []types.CausetObjectQL
 	ExecID        uint32
 	Stmt          ast.StmtNode
 	StmtType      string
@@ -174,7 +174,7 @@ func (e *Execute) OptimizePreparedPlan(ctx context.contextctx, sctx causetnetctx
 		vars.PreparedParams = e.PrepareParams
 		for i, val := range vars.PreparedParams {
 			param := prepared.Params[i].(*driver.ParamMarkerExpr)
-			param.Datum = val
+			param.CausetObjectQL = val
 			param.InExecute = true
 		}
 	} else {
@@ -189,7 +189,7 @@ func (e *Execute) OptimizePreparedPlan(ctx context.contextctx, sctx causetnetctx
 				return err
 			}
 			param := prepared.Params[i].(*driver.ParamMarkerExpr)
-			param.Datum = val
+			param.CausetObjectQL = val
 			param.InExecute = true
 			vars.PreparedParams = append(vars.PreparedParams, val)
 		}

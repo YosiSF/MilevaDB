@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,20 +21,20 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	dto "github.com/prometheus/client_perceptron/go"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/executor"
+	"github.com/whtcorpsinc/MilevaDB-Prod/metrics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/hint"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/kvcache"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testleak"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastik"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/auth"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/executor"
-	"github.com/whtcorpsinc/milevadb/metrics"
-	"github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton/hint"
-	"github.com/whtcorpsinc/milevadb/soliton/kvcache"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/soliton/testleak"
-	"github.com/whtcorpsinc/milevadb/stochastik"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
 )
 
 var _ = Suite(&testPrepareSuite{})
@@ -194,7 +194,7 @@ func (s *testPlanSerialSuite) TestPrepareCacheDeferredFunction(c *C) {
 	for i := 0; i < 2; i++ {
 		stmt, err := s.ParseOneStmt(sql1, "", "")
 		c.Check(err, IsNil)
-		is := tk.Se.GetStochastikVars().TxnCtx.SchemaReplicant.(schemareplicant.SchemaReplicant)
+		is := tk.Se.GetStochaseinstein_dbars().TxnCtx.SchemaReplicant.(schemareplicant.SchemaReplicant)
 		builder := core.NewPlanBuilder(tk.Se, is, &hint.BlockHintProcessor{})
 		p, err := builder.Build(ctx, stmt)
 		c.Check(err, IsNil)
@@ -291,7 +291,7 @@ func (s *testPrepareSerialSuite) TestPrepareOverMaxPreparedStmtCount(c *C) {
 	}
 }
 
-// unit test for issue https://github.com/whtcorpsinc/milevadb/issues/8518
+// unit test for issue https://github.com/whtcorpsinc/MilevaDB-Prod/issues/8518
 func (s *testPrepareSerialSuite) TestPrepareBlockAsNameOnGroupByWithCache(c *C) {
 	defer testleak.AfterTest(c)()
 	causetstore, dom, err := newStoreWithBootstrap()
@@ -341,7 +341,7 @@ func readGaugeInt(g prometheus.Gauge) int {
 	return int(mm.GetGauge().GetValue())
 }
 
-// unit test for issue https://github.com/whtcorpsinc/milevadb/issues/9478
+// unit test for issue https://github.com/whtcorpsinc/MilevaDB-Prod/issues/9478
 func (s *testPrepareSuite) TestPrepareWithWindowFunction(c *C) {
 	defer testleak.AfterTest(c)()
 	causetstore, dom, err := newStoreWithBootstrap()
@@ -842,17 +842,17 @@ func (s *testPrepareSuite) TestInvisibleIndex(c *C) {
 
 	tk.MustQuery("execute stmt1").Check(testkit.Rows("1"))
 	tk.MustQuery("execute stmt1").Check(testkit.Rows("1"))
-	c.Assert(len(tk.Se.GetStochastikVars().StmtCtx.IndexNames), Equals, 1)
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.IndexNames[0], Equals, "t:idx_a")
+	c.Assert(len(tk.Se.GetStochaseinstein_dbars().StmtCtx.IndexNames), Equals, 1)
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.IndexNames[0], Equals, "t:idx_a")
 
 	tk.MustExec("alter block t alter index idx_a invisible")
 	tk.MustQuery("execute stmt1").Check(testkit.Rows("1"))
 	tk.MustQuery("execute stmt1").Check(testkit.Rows("1"))
-	c.Assert(len(tk.Se.GetStochastikVars().StmtCtx.IndexNames), Equals, 0)
+	c.Assert(len(tk.Se.GetStochaseinstein_dbars().StmtCtx.IndexNames), Equals, 0)
 
 	tk.MustExec("alter block t alter index idx_a visible")
 	tk.MustQuery("execute stmt1").Check(testkit.Rows("1"))
 	tk.MustQuery("execute stmt1").Check(testkit.Rows("1"))
-	c.Assert(len(tk.Se.GetStochastikVars().StmtCtx.IndexNames), Equals, 1)
-	c.Assert(tk.Se.GetStochastikVars().StmtCtx.IndexNames[0], Equals, "t:idx_a")
+	c.Assert(len(tk.Se.GetStochaseinstein_dbars().StmtCtx.IndexNames), Equals, 1)
+	c.Assert(tk.Se.GetStochaseinstein_dbars().StmtCtx.IndexNames[0], Equals, "t:idx_a")
 }

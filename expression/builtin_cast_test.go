@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,14 +23,14 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/charset"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 )
 
 func (s *testEvaluatorSuite) TestCastXXX(c *C) {
-	ctx, sc := s.ctx, s.ctx.GetStochastikVars().StmtCtx
+	ctx, sc := s.ctx, s.ctx.GetStochaseinstein_dbars().StmtCtx
 
 	// Test `cast as char[(N)]` and `cast as binary[(N)]`.
 	originIgnoreTruncate := sc.IgnoreTruncate
@@ -48,14 +48,14 @@ func (s *testEvaluatorSuite) TestCastXXX(c *C) {
 	// cast(str as char(N)), N < len([]rune(str)).
 	// cast("你好world" as char(5))
 	tp.Charset = charset.CharsetUTF8
-	f := BuildCastFunction(ctx, &Constant{Value: types.NewCauset("你好world"), RetType: tp}, tp)
+	f := BuildCastFunction(ctx, &CouplingConstantWithRadix{Value: types.NewCauset("你好world"), RetType: tp}, tp)
 	res, err := f.Eval(chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(res.GetString(), Equals, "你好wor")
 
 	// cast(str as char(N)), N > len([]rune(str)).
 	// cast("a" as char(5))
-	f = BuildCastFunction(ctx, &Constant{Value: types.NewCauset("a"), RetType: types.NewFieldType(allegrosql.TypeString)}, tp)
+	f = BuildCastFunction(ctx, &CouplingConstantWithRadix{Value: types.NewCauset("a"), RetType: types.NewFieldType(allegrosql.TypeString)}, tp)
 	res, err = f.Eval(chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(len(res.GetString()), Equals, 1)
@@ -67,14 +67,14 @@ func (s *testEvaluatorSuite) TestCastXXX(c *C) {
 	tp.Flag |= allegrosql.BinaryFlag
 	tp.Charset = charset.CharsetBin
 	tp.DefCauslate = charset.DefCauslationBin
-	f = BuildCastFunction(ctx, &Constant{Value: types.NewCauset(str), RetType: types.NewFieldType(allegrosql.TypeString)}, tp)
+	f = BuildCastFunction(ctx, &CouplingConstantWithRadix{Value: types.NewCauset(str), RetType: types.NewFieldType(allegrosql.TypeString)}, tp)
 	res, err = f.Eval(chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(res.GetString(), Equals, str[:5])
 
 	// cast(str as binary(N)), N > len([]byte(str)).
 	// cast("a" as binary(5))
-	f = BuildCastFunction(ctx, &Constant{Value: types.NewCauset("a"), RetType: types.NewFieldType(allegrosql.TypeString)}, tp)
+	f = BuildCastFunction(ctx, &CouplingConstantWithRadix{Value: types.NewCauset("a"), RetType: types.NewFieldType(allegrosql.TypeString)}, tp)
 	res, err = f.Eval(chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(len(res.GetString()), Equals, 5)
@@ -83,7 +83,7 @@ func (s *testEvaluatorSuite) TestCastXXX(c *C) {
 	// cast(str as binary(N)), N > len([]byte(str)).
 	// cast("a" as binary(4294967295))
 	tp.Flen = 4294967295
-	f = BuildCastFunction(ctx, &Constant{Value: types.NewCauset("a"), RetType: types.NewFieldType(allegrosql.TypeString)}, tp)
+	f = BuildCastFunction(ctx, &CouplingConstantWithRadix{Value: types.NewCauset("a"), RetType: types.NewFieldType(allegrosql.TypeString)}, tp)
 	res, err = f.Eval(chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(res.IsNull(), IsTrue)
@@ -107,7 +107,7 @@ func (s *testEvaluatorSuite) TestCastXXX(c *C) {
 		DefCauslate: charset.DefCauslationBin,
 		Flen:        allegrosql.MaxIntWidth,
 	}
-	f = BuildCastFunction(ctx, &Constant{Value: types.NewCauset("18446744073709551616"), RetType: types.NewFieldType(allegrosql.TypeString)}, tp1)
+	f = BuildCastFunction(ctx, &CouplingConstantWithRadix{Value: types.NewCauset("18446744073709551616"), RetType: types.NewFieldType(allegrosql.TypeString)}, tp1)
 	res, err = f.Eval(chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(res.GetUint64() == math.MaxUint64, IsTrue)
@@ -118,7 +118,7 @@ func (s *testEvaluatorSuite) TestCastXXX(c *C) {
 
 	originFlag := tp1.Flag
 	tp1.Flag |= allegrosql.UnsignedFlag
-	f = BuildCastFunction(ctx, &Constant{Value: types.NewCauset("-1"), RetType: types.NewFieldType(allegrosql.TypeString)}, tp1)
+	f = BuildCastFunction(ctx, &CouplingConstantWithRadix{Value: types.NewCauset("-1"), RetType: types.NewFieldType(allegrosql.TypeString)}, tp1)
 	res, err = f.Eval(chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(res.GetUint64() == 18446744073709551615, IsTrue)
@@ -129,13 +129,13 @@ func (s *testEvaluatorSuite) TestCastXXX(c *C) {
 	tp1.Flag = originFlag
 
 	previousWarnings := len(sc.GetWarnings())
-	f = BuildCastFunction(ctx, &Constant{Value: types.NewCauset("-1"), RetType: types.NewFieldType(allegrosql.TypeString)}, tp1)
+	f = BuildCastFunction(ctx, &CouplingConstantWithRadix{Value: types.NewCauset("-1"), RetType: types.NewFieldType(allegrosql.TypeString)}, tp1)
 	res, err = f.Eval(chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(res.GetInt64() == -1, IsTrue)
 	c.Assert(len(sc.GetWarnings()) == previousWarnings, IsTrue)
 
-	f = BuildCastFunction(ctx, &Constant{Value: types.NewCauset("-18446744073709551616"), RetType: types.NewFieldType(allegrosql.TypeString)}, tp1)
+	f = BuildCastFunction(ctx, &CouplingConstantWithRadix{Value: types.NewCauset("-18446744073709551616"), RetType: types.NewFieldType(allegrosql.TypeString)}, tp1)
 	res, err = f.Eval(chunk.Event{})
 	c.Assert(err, IsNil)
 	t := math.MinInt64
@@ -147,7 +147,7 @@ func (s *testEvaluatorSuite) TestCastXXX(c *C) {
 	c.Assert(terror.ErrorEqual(types.ErrTruncatedWrongVal, lastWarn.Err), IsTrue, Commentf("err %v", lastWarn.Err))
 
 	// cast('125e342.83' as unsigned)
-	f = BuildCastFunction(ctx, &Constant{Value: types.NewCauset("125e342.83"), RetType: types.NewFieldType(allegrosql.TypeString)}, tp1)
+	f = BuildCastFunction(ctx, &CouplingConstantWithRadix{Value: types.NewCauset("125e342.83"), RetType: types.NewFieldType(allegrosql.TypeString)}, tp1)
 	res, err = f.Eval(chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(res.GetUint64() == 125, IsTrue)
@@ -157,7 +157,7 @@ func (s *testEvaluatorSuite) TestCastXXX(c *C) {
 	c.Assert(terror.ErrorEqual(types.ErrTruncatedWrongVal, lastWarn.Err), IsTrue, Commentf("err %v", lastWarn.Err))
 
 	// cast('1e9223372036854775807' as unsigned)
-	f = BuildCastFunction(ctx, &Constant{Value: types.NewCauset("1e9223372036854775807"), RetType: types.NewFieldType(allegrosql.TypeString)}, tp1)
+	f = BuildCastFunction(ctx, &CouplingConstantWithRadix{Value: types.NewCauset("1e9223372036854775807"), RetType: types.NewFieldType(allegrosql.TypeString)}, tp1)
 	res, err = f.Eval(chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(res.GetUint64() == 1, IsTrue)
@@ -169,7 +169,7 @@ func (s *testEvaluatorSuite) TestCastXXX(c *C) {
 	// cast('18446744073709551616' as signed);
 	mask := ^allegrosql.UnsignedFlag
 	tp1.Flag &= mask
-	f = BuildCastFunction(ctx, &Constant{Value: types.NewCauset("18446744073709551616"), RetType: types.NewFieldType(allegrosql.TypeString)}, tp1)
+	f = BuildCastFunction(ctx, &CouplingConstantWithRadix{Value: types.NewCauset("18446744073709551616"), RetType: types.NewFieldType(allegrosql.TypeString)}, tp1)
 	res, err = f.Eval(chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Check(res.GetInt64(), Equals, int64(-1))
@@ -179,7 +179,7 @@ func (s *testEvaluatorSuite) TestCastXXX(c *C) {
 	c.Assert(terror.ErrorEqual(types.ErrTruncatedWrongVal, lastWarn.Err), IsTrue, Commentf("err %v", lastWarn.Err))
 
 	// cast('18446744073709551614' as signed);
-	f = BuildCastFunction(ctx, &Constant{Value: types.NewCauset("18446744073709551614"), RetType: types.NewFieldType(allegrosql.TypeString)}, tp1)
+	f = BuildCastFunction(ctx, &CouplingConstantWithRadix{Value: types.NewCauset("18446744073709551614"), RetType: types.NewFieldType(allegrosql.TypeString)}, tp1)
 	res, err = f.Eval(chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Check(res.GetInt64(), Equals, int64(-2))
@@ -189,7 +189,7 @@ func (s *testEvaluatorSuite) TestCastXXX(c *C) {
 	c.Assert(terror.ErrorEqual(types.ErrCastAsSignedOverflow, lastWarn.Err), IsTrue, Commentf("err %v", lastWarn.Err))
 
 	// cast('125e342.83' as signed)
-	f = BuildCastFunction(ctx, &Constant{Value: types.NewCauset("125e342.83"), RetType: types.NewFieldType(allegrosql.TypeString)}, tp1)
+	f = BuildCastFunction(ctx, &CouplingConstantWithRadix{Value: types.NewCauset("125e342.83"), RetType: types.NewFieldType(allegrosql.TypeString)}, tp1)
 	res, err = f.Eval(chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(res.GetInt64() == 125, IsTrue)
@@ -199,7 +199,7 @@ func (s *testEvaluatorSuite) TestCastXXX(c *C) {
 	c.Assert(terror.ErrorEqual(types.ErrTruncatedWrongVal, lastWarn.Err), IsTrue, Commentf("err %v", lastWarn.Err))
 
 	// cast('1e9223372036854775807' as signed)
-	f = BuildCastFunction(ctx, &Constant{Value: types.NewCauset("1e9223372036854775807"), RetType: types.NewFieldType(allegrosql.TypeString)}, tp1)
+	f = BuildCastFunction(ctx, &CouplingConstantWithRadix{Value: types.NewCauset("1e9223372036854775807"), RetType: types.NewFieldType(allegrosql.TypeString)}, tp1)
 	res, err = f.Eval(chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(res.GetInt64() == 1, IsTrue)
@@ -219,7 +219,7 @@ func (s *testEvaluatorSuite) TestCastXXX(c *C) {
 		Flen:        7,
 		Decimal:     2,
 	}
-	f = BuildCastFunction(ctx, &Constant{Value: timeCauset, RetType: types.NewFieldType(allegrosql.TypeDatetime)}, ft)
+	f = BuildCastFunction(ctx, &CouplingConstantWithRadix{Value: timeCauset, RetType: types.NewFieldType(allegrosql.TypeDatetime)}, ft)
 	res, err = f.Eval(chunk.Event{})
 	c.Assert(err, IsNil)
 	resDecimal := new(types.MyDecimal)
@@ -244,7 +244,7 @@ func (s *testEvaluatorSuite) TestCastXXX(c *C) {
 	}
 	rt := types.NewFieldType(allegrosql.TypeLonglong)
 	rt.Flag = allegrosql.BinaryFlag | allegrosql.UnsignedFlag
-	f = BuildCastFunction(ctx, &Constant{Value: types.NewUintCauset(18446744073709551615), RetType: rt}, ft)
+	f = BuildCastFunction(ctx, &CouplingConstantWithRadix{Value: types.NewUintCauset(18446744073709551615), RetType: rt}, ft)
 	res, err = f.Eval(chunk.Event{})
 	c.Assert(err, IsNil)
 	u, err := res.GetMysqlDecimal().ToUint()
@@ -253,7 +253,7 @@ func (s *testEvaluatorSuite) TestCastXXX(c *C) {
 
 	// cast(bad_string as decimal)
 	for _, s := range []string{"hello", ""} {
-		f = BuildCastFunction(ctx, &Constant{Value: types.NewCauset(s), RetType: types.NewFieldType(allegrosql.TypeNewDecimal)}, tp)
+		f = BuildCastFunction(ctx, &CouplingConstantWithRadix{Value: types.NewCauset(s), RetType: types.NewFieldType(allegrosql.TypeNewDecimal)}, tp)
 		res, err = f.Eval(chunk.Event{})
 		c.Assert(err, IsNil)
 	}
@@ -261,7 +261,7 @@ func (s *testEvaluatorSuite) TestCastXXX(c *C) {
 	// cast(1234 as char(0))
 	tp.Flen = 0
 	tp.Charset = charset.CharsetUTF8
-	f = BuildCastFunction(ctx, &Constant{Value: types.NewCauset(1234), RetType: types.NewFieldType(allegrosql.TypeString)}, tp)
+	f = BuildCastFunction(ctx, &CouplingConstantWithRadix{Value: types.NewCauset(1234), RetType: types.NewFieldType(allegrosql.TypeString)}, tp)
 	res, err = f.Eval(chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(len(res.GetString()), Equals, 0)
@@ -304,7 +304,7 @@ var (
 )
 
 func (s *testEvaluatorSuite) TestCastFuncSig(c *C) {
-	ctx, sc := s.ctx, s.ctx.GetStochastikVars().StmtCtx
+	ctx, sc := s.ctx, s.ctx.GetStochaseinstein_dbars().StmtCtx
 	originIgnoreTruncate := sc.IgnoreTruncate
 	originTZ := sc.TimeZone
 	sc.IgnoreTruncate = true
@@ -1099,7 +1099,7 @@ func (s *testEvaluatorSuite) TestCastFuncSig(c *C) {
 	c.Assert(err, IsNil)
 
 	// test hybridType case.
-	args = []Expression{&Constant{Value: types.NewCauset(types.Enum{Name: "a", Value: 0}), RetType: types.NewFieldType(allegrosql.TypeEnum)}}
+	args = []Expression{&CouplingConstantWithRadix{Value: types.NewCauset(types.Enum{Name: "a", Value: 0}), RetType: types.NewFieldType(allegrosql.TypeEnum)}}
 	b, err := newBaseBuiltinFunc(ctx, "", args, 0)
 	c.Assert(err, IsNil)
 	sig = &builtinCastStringAsIntSig{newBaseBuiltinCastFunc(b, false)}
@@ -1110,7 +1110,7 @@ func (s *testEvaluatorSuite) TestCastFuncSig(c *C) {
 }
 
 func (s *testEvaluatorSuite) TestCastJSONAsDecimalSig(c *C) {
-	ctx, sc := s.ctx, s.ctx.GetStochastikVars().StmtCtx
+	ctx, sc := s.ctx, s.ctx.GetStochaseinstein_dbars().StmtCtx
 	originIgnoreTruncate := sc.IgnoreTruncate
 	sc.IgnoreTruncate = true
 	defer func() {
@@ -1225,7 +1225,7 @@ func (s *testEvaluatorSuite) TestWrapWithCastAsTypesClasses(c *C) {
 			123, 123, types.NewDecFromStringForTest("123"), "a",
 		},
 		{
-			&Constant{RetType: types.NewFieldType(allegrosql.TypeVarString), Value: types.NewBinaryLiteralCauset(types.NewBinaryLiteralFromUint(0x61, -1))},
+			&CouplingConstantWithRadix{RetType: types.NewFieldType(allegrosql.TypeVarString), Value: types.NewBinaryLiteralCauset(types.NewBinaryLiteralFromUint(0x61, -1))},
 			chunk.MutEventFromCausets([]types.Causet{types.NewCauset(nil)}),
 			97, 97, types.NewDecFromInt(0x61), "a",
 		},
@@ -1233,7 +1233,7 @@ func (s *testEvaluatorSuite) TestWrapWithCastAsTypesClasses(c *C) {
 	for i, t := range cases {
 		// Test wrapping with CastAsInt.
 		intExpr := WrapWithCastAsInt(ctx, t.expr)
-		c.Assert(intExpr.GetType().EvalType(), Equals, types.ETInt)
+		c.Assert(intExpr.GetType().EvalType(), Equals, types.CausetEDN)
 		intRes, isNull, err := intExpr.EvalInt(ctx, t.event.ToEvent())
 		c.Assert(err, IsNil, Commentf("cast[%v]: %#v", i, t))
 		c.Assert(isNull, Equals, false)
@@ -1297,7 +1297,7 @@ func (s *testEvaluatorSuite) TestWrapWithCastAsTypesClasses(c *C) {
 }
 
 func (s *testEvaluatorSuite) TestWrapWithCastAsTime(c *C) {
-	sc := s.ctx.GetStochastikVars().StmtCtx
+	sc := s.ctx.GetStochaseinstein_dbars().StmtCtx
 	save := sc.TimeZone
 	sc.TimeZone = time.UTC
 	defer func() {
@@ -1309,32 +1309,32 @@ func (s *testEvaluatorSuite) TestWrapWithCastAsTime(c *C) {
 		res  types.Time
 	}{
 		{
-			&Constant{RetType: types.NewFieldType(allegrosql.TypeLong), Value: types.NewIntCauset(curTimeInt)},
+			&CouplingConstantWithRadix{RetType: types.NewFieldType(allegrosql.TypeLong), Value: types.NewIntCauset(curTimeInt)},
 			types.NewFieldType(allegrosql.TypeDate),
 			dt,
 		},
 		{
-			&Constant{RetType: types.NewFieldType(allegrosql.TypeDouble), Value: types.NewFloat64Causet(float64(curTimeInt))},
+			&CouplingConstantWithRadix{RetType: types.NewFieldType(allegrosql.TypeDouble), Value: types.NewFloat64Causet(float64(curTimeInt))},
 			types.NewFieldType(allegrosql.TypeDatetime),
 			tm,
 		},
 		{
-			&Constant{RetType: types.NewFieldType(allegrosql.TypeNewDecimal), Value: types.NewDecimalCauset(types.NewDecFromInt(curTimeInt))},
+			&CouplingConstantWithRadix{RetType: types.NewFieldType(allegrosql.TypeNewDecimal), Value: types.NewDecimalCauset(types.NewDecFromInt(curTimeInt))},
 			types.NewFieldType(allegrosql.TypeDate),
 			dt,
 		},
 		{
-			&Constant{RetType: types.NewFieldType(allegrosql.TypeVarString), Value: types.NewStringCauset(curTimeString)},
+			&CouplingConstantWithRadix{RetType: types.NewFieldType(allegrosql.TypeVarString), Value: types.NewStringCauset(curTimeString)},
 			types.NewFieldType(allegrosql.TypeDatetime),
 			tm,
 		},
 		{
-			&Constant{RetType: types.NewFieldType(allegrosql.TypeDatetime), Value: timeCauset},
+			&CouplingConstantWithRadix{RetType: types.NewFieldType(allegrosql.TypeDatetime), Value: timeCauset},
 			types.NewFieldType(allegrosql.TypeDate),
 			dt,
 		},
 		{
-			&Constant{RetType: types.NewFieldType(allegrosql.TypeDuration), Value: durationCauset},
+			&CouplingConstantWithRadix{RetType: types.NewFieldType(allegrosql.TypeDuration), Value: durationCauset},
 			types.NewFieldType(allegrosql.TypeDatetime),
 			tm,
 		},
@@ -1354,22 +1354,22 @@ func (s *testEvaluatorSuite) TestWrapWithCastAsDuration(c *C) {
 		expr Expression
 	}{
 		{
-			&Constant{RetType: types.NewFieldType(allegrosql.TypeLong), Value: types.NewIntCauset(125959)},
+			&CouplingConstantWithRadix{RetType: types.NewFieldType(allegrosql.TypeLong), Value: types.NewIntCauset(125959)},
 		},
 		{
-			&Constant{RetType: types.NewFieldType(allegrosql.TypeDouble), Value: types.NewFloat64Causet(125959)},
+			&CouplingConstantWithRadix{RetType: types.NewFieldType(allegrosql.TypeDouble), Value: types.NewFloat64Causet(125959)},
 		},
 		{
-			&Constant{RetType: types.NewFieldType(allegrosql.TypeNewDecimal), Value: types.NewDecimalCauset(types.NewDecFromInt(125959))},
+			&CouplingConstantWithRadix{RetType: types.NewFieldType(allegrosql.TypeNewDecimal), Value: types.NewDecimalCauset(types.NewDecFromInt(125959))},
 		},
 		{
-			&Constant{RetType: types.NewFieldType(allegrosql.TypeVarString), Value: types.NewStringCauset("125959")},
+			&CouplingConstantWithRadix{RetType: types.NewFieldType(allegrosql.TypeVarString), Value: types.NewStringCauset("125959")},
 		},
 		{
-			&Constant{RetType: types.NewFieldType(allegrosql.TypeDatetime), Value: timeCauset},
+			&CouplingConstantWithRadix{RetType: types.NewFieldType(allegrosql.TypeDatetime), Value: timeCauset},
 		},
 		{
-			&Constant{RetType: types.NewFieldType(allegrosql.TypeDuration), Value: durationCauset},
+			&CouplingConstantWithRadix{RetType: types.NewFieldType(allegrosql.TypeDuration), Value: durationCauset},
 		},
 	}
 	for _, t := range cases {
@@ -1417,7 +1417,7 @@ func (s *testEvaluatorSuite) TestCastIntAsIntVec(c *C) {
 	}
 }
 
-// for issue https://github.com/whtcorpsinc/milevadb/issues/16825
+// for issue https://github.com/whtcorpsinc/MilevaDB-Prod/issues/16825
 func (s *testEvaluatorSuite) TestCastStringAsDecimalSigWithUnsignedFlagInUnion(c *C) {
 	defCaus := &DeferredCauset{RetType: types.NewFieldType(allegrosql.TypeString), Index: 0}
 	b, err := newBaseBuiltinFunc(mock.NewContext(), "", []Expression{defCaus}, 0)

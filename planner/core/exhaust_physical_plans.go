@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,23 +19,23 @@ import (
 	"math"
 	"sort"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression/aggregation"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/property"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/collate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/plancodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/ranger"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/set"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/expression/aggregation"
-	"github.com/whtcorpsinc/milevadb/planner/property"
-	"github.com/whtcorpsinc/milevadb/planner/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/collate"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/plancodec"
-	"github.com/whtcorpsinc/milevadb/soliton/ranger"
-	"github.com/whtcorpsinc/milevadb/soliton/set"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
 	"go.uber.org/zap"
 )
 
@@ -877,7 +877,7 @@ func (p *LogicalJoin) constructInnerBlockScanTask(
 		// Cardinality would not be used in cost computation of IndexJoin, set leave it as default nil.
 	}
 	rowSize := ds.TblDefCausHists.GetBlockAvgRowSize(p.ctx, ds.TblDefCauss, ts.StoreType, true)
-	sessVars := ds.ctx.GetStochastikVars()
+	sessVars := ds.ctx.GetStochaseinstein_dbars()
 	INTERLOCKTask := &INTERLOCKTask{
 		blockPlan:         ts,
 		indexPlanFinished: true,
@@ -1033,7 +1033,7 @@ func (p *LogicalJoin) constructInnerIndexScanTask(
 	}
 	is.stats = ds.blockStats.ScaleByExpectCnt(tmpPath.CountAfterAccess)
 	rowSize := is.indexScanRowSize(path.Index, ds, true)
-	sessVars := ds.ctx.GetStochastikVars()
+	sessVars := ds.ctx.GetStochaseinstein_dbars()
 	INTERLOCK.cst = tmpPath.CountAfterAccess * rowSize * sessVars.ScanFactor
 	finalStats := ds.blockStats.ScaleByExpectCnt(rowCount)
 	is.addPushedDownSelection(INTERLOCK, ds, tmpPath, finalStats)
@@ -1053,19 +1053,19 @@ var symmetriINTERLOCK = map[string]string{
 // DefCausWithCmpFuncManager is used in index join to handle the column with compare functions(>=, >, <, <=).
 // It stores the compare functions and build ranges in execution phase.
 type DefCausWithCmpFuncManager struct {
-	TargetDefCaus         *expression.DeferredCauset
-	colLength             int
-	OpType                []string
-	opArg                 []expression.Expression
-	TmpConstant           []*expression.Constant
-	affectedDefCausSchema *expression.Schema
-	compareFuncs          []chunk.CompareFunc
+	TargetDefCaus                *expression.DeferredCauset
+	colLength                    int
+	OpType                       []string
+	opArg                        []expression.Expression
+	TmpCouplingConstantWithRadix []*expression.CouplingConstantWithRadix
+	affectedDefCausSchema        *expression.Schema
+	compareFuncs                 []chunk.CompareFunc
 }
 
 func (cwc *DefCausWithCmpFuncManager) appendNewExpr(opName string, arg expression.Expression, affectedDefCauss []*expression.DeferredCauset) {
 	cwc.OpType = append(cwc.OpType, opName)
 	cwc.opArg = append(cwc.opArg, arg)
-	cwc.TmpConstant = append(cwc.TmpConstant, &expression.Constant{RetType: cwc.TargetDefCaus.RetType})
+	cwc.TmpCouplingConstantWithRadix = append(cwc.TmpCouplingConstantWithRadix, &expression.CouplingConstantWithRadix{RetType: cwc.TargetDefCaus.RetType})
 	for _, col := range affectedDefCauss {
 		if cwc.affectedDefCausSchema.Contains(col) {
 			continue
@@ -1094,14 +1094,14 @@ func (cwc *DefCausWithCmpFuncManager) BuildRangesByRow(ctx stochastikctx.Context
 		if err != nil {
 			return nil, err
 		}
-		cwc.TmpConstant[i].Value = constantArg
-		newExpr, err := expression.NewFunction(ctx, opType, types.NewFieldType(allegrosql.TypeTiny), cwc.TargetDefCaus, cwc.TmpConstant[i])
+		cwc.TmpCouplingConstantWithRadix[i].Value = constantArg
+		newExpr, err := expression.NewFunction(ctx, opType, types.NewFieldType(allegrosql.TypeTiny), cwc.TargetDefCaus, cwc.TmpCouplingConstantWithRadix[i])
 		if err != nil {
 			return nil, err
 		}
 		exprs = append(exprs, newExpr)
 	}
-	ranges, err := ranger.BuildDeferredCausetRange(exprs, ctx.GetStochastikVars().StmtCtx, cwc.TargetDefCaus.RetType, cwc.colLength)
+	ranges, err := ranger.BuildDeferredCausetRange(exprs, ctx.GetStochaseinstein_dbars().StmtCtx, cwc.TargetDefCaus.RetType, cwc.colLength)
 	if err != nil {
 		return nil, err
 	}
@@ -1294,7 +1294,7 @@ func (ijHelper *indexJoinBuildHelper) analyzeLookUpFilters(path *soliton.AccessP
 		var ranges, nextDefCausRange []*ranger.Range
 		var err error
 		if len(colAccesses) > 0 {
-			nextDefCausRange, err = ranger.BuildDeferredCausetRange(colAccesses, ijHelper.join.ctx.GetStochastikVars().StmtCtx, lastPossibleDefCaus.RetType, path.IdxDefCausLens[lastDefCausPos])
+			nextDefCausRange, err = ranger.BuildDeferredCausetRange(colAccesses, ijHelper.join.ctx.GetStochaseinstein_dbars().StmtCtx, lastPossibleDefCaus.RetType, path.IdxDefCausLens[lastDefCausPos])
 			if err != nil {
 				return false, err
 			}
@@ -1370,7 +1370,7 @@ func (ijHelper *indexJoinBuildHelper) buildTemplateRange(matchedKeyCnt int, eqAn
 			HighVal: make([]types.Causet, pointLength),
 		})
 	}
-	sc := ijHelper.join.ctx.GetStochastikVars().StmtCtx
+	sc := ijHelper.join.ctx.GetStochaseinstein_dbars().StmtCtx
 	for i, j := 0, 0; j < len(eqAndInFuncs); i++ {
 		// This position is occupied by join key.
 		if ijHelper.curIdxOff2KeyOff[i] != -1 {
@@ -1457,7 +1457,7 @@ func (p *LogicalJoin) tryToGetIndexJoin(prop *property.PhysicalProperty) (indexJ
 
 			// Generate warning message to client.
 			warning := ErrInternal.GenWithStack(errMsg)
-			p.ctx.GetStochastikVars().StmtCtx.AppendWarning(warning)
+			p.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(warning)
 		}
 	}()
 
@@ -1552,7 +1552,7 @@ func (p *LogicalJoin) exhaustPhysicalPlans(prop *property.PhysicalProperty) ([]P
 		return nil, false
 	}
 	joins := make([]PhysicalPlan, 0, 8)
-	if p.ctx.GetStochastikVars().AllowBCJ {
+	if p.ctx.GetStochaseinstein_dbars().AllowBCJ {
 		broadCastJoins := p.tryToGetBroadCastJoin(prop)
 		if (p.preferJoinType & preferBCJoin) > 0 {
 			return broadCastJoins, true
@@ -1718,7 +1718,7 @@ func (lt *LogicalTopN) getPhysTopN(prop *property.PhysicalProperty) []PhysicalPl
 		if !lt.canPushToINTERLOCK() {
 			errMsg := "Optimizer Hint LIMIT_TO_INTERLOCK is inapplicable"
 			warning := ErrInternal.GenWithStack(errMsg)
-			lt.ctx.GetStochastikVars().StmtCtx.AppendWarning(warning)
+			lt.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(warning)
 			lt.limitHints.preferLimitToINTERLOCK = false
 		}
 	}
@@ -1749,7 +1749,7 @@ func (lt *LogicalTopN) getPhysLimits(prop *property.PhysicalProperty) []Physical
 		if !lt.canPushToINTERLOCK() {
 			errMsg := "Optimizer Hint LIMIT_TO_INTERLOCK is inapplicable"
 			warning := ErrInternal.GenWithStack(errMsg)
-			lt.ctx.GetStochastikVars().StmtCtx.AppendWarning(warning)
+			lt.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(warning)
 			lt.limitHints.preferLimitToINTERLOCK = false
 		}
 	}
@@ -1814,7 +1814,7 @@ func (la *LogicalApply) exhaustPhysicalPlans(prop *property.PhysicalProperty) ([
 	}
 
 	var canUseCache bool
-	if cacheHitRatio > 0.1 && la.ctx.GetStochastikVars().NestedLoopJoinCacheCapacity > 0 {
+	if cacheHitRatio > 0.1 && la.ctx.GetStochaseinstein_dbars().NestedLoopJoinCacheCapacity > 0 {
 		canUseCache = true
 	} else {
 		canUseCache = false
@@ -1888,7 +1888,7 @@ func (la *LogicalAggregation) getEnforcedStreamAggs(prop *property.PhysicalPrope
 	if la.HasDistinct() {
 		// TODO: remove AllowDistinctAggPushDown after the cost estimation of distinct pushdown is implemented.
 		// If AllowDistinctAggPushDown is set to true, we should not consider RootTask.
-		if !la.canPushToINTERLOCK() || !la.ctx.GetStochastikVars().AllowDistinctAggPushDown {
+		if !la.canPushToINTERLOCK() || !la.ctx.GetStochaseinstein_dbars().AllowDistinctAggPushDown {
 			taskTypes = []property.TaskType{property.RootTaskType}
 		}
 	} else if !la.aggHints.preferAggToINTERLOCK {
@@ -1959,7 +1959,7 @@ func (la *LogicalAggregation) getStreamAggs(prop *property.PhysicalProperty) []P
 		if la.HasDistinct() {
 			// TODO: remove AllowDistinctAggPushDown after the cost estimation of distinct pushdown is implemented.
 			// If AllowDistinctAggPushDown is set to true, we should not consider RootTask.
-			if !la.canPushToINTERLOCK() || !la.ctx.GetStochastikVars().AllowDistinctAggPushDown {
+			if !la.canPushToINTERLOCK() || !la.ctx.GetStochaseinstein_dbars().AllowDistinctAggPushDown {
 				taskTypes = []property.TaskType{property.RootTaskType}
 			} else {
 				if !la.distinctArgsMeetsProperty() {
@@ -1996,13 +1996,13 @@ func (la *LogicalAggregation) getHashAggs(prop *property.PhysicalProperty) []Phy
 	}
 	hashAggs := make([]PhysicalPlan, 0, len(prop.GetAllPossibleChildTaskTypes()))
 	taskTypes := []property.TaskType{property.INTERLOCKSingleReadTaskType, property.CoFIDeloubleReadTaskType}
-	if la.ctx.GetStochastikVars().AllowBCJ {
+	if la.ctx.GetStochaseinstein_dbars().AllowBCJ {
 		taskTypes = append(taskTypes, property.INTERLOCKTiFlashLocalReadTaskType)
 	}
 	if la.HasDistinct() {
 		// TODO: remove AllowDistinctAggPushDown after the cost estimation of distinct pushdown is implemented.
 		// If AllowDistinctAggPushDown is set to true, we should not consider RootTask.
-		if !la.canPushToINTERLOCK() || !la.ctx.GetStochastikVars().AllowDistinctAggPushDown {
+		if !la.canPushToINTERLOCK() || !la.ctx.GetStochaseinstein_dbars().AllowDistinctAggPushDown {
 			taskTypes = []property.TaskType{property.RootTaskType}
 		}
 	} else if !la.aggHints.preferAggToINTERLOCK {
@@ -2027,7 +2027,7 @@ func (la *LogicalAggregation) ResetHintIfConflicted() (preferHash bool, preferSt
 	if preferHash && preferStream {
 		errMsg := "Optimizer aggregation hints are conflicted"
 		warning := ErrInternal.GenWithStack(errMsg)
-		la.ctx.GetStochastikVars().StmtCtx.AppendWarning(warning)
+		la.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(warning)
 		la.aggHints.preferAggType = 0
 		preferHash, preferStream = false, false
 	}
@@ -2039,7 +2039,7 @@ func (la *LogicalAggregation) exhaustPhysicalPlans(prop *property.PhysicalProper
 		if !la.canPushToINTERLOCK() {
 			errMsg := "Optimizer Hint AGG_TO_INTERLOCK is inapplicable"
 			warning := ErrInternal.GenWithStack(errMsg)
-			la.ctx.GetStochastikVars().StmtCtx.AppendWarning(warning)
+			la.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(warning)
 			la.aggHints.preferAggToINTERLOCK = false
 		}
 	}
@@ -2061,7 +2061,7 @@ func (la *LogicalAggregation) exhaustPhysicalPlans(prop *property.PhysicalProper
 	if streamAggs == nil && preferStream && !prop.IsEmpty() {
 		errMsg := "Optimizer Hint STREAM_AGG is inapplicable"
 		warning := ErrInternal.GenWithStack(errMsg)
-		la.ctx.GetStochastikVars().StmtCtx.AppendWarning(warning)
+		la.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(warning)
 	}
 
 	return aggs, !(preferStream || preferHash)
@@ -2094,7 +2094,7 @@ func (p *LogicalLimit) exhaustPhysicalPlans(prop *property.PhysicalProperty) ([]
 		if !p.canPushToINTERLOCK() {
 			errMsg := "Optimizer Hint LIMIT_TO_INTERLOCK is inapplicable"
 			warning := ErrInternal.GenWithStack(errMsg)
-			p.ctx.GetStochastikVars().StmtCtx.AppendWarning(warning)
+			p.ctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(warning)
 			p.limitHints.preferLimitToINTERLOCK = false
 		}
 	}

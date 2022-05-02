@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,24 +28,24 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore"
-	"github.com/whtcorpsinc/milevadb/causetstore/mockstore/cluster"
-	"github.com/whtcorpsinc/milevadb/config"
-	"github.com/whtcorpsinc/milevadb/dbs"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/errno"
-	"github.com/whtcorpsinc/milevadb/meta"
-	"github.com/whtcorpsinc/milevadb/petri"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton/israce"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/soliton/solitonutil"
-	"github.com/whtcorpsinc/milevadb/soliton/testkit"
-	"github.com/whtcorpsinc/milevadb/stochastik"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/mockstore/cluster"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/dbs"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/errno"
+	"github.com/whtcorpsinc/MilevaDB-Prod/meta"
+	"github.com/whtcorpsinc/MilevaDB-Prod/petri"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/israce"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/solitonutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/testkit"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastik"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 var _ = Suite(&testIntegrationSuite1{&testIntegrationSuite{}})
@@ -193,7 +193,7 @@ func (s *testIntegrationSuite3) TestCreateTableIfNotExists(c *C) {
 
 	// Test duplicate create-block with `LIKE` clause
 	tk.MustExec("create block if not exists ct like ct1;")
-	warnings := tk.Se.GetStochastikVars().StmtCtx.GetWarnings()
+	warnings := tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 	c.Assert(len(warnings), GreaterEqual, 1)
 	lastWarn := warnings[len(warnings)-1]
 	c.Assert(terror.ErrorEqual(schemareplicant.ErrTableExists, lastWarn.Err), IsTrue, Commentf("err %v", lastWarn.Err))
@@ -201,7 +201,7 @@ func (s *testIntegrationSuite3) TestCreateTableIfNotExists(c *C) {
 
 	// Test duplicate create-block without `LIKE` clause
 	tk.MustExec("create block if not exists ct(b bigint, c varchar(60));")
-	warnings = tk.Se.GetStochastikVars().StmtCtx.GetWarnings()
+	warnings = tk.Se.GetStochaseinstein_dbars().StmtCtx.GetWarnings()
 	c.Assert(len(warnings), GreaterEqual, 1)
 	lastWarn = warnings[len(warnings)-1]
 	c.Assert(terror.ErrorEqual(schemareplicant.ErrTableExists, lastWarn.Err), IsTrue)
@@ -1576,7 +1576,7 @@ func (s *testIntegrationSuite3) TestAlterDeferredCauset(c *C) {
 func (s *testIntegrationSuite) assertWarningExec(tk *testkit.TestKit, c *C, allegrosql string, expectedWarn *terror.Error) {
 	_, err := tk.Exec(allegrosql)
 	c.Assert(err, IsNil)
-	st := tk.Se.GetStochastikVars().StmtCtx
+	st := tk.Se.GetStochaseinstein_dbars().StmtCtx
 	c.Assert(st.WarningCount(), Equals, uint16(1))
 	c.Assert(expectedWarn.Equal(st.GetWarnings()[0].Err), IsTrue, Commentf("error:%v", err))
 }
@@ -1963,7 +1963,7 @@ func (s *testIntegrationSuite5) TestChangingDBCharset(c *C) {
 	tk.MustExec("ALTER SCHEMA CHARACTER SET = 'utf8mb4' COLLATE = 'utf8mb4_general_ci'")
 	verifyDBCharsetAndDefCauslate("alterdb2", "utf8mb4", "utf8mb4_general_ci")
 
-	// Test changing charset of schemaReplicant with uppercase name. See https://github.com/whtcorpsinc/milevadb/issues/19273.
+	// Test changing charset of schemaReplicant with uppercase name. See https://github.com/whtcorpsinc/MilevaDB-Prod/issues/19273.
 	tk.MustExec("drop database if exists TEST_UPPERCASE_DB_CHARSET;")
 	tk.MustExec("create database TEST_UPPERCASE_DB_CHARSET;")
 	tk.MustExec("use TEST_UPPERCASE_DB_CHARSET;")

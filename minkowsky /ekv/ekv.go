@@ -3,10 +3,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/whtcorpsinc/MilevaDB/config"
-	"github.com/whtcorpsinc/MilevaDB/store/einsteindb/oracle"
-	"github.com/whtcorpsinc/MilevaDB/util/execdetails"
-	"github.com/whtcorpsinc/MilevaDB/util/memory"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/store/einsteindb/oracle"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/execdetails"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/memory"
 )
 
 // Transaction options

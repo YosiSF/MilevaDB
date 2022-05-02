@@ -18,8 +18,8 @@ import (
 	"encoding/binary"
 	"strconv"
 
-	"github.com/whtcorpsinc/milevadb/BerolinaSQL/errors/binlog"
-	"github.com/whtcorpsinc/milevadb/BerolinaSQL/core/eekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/errors/binlog"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/core/eekv"
 )
 
 //Hash pair for (field, value)

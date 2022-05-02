@@ -1,8 +1,8 @@
-// INTERLOCKyright 2020 The ql Authors. All rights reserved.
+Copuright 2021 Whtcorps Inc; EinsteinDB and MilevaDB aithors; Licensed Under Apache 2.0. All Rights Reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSES/QL-LICENSE file.
 
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,13 +30,13 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/fidelpb/go-fidelpb"
-	"github.com/whtcorpsinc/milevadb/causetstore/einsteindb/oracle"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/stmtctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb/oracle"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/stmtctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"go.uber.org/zap"
 )
 
@@ -312,7 +312,7 @@ func (c *dateLiteralFunctionClass) getFunction(ctx stochastikctx.Context, args [
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	con, ok := args[0].(*Constant)
+	con, ok := args[0].(*CouplingConstantWithRadix)
 	if !ok {
 		panic("Unexpected parameter for date literal")
 	}
@@ -324,7 +324,7 @@ func (c *dateLiteralFunctionClass) getFunction(ctx stochastikctx.Context, args [
 	if !datePattern.MatchString(str) {
 		return nil, types.ErrWrongValue.GenWithStackByArgs(types.DateTimeStr, str)
 	}
-	tm, err := types.ParseDate(ctx.GetStochastikVars().StmtCtx, str)
+	tm, err := types.ParseDate(ctx.GetStochaseinstein_dbars().StmtCtx, str)
 	if err != nil {
 		return nil, err
 	}
@@ -351,7 +351,7 @@ func (b *builtinDateLiteralSig) Clone() builtinFunc {
 // evalTime evals DATE 'stringLit'.
 // See https://dev.allegrosql.com/doc/refman/5.7/en/date-and-time-literals.html
 func (b *builtinDateLiteralSig) evalTime(event chunk.Event) (types.Time, bool, error) {
-	mode := b.ctx.GetStochastikVars().ALLEGROSQLMode
+	mode := b.ctx.GetStochaseinstein_dbars().ALLEGROSQLMode
 	if mode.HasNoZeroDateMode() && b.literal.IsZero() {
 		return b.literal, true, types.ErrWrongValue.GenWithStackByArgs(types.DateTimeStr, b.literal.String())
 	}
@@ -369,7 +369,7 @@ func (c *dateDiffFunctionClass) getFunction(ctx stochastikctx.Context, args []Ex
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETDatetime, types.ETDatetime)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETDatetime, types.ETDatetime)
 	if err != nil {
 		return nil, err
 	}
@@ -542,7 +542,7 @@ func (b *builtinTimeTimeTimeDiffSig) evalDuration(event chunk.Event) (d types.Du
 		return d, isNull, err
 	}
 
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	d, isNull, err = calculateTimeDiff(sc, lhs, rhs)
 	return d, isNull, err
 }
@@ -570,7 +570,7 @@ func (b *builtinDurationStringTimeDiffSig) evalDuration(event chunk.Event) (d ty
 		return d, isNull, err
 	}
 
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	rhs, _, isDuration, err := convertStringToDuration(sc, rhsStr, int8(b.tp.Decimal))
 	if err != nil || !isDuration {
 		return d, true, err
@@ -603,7 +603,7 @@ func (b *builtinStringDurationTimeDiffSig) evalDuration(event chunk.Event) (d ty
 		return d, isNull, err
 	}
 
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	lhs, _, isDuration, err := convertStringToDuration(sc, lhsStr, int8(b.tp.Decimal))
 	if err != nil || !isDuration {
 		return d, true, err
@@ -632,7 +632,7 @@ func calculateDurationTimeDiff(ctx stochastikctx.Context, lhs, rhs types.Duratio
 
 	d.Duration, err = types.TruncateOverflowMyALLEGROSQLTime(d.Duration)
 	if types.ErrTruncatedWrongVal.Equal(err) {
-		sc := ctx.GetStochastikVars().StmtCtx
+		sc := ctx.GetStochaseinstein_dbars().StmtCtx
 		err = sc.HandleTruncate(err)
 	}
 	return d, err != nil, err
@@ -661,7 +661,7 @@ func (b *builtinTimeStringTimeDiffSig) evalDuration(event chunk.Event) (d types.
 		return d, isNull, err
 	}
 
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	_, rhs, isDuration, err := convertStringToDuration(sc, rhsStr, int8(b.tp.Decimal))
 	if err != nil || isDuration {
 		return d, true, err
@@ -694,7 +694,7 @@ func (b *builtinStringTimeTimeDiffSig) evalDuration(event chunk.Event) (d types.
 		return d, isNull, err
 	}
 
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	_, lhs, isDuration, err := convertStringToDuration(sc, lhsStr, int8(b.tp.Decimal))
 	if err != nil || isDuration {
 		return d, true, err
@@ -727,7 +727,7 @@ func (b *builtinStringStringTimeDiffSig) evalDuration(event chunk.Event) (d type
 		return d, isNull, err
 	}
 
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	fsp := int8(b.tp.Decimal)
 	lhsDur, lhsTime, lhsIsDuration, err := convertStringToDuration(sc, lhs, fsp)
 	if err != nil {
@@ -852,7 +852,7 @@ func (c *fromDaysFunctionClass) getFunction(ctx stochastikctx.Context, args []Ex
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETDatetime, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETDatetime, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
@@ -891,7 +891,7 @@ func (c *hourFunctionClass) getFunction(ctx stochastikctx.Context, args []Expres
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETDuration)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETDuration)
 	if err != nil {
 		return nil, err
 	}
@@ -930,7 +930,7 @@ func (c *minuteFunctionClass) getFunction(ctx stochastikctx.Context, args []Expr
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETDuration)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETDuration)
 	if err != nil {
 		return nil, err
 	}
@@ -969,7 +969,7 @@ func (c *secondFunctionClass) getFunction(ctx stochastikctx.Context, args []Expr
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETDuration)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETDuration)
 	if err != nil {
 		return nil, err
 	}
@@ -1008,7 +1008,7 @@ func (c *microSecondFunctionClass) getFunction(ctx stochastikctx.Context, args [
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETDuration)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETDuration)
 	if err != nil {
 		return nil, err
 	}
@@ -1047,7 +1047,7 @@ func (c *monthFunctionClass) getFunction(ctx stochastikctx.Context, args []Expre
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETDatetime)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETDatetime)
 	if err != nil {
 		return nil, err
 	}
@@ -1077,7 +1077,7 @@ func (b *builtinMonthSig) evalInt(event chunk.Event) (int64, bool, error) {
 	}
 
 	if date.IsZero() {
-		if b.ctx.GetStochastikVars().ALLEGROSQLMode.HasNoZeroDateMode() {
+		if b.ctx.GetStochaseinstein_dbars().ALLEGROSQLMode.HasNoZeroDateMode() {
 			return 0, true, handleInvalidTimeError(b.ctx, types.ErrWrongValue.GenWithStackByArgs(types.DateTimeStr, date.String()))
 		}
 		return 0, false, nil
@@ -1099,7 +1099,7 @@ func (c *monthNameFunctionClass) getFunction(ctx stochastikctx.Context, args []E
 	if err != nil {
 		return nil, err
 	}
-	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochastikVars().GetCharsetInfo()
+	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 	bf.tp.Flen = 10
 	sig := &builtinMonthNameSig{bf}
 	sig.setPbCode(fidelpb.ScalarFuncSig_MonthName)
@@ -1122,7 +1122,7 @@ func (b *builtinMonthNameSig) evalString(event chunk.Event) (string, bool, error
 		return "", true, handleInvalidTimeError(b.ctx, err)
 	}
 	mon := arg.Month()
-	if (arg.IsZero() && b.ctx.GetStochastikVars().ALLEGROSQLMode.HasNoZeroDateMode()) || mon < 0 || mon > len(types.MonthNames) {
+	if (arg.IsZero() && b.ctx.GetStochaseinstein_dbars().ALLEGROSQLMode.HasNoZeroDateMode()) || mon < 0 || mon > len(types.MonthNames) {
 		return "", true, handleInvalidTimeError(b.ctx, types.ErrWrongValue.GenWithStackByArgs(types.DateTimeStr, arg.String()))
 	} else if mon == 0 || arg.IsZero() {
 		return "", true, nil
@@ -1142,7 +1142,7 @@ func (c *dayNameFunctionClass) getFunction(ctx stochastikctx.Context, args []Exp
 	if err != nil {
 		return nil, err
 	}
-	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochastikVars().GetCharsetInfo()
+	bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 	bf.tp.Flen = 10
 	sig := &builtinDayNameSig{bf}
 	sig.setPbCode(fidelpb.ScalarFuncSig_DayName)
@@ -1208,7 +1208,7 @@ func (c *dayOfMonthFunctionClass) getFunction(ctx stochastikctx.Context, args []
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETDatetime)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETDatetime)
 	if err != nil {
 		return nil, err
 	}
@@ -1236,7 +1236,7 @@ func (b *builtinDayOfMonthSig) evalInt(event chunk.Event) (int64, bool, error) {
 		return 0, true, handleInvalidTimeError(b.ctx, err)
 	}
 	if arg.IsZero() {
-		if b.ctx.GetStochastikVars().ALLEGROSQLMode.HasNoZeroDateMode() {
+		if b.ctx.GetStochaseinstein_dbars().ALLEGROSQLMode.HasNoZeroDateMode() {
 			return 0, true, handleInvalidTimeError(b.ctx, types.ErrWrongValue.GenWithStackByArgs(types.DateTimeStr, arg.String()))
 		}
 		return 0, false, nil
@@ -1252,7 +1252,7 @@ func (c *dayOfWeekFunctionClass) getFunction(ctx stochastikctx.Context, args []E
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETDatetime)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETDatetime)
 	if err != nil {
 		return nil, err
 	}
@@ -1294,7 +1294,7 @@ func (c *dayOfYearFunctionClass) getFunction(ctx stochastikctx.Context, args []E
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETDatetime)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETDatetime)
 	if err != nil {
 		return nil, err
 	}
@@ -1339,10 +1339,10 @@ func (c *weekFunctionClass) getFunction(ctx stochastikctx.Context, args []Expres
 
 	argTps := []types.EvalType{types.ETDatetime}
 	if len(args) == 2 {
-		argTps = append(argTps, types.ETInt)
+		argTps = append(argTps, types.CausetEDN)
 	}
 
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, argTps...)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, argTps...)
 	if err != nil {
 		return nil, err
 	}
@@ -1416,7 +1416,7 @@ func (b *builtinWeekWithoutModeSig) evalInt(event chunk.Event) (int64, bool, err
 	}
 
 	mode := 0
-	modeStr, ok := b.ctx.GetStochastikVars().GetSystemVar(variable.DefaultWeekFormat)
+	modeStr, ok := b.ctx.GetStochaseinstein_dbars().GetSystemVar(variable.DefaultWeekFormat)
 	if ok && modeStr != "" {
 		mode, err = strconv.Atoi(modeStr)
 		if err != nil {
@@ -1437,7 +1437,7 @@ func (c *weekDayFunctionClass) getFunction(ctx stochastikctx.Context, args []Exp
 		return nil, err
 	}
 
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETDatetime)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETDatetime)
 	if err != nil {
 		return nil, err
 	}
@@ -1480,7 +1480,7 @@ func (c *weekOfYearFunctionClass) getFunction(ctx stochastikctx.Context, args []
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETDatetime)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETDatetime)
 	if err != nil {
 		return nil, err
 	}
@@ -1525,7 +1525,7 @@ func (c *yearFunctionClass) getFunction(ctx stochastikctx.Context, args []Expres
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETDatetime)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETDatetime)
 	if err != nil {
 		return nil, err
 	}
@@ -1555,7 +1555,7 @@ func (b *builtinYearSig) evalInt(event chunk.Event) (int64, bool, error) {
 	}
 
 	if date.IsZero() {
-		if b.ctx.GetStochastikVars().ALLEGROSQLMode.HasNoZeroDateMode() {
+		if b.ctx.GetStochaseinstein_dbars().ALLEGROSQLMode.HasNoZeroDateMode() {
 			return 0, true, handleInvalidTimeError(b.ctx, types.ErrWrongValue.GenWithStackByArgs(types.DateTimeStr, date.String()))
 		}
 		return 0, false, nil
@@ -1573,10 +1573,10 @@ func (c *yearWeekFunctionClass) getFunction(ctx stochastikctx.Context, args []Ex
 	}
 	argTps := []types.EvalType{types.ETDatetime}
 	if len(args) == 2 {
-		argTps = append(argTps, types.ETInt)
+		argTps = append(argTps, types.CausetEDN)
 	}
 
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, argTps...)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, argTps...)
 	if err != nil {
 		return nil, err
 	}
@@ -1739,7 +1739,7 @@ func evalFromUnixTime(ctx stochastikctx.Context, fsp int8, unixTimeStamp *types.
 		fsp = types.MaxFsp
 	}
 
-	sc := ctx.GetStochastikVars().StmtCtx
+	sc := ctx.GetStochaseinstein_dbars().StmtCtx
 	tmp := time.Unix(integralPart, fractionalPart).In(sc.TimeZone)
 	t, err := convertTimeToMysqlTime(tmp, fsp, types.ModeHalfEven)
 	if err != nil {
@@ -1847,7 +1847,7 @@ type strToDateFunctionClass struct {
 
 func (c *strToDateFunctionClass) getRetTp(ctx stochastikctx.Context, arg Expression) (tp byte, fsp int8) {
 	tp = allegrosql.TypeDatetime
-	if _, ok := arg.(*Constant); !ok {
+	if _, ok := arg.(*CouplingConstantWithRadix); !ok {
 		return tp, types.MaxFsp
 	}
 	strArg := WrapWithCastAsString(ctx, arg)
@@ -1931,12 +1931,12 @@ func (b *builtinStrToDateDateSig) evalTime(event chunk.Event) (types.Time, bool,
 		return types.ZeroTime, isNull, err
 	}
 	var t types.Time
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	succ := t.StrToDate(sc, date, format)
 	if !succ {
 		return types.ZeroTime, true, handleInvalidTimeError(b.ctx, types.ErrWrongValue.GenWithStackByArgs(types.DateTimeStr, t.String()))
 	}
-	if b.ctx.GetStochastikVars().ALLEGROSQLMode.HasNoZeroDateMode() && (t.Year() == 0 || t.Month() == 0 || t.Day() == 0) {
+	if b.ctx.GetStochaseinstein_dbars().ALLEGROSQLMode.HasNoZeroDateMode() && (t.Year() == 0 || t.Month() == 0 || t.Day() == 0) {
 		return types.ZeroTime, true, handleInvalidTimeError(b.ctx, types.ErrWrongValue.GenWithStackByArgs(types.DateTimeStr, t.String()))
 	}
 	t.SetType(allegrosql.TypeDate)
@@ -1964,12 +1964,12 @@ func (b *builtinStrToDateDatetimeSig) evalTime(event chunk.Event) (types.Time, b
 		return types.ZeroTime, isNull, err
 	}
 	var t types.Time
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	succ := t.StrToDate(sc, date, format)
 	if !succ {
 		return types.ZeroTime, true, handleInvalidTimeError(b.ctx, types.ErrWrongValue.GenWithStackByArgs(types.DateTimeStr, t.String()))
 	}
-	if b.ctx.GetStochastikVars().ALLEGROSQLMode.HasNoZeroDateMode() && (t.Year() == 0 || t.Month() == 0 || t.Day() == 0) {
+	if b.ctx.GetStochaseinstein_dbars().ALLEGROSQLMode.HasNoZeroDateMode() && (t.Year() == 0 || t.Month() == 0 || t.Day() == 0) {
 		return types.ZeroTime, true, handleInvalidTimeError(b.ctx, types.ErrWrongValue.GenWithStackByArgs(types.DateTimeStr, t.String()))
 	}
 	t.SetType(allegrosql.TypeDatetime)
@@ -2000,12 +2000,12 @@ func (b *builtinStrToDateDurationSig) evalDuration(event chunk.Event) (types.Dur
 		return types.Duration{}, isNull, err
 	}
 	var t types.Time
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	succ := t.StrToDate(sc, date, format)
 	if !succ {
 		return types.Duration{}, true, handleInvalidTimeError(b.ctx, types.ErrWrongValue.GenWithStackByArgs(types.DateTimeStr, t.String()))
 	}
-	if b.ctx.GetStochastikVars().ALLEGROSQLMode.HasNoZeroDateMode() && (t.Year() == 0 || t.Month() == 0 || t.Day() == 0) {
+	if b.ctx.GetStochaseinstein_dbars().ALLEGROSQLMode.HasNoZeroDateMode() && (t.Year() == 0 || t.Month() == 0 || t.Day() == 0) {
 		return types.Duration{}, true, handleInvalidTimeError(b.ctx, types.ErrWrongValue.GenWithStackByArgs(types.DateTimeStr, t.String()))
 	}
 	t.SetFsp(int8(b.tp.Decimal))
@@ -2023,7 +2023,7 @@ func (c *sysDateFunctionClass) getFunction(ctx stochastikctx.Context, args []Exp
 	}
 	var argTps = make([]types.EvalType, 0)
 	if len(args) == 1 {
-		argTps = append(argTps, types.ETInt)
+		argTps = append(argTps, types.CausetEDN)
 	}
 	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETDatetime, argTps...)
 	if err != nil {
@@ -2060,7 +2060,7 @@ func (b *builtinSysDateWithFspSig) evalTime(event chunk.Event) (d types.Time, is
 		return types.ZeroTime, isNull, err
 	}
 
-	loc := b.ctx.GetStochastikVars().Location()
+	loc := b.ctx.GetStochaseinstein_dbars().Location()
 	now := time.Now().In(loc)
 	result, err := convertTimeToMysqlTime(now, int8(fsp), types.ModeHalfEven)
 	if err != nil {
@@ -2082,7 +2082,7 @@ func (b *builtinSysDateWithoutFspSig) Clone() builtinFunc {
 // evalTime evals SYSDATE().
 // See https://dev.allegrosql.com/doc/refman/5.7/en/date-and-time-functions.html#function_sysdate
 func (b *builtinSysDateWithoutFspSig) evalTime(event chunk.Event) (d types.Time, isNull bool, err error) {
-	tz := b.ctx.GetStochastikVars().Location()
+	tz := b.ctx.GetStochaseinstein_dbars().Location()
 	now := time.Now().In(tz)
 	result, err := convertTimeToMysqlTime(now, 0, types.ModeHalfEven)
 	if err != nil {
@@ -2121,7 +2121,7 @@ func (b *builtinCurrentDateSig) Clone() builtinFunc {
 // evalTime evals CURDATE().
 // See https://dev.allegrosql.com/doc/refman/5.7/en/date-and-time-functions.html#function_curdate
 func (b *builtinCurrentDateSig) evalTime(event chunk.Event) (d types.Time, isNull bool, err error) {
-	tz := b.ctx.GetStochastikVars().Location()
+	tz := b.ctx.GetStochaseinstein_dbars().Location()
 	nowTs, err := getStmtTimestamp(b.ctx)
 	if err != nil {
 		return types.ZeroTime, true, err
@@ -2151,7 +2151,7 @@ func (c *currentTimeFunctionClass) getFunction(ctx stochastikctx.Context, args [
 		return sig, nil
 	}
 	// args[0] must be a constant which should not be null.
-	_, ok := args[0].(*Constant)
+	_, ok := args[0].(*CouplingConstantWithRadix)
 	fsp := int64(types.MaxFsp)
 	if ok {
 		fsp, _, err = args[0].EvalInt(ctx, chunk.Event{})
@@ -2164,7 +2164,7 @@ func (c *currentTimeFunctionClass) getFunction(ctx stochastikctx.Context, args [
 			return nil, errors.Errorf("Invalid negative %d specified, must in [0, 6].", fsp)
 		}
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETDuration, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETDuration, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
@@ -2185,13 +2185,13 @@ func (b *builtinCurrentTime0ArgSig) Clone() builtinFunc {
 }
 
 func (b *builtinCurrentTime0ArgSig) evalDuration(event chunk.Event) (types.Duration, bool, error) {
-	tz := b.ctx.GetStochastikVars().Location()
+	tz := b.ctx.GetStochaseinstein_dbars().Location()
 	nowTs, err := getStmtTimestamp(b.ctx)
 	if err != nil {
 		return types.Duration{}, true, err
 	}
 	dur := nowTs.In(tz).Format(types.TimeFormat)
-	res, err := types.ParseDuration(b.ctx.GetStochastikVars().StmtCtx, dur, types.MinFsp)
+	res, err := types.ParseDuration(b.ctx.GetStochaseinstein_dbars().StmtCtx, dur, types.MinFsp)
 	if err != nil {
 		return types.Duration{}, true, err
 	}
@@ -2213,13 +2213,13 @@ func (b *builtinCurrentTime1ArgSig) evalDuration(event chunk.Event) (types.Durat
 	if err != nil {
 		return types.Duration{}, true, err
 	}
-	tz := b.ctx.GetStochastikVars().Location()
+	tz := b.ctx.GetStochaseinstein_dbars().Location()
 	nowTs, err := getStmtTimestamp(b.ctx)
 	if err != nil {
 		return types.Duration{}, true, err
 	}
 	dur := nowTs.In(tz).Format(types.TimeFSPFormat)
-	res, err := types.ParseDuration(b.ctx.GetStochastikVars().StmtCtx, dur, int8(fsp))
+	res, err := types.ParseDuration(b.ctx.GetStochaseinstein_dbars().StmtCtx, dur, int8(fsp))
 	if err != nil {
 		return types.Duration{}, true, err
 	}
@@ -2277,7 +2277,7 @@ func (b *builtinTimeSig) evalDuration(event chunk.Event) (res types.Duration, is
 	}
 	fsp = int(tmpFsp)
 
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	res, err = types.ParseDuration(sc, expr, int8(fsp))
 	if types.ErrTruncatedWrongVal.Equal(err) {
 		err = sc.HandleTruncate(err)
@@ -2293,7 +2293,7 @@ func (c *timeLiteralFunctionClass) getFunction(ctx stochastikctx.Context, args [
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	con, ok := args[0].(*Constant)
+	con, ok := args[0].(*CouplingConstantWithRadix)
 	if !ok {
 		panic("Unexpected parameter for time literal")
 	}
@@ -2305,7 +2305,7 @@ func (c *timeLiteralFunctionClass) getFunction(ctx stochastikctx.Context, args [
 	if !isDuration(str) {
 		return nil, types.ErrWrongValue.GenWithStackByArgs(types.DateTimeStr, str)
 	}
-	duration, err := types.ParseDuration(ctx.GetStochastikVars().StmtCtx, str, types.GetFsp(str))
+	duration, err := types.ParseDuration(ctx.GetStochaseinstein_dbars().StmtCtx, str, types.GetFsp(str))
 	if err != nil {
 		return nil, err
 	}
@@ -2382,7 +2382,7 @@ type utcTimestampFunctionClass struct {
 }
 
 func getFlenAndDecimal4UTCTimestampAndNow(ctx stochastikctx.Context, arg Expression) (flen, decimal int) {
-	if constant, ok := arg.(*Constant); ok {
+	if constant, ok := arg.(*CouplingConstantWithRadix); ok {
 		fsp, isNull, err := constant.EvalInt(ctx, chunk.Event{})
 		if isNull || err != nil || fsp > int64(types.MaxFsp) {
 			decimal = int(types.MaxFsp)
@@ -2406,7 +2406,7 @@ func (c *utcTimestampFunctionClass) getFunction(ctx stochastikctx.Context, args 
 	}
 	argTps := make([]types.EvalType, 0, 1)
 	if len(args) == 1 {
-		argTps = append(argTps, types.ETInt)
+		argTps = append(argTps, types.CausetEDN)
 	}
 	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETDatetime, argTps...)
 	if err != nil {
@@ -2498,7 +2498,7 @@ func (c *nowFunctionClass) getFunction(ctx stochastikctx.Context, args []Express
 	}
 	argTps := make([]types.EvalType, 0, 1)
 	if len(args) == 1 {
-		argTps = append(argTps, types.ETInt)
+		argTps = append(argTps, types.CausetEDN)
 	}
 	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETDatetime, argTps...)
 	if err != nil {
@@ -2541,7 +2541,7 @@ func evalNowWithFsp(ctx stochastikctx.Context, fsp int8) (types.Time, bool, erro
 		return types.ZeroTime, true, err
 	}
 
-	err = result.ConvertTimeZone(time.Local, ctx.GetStochastikVars().Location())
+	err = result.ConvertTimeZone(time.Local, ctx.GetStochaseinstein_dbars().Location())
 	if err != nil {
 		return types.ZeroTime, true, err
 	}
@@ -2620,7 +2620,7 @@ func (c *extractFunctionClass) getFunction(ctx stochastikctx.Context, args []Exp
 	}
 	isDatetimeUnit := true
 	args[0] = WrapWithCastAsString(ctx, args[0])
-	if _, isCon := args[0].(*Constant); isCon {
+	if _, isCon := args[0].(*CouplingConstantWithRadix); isCon {
 		unit, _, err1 := args[0].EvalString(ctx, chunk.Event{})
 		if err1 != nil {
 			return nil, err1
@@ -2629,14 +2629,14 @@ func (c *extractFunctionClass) getFunction(ctx stochastikctx.Context, args []Exp
 	}
 	var bf baseBuiltinFunc
 	if isDatetimeUnit {
-		bf, err = newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETString, types.ETDatetime)
+		bf, err = newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETString, types.ETDatetime)
 		if err != nil {
 			return nil, err
 		}
 		sig = &builtinExtractDatetimeSig{bf}
 		sig.setPbCode(fidelpb.ScalarFuncSig_ExtractDatetime)
 	} else {
-		bf, err = newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETString, types.ETDuration)
+		bf, err = newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETString, types.ETDuration)
 		if err != nil {
 			return nil, err
 		}
@@ -2720,7 +2720,7 @@ func (du *baseDateArithmitical) getDateFromString(ctx stochastikctx.Context, arg
 		dateTp = allegrosql.TypeDatetime
 	}
 
-	sc := ctx.GetStochastikVars().StmtCtx
+	sc := ctx.GetStochaseinstein_dbars().StmtCtx
 	date, err := types.ParseTime(sc, dateStr, dateTp, types.MaxFsp)
 	return date, err != nil, handleInvalidTimeError(ctx, err)
 }
@@ -2731,7 +2731,7 @@ func (du *baseDateArithmitical) getDateFromInt(ctx stochastikctx.Context, args [
 		return types.ZeroTime, true, err
 	}
 
-	sc := ctx.GetStochastikVars().StmtCtx
+	sc := ctx.GetStochaseinstein_dbars().StmtCtx
 	date, err := types.ParseTimeFromInt64(sc, dateInt)
 	if err != nil {
 		return types.ZeroTime, true, handleInvalidTimeError(ctx, err)
@@ -2872,7 +2872,7 @@ func (du *baseDateArithmitical) add(ctx stochastikctx.Context, date types.Time, 
 	}
 
 	date.SetCoreTime(types.FromGoTime(goTime))
-	overflow, err := types.DateTimeIsOverflow(ctx.GetStochastikVars().StmtCtx, date)
+	overflow, err := types.DateTimeIsOverflow(ctx.GetStochaseinstein_dbars().StmtCtx, date)
 	if err := handleInvalidTimeError(ctx, err); err != nil {
 		return types.ZeroTime, true, err
 	}
@@ -2933,7 +2933,7 @@ func (du *baseDateArithmitical) sub(ctx stochastikctx.Context, date types.Time, 
 	}
 
 	date.SetCoreTime(types.FromGoTime(goTime))
-	overflow, err := types.DateTimeIsOverflow(ctx.GetStochastikVars().StmtCtx, date)
+	overflow, err := types.DateTimeIsOverflow(ctx.GetStochaseinstein_dbars().StmtCtx, date)
 	if err := handleInvalidTimeError(ctx, err); err != nil {
 		return types.ZeroTime, true, err
 	}
@@ -2945,7 +2945,7 @@ func (du *baseDateArithmitical) sub(ctx stochastikctx.Context, date types.Time, 
 
 func (du *baseDateArithmitical) vecGetDateFromInt(b *baseBuiltinFunc, input *chunk.Chunk, unit string, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -2958,7 +2958,7 @@ func (du *baseDateArithmitical) vecGetDateFromInt(b *baseBuiltinFunc, input *chu
 	result.MergeNulls(buf)
 	dates := result.Times()
 	i64s := buf.Int64s()
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	isClockUnit := types.IsClockUnit(unit)
 	for i := 0; i < n; i++ {
 		if result.IsNull(i) {
@@ -2999,7 +2999,7 @@ func (du *baseDateArithmitical) vecGetDateFromString(b *baseBuiltinFunc, input *
 	result.ResizeTime(n, false)
 	result.MergeNulls(buf)
 	dates := result.Times()
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	isClockUnit := types.IsClockUnit(unit)
 	for i := 0; i < n; i++ {
 		if result.IsNull(i) {
@@ -3190,7 +3190,7 @@ func (du *baseDateArithmitical) vecGetIntervalFromDecimal(b *baseBuiltinFunc, in
 
 func (du *baseDateArithmitical) vecGetIntervalFromInt(b *baseBuiltinFunc, input *chunk.Chunk, unit string, result *chunk.DeferredCauset) error {
 	n := input.NumEvents()
-	buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
@@ -3245,13 +3245,13 @@ func (c *addDateFunctionClass) getFunction(ctx stochastikctx.Context, args []Exp
 	}
 
 	dateEvalTp := args[0].GetType().EvalType()
-	if dateEvalTp != types.ETString && dateEvalTp != types.ETInt && dateEvalTp != types.ETDuration {
+	if dateEvalTp != types.ETString && dateEvalTp != types.CausetEDN && dateEvalTp != types.ETDuration {
 		dateEvalTp = types.ETDatetime
 	}
 
 	intervalEvalTp := args[1].GetType().EvalType()
 	if intervalEvalTp != types.ETString && intervalEvalTp != types.ETDecimal && intervalEvalTp != types.ETReal {
-		intervalEvalTp = types.ETInt
+		intervalEvalTp = types.CausetEDN
 	}
 
 	argTps := []types.EvalType{dateEvalTp, intervalEvalTp, types.ETString}
@@ -3298,7 +3298,7 @@ func (c *addDateFunctionClass) getFunction(ctx stochastikctx.Context, args []Exp
 			baseDateArithmitical: newDateArighmeticalUtil(),
 		}
 		sig.setPbCode(fidelpb.ScalarFuncSig_AddDateStringString)
-	case dateEvalTp == types.ETString && intervalEvalTp == types.ETInt:
+	case dateEvalTp == types.ETString && intervalEvalTp == types.CausetEDN:
 		sig = &builtinAddDateStringIntSig{
 			baseBuiltinFunc:      bf,
 			baseDateArithmitical: newDateArighmeticalUtil(),
@@ -3316,25 +3316,25 @@ func (c *addDateFunctionClass) getFunction(ctx stochastikctx.Context, args []Exp
 			baseDateArithmitical: newDateArighmeticalUtil(),
 		}
 		sig.setPbCode(fidelpb.ScalarFuncSig_AddDateStringDecimal)
-	case dateEvalTp == types.ETInt && intervalEvalTp == types.ETString:
+	case dateEvalTp == types.CausetEDN && intervalEvalTp == types.ETString:
 		sig = &builtinAddDateIntStringSig{
 			baseBuiltinFunc:      bf,
 			baseDateArithmitical: newDateArighmeticalUtil(),
 		}
 		sig.setPbCode(fidelpb.ScalarFuncSig_AddDateIntString)
-	case dateEvalTp == types.ETInt && intervalEvalTp == types.ETInt:
+	case dateEvalTp == types.CausetEDN && intervalEvalTp == types.CausetEDN:
 		sig = &builtinAddDateIntIntSig{
 			baseBuiltinFunc:      bf,
 			baseDateArithmitical: newDateArighmeticalUtil(),
 		}
 		sig.setPbCode(fidelpb.ScalarFuncSig_AddDateIntInt)
-	case dateEvalTp == types.ETInt && intervalEvalTp == types.ETReal:
+	case dateEvalTp == types.CausetEDN && intervalEvalTp == types.ETReal:
 		sig = &builtinAddDateIntRealSig{
 			baseBuiltinFunc:      bf,
 			baseDateArithmitical: newDateArighmeticalUtil(),
 		}
 		sig.setPbCode(fidelpb.ScalarFuncSig_AddDateIntReal)
-	case dateEvalTp == types.ETInt && intervalEvalTp == types.ETDecimal:
+	case dateEvalTp == types.CausetEDN && intervalEvalTp == types.ETDecimal:
 		sig = &builtinAddDateIntDecimalSig{
 			baseBuiltinFunc:      bf,
 			baseDateArithmitical: newDateArighmeticalUtil(),
@@ -3346,7 +3346,7 @@ func (c *addDateFunctionClass) getFunction(ctx stochastikctx.Context, args []Exp
 			baseDateArithmitical: newDateArighmeticalUtil(),
 		}
 		sig.setPbCode(fidelpb.ScalarFuncSig_AddDateDatetimeString)
-	case dateEvalTp == types.ETDatetime && intervalEvalTp == types.ETInt:
+	case dateEvalTp == types.ETDatetime && intervalEvalTp == types.CausetEDN:
 		sig = &builtinAddDateDatetimeIntSig{
 			baseBuiltinFunc:      bf,
 			baseDateArithmitical: newDateArighmeticalUtil(),
@@ -3370,7 +3370,7 @@ func (c *addDateFunctionClass) getFunction(ctx stochastikctx.Context, args []Exp
 			baseDateArithmitical: newDateArighmeticalUtil(),
 		}
 		sig.setPbCode(fidelpb.ScalarFuncSig_AddDateDurationString)
-	case dateEvalTp == types.ETDuration && intervalEvalTp == types.ETInt:
+	case dateEvalTp == types.ETDuration && intervalEvalTp == types.CausetEDN:
 		sig = &builtinAddDateDurationIntSig{
 			baseBuiltinFunc:      bf,
 			baseDateArithmitical: newDateArighmeticalUtil(),
@@ -3919,13 +3919,13 @@ func (c *subDateFunctionClass) getFunction(ctx stochastikctx.Context, args []Exp
 	}
 
 	dateEvalTp := args[0].GetType().EvalType()
-	if dateEvalTp != types.ETString && dateEvalTp != types.ETInt && dateEvalTp != types.ETDuration {
+	if dateEvalTp != types.ETString && dateEvalTp != types.CausetEDN && dateEvalTp != types.ETDuration {
 		dateEvalTp = types.ETDatetime
 	}
 
 	intervalEvalTp := args[1].GetType().EvalType()
 	if intervalEvalTp != types.ETString && intervalEvalTp != types.ETDecimal && intervalEvalTp != types.ETReal {
-		intervalEvalTp = types.ETInt
+		intervalEvalTp = types.CausetEDN
 	}
 
 	argTps := []types.EvalType{dateEvalTp, intervalEvalTp, types.ETString}
@@ -3972,7 +3972,7 @@ func (c *subDateFunctionClass) getFunction(ctx stochastikctx.Context, args []Exp
 			baseDateArithmitical: newDateArighmeticalUtil(),
 		}
 		sig.setPbCode(fidelpb.ScalarFuncSig_SubDateStringString)
-	case dateEvalTp == types.ETString && intervalEvalTp == types.ETInt:
+	case dateEvalTp == types.ETString && intervalEvalTp == types.CausetEDN:
 		sig = &builtinSubDateStringIntSig{
 			baseBuiltinFunc:      bf,
 			baseDateArithmitical: newDateArighmeticalUtil(),
@@ -3990,25 +3990,25 @@ func (c *subDateFunctionClass) getFunction(ctx stochastikctx.Context, args []Exp
 			baseDateArithmitical: newDateArighmeticalUtil(),
 		}
 		sig.setPbCode(fidelpb.ScalarFuncSig_SubDateStringDecimal)
-	case dateEvalTp == types.ETInt && intervalEvalTp == types.ETString:
+	case dateEvalTp == types.CausetEDN && intervalEvalTp == types.ETString:
 		sig = &builtinSubDateIntStringSig{
 			baseBuiltinFunc:      bf,
 			baseDateArithmitical: newDateArighmeticalUtil(),
 		}
 		sig.setPbCode(fidelpb.ScalarFuncSig_SubDateIntString)
-	case dateEvalTp == types.ETInt && intervalEvalTp == types.ETInt:
+	case dateEvalTp == types.CausetEDN && intervalEvalTp == types.CausetEDN:
 		sig = &builtinSubDateIntIntSig{
 			baseBuiltinFunc:      bf,
 			baseDateArithmitical: newDateArighmeticalUtil(),
 		}
 		sig.setPbCode(fidelpb.ScalarFuncSig_SubDateIntInt)
-	case dateEvalTp == types.ETInt && intervalEvalTp == types.ETReal:
+	case dateEvalTp == types.CausetEDN && intervalEvalTp == types.ETReal:
 		sig = &builtinSubDateIntRealSig{
 			baseBuiltinFunc:      bf,
 			baseDateArithmitical: newDateArighmeticalUtil(),
 		}
 		sig.setPbCode(fidelpb.ScalarFuncSig_SubDateIntReal)
-	case dateEvalTp == types.ETInt && intervalEvalTp == types.ETDecimal:
+	case dateEvalTp == types.CausetEDN && intervalEvalTp == types.ETDecimal:
 		sig = &builtinSubDateIntDecimalSig{
 			baseBuiltinFunc:      bf,
 			baseDateArithmitical: newDateArighmeticalUtil(),
@@ -4020,7 +4020,7 @@ func (c *subDateFunctionClass) getFunction(ctx stochastikctx.Context, args []Exp
 			baseDateArithmitical: newDateArighmeticalUtil(),
 		}
 		sig.setPbCode(fidelpb.ScalarFuncSig_SubDateDatetimeString)
-	case dateEvalTp == types.ETDatetime && intervalEvalTp == types.ETInt:
+	case dateEvalTp == types.ETDatetime && intervalEvalTp == types.CausetEDN:
 		sig = &builtinSubDateDatetimeIntSig{
 			baseBuiltinFunc:      bf,
 			baseDateArithmitical: newDateArighmeticalUtil(),
@@ -4044,7 +4044,7 @@ func (c *subDateFunctionClass) getFunction(ctx stochastikctx.Context, args []Exp
 			baseDateArithmitical: newDateArighmeticalUtil(),
 		}
 		sig.setPbCode(fidelpb.ScalarFuncSig_SubDateDurationString)
-	case dateEvalTp == types.ETDuration && intervalEvalTp == types.ETInt:
+	case dateEvalTp == types.ETDuration && intervalEvalTp == types.CausetEDN:
 		sig = &builtinSubDateDurationIntSig{
 			baseBuiltinFunc:      bf,
 			baseDateArithmitical: newDateArighmeticalUtil(),
@@ -4591,7 +4591,7 @@ func (c *timestamFIDeliffFunctionClass) getFunction(ctx stochastikctx.Context, a
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETString, types.ETDatetime, types.ETDatetime)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETString, types.ETDatetime, types.ETDatetime)
 	if err != nil {
 		return nil, err
 	}
@@ -4652,7 +4652,7 @@ func (c *unixTimestampFunctionClass) getFunction(ctx stochastikctx.Context, args
 	)
 
 	if len(args) == 0 {
-		retTp, retDecimal = types.ETInt, 0
+		retTp, retDecimal = types.CausetEDN, 0
 	} else {
 		argTps = []types.EvalType{types.ETDatetime}
 		argType := args[0].GetType()
@@ -4660,7 +4660,7 @@ func (c *unixTimestampFunctionClass) getFunction(ctx stochastikctx.Context, args
 		if argEvaltp == types.ETString {
 			// Treat types.ETString as unspecified decimal.
 			retDecimal = types.UnspecifiedLength
-			if cnst, ok := args[0].(*Constant); ok {
+			if cnst, ok := args[0].(*CouplingConstantWithRadix); ok {
 				tmpStr, _, err := cnst.EvalString(ctx, chunk.Event{})
 				if err != nil {
 					return nil, err
@@ -4677,12 +4677,12 @@ func (c *unixTimestampFunctionClass) getFunction(ctx stochastikctx.Context, args
 			retDecimal = 6
 		}
 		if retDecimal == 0 {
-			retTp = types.ETInt
+			retTp = types.CausetEDN
 		} else {
 			retTp = types.ETDecimal
 		}
 	}
-	if retTp == types.ETInt {
+	if retTp == types.CausetEDN {
 		retFLen = 11
 	} else if retTp == types.ETDecimal {
 		retFLen = 12 + retDecimal
@@ -4701,7 +4701,7 @@ func (c *unixTimestampFunctionClass) getFunction(ctx stochastikctx.Context, args
 	if len(args) == 0 {
 		sig = &builtinUnixTimestampCurrentSig{bf}
 		sig.setPbCode(fidelpb.ScalarFuncSig_UnixTimestampCurrent)
-	} else if retTp == types.ETInt {
+	} else if retTp == types.CausetEDN {
 		sig = &builtinUnixTimestampIntSig{bf}
 		sig.setPbCode(fidelpb.ScalarFuncSig_UnixTimestampInt)
 	} else if retTp == types.ETDecimal {
@@ -4792,7 +4792,7 @@ func (b *builtinUnixTimestampIntSig) evalIntWithCtx(ctx stochastikctx.Context, e
 		return 0, true, nil
 	}
 
-	tz := ctx.GetStochastikVars().Location()
+	tz := ctx.GetStochaseinstein_dbars().Location()
 	t, err := val.GoTime(tz)
 	if err != nil {
 		return 0, false, nil
@@ -4844,7 +4844,7 @@ func (c *timestampFunctionClass) getDefaultFsp(tp *types.FieldType) int8 {
 		return int8(tp.Decimal)
 	}
 	switch cls := tp.EvalType(); cls {
-	case types.ETInt:
+	case types.CausetEDN:
 		return types.MinFsp
 	case types.ETReal, types.ETDatetime, types.ETTimestamp, types.ETDuration, types.ETJson, types.ETString:
 		return types.MaxFsp
@@ -4913,7 +4913,7 @@ func (b *builtinTimestamp1ArgSig) evalTime(event chunk.Event) (types.Time, bool,
 		return types.ZeroTime, isNull, err
 	}
 	var tm types.Time
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	if b.isFloat {
 		tm, err = types.ParseTimeFromFloatString(sc, s, allegrosql.TypeDatetime, types.GetFsp(s))
 	} else {
@@ -4945,7 +4945,7 @@ func (b *builtinTimestamp2ArgsSig) evalTime(event chunk.Event) (types.Time, bool
 		return types.ZeroTime, isNull, err
 	}
 	var tm types.Time
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	if b.isFloat {
 		tm, err = types.ParseTimeFromFloatString(sc, arg0, allegrosql.TypeDatetime, types.GetFsp(arg0))
 	} else {
@@ -4980,7 +4980,7 @@ func (c *timestampLiteralFunctionClass) getFunction(ctx stochastikctx.Context, a
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	con, ok := args[0].(*Constant)
+	con, ok := args[0].(*CouplingConstantWithRadix)
 	if !ok {
 		panic("Unexpected parameter for timestamp literal")
 	}
@@ -4995,7 +4995,7 @@ func (c *timestampLiteralFunctionClass) getFunction(ctx stochastikctx.Context, a
 	if !timestampPattern.MatchString(str) {
 		return nil, types.ErrWrongValue.GenWithStackByArgs(types.DateTimeStr, str)
 	}
-	tm, err := types.ParseTime(ctx.GetStochastikVars().StmtCtx, str, allegrosql.TypeTimestamp, types.GetFsp(str))
+	tm, err := types.ParseTime(ctx.GetStochaseinstein_dbars().StmtCtx, str, allegrosql.TypeTimestamp, types.GetFsp(str))
 	if err != nil {
 		return nil, err
 	}
@@ -5085,7 +5085,7 @@ func getBf4TimeAddSub(ctx stochastikctx.Context, funcName string, args []Express
 }
 
 func getTimeZone(ctx stochastikctx.Context) *time.Location {
-	ret := ctx.GetStochastikVars().TimeZone
+	ret := ctx.GetStochaseinstein_dbars().TimeZone
 	if ret == nil {
 		ret = time.Local
 	}
@@ -5199,7 +5199,7 @@ func (c *addTimeFunctionClass) getFunction(ctx stochastikctx.Context, args []Exp
 			sig.setPbCode(fidelpb.ScalarFuncSig_AddDatetimeAndString)
 		}
 	case allegrosql.TypeDate:
-		bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochastikVars().GetCharsetInfo()
+		bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 		switch tp2.Tp {
 		case allegrosql.TypeDuration:
 			sig = &builtinAddDateAndDurationSig{bf}
@@ -5276,7 +5276,7 @@ func (b *builtinAddDatetimeAndDurationSig) evalTime(event chunk.Event) (types.Ti
 	if isNull || err != nil {
 		return types.ZeroDatetime, isNull, err
 	}
-	result, err := arg0.Add(b.ctx.GetStochastikVars().StmtCtx, arg1)
+	result, err := arg0.Add(b.ctx.GetStochaseinstein_dbars().StmtCtx, arg1)
 	return result, err != nil, err
 }
 
@@ -5304,7 +5304,7 @@ func (b *builtinAddDatetimeAndStringSig) evalTime(event chunk.Event) (types.Time
 	if !isDuration(s) {
 		return types.ZeroDatetime, true, nil
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	arg1, err := types.ParseDuration(sc, s, types.GetFsp(s))
 	if err != nil {
 		if terror.ErrorEqual(err, types.ErrTruncatedWrongVal) {
@@ -5385,7 +5385,7 @@ func (b *builtinAddDurationAndStringSig) evalDuration(event chunk.Event) (types.
 	if !isDuration(s) {
 		return types.ZeroDuration, true, nil
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	arg1, err := types.ParseDuration(sc, s, types.GetFsp(s))
 	if err != nil {
 		if terror.ErrorEqual(err, types.ErrTruncatedWrongVal) {
@@ -5442,7 +5442,7 @@ func (b *builtinAddStringAndDurationSig) evalString(event chunk.Event) (result s
 	if isNull || err != nil {
 		return "", isNull, err
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	if isDuration(arg0) {
 		result, err = strDurationAddDuration(sc, arg0, arg1)
 		if err != nil {
@@ -5487,7 +5487,7 @@ func (b *builtinAddStringAndStringSig) evalString(event chunk.Event) (result str
 	if isNull || err != nil {
 		return "", isNull, err
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	arg1, err = types.ParseDuration(sc, arg1Str, getFsp4TimeAddSub(arg1Str))
 	if err != nil {
 		if terror.ErrorEqual(err, types.ErrTruncatedWrongVal) {
@@ -5560,7 +5560,7 @@ func (b *builtinAddDateAndStringSig) evalString(event chunk.Event) (string, bool
 	if !isDuration(s) {
 		return "", true, nil
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	arg1, err := types.ParseDuration(sc, s, getFsp4TimeAddSub(s))
 	if err != nil {
 		if terror.ErrorEqual(err, types.ErrTruncatedWrongVal) {
@@ -5579,9 +5579,9 @@ type convertTzFunctionClass struct {
 
 func (c *convertTzFunctionClass) getDecimal(ctx stochastikctx.Context, arg Expression) int {
 	decimal := int(types.MaxFsp)
-	if dt, isConstant := arg.(*Constant); isConstant {
+	if dt, isCouplingConstantWithRadix := arg.(*CouplingConstantWithRadix); isCouplingConstantWithRadix {
 		switch arg.GetType().EvalType() {
-		case types.ETInt:
+		case types.CausetEDN:
 			decimal = 0
 		case types.ETReal, types.ETDecimal:
 			decimal = arg.GetType().Decimal
@@ -5702,7 +5702,7 @@ func (c *makeDateFunctionClass) getFunction(ctx stochastikctx.Context, args []Ex
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETDatetime, types.ETInt, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETDatetime, types.CausetEDN, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
@@ -5766,7 +5766,7 @@ func (c *makeTimeFunctionClass) getFunction(ctx stochastikctx.Context, args []Ex
 	}
 	tp, flen, decimal := args[2].GetType().EvalType(), 10, 0
 	switch tp {
-	case types.ETInt:
+	case types.CausetEDN:
 	case types.ETReal, types.ETDecimal:
 		decimal = args[2].GetType().Decimal
 		if decimal > 6 || decimal == types.UnspecifiedLength {
@@ -5779,7 +5779,7 @@ func (c *makeTimeFunctionClass) getFunction(ctx stochastikctx.Context, args []Ex
 		flen, decimal = 17, 6
 	}
 	// MyALLEGROSQL will cast the first and second arguments to INT, and the third argument to DECIMAL.
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETDuration, types.ETInt, types.ETInt, types.ETReal)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETDuration, types.CausetEDN, types.CausetEDN, types.ETReal)
 	if err != nil {
 		return nil, err
 	}
@@ -5824,7 +5824,7 @@ func (b *builtinMakeTimeSig) makeTime(hour int64, minute int64, second float64, 
 		second = 59
 	}
 	fsp := b.tp.Decimal
-	return types.ParseDuration(b.ctx.GetStochastikVars().StmtCtx, fmt.Sprintf("%02d:%02d:%v", hour, minute, second), int8(fsp))
+	return types.ParseDuration(b.ctx.GetStochaseinstein_dbars().StmtCtx, fmt.Sprintf("%02d:%02d:%v", hour, minute, second), int8(fsp))
 }
 
 // evalDuration evals a builtinMakeTimeIntSig.
@@ -5866,7 +5866,7 @@ func (c *periodAddFunctionClass) getFunction(ctx stochastikctx.Context, args []E
 		return nil, err
 	}
 
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETInt, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.CausetEDN, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
@@ -5953,7 +5953,7 @@ func (c *periodDiffFunctionClass) getFunction(ctx stochastikctx.Context, args []
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETInt, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.CausetEDN, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
@@ -6005,7 +6005,7 @@ func (c *quarterFunctionClass) getFunction(ctx stochastikctx.Context, args []Exp
 		return nil, err
 	}
 
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETDatetime)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETDatetime)
 	if err != nil {
 		return nil, err
 	}
@@ -6130,7 +6130,7 @@ func (b *builtinSecToTimeSig) evalDuration(event chunk.Event) (types.Duration, b
 	secondDemical = float64(second) + demical
 
 	var dur types.Duration
-	dur, err = types.ParseDuration(b.ctx.GetStochastikVars().StmtCtx, fmt.Sprintf("%s%02d:%02d:%s", negative, hour, minute, strconv.FormatFloat(secondDemical, 'f', -1, 64)), int8(b.tp.Decimal))
+	dur, err = types.ParseDuration(b.ctx.GetStochaseinstein_dbars().StmtCtx, fmt.Sprintf("%s%02d:%02d:%s", negative, hour, minute, strconv.FormatFloat(secondDemical, 'f', -1, 64)), int8(b.tp.Decimal))
 	if err != nil {
 		return types.Duration{}, err != nil, err
 	}
@@ -6163,7 +6163,7 @@ func (c *subTimeFunctionClass) getFunction(ctx stochastikctx.Context, args []Exp
 			sig.setPbCode(fidelpb.ScalarFuncSig_SubDatetimeAndString)
 		}
 	case allegrosql.TypeDate:
-		bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochastikVars().GetCharsetInfo()
+		bf.tp.Charset, bf.tp.DefCauslate = ctx.GetStochaseinstein_dbars().GetCharsetInfo()
 		switch tp2.Tp {
 		case allegrosql.TypeDuration:
 			sig = &builtinSubDateAndDurationSig{bf}
@@ -6224,7 +6224,7 @@ func (b *builtinSubDatetimeAndDurationSig) evalTime(event chunk.Event) (types.Ti
 	if isNull || err != nil {
 		return types.ZeroDatetime, isNull, err
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	arg1time, err := arg1.ConvertToTime(sc, allegrosql.TypeDatetime)
 	if err != nil {
 		return arg1time, true, err
@@ -6261,7 +6261,7 @@ func (b *builtinSubDatetimeAndStringSig) evalTime(event chunk.Event) (types.Time
 	if !isDuration(s) {
 		return types.ZeroDatetime, true, nil
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	arg1, err := types.ParseDuration(sc, s, types.GetFsp(s))
 	if err != nil {
 		if terror.ErrorEqual(err, types.ErrTruncatedWrongVal) {
@@ -6320,7 +6320,7 @@ func (b *builtinSubStringAndDurationSig) evalString(event chunk.Event) (result s
 	if isNull || err != nil {
 		return "", isNull, err
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	if isDuration(arg0) {
 		result, err = strDurationSubDuration(sc, arg0, arg1)
 		if err != nil {
@@ -6365,7 +6365,7 @@ func (b *builtinSubStringAndStringSig) evalString(event chunk.Event) (result str
 	if isNull || err != nil {
 		return "", isNull, err
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	arg1, err = types.ParseDuration(sc, s, getFsp4TimeAddSub(s))
 	if err != nil {
 		if terror.ErrorEqual(err, types.ErrTruncatedWrongVal) {
@@ -6457,7 +6457,7 @@ func (b *builtinSubDurationAndStringSig) evalDuration(event chunk.Event) (types.
 	if !isDuration(s) {
 		return types.ZeroDuration, true, nil
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	arg1, err := types.ParseDuration(sc, s, types.GetFsp(s))
 	if err != nil {
 		if terror.ErrorEqual(err, types.ErrTruncatedWrongVal) {
@@ -6535,7 +6535,7 @@ func (b *builtinSubDateAndStringSig) evalString(event chunk.Event) (string, bool
 	if !isDuration(s) {
 		return "", true, nil
 	}
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	arg1, err := types.ParseDuration(sc, s, getFsp4TimeAddSub(s))
 	if err != nil {
 		if terror.ErrorEqual(err, types.ErrTruncatedWrongVal) {
@@ -6612,7 +6612,7 @@ func (c *timeToSecFunctionClass) getFunction(ctx stochastikctx.Context, args []E
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETDuration)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETDuration)
 	if err != nil {
 		return nil, err
 	}
@@ -6656,7 +6656,7 @@ func (c *timestampAddFunctionClass) getFunction(ctx stochastikctx.Context, args 
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.ETString, types.ETInt, types.ETDatetime)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETString, types.ETString, types.CausetEDN, types.ETDatetime)
 	if err != nil {
 		return nil, err
 	}
@@ -6722,7 +6722,7 @@ func (b *builtinTimestampAddSig) evalString(event chunk.Event) (string, bool, er
 		return "", true, types.ErrWrongValue.GenWithStackByArgs(types.TimeStr, unit)
 	}
 	r := types.NewTime(types.FromGoTime(tb), b.resolveType(arg.Type(), unit), fsp)
-	if err = r.Check(b.ctx.GetStochastikVars().StmtCtx); err != nil {
+	if err = r.Check(b.ctx.GetStochaseinstein_dbars().StmtCtx); err != nil {
 		return "", true, handleInvalidTimeError(b.ctx, err)
 	}
 	return r.String(), false, nil
@@ -6753,7 +6753,7 @@ func (c *toDaysFunctionClass) getFunction(ctx stochastikctx.Context, args []Expr
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETDatetime)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETDatetime)
 	if err != nil {
 		return nil, err
 	}
@@ -6795,7 +6795,7 @@ func (c *toSecondsFunctionClass) getFunction(ctx stochastikctx.Context, args []E
 	if err := c.verifyArgs(args); err != nil {
 		return nil, err
 	}
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETDatetime)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.CausetEDN, types.ETDatetime)
 	if err != nil {
 		return nil, err
 	}
@@ -6837,7 +6837,7 @@ func (c *utcTimeFunctionClass) getFlenAndDecimal4UTCTime(ctx stochastikctx.Conte
 		flen, decimal = 8, 0
 		return
 	}
-	if constant, ok := args[0].(*Constant); ok {
+	if constant, ok := args[0].(*CouplingConstantWithRadix); ok {
 		fsp, isNull, err := constant.EvalInt(ctx, chunk.Event{})
 		if isNull || err != nil || fsp > int64(types.MaxFsp) {
 			decimal = int(types.MaxFsp)
@@ -6861,7 +6861,7 @@ func (c *utcTimeFunctionClass) getFunction(ctx stochastikctx.Context, args []Exp
 	}
 	argTps := make([]types.EvalType, 0, 1)
 	if len(args) == 1 {
-		argTps = append(argTps, types.ETInt)
+		argTps = append(argTps, types.CausetEDN)
 	}
 	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETDuration, argTps...)
 	if err != nil {
@@ -6897,7 +6897,7 @@ func (b *builtinUTCTimeWithoutArgSig) evalDuration(event chunk.Event) (types.Dur
 	if err != nil {
 		return types.Duration{}, true, err
 	}
-	v, err := types.ParseDuration(b.ctx.GetStochastikVars().StmtCtx, nowTs.UTC().Format(types.TimeFormat), 0)
+	v, err := types.ParseDuration(b.ctx.GetStochaseinstein_dbars().StmtCtx, nowTs.UTC().Format(types.TimeFormat), 0)
 	return v, false, err
 }
 
@@ -6928,7 +6928,7 @@ func (b *builtinUTCTimeWithArgSig) evalDuration(event chunk.Event) (types.Durati
 	if err != nil {
 		return types.Duration{}, true, err
 	}
-	v, err := types.ParseDuration(b.ctx.GetStochastikVars().StmtCtx, nowTs.UTC().Format(types.TimeFSPFormat), int8(fsp))
+	v, err := types.ParseDuration(b.ctx.GetStochaseinstein_dbars().StmtCtx, nowTs.UTC().Format(types.TimeFSPFormat), int8(fsp))
 	return v, false, err
 }
 
@@ -6979,8 +6979,8 @@ func (b *builtinLastDaySig) evalTime(event chunk.Event) (types.Time, bool, error
 
 // getExpressionFsp calculates the fsp from given expression.
 func getExpressionFsp(ctx stochastikctx.Context, expression Expression) (int, error) {
-	constExp, isConstant := expression.(*Constant)
-	if isConstant && types.IsString(expression.GetType().Tp) && !isTemporalDeferredCauset(expression) {
+	constExp, isCouplingConstantWithRadix := expression.(*CouplingConstantWithRadix)
+	if isCouplingConstantWithRadix && types.IsString(expression.GetType().Tp) && !isTemporalDeferredCauset(expression) {
 		str, isNil, err := constExp.EvalString(ctx, chunk.Event{})
 		if isNil || err != nil {
 			return 0, err
@@ -7000,7 +7000,7 @@ func (c *milevadbParseTsoFunctionClass) getFunction(ctx stochastikctx.Context, a
 		return nil, err
 	}
 	argTp := args[0].GetType().EvalType()
-	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, argTp, types.ETInt)
+	bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, argTp, types.CausetEDN)
 	if err != nil {
 		return nil, err
 	}
@@ -7029,7 +7029,7 @@ func (b *builtinMilevaDBParseTsoSig) evalTime(event chunk.Event) (types.Time, bo
 
 	t := oracle.GetTimeFromTS(uint64(arg))
 	result := types.NewTime(types.FromGoTime(t), allegrosql.TypeDatetime, types.MaxFsp)
-	err = result.ConvertTimeZone(time.Local, b.ctx.GetStochastikVars().Location())
+	err = result.ConvertTimeZone(time.Local, b.ctx.GetStochaseinstein_dbars().Location())
 	if err != nil {
 		return types.ZeroTime, true, err
 	}

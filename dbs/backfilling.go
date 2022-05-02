@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,18 +23,18 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/blockcodec"
-	"github.com/whtcorpsinc/milevadb/causetstore/einsteindb"
-	dbsutil "github.com/whtcorpsinc/milevadb/dbs/soliton"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/metrics"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	decoder "github.com/whtcorpsinc/milevadb/soliton/rowDecoder"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/blockcodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetstore/einsteindb"
+	dbsutil "github.com/whtcorpsinc/MilevaDB-Prod/dbs/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/metrics"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	decoder "github.com/whtcorpsinc/MilevaDB-Prod/soliton/rowDecoder"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
 	"go.uber.org/zap"
 )
 
@@ -399,7 +399,7 @@ func loadDBSReorgVars(w *worker) error {
 }
 
 func makeuFIDelecodeDefCausMap(sessCtx stochastikctx.Context, t block.Block) (map[int64]decoder.DeferredCauset, error) {
-	dbName := perceptron.NewCIStr(sessCtx.GetStochastikVars().CurrentDB)
+	dbName := perceptron.NewCIStr(sessCtx.GetStochaseinstein_dbars().CurrentDB)
 	wriblockDefCausInfos := make([]*perceptron.DeferredCausetInfo, 0, len(t.WriblockDefCauss()))
 	for _, col := range t.WriblockDefCauss() {
 		wriblockDefCausInfos = append(wriblockDefCausInfos, col.DeferredCausetInfo)
@@ -478,7 +478,7 @@ func (w *worker) writePhysicalTableRecord(t block.PhysicalTable, bfWorkerType ba
 		// Enlarge the worker size.
 		for i := len(backfillWorkers); i < int(workerCnt); i++ {
 			sessCtx := newContext(reorgInfo.d.causetstore)
-			sessCtx.GetStochastikVars().StmtCtx.IsDBSJobInQueue = true
+			sessCtx.GetStochaseinstein_dbars().StmtCtx.IsDBSJobInQueue = true
 
 			if bfWorkerType == typeAddIndexWorker {
 				idxWorker := newAddIndexWorker(sessCtx, w, i, t, indexInfo, decodeDefCausMap)

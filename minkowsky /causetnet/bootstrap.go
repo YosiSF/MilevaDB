@@ -10,16 +10,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/auth"
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/mysql"
-	"github.com/whtcorpsinc/MilevaDB/BerolinaSQL/terror"
-	"github.com/whtcorpsinc/MilevaDB/causetnetctx/variable"
-	"github.com/whtcorpsinc/MilevaDB/config"
-	"github.com/whtcorpsinc/MilevaDB/dbs"
-	"github.com/whtcorpsinc/MilevaDB/namespace"
-	"github.com/whtcorpsinc/MilevaDB/planner/core"
-	"github.com/whtcorpsinc/MilevaDB/util/logutil"
-	"github.com/whtcorpsinc/MilevaDB/util/timeutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/auth"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/mysql"
+	"github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/terror"
+	"github.com/whtcorpsinc/MilevaDB-Prod/causetnetctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	"github.com/whtcorpsinc/MilevaDB-Prod/dbs"
+	"github.com/whtcorpsinc/MilevaDB-Prod/namespace"
+	"github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/util/timeutil"
 	"github.com/whtcorpsinc/errors"
 	"go.uber.org/zap"
 )
@@ -355,7 +355,7 @@ const (
 	version38 = 38
 	version39 = 39
 	// version40 is the version that introduce new collation in milevadb,
-	// see https://github.com/whtcorpsinc/milevadb/BerolinaSQL/pull/14574 for more details.
+	// see https://github.com/whtcorpsinc/MilevaDB-Prod/BerolinaSQL/pull/14574 for more details.
 	version40 = 40
 	version41 = 41
 	// version42 add storeType and reason column in expr_pushdown_blacklist

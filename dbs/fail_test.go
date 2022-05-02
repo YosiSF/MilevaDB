@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	. "github.com/whtcorpsinc/check"
 	"github.com/whtcorpsinc/failpoint"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 )
 
 func (s *testDeferredCausetChangeSuite) TestFailBeforeDecodeArgs(c *C) {
@@ -57,10 +57,10 @@ func (s *testDeferredCausetChangeSuite) TestFailBeforeDecodeArgs(c *C) {
 			stateCnt++
 		} else if job.SchemaState == perceptron.StateWriteReorganization {
 			if first {
-				c.Assert(failpoint.Enable("github.com/whtcorpsinc/milevadb/dbs/errorBeforeDecodeArgs", `return(true)`), IsNil)
+				c.Assert(failpoint.Enable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/errorBeforeDecodeArgs", `return(true)`), IsNil)
 				first = false
 			} else {
-				c.Assert(failpoint.Disable("github.com/whtcorpsinc/milevadb/dbs/errorBeforeDecodeArgs"), IsNil)
+				c.Assert(failpoint.Disable("github.com/whtcorpsinc/MilevaDB-Prod/dbs/errorBeforeDecodeArgs"), IsNil)
 			}
 		}
 	}

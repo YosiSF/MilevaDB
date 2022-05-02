@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,10 +22,10 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	. "github.com/whtcorpsinc/check"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
 )
 
 var _ = Suite(&testExpressionSuite{})
@@ -43,25 +43,25 @@ func newDeferredCausetWithType(id int, t *types.FieldType) *DeferredCauset {
 	}
 }
 
-func newLonglong(value int64) *Constant {
-	return &Constant{
+func newLonglong(value int64) *CouplingConstantWithRadix {
+	return &CouplingConstantWithRadix{
 		Value:   types.NewIntCauset(value),
 		RetType: types.NewFieldType(allegrosql.TypeLonglong),
 	}
 }
 
-func newDate(year, month, day int) *Constant {
+func newDate(year, month, day int) *CouplingConstantWithRadix {
 	return newTimeConst(year, month, day, 0, 0, 0, allegrosql.TypeDate)
 }
 
-func newTimestamp(yy, mm, dd, hh, min, ss int) *Constant {
+func newTimestamp(yy, mm, dd, hh, min, ss int) *CouplingConstantWithRadix {
 	return newTimeConst(yy, mm, dd, hh, min, ss, allegrosql.TypeTimestamp)
 }
 
-func newTimeConst(yy, mm, dd, hh, min, ss int, tp uint8) *Constant {
+func newTimeConst(yy, mm, dd, hh, min, ss int, tp uint8) *CouplingConstantWithRadix {
 	var tmp types.Causet
 	tmp.SetMysqlTime(types.NewTime(types.FromDate(yy, mm, dd, 0, 0, 0, 0), tp, types.DefaultFsp))
-	return &Constant{
+	return &CouplingConstantWithRadix{
 		Value:   tmp,
 		RetType: types.NewFieldType(tp),
 	}
@@ -72,14 +72,14 @@ func newFunction(funcName string, args ...Expression) Expression {
 	return NewFunctionInternal(mock.NewContext(), funcName, typeLong, args...)
 }
 
-func (*testExpressionSuite) TestConstantPropagation(c *C) {
+func (*testExpressionSuite) TestCouplingConstantWithRadixPropagation(c *C) {
 	tests := []struct {
-		solver     []PropagateConstantSolver
+		solver     []PropagateCouplingConstantWithRadixSolver
 		conditions []Expression
 		result     string
 	}{
 		{
-			solver: []PropagateConstantSolver{newPropConstSolver()},
+			solver: []PropagateCouplingConstantWithRadixSolver{newPropConstSolver()},
 			conditions: []Expression{
 				newFunction(ast.EQ, newDeferredCauset(0), newDeferredCauset(1)),
 				newFunction(ast.EQ, newDeferredCauset(1), newDeferredCauset(2)),
@@ -90,7 +90,7 @@ func (*testExpressionSuite) TestConstantPropagation(c *C) {
 			result: "1, eq(DeferredCauset#0, 1), eq(DeferredCauset#1, 1), eq(DeferredCauset#2, 1), eq(DeferredCauset#3, 1)",
 		},
 		{
-			solver: []PropagateConstantSolver{newPropConstSolver()},
+			solver: []PropagateCouplingConstantWithRadixSolver{newPropConstSolver()},
 			conditions: []Expression{
 				newFunction(ast.EQ, newDeferredCauset(0), newDeferredCauset(1)),
 				newFunction(ast.EQ, newDeferredCauset(1), newLonglong(1)),
@@ -99,7 +99,7 @@ func (*testExpressionSuite) TestConstantPropagation(c *C) {
 			result: "eq(DeferredCauset#0, 1), eq(DeferredCauset#1, 1), ne(DeferredCauset#2, 2)",
 		},
 		{
-			solver: []PropagateConstantSolver{newPropConstSolver()},
+			solver: []PropagateCouplingConstantWithRadixSolver{newPropConstSolver()},
 			conditions: []Expression{
 				newFunction(ast.EQ, newDeferredCauset(0), newDeferredCauset(1)),
 				newFunction(ast.EQ, newDeferredCauset(1), newLonglong(1)),
@@ -111,7 +111,7 @@ func (*testExpressionSuite) TestConstantPropagation(c *C) {
 			result: "eq(DeferredCauset#0, 1), eq(DeferredCauset#1, 1), eq(DeferredCauset#2, DeferredCauset#3), ge(DeferredCauset#2, 2), ge(DeferredCauset#3, 2), ne(DeferredCauset#2, 4), ne(DeferredCauset#2, 5), ne(DeferredCauset#3, 4), ne(DeferredCauset#3, 5)",
 		},
 		{
-			solver: []PropagateConstantSolver{newPropConstSolver()},
+			solver: []PropagateCouplingConstantWithRadixSolver{newPropConstSolver()},
 			conditions: []Expression{
 				newFunction(ast.EQ, newDeferredCauset(0), newDeferredCauset(1)),
 				newFunction(ast.EQ, newDeferredCauset(0), newDeferredCauset(2)),
@@ -120,7 +120,7 @@ func (*testExpressionSuite) TestConstantPropagation(c *C) {
 			result: "eq(DeferredCauset#0, DeferredCauset#1), eq(DeferredCauset#0, DeferredCauset#2), ge(DeferredCauset#0, 0), ge(DeferredCauset#1, 0), ge(DeferredCauset#2, 0)",
 		},
 		{
-			solver: []PropagateConstantSolver{newPropConstSolver()},
+			solver: []PropagateCouplingConstantWithRadixSolver{newPropConstSolver()},
 			conditions: []Expression{
 				newFunction(ast.EQ, newDeferredCauset(0), newDeferredCauset(1)),
 				newFunction(ast.GT, newDeferredCauset(0), newLonglong(2)),
@@ -131,7 +131,7 @@ func (*testExpressionSuite) TestConstantPropagation(c *C) {
 			result: "eq(DeferredCauset#0, DeferredCauset#1), gt(2, DeferredCauset#0), gt(2, DeferredCauset#1), gt(DeferredCauset#0, 2), gt(DeferredCauset#0, 3), gt(DeferredCauset#1, 2), gt(DeferredCauset#1, 3), lt(DeferredCauset#0, 1), lt(DeferredCauset#1, 1)",
 		},
 		{
-			solver: []PropagateConstantSolver{newPropConstSolver()},
+			solver: []PropagateCouplingConstantWithRadixSolver{newPropConstSolver()},
 			conditions: []Expression{
 				newFunction(ast.EQ, newLonglong(1), newDeferredCauset(0)),
 				newLonglong(0),
@@ -139,7 +139,7 @@ func (*testExpressionSuite) TestConstantPropagation(c *C) {
 			result: "0",
 		},
 		{
-			solver: []PropagateConstantSolver{newPropConstSolver()},
+			solver: []PropagateCouplingConstantWithRadixSolver{newPropConstSolver()},
 			conditions: []Expression{
 				newFunction(ast.EQ, newDeferredCauset(0), newDeferredCauset(1)),
 				newFunction(ast.In, newDeferredCauset(0), newLonglong(1), newLonglong(2)),
@@ -148,7 +148,7 @@ func (*testExpressionSuite) TestConstantPropagation(c *C) {
 			result: "eq(DeferredCauset#0, DeferredCauset#1), in(DeferredCauset#0, 1, 2), in(DeferredCauset#0, 3, 4), in(DeferredCauset#1, 1, 2), in(DeferredCauset#1, 3, 4)",
 		},
 		{
-			solver: []PropagateConstantSolver{newPropConstSolver()},
+			solver: []PropagateCouplingConstantWithRadixSolver{newPropConstSolver()},
 			conditions: []Expression{
 				newFunction(ast.EQ, newDeferredCauset(0), newDeferredCauset(1)),
 				newFunction(ast.EQ, newDeferredCauset(0), newFunction(ast.BitLength, newDeferredCauset(2))),
@@ -156,7 +156,7 @@ func (*testExpressionSuite) TestConstantPropagation(c *C) {
 			result: "eq(DeferredCauset#0, DeferredCauset#1), eq(DeferredCauset#0, bit_length(cast(DeferredCauset#2, var_string(20)))), eq(DeferredCauset#1, bit_length(cast(DeferredCauset#2, var_string(20))))",
 		},
 		{
-			solver: []PropagateConstantSolver{newPropConstSolver()},
+			solver: []PropagateCouplingConstantWithRadixSolver{newPropConstSolver()},
 			conditions: []Expression{
 				newFunction(ast.EQ, newDeferredCauset(0), newDeferredCauset(1)),
 				newFunction(ast.LE, newFunction(ast.Mul, newDeferredCauset(0), newDeferredCauset(0)), newLonglong(50)),
@@ -164,7 +164,7 @@ func (*testExpressionSuite) TestConstantPropagation(c *C) {
 			result: "eq(DeferredCauset#0, DeferredCauset#1), le(mul(DeferredCauset#0, DeferredCauset#0), 50), le(mul(DeferredCauset#1, DeferredCauset#1), 50)",
 		},
 		{
-			solver: []PropagateConstantSolver{newPropConstSolver()},
+			solver: []PropagateCouplingConstantWithRadixSolver{newPropConstSolver()},
 			conditions: []Expression{
 				newFunction(ast.EQ, newDeferredCauset(0), newDeferredCauset(1)),
 				newFunction(ast.LE, newDeferredCauset(0), newFunction(ast.Plus, newDeferredCauset(1), newLonglong(1))),
@@ -172,7 +172,7 @@ func (*testExpressionSuite) TestConstantPropagation(c *C) {
 			result: "eq(DeferredCauset#0, DeferredCauset#1), le(DeferredCauset#0, plus(DeferredCauset#0, 1)), le(DeferredCauset#0, plus(DeferredCauset#1, 1)), le(DeferredCauset#1, plus(DeferredCauset#1, 1))",
 		},
 		{
-			solver: []PropagateConstantSolver{newPropConstSolver()},
+			solver: []PropagateCouplingConstantWithRadixSolver{newPropConstSolver()},
 			conditions: []Expression{
 				newFunction(ast.EQ, newDeferredCauset(0), newDeferredCauset(1)),
 				newFunction(ast.LE, newDeferredCauset(0), newFunction(ast.Rand)),
@@ -185,9 +185,9 @@ func (*testExpressionSuite) TestConstantPropagation(c *C) {
 			ctx := mock.NewContext()
 			conds := make([]Expression, 0, len(tt.conditions))
 			for _, cd := range tt.conditions {
-				conds = append(conds, FoldConstant(cd))
+				conds = append(conds, FoldCouplingConstantWithRadix(cd))
 			}
-			newConds := solver.PropagateConstant(ctx, conds)
+			newConds := solver.PropagateCouplingConstantWithRadix(ctx, conds)
 			var result []string
 			for _, v := range newConds {
 				result = append(result, v.String())
@@ -198,7 +198,7 @@ func (*testExpressionSuite) TestConstantPropagation(c *C) {
 	}
 }
 
-func (*testExpressionSuite) TestConstantFolding(c *C) {
+func (*testExpressionSuite) TestCouplingConstantWithRadixFolding(c *C) {
 	tests := []struct {
 		condition Expression
 		result    string
@@ -229,13 +229,13 @@ func (*testExpressionSuite) TestConstantFolding(c *C) {
 		},
 	}
 	for _, tt := range tests {
-		newConds := FoldConstant(tt.condition)
+		newConds := FoldCouplingConstantWithRadix(tt.condition)
 		c.Assert(newConds.String(), Equals, tt.result, Commentf("different for expr %s", tt.condition))
 	}
 }
 
-func (*testExpressionSuite) TestDeferredExprNullConstantFold(c *C) {
-	nullConst := &Constant{
+func (*testExpressionSuite) TestDeferredExprNullCouplingConstantWithRadixFold(c *C) {
+	nullConst := &CouplingConstantWithRadix{
 		Value:        types.NewCauset(nil),
 		RetType:      types.NewFieldType(allegrosql.TypeTiny),
 		DeferredExpr: NewNull(),
@@ -253,9 +253,9 @@ func (*testExpressionSuite) TestDeferredExprNullConstantFold(c *C) {
 		comment := Commentf("different for expr %s", tt.condition)
 		sf, ok := tt.condition.(*ScalarFunction)
 		c.Assert(ok, IsTrue, comment)
-		sf.GetCtx().GetStochastikVars().StmtCtx.InNullRejectCheck = true
-		newConds := FoldConstant(tt.condition)
-		newConst, ok := newConds.(*Constant)
+		sf.GetCtx().GetStochaseinstein_dbars().StmtCtx.InNullRejectCheck = true
+		newConds := FoldCouplingConstantWithRadix(tt.condition)
+		newConst, ok := newConds.(*CouplingConstantWithRadix)
 		c.Assert(ok, IsTrue, comment)
 		c.Assert(newConst.DeferredExpr.String(), Equals, tt.deferred, comment)
 	}
@@ -264,7 +264,7 @@ func (*testExpressionSuite) TestDeferredExprNullConstantFold(c *C) {
 func (*testExpressionSuite) TestDeferredParamNotNull(c *C) {
 	ctx := mock.NewContext()
 	testTime := time.Now()
-	ctx.GetStochastikVars().PreparedParams = []types.Causet{
+	ctx.GetStochaseinstein_dbars().PreparedParams = []types.Causet{
 		types.NewIntCauset(1),
 		types.NewDecimalCauset(types.NewDecFromStringForTest("20170118123950.123")),
 		types.NewTimeCauset(types.NewTime(types.FromGoTime(testTime), allegrosql.TypeTimestamp, 6)),
@@ -278,18 +278,18 @@ func (*testExpressionSuite) TestDeferredParamNotNull(c *C) {
 		types.NewMysqlBitCauset([]byte{1}),
 		types.NewMysqlEnumCauset(types.Enum{Name: "n", Value: 2}),
 	}
-	cstInt := &Constant{ParamMarker: &ParamMarker{ctx: ctx, order: 0}, RetType: newIntFieldType()}
-	cstDec := &Constant{ParamMarker: &ParamMarker{ctx: ctx, order: 1}, RetType: newDecimalFieldType()}
-	cstTime := &Constant{ParamMarker: &ParamMarker{ctx: ctx, order: 2}, RetType: newDateFieldType()}
-	cstDuration := &Constant{ParamMarker: &ParamMarker{ctx: ctx, order: 3}, RetType: newDurFieldType()}
-	cstJSON := &Constant{ParamMarker: &ParamMarker{ctx: ctx, order: 4}, RetType: newJSONFieldType()}
-	cstBytes := &Constant{ParamMarker: &ParamMarker{ctx: ctx, order: 6}, RetType: newBlobFieldType()}
-	cstBinary := &Constant{ParamMarker: &ParamMarker{ctx: ctx, order: 5}, RetType: newBinaryLiteralFieldType()}
-	cstFloat32 := &Constant{ParamMarker: &ParamMarker{ctx: ctx, order: 7}, RetType: newFloatFieldType()}
-	cstFloat64 := &Constant{ParamMarker: &ParamMarker{ctx: ctx, order: 8}, RetType: newFloatFieldType()}
-	cstUint := &Constant{ParamMarker: &ParamMarker{ctx: ctx, order: 9}, RetType: newIntFieldType()}
-	cstBit := &Constant{ParamMarker: &ParamMarker{ctx: ctx, order: 10}, RetType: newBinaryLiteralFieldType()}
-	cstEnum := &Constant{ParamMarker: &ParamMarker{ctx: ctx, order: 11}, RetType: newEnumFieldType()}
+	cstInt := &CouplingConstantWithRadix{ParamMarker: &ParamMarker{ctx: ctx, order: 0}, RetType: newIntFieldType()}
+	cstDec := &CouplingConstantWithRadix{ParamMarker: &ParamMarker{ctx: ctx, order: 1}, RetType: newDecimalFieldType()}
+	cstTime := &CouplingConstantWithRadix{ParamMarker: &ParamMarker{ctx: ctx, order: 2}, RetType: newDateFieldType()}
+	cstDuration := &CouplingConstantWithRadix{ParamMarker: &ParamMarker{ctx: ctx, order: 3}, RetType: newDurFieldType()}
+	cstJSON := &CouplingConstantWithRadix{ParamMarker: &ParamMarker{ctx: ctx, order: 4}, RetType: newJSONFieldType()}
+	cstBytes := &CouplingConstantWithRadix{ParamMarker: &ParamMarker{ctx: ctx, order: 6}, RetType: newBlobFieldType()}
+	cstBinary := &CouplingConstantWithRadix{ParamMarker: &ParamMarker{ctx: ctx, order: 5}, RetType: newBinaryLiteralFieldType()}
+	cstFloat32 := &CouplingConstantWithRadix{ParamMarker: &ParamMarker{ctx: ctx, order: 7}, RetType: newFloatFieldType()}
+	cstFloat64 := &CouplingConstantWithRadix{ParamMarker: &ParamMarker{ctx: ctx, order: 8}, RetType: newFloatFieldType()}
+	cstUint := &CouplingConstantWithRadix{ParamMarker: &ParamMarker{ctx: ctx, order: 9}, RetType: newIntFieldType()}
+	cstBit := &CouplingConstantWithRadix{ParamMarker: &ParamMarker{ctx: ctx, order: 10}, RetType: newBinaryLiteralFieldType()}
+	cstEnum := &CouplingConstantWithRadix{ParamMarker: &ParamMarker{ctx: ctx, order: 11}, RetType: newEnumFieldType()}
 
 	c.Assert(allegrosql.TypeVarString, Equals, cstJSON.GetType().Tp)
 	c.Assert(allegrosql.TypeNewDecimal, Equals, cstDec.GetType().Tp)
@@ -318,7 +318,7 @@ func (*testExpressionSuite) TestDeferredParamNotNull(c *C) {
 	c.Assert(s, Equals, "b")
 	t, _, err := cstTime.EvalTime(ctx, chunk.Event{})
 	c.Assert(err, IsNil)
-	c.Assert(t.Compare(ctx.GetStochastikVars().PreparedParams[2].GetMysqlTime()), Equals, 0)
+	c.Assert(t.Compare(ctx.GetStochaseinstein_dbars().PreparedParams[2].GetMysqlTime()), Equals, 0)
 	dur, _, err := cstDuration.EvalDuration(ctx, chunk.Event{})
 	c.Assert(err, IsNil)
 	c.Assert(dur.Duration, Equals, types.ZeroDuration.Duration)
@@ -330,7 +330,7 @@ func (*testExpressionSuite) TestDeferredParamNotNull(c *C) {
 func (*testExpressionSuite) TestDeferredExprNotNull(c *C) {
 	m := &MockExpr{}
 	ctx := mock.NewContext()
-	cst := &Constant{DeferredExpr: m, RetType: newIntFieldType()}
+	cst := &CouplingConstantWithRadix{DeferredExpr: m, RetType: newIntFieldType()}
 	m.i, m.err = nil, fmt.Errorf("ERROR")
 	_, _, err := cst.EvalInt(ctx, chunk.Event{})
 	c.Assert(err, NotNil)
@@ -398,15 +398,15 @@ func (*testExpressionSuite) TestDeferredExprNotNull(c *C) {
 	xJsn, _, _ := cst.EvalJSON(ctx, chunk.Event{})
 	c.Assert(m.i.(json.BinaryJSON).String(), Equals, xJsn.String())
 
-	cln := cst.Clone().(*Constant)
+	cln := cst.Clone().(*CouplingConstantWithRadix)
 	c.Assert(cln.DeferredExpr, Equals, cst.DeferredExpr)
 }
 
-func (*testExpressionSuite) TestVectorizedConstant(c *C) {
+func (*testExpressionSuite) TestVectorizedCouplingConstantWithRadix(c *C) {
 	// fixed-length type with/without Sel
-	for _, cst := range []*Constant{
+	for _, cst := range []*CouplingConstantWithRadix{
 		{RetType: newIntFieldType(), Value: types.NewIntCauset(2333)},
-		{RetType: newIntFieldType(), DeferredExpr: &Constant{RetType: newIntFieldType(), Value: types.NewIntCauset(2333)}}} {
+		{RetType: newIntFieldType(), DeferredExpr: &CouplingConstantWithRadix{RetType: newIntFieldType(), Value: types.NewIntCauset(2333)}}} {
 		chk := chunk.New([]*types.FieldType{newIntFieldType()}, 1024, 1024)
 		for i := 0; i < 1024; i++ {
 			chk.AppendInt64(0, int64(i))
@@ -431,14 +431,14 @@ func (*testExpressionSuite) TestVectorizedConstant(c *C) {
 	}
 
 	// var-length type with/without Sel
-	for _, cst := range []*Constant{
+	for _, cst := range []*CouplingConstantWithRadix{
 		{RetType: newStringFieldType(), Value: types.NewStringCauset("hello")},
-		{RetType: newStringFieldType(), DeferredExpr: &Constant{RetType: newStringFieldType(), Value: types.NewStringCauset("hello")}}} {
+		{RetType: newStringFieldType(), DeferredExpr: &CouplingConstantWithRadix{RetType: newStringFieldType(), Value: types.NewStringCauset("hello")}}} {
 		chk := chunk.New([]*types.FieldType{newIntFieldType()}, 1024, 1024)
 		for i := 0; i < 1024; i++ {
 			chk.AppendInt64(0, int64(i))
 		}
-		cst = &Constant{DeferredExpr: nil, RetType: newStringFieldType(), Value: types.NewStringCauset("hello")}
+		cst = &CouplingConstantWithRadix{DeferredExpr: nil, RetType: newStringFieldType(), Value: types.NewStringCauset("hello")}
 		chk.SetSel(nil)
 		defCaus := chunk.NewDeferredCauset(newStringFieldType(), 1024)
 		ctx := mock.NewContext()
@@ -459,10 +459,10 @@ func (*testExpressionSuite) TestVectorizedConstant(c *C) {
 
 func (*testExpressionSuite) TestGetTypeThreadSafe(c *C) {
 	ctx := mock.NewContext()
-	ctx.GetStochastikVars().PreparedParams = []types.Causet{
+	ctx.GetStochaseinstein_dbars().PreparedParams = []types.Causet{
 		types.NewIntCauset(1),
 	}
-	con := &Constant{ParamMarker: &ParamMarker{ctx: ctx, order: 0}, RetType: newStringFieldType()}
+	con := &CouplingConstantWithRadix{ParamMarker: &ParamMarker{ctx: ctx, order: 0}, RetType: newStringFieldType()}
 	ft1 := con.GetType()
 	ft2 := con.GetType()
 	c.Assert(ft1, Not(Equals), ft2)

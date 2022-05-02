@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 package expression
 
 import (
-	"github.com/whtcorpsinc/milevadb/types"
-	"github.com/whtcorpsinc/milevadb/types/json"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types/json"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
 )
 
 func (b *builtinLTRealSig) vecEvalInt(input *chunk.Chunk, result *chunk.DeferredCauset) error {
@@ -1783,12 +1783,12 @@ func (b *builtinCoalesceIntSig) vecEvalInt(input *chunk.Chunk, result *chunk.Def
 	n := input.NumEvents()
 	result.ResizeInt64(n, true)
 	i64s := result.Int64s()
-	buf1, err := b.bufSlabPredictor.get(types.ETInt, n)
+	buf1, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 	if err != nil {
 		return err
 	}
 	defer b.bufSlabPredictor.put(buf1)
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 	for j := 0; j < len(b.args); j++ {
 		err := b.args[j].VecEvalInt(b.ctx, input, buf1)
@@ -1845,7 +1845,7 @@ func (b *builtinCoalesceRealSig) vecEvalReal(input *chunk.Chunk, result *chunk.D
 		return err
 	}
 	defer b.bufSlabPredictor.put(buf1)
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 	for j := 0; j < len(b.args); j++ {
 		err := b.args[j].VecEvalReal(b.ctx, input, buf1)
@@ -1902,7 +1902,7 @@ func (b *builtinCoalesceDecimalSig) vecEvalDecimal(input *chunk.Chunk, result *c
 		return err
 	}
 	defer b.bufSlabPredictor.put(buf1)
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 	for j := 0; j < len(b.args); j++ {
 		err := b.args[j].VecEvalDecimal(b.ctx, input, buf1)
@@ -1953,10 +1953,10 @@ func (b *builtinCoalesceStringSig) vecEvalString(input *chunk.Chunk, result *chu
 	argLen := len(b.args)
 
 	bufs := make([]*chunk.DeferredCauset, argLen)
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 	for i := 0; i < argLen; i++ {
-		buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+		buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 		if err != nil {
 			return err
 		}
@@ -2022,7 +2022,7 @@ func (b *builtinCoalesceTimeSig) vecEvalTime(input *chunk.Chunk, result *chunk.D
 		return err
 	}
 	defer b.bufSlabPredictor.put(buf1)
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 	for j := 0; j < len(b.args); j++ {
 		err := b.args[j].VecEvalTime(b.ctx, input, buf1)
@@ -2079,7 +2079,7 @@ func (b *builtinCoalesceDurationSig) vecEvalDuration(input *chunk.Chunk, result 
 		return err
 	}
 	defer b.bufSlabPredictor.put(buf1)
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 	for j := 0; j < len(b.args); j++ {
 		err := b.args[j].VecEvalDuration(b.ctx, input, buf1)
@@ -2130,10 +2130,10 @@ func (b *builtinCoalesceJSONSig) vecEvalJSON(input *chunk.Chunk, result *chunk.D
 	argLen := len(b.args)
 
 	bufs := make([]*chunk.DeferredCauset, argLen)
-	sc := b.ctx.GetStochastikVars().StmtCtx
+	sc := b.ctx.GetStochaseinstein_dbars().StmtCtx
 	beforeWarns := sc.WarningCount()
 	for i := 0; i < argLen; i++ {
-		buf, err := b.bufSlabPredictor.get(types.ETInt, n)
+		buf, err := b.bufSlabPredictor.get(types.CausetEDN, n)
 		if err != nil {
 			return err
 		}

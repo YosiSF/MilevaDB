@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,12 +17,12 @@ import (
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/defCauslate"
-	"github.com/whtcorpsinc/milevadb/soliton/disjointset"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/defCauslate"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/disjointset"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"go.uber.org/zap"
 )
 
@@ -31,7 +31,7 @@ var MaxPropagateDefCaussCnt = 100
 
 type basePropConstSolver struct {
 	defCausMapper map[int64]int       // defCausMapper maps defCausumn to its index
-	eqList    []*Constant         // if eqList[i] != nil, it means defCaus_i = eqList[i]
+	eqList    []*CouplingConstantWithRadix         // if eqList[i] != nil, it means defCaus_i = eqList[i]
 	unionSet  *disjointset.IntSet // unionSet stores the relations like defCaus_i = defCaus_j
 	defCausumns   []*DeferredCauset           // defCausumns stores all defCausumns appearing in the conditions
 	ctx       stochastikctx.Context
@@ -51,7 +51,7 @@ func (s *basePropConstSolver) insertDefCaus(defCaus *DeferredCauset) {
 
 // tryToUFIDelateEQList tries to uFIDelate the eqList. When the eqList has causetstore this defCausumn with a different constant, like
 // a = 1 and a = 2, we set the second return value to false.
-func (s *basePropConstSolver) tryToUFIDelateEQList(defCaus *DeferredCauset, con *Constant) (bool, bool) {
+func (s *basePropConstSolver) tryToUFIDelateEQList(defCaus *DeferredCauset, con *CouplingConstantWithRadix) (bool, bool) {
 	if con.Value.IsNull() {
 		return false, true
 	}
@@ -64,9 +64,9 @@ func (s *basePropConstSolver) tryToUFIDelateEQList(defCaus *DeferredCauset, con 
 	return true, false
 }
 
-func validEqualCondHelper(ctx stochastikctx.Context, eq *ScalarFunction, defCausIsLeft bool) (*DeferredCauset, *Constant) {
+func validEqualCondHelper(ctx stochastikctx.Context, eq *ScalarFunction, defCausIsLeft bool) (*DeferredCauset, *CouplingConstantWithRadix) {
 	var defCaus *DeferredCauset
-	var con *Constant
+	var con *CouplingConstantWithRadix
 	defCausOk := false
 	conOk := false
 	if defCausIsLeft {
@@ -78,9 +78,9 @@ func validEqualCondHelper(ctx stochastikctx.Context, eq *ScalarFunction, defCaus
 		return nil, nil
 	}
 	if defCausIsLeft {
-		con, conOk = eq.GetArgs()[1].(*Constant)
+		con, conOk = eq.GetArgs()[1].(*CouplingConstantWithRadix)
 	} else {
-		con, conOk = eq.GetArgs()[0].(*Constant)
+		con, conOk = eq.GetArgs()[0].(*CouplingConstantWithRadix)
 	}
 	if !conOk {
 		return nil, nil
@@ -95,7 +95,7 @@ func validEqualCondHelper(ctx stochastikctx.Context, eq *ScalarFunction, defCaus
 }
 
 // validEqualCond checks if the cond is an expression like [defCausumn eq constant].
-func validEqualCond(ctx stochastikctx.Context, cond Expression) (*DeferredCauset, *Constant) {
+func validEqualCond(ctx stochastikctx.Context, cond Expression) (*DeferredCauset, *CouplingConstantWithRadix) {
 	if eq, ok := cond.(*ScalarFunction); ok {
 		if eq.FuncName.L != ast.EQ {
 			return nil, nil
@@ -132,7 +132,7 @@ func tryToReplaceCond(ctx stochastikctx.Context, src *DeferredCauset, tgt *Defer
 	if _, ok := inequalFunctions[sf.FuncName.L]; ok {
 		return false, true, cond
 	}
-	// See https://github.com/whtcorpsinc/milevadb/issues/15782. The control function's result may rely on the original nullable
+	// See https://github.com/whtcorpsinc/MilevaDB-Prod/issues/15782. The control function's result may rely on the original nullable
 	// information of the outer side defCausumn. Its args cannot be replaced easily.
 	// A more strict check is that after we replace the arg. We check the nullability of the new expression.
 	// But we haven't maintained it yet, so don't replace the arg of the control function currently.
@@ -176,13 +176,13 @@ type propConstSolver struct {
 	conditions []Expression
 }
 
-// propagateConstantEQ propagates expressions like 'defCausumn = constant' by substituting the constant for defCausumn, the
+// propagateCouplingConstantWithRadixEQ propagates expressions like 'defCausumn = constant' by substituting the constant for defCausumn, the
 // procedure repeats multiple times. An example runs as following:
 // a = d & b * 2 = c & c = d + 2 & b = 1 & a = 4, we pick eq cond b = 1 and a = 4
 // d = 4 & 2 = c & c = d + 2 & b = 1 & a = 4, we propagate b = 1 and a = 4 and pick eq cond c = 2 and d = 4
 // d = 4 & 2 = c & false & b = 1 & a = 4, we propagate c = 2 and d = 4, and do constant folding: c = d + 2 will be folded as false.
-func (s *propConstSolver) propagateConstantEQ() {
-	s.eqList = make([]*Constant, len(s.defCausumns))
+func (s *propConstSolver) propagateCouplingConstantWithRadixEQ() {
+	s.eqList = make([]*CouplingConstantWithRadix, len(s.defCausumns))
 	visited := make([]bool, len(s.conditions))
 	for i := 0; i < MaxPropagateDefCaussCnt; i++ {
 		mapper := s.pickNewEQConds(visited)
@@ -265,15 +265,15 @@ func (s *propConstSolver) propagateDeferredCausetEQ() {
 }
 
 func (s *propConstSolver) setConds2ConstFalse() {
-	s.conditions = []Expression{&Constant{
+	s.conditions = []Expression{&CouplingConstantWithRadix{
 		Value:   types.NewCauset(false),
 		RetType: types.NewFieldType(allegrosql.TypeTiny),
 	}}
 }
 
 // pickNewEQConds tries to pick new equal conds and puts them to retMapper.
-func (s *propConstSolver) pickNewEQConds(visited []bool) (retMapper map[int]*Constant) {
-	retMapper = make(map[int]*Constant)
+func (s *propConstSolver) pickNewEQConds(visited []bool) (retMapper map[int]*CouplingConstantWithRadix) {
+	retMapper = make(map[int]*CouplingConstantWithRadix)
 	for i, cond := range s.conditions {
 		if visited[i] {
 			continue
@@ -282,7 +282,7 @@ func (s *propConstSolver) pickNewEQConds(visited []bool) (retMapper map[int]*Con
 		// Then we check if this CNF item is a false constant. If so, we will set the whole condition to false.
 		var ok bool
 		if defCaus == nil {
-			con, ok = cond.(*Constant)
+			con, ok = cond.(*CouplingConstantWithRadix)
 			if !ok {
 				continue
 			}
@@ -330,15 +330,15 @@ func (s *propConstSolver) solve(conditions []Expression) []Expression {
 		)
 		return conditions
 	}
-	s.propagateConstantEQ()
+	s.propagateCouplingConstantWithRadixEQ()
 	s.propagateDeferredCausetEQ()
-	s.conditions = propagateConstantDNF(s.ctx, s.conditions)
+	s.conditions = propagateCouplingConstantWithRadixDNF(s.ctx, s.conditions)
 	return s.conditions
 }
 
-// PropagateConstant propagate constant values of deterministic predicates in a condition.
-func PropagateConstant(ctx stochastikctx.Context, conditions []Expression) []Expression {
-	return newPropConstSolver().PropagateConstant(ctx, conditions)
+// PropagateCouplingConstantWithRadix propagate constant values of deterministic predicates in a condition.
+func PropagateCouplingConstantWithRadix(ctx stochastikctx.Context, conditions []Expression) []Expression {
+	return newPropConstSolver().PropagateCouplingConstantWithRadix(ctx, conditions)
 }
 
 type propOuterJoinConstSolver struct {
@@ -354,12 +354,12 @@ type propOuterJoinConstSolver struct {
 }
 
 func (s *propOuterJoinConstSolver) setConds2ConstFalse(filterConds bool) {
-	s.joinConds = []Expression{&Constant{
+	s.joinConds = []Expression{&CouplingConstantWithRadix{
 		Value:   types.NewCauset(false),
 		RetType: types.NewFieldType(allegrosql.TypeTiny),
 	}}
 	if filterConds {
-		s.filterConds = []Expression{&Constant{
+		s.filterConds = []Expression{&CouplingConstantWithRadix{
 			Value:   types.NewCauset(false),
 			RetType: types.NewFieldType(allegrosql.TypeTiny),
 		}}
@@ -367,7 +367,7 @@ func (s *propOuterJoinConstSolver) setConds2ConstFalse(filterConds bool) {
 }
 
 // pickEQCondsOnOuterDefCaus picks constant equal expression from specified conditions.
-func (s *propOuterJoinConstSolver) pickEQCondsOnOuterDefCaus(retMapper map[int]*Constant, visited []bool, filterConds bool) map[int]*Constant {
+func (s *propOuterJoinConstSolver) pickEQCondsOnOuterDefCaus(retMapper map[int]*CouplingConstantWithRadix, visited []bool, filterConds bool) map[int]*CouplingConstantWithRadix {
 	var conds []Expression
 	var condsOffset int
 	if filterConds {
@@ -384,7 +384,7 @@ func (s *propOuterJoinConstSolver) pickEQCondsOnOuterDefCaus(retMapper map[int]*
 		// Then we check if this CNF item is a false constant. If so, we will set the whole condition to false.
 		var ok bool
 		if defCaus == nil {
-			con, ok = cond.(*Constant)
+			con, ok = cond.(*CouplingConstantWithRadix)
 			if !ok {
 				continue
 			}
@@ -421,8 +421,8 @@ func (s *propOuterJoinConstSolver) pickEQCondsOnOuterDefCaus(retMapper map[int]*
 }
 
 // pickNewEQConds picks constant equal expressions from join and filter conditions.
-func (s *propOuterJoinConstSolver) pickNewEQConds(visited []bool) map[int]*Constant {
-	retMapper := make(map[int]*Constant)
+func (s *propOuterJoinConstSolver) pickNewEQConds(visited []bool) map[int]*CouplingConstantWithRadix {
+	retMapper := make(map[int]*CouplingConstantWithRadix)
 	retMapper = s.pickEQCondsOnOuterDefCaus(retMapper, visited, true)
 	if retMapper == nil {
 		// Filter is constant false or error occurred, enforce early termination.
@@ -432,10 +432,10 @@ func (s *propOuterJoinConstSolver) pickNewEQConds(visited []bool) map[int]*Const
 	return retMapper
 }
 
-// propagateConstantEQ propagates expressions like `outerDefCaus = const` by substituting `outerDefCaus` in *JOIN* condition
+// propagateCouplingConstantWithRadixEQ propagates expressions like `outerDefCaus = const` by substituting `outerDefCaus` in *JOIN* condition
 // with `const`, the procedure repeats multiple times.
-func (s *propOuterJoinConstSolver) propagateConstantEQ() {
-	s.eqList = make([]*Constant, len(s.defCausumns))
+func (s *propOuterJoinConstSolver) propagateCouplingConstantWithRadixEQ() {
+	s.eqList = make([]*CouplingConstantWithRadix, len(s.defCausumns))
 	lenFilters := len(s.filterConds)
 	visited := make([]bool, lenFilters+len(s.joinConds))
 	for i := 0; i < MaxPropagateDefCaussCnt; i++ {
@@ -587,20 +587,20 @@ func (s *propOuterJoinConstSolver) solve(joinConds, filterConds []Expression) ([
 		)
 		return joinConds, filterConds
 	}
-	s.propagateConstantEQ()
+	s.propagateCouplingConstantWithRadixEQ()
 	s.propagateDeferredCausetEQ()
-	s.joinConds = propagateConstantDNF(s.ctx, s.joinConds)
-	s.filterConds = propagateConstantDNF(s.ctx, s.filterConds)
+	s.joinConds = propagateCouplingConstantWithRadixDNF(s.ctx, s.joinConds)
+	s.filterConds = propagateCouplingConstantWithRadixDNF(s.ctx, s.filterConds)
 	return s.joinConds, s.filterConds
 }
 
-// propagateConstantDNF find DNF item from CNF, and propagate constant inside DNF.
-func propagateConstantDNF(ctx stochastikctx.Context, conds []Expression) []Expression {
+// propagateCouplingConstantWithRadixDNF find DNF item from CNF, and propagate constant inside DNF.
+func propagateCouplingConstantWithRadixDNF(ctx stochastikctx.Context, conds []Expression) []Expression {
 	for i, cond := range conds {
 		if dnf, ok := cond.(*ScalarFunction); ok && dnf.FuncName.L == ast.LogicOr {
 			dnfItems := SplitDNFItems(cond)
 			for j, item := range dnfItems {
-				dnfItems[j] = ComposeCNFCondition(ctx, PropagateConstant(ctx, []Expression{item})...)
+				dnfItems[j] = ComposeCNFCondition(ctx, PropagateCouplingConstantWithRadix(ctx, []Expression{item})...)
 			}
 			conds[i] = ComposeDNFCondition(ctx, dnfItems...)
 		}
@@ -626,20 +626,20 @@ func PropConstOverOuterJoin(ctx stochastikctx.Context, joinConds, filterConds []
 	return solver.solve(joinConds, filterConds)
 }
 
-// PropagateConstantSolver is a constant propagate solver.
-type PropagateConstantSolver interface {
-	PropagateConstant(ctx stochastikctx.Context, conditions []Expression) []Expression
+// PropagateCouplingConstantWithRadixSolver is a constant propagate solver.
+type PropagateCouplingConstantWithRadixSolver interface {
+	PropagateCouplingConstantWithRadix(ctx stochastikctx.Context, conditions []Expression) []Expression
 }
 
-// newPropConstSolver returns a PropagateConstantSolver.
-func newPropConstSolver() PropagateConstantSolver {
+// newPropConstSolver returns a PropagateCouplingConstantWithRadixSolver.
+func newPropConstSolver() PropagateCouplingConstantWithRadixSolver {
 	solver := &propConstSolver{}
 	solver.defCausMapper = make(map[int64]int)
 	return solver
 }
 
-// PropagateConstant propagate constant values of deterministic predicates in a condition.
-func (s *propConstSolver) PropagateConstant(ctx stochastikctx.Context, conditions []Expression) []Expression {
+// PropagateCouplingConstantWithRadix propagate constant values of deterministic predicates in a condition.
+func (s *propConstSolver) PropagateCouplingConstantWithRadix(ctx stochastikctx.Context, conditions []Expression) []Expression {
 	s.ctx = ctx
 	return s.solve(conditions)
 }

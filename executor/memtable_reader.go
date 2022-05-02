@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,22 +25,22 @@ import (
 	"sync"
 	"time"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/config"
+	plannercore "github.com/whtcorpsinc/MilevaDB-Prod/planner/core"
+	"github.com/whtcorpsinc/MilevaDB-Prod/schemareplicant"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/FIDelapi"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/set"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx/variable"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/terror"
 	"github.com/whtcorpsinc/ekvproto/pkg/diagnosticspb"
 	"github.com/whtcorpsinc/errors"
 	"github.com/whtcorpsinc/failpoint"
 	"github.com/whtcorpsinc/log"
-	"github.com/whtcorpsinc/milevadb/config"
-	plannercore "github.com/whtcorpsinc/milevadb/planner/core"
-	"github.com/whtcorpsinc/milevadb/schemareplicant"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/FIDelapi"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/set"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/stochastikctx/variable"
-	"github.com/whtcorpsinc/milevadb/types"
 	"github.com/whtcorpsinc/sysutil"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -90,7 +90,7 @@ func (e *MemBlockReaderExec) Next(ctx context.Context, req *chunk.Chunk) error {
 
 	// The `InspectionBlockCache` will be assigned in the begin of retrieving` and be
 	// cleaned at the end of retrieving, so nil represents currently in non-inspection mode.
-	if cache, tbl := e.ctx.GetStochastikVars().InspectionBlockCache, e.block.Name.L; cache != nil &&
+	if cache, tbl := e.ctx.GetStochaseinstein_dbars().InspectionBlockCache, e.block.Name.L; cache != nil &&
 		e.isInspectionCacheableBlock(tbl) {
 		// TODO: cached rows will be returned fully, we should refactor this part.
 		if !e.cacheRetrieved {
@@ -171,7 +171,7 @@ func fetchClusterConfig(sctx stochastikctx.Context, nodeTypes, nodeAddrs set.Str
 		address := srv.Address
 		statusAddr := srv.StatusAddr
 		if len(statusAddr) == 0 {
-			sctx.GetStochastikVars().StmtCtx.AppendWarning(errors.Errorf("%s node %s does not contain status address", typ, address))
+			sctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errors.Errorf("%s node %s does not contain status address", typ, address))
 			continue
 		}
 		wg.Add(1)
@@ -255,7 +255,7 @@ func fetchClusterConfig(sctx stochastikctx.Context, nodeTypes, nodeAddrs set.Str
 	var results []result
 	for result := range ch {
 		if result.err != nil {
-			sctx.GetStochastikVars().StmtCtx.AppendWarning(result.err)
+			sctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(result.err)
 			continue
 		}
 		results = append(results, result)
@@ -322,7 +322,7 @@ func (e *clusterServerInfoRetriever) retrieve(ctx context.Context, sctx stochast
 	var results []result
 	for result := range ch {
 		if result.err != nil {
-			sctx.GetStochastikVars().StmtCtx.AppendWarning(result.err)
+			sctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(result.err)
 			continue
 		}
 		results = append(results, result)
@@ -536,7 +536,7 @@ func (e *clusterLogRetriever) startRetrieving(
 		address := srv.Address
 		statusAddr := srv.StatusAddr
 		if len(statusAddr) == 0 {
-			sctx.GetStochastikVars().StmtCtx.AppendWarning(errors.Errorf("%s node %s does not contain status address", typ, address))
+			sctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(errors.Errorf("%s node %s does not contain status address", typ, address))
 			continue
 		}
 		ch := make(chan logStreamResult)
@@ -611,7 +611,7 @@ func (e *clusterLogRetriever) retrieve(ctx context.Context, sctx stochastikctx.C
 			result := <-ch
 			if result.err != nil || len(result.messages) == 0 {
 				if result.err != nil {
-					sctx.GetStochastikVars().StmtCtx.AppendWarning(result.err)
+					sctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(result.err)
 				}
 				continue
 			}
@@ -638,7 +638,7 @@ func (e *clusterLogRetriever) retrieve(ctx context.Context, sctx stochastikctx.C
 		if len(minTimeItem.messages) == 0 {
 			result := <-minTimeItem.next
 			if result.err != nil {
-				sctx.GetStochastikVars().StmtCtx.AppendWarning(result.err)
+				sctx.GetStochaseinstein_dbars().StmtCtx.AppendWarning(result.err)
 				continue
 			}
 			if len(result.messages) > 0 {

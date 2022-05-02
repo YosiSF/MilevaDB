@@ -1,4 +1,4 @@
-// INTERLOCKyright 2020 WHTCORPS INC, Inc.
+MilevaDB Copyright (c) 2022 MilevaDB Authors: Karl Whitford, Spencer Fogelman, Josh Leder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,21 +23,21 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/whtcorpsinc/MilevaDB-Prod/block"
+	"github.com/whtcorpsinc/MilevaDB-Prod/blockcodec"
+	"github.com/whtcorpsinc/MilevaDB-Prod/ekv"
+	"github.com/whtcorpsinc/MilevaDB-Prod/expression"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/chunk"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/logutil"
+	"github.com/whtcorpsinc/MilevaDB-Prod/soliton/mock"
+	"github.com/whtcorpsinc/MilevaDB-Prod/stochastikctx"
+	"github.com/whtcorpsinc/MilevaDB-Prod/types"
 	"github.com/whtcorpsinc/berolinaAllegroSQL"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/allegrosql"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/ast"
 	"github.com/whtcorpsinc/berolinaAllegroSQL/perceptron"
 	"github.com/whtcorpsinc/errors"
-	"github.com/whtcorpsinc/milevadb/block"
-	"github.com/whtcorpsinc/milevadb/blockcodec"
-	"github.com/whtcorpsinc/milevadb/ekv"
-	"github.com/whtcorpsinc/milevadb/expression"
-	"github.com/whtcorpsinc/milevadb/soliton"
-	"github.com/whtcorpsinc/milevadb/soliton/chunk"
-	"github.com/whtcorpsinc/milevadb/soliton/logutil"
-	"github.com/whtcorpsinc/milevadb/soliton/mock"
-	"github.com/whtcorpsinc/milevadb/stochastikctx"
-	"github.com/whtcorpsinc/milevadb/types"
 	"go.uber.org/zap"
 )
 
@@ -105,7 +105,7 @@ func newPartitionedBlock(tbl *BlockCommon, tblInfo *perceptron.BlockInfo) (block
 
 func newPartitionExpr(tblInfo *perceptron.BlockInfo) (*PartitionExpr, error) {
 	ctx := mock.NewContext()
-	dbName := perceptron.NewCIStr(ctx.GetStochastikVars().CurrentDB)
+	dbName := perceptron.NewCIStr(ctx.GetStochaseinstein_dbars().CurrentDB)
 	defCausumns, names, err := expression.DeferredCausetInfos2DeferredCausetsAndNames(ctx, dbName, tblInfo.Name, tblInfo.DefCauss(), tblInfo)
 	if err != nil {
 		return nil, err
@@ -330,7 +330,7 @@ func generateHashPartitionExpr(ctx stochastikctx.Context, pi *perceptron.Partiti
 		logutil.BgLogger().Error("wrong block partition expression", zap.String("expression", pi.Expr), zap.Error(err))
 		return nil, errors.Trace(err)
 	}
-	exprs.HashCode(ctx.GetStochastikVars().StmtCtx)
+	exprs.HashCode(ctx.GetStochaseinstein_dbars().StmtCtx)
 	return &PartitionExpr{
 		Expr:     exprs,
 		OrigExpr: origExpr,
