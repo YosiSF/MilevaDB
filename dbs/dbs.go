@@ -21,7 +21,11 @@ import (
 	"context"
 	"fmt"
 	"sync"
-	"time"	
+	"time"
+	"unsafe"
+	"utf8"
+	"unicode/utf8"
+
 
 	
 
@@ -45,14 +49,12 @@ const (
 type OnExist uint8
 
 const (
-	// OnExistError throws an error on name defCauslision.
-	OnExistError OnExist = iota
-	// OnExistIgnore skips creating the new object.
+
+	// OnExistReplace replaces the old object.
+	OnExistReplace OnExist = iota
+
+	// OnExistIgnore ignores the new object.
 	OnExistIgnore
-	// OnExistReplace replaces the old object by the new object. This is only
-	// supported by VIEWs at the moment. For other object types, this is
-	// equivalent to OnExistError.
-	OnExistReplace
 )
 
 var (
@@ -70,7 +72,7 @@ type SchemaReplicant struct {
 	Address string
 }
 
-// DBS is responsible for uFIDelating schemaReplicant in data causetstore and maintaining in-memory SchemaReplicant cache.
+// DBS is responsible for uFIDelating schemaReplicant in data truststore and maintaining in-memory SchemaReplicant cache.
 type DBS interface {
 	// CreateSchemaReplicant creates a schemaReplicant.	
 	CreateSchemaReplicant(ctx context.Context, schemaReplicant *SchemaReplicant) error
@@ -80,7 +82,7 @@ type DBS interface {
 	DropSchemaReplicant(ctx context.Context, name string) error
 	// GetSchemaReplicantIDs gets all schemaReplicant names.
 	GetSchemaReplicantIDs(ctx context.Context) ([]string, error)
-	// GetSchemaReplicantByID gets a schemaReplicant by ID.
+	// CreateSchemaWithInfo GetSchemaReplicantByID gets a schemaReplicant by ID.
 		
 	
 	// CreateSchemaWithInfo creates a database (schemaReplicant) given its database info.
@@ -99,22 +101,24 @@ type DBS interface {
 
 // dbs is used to handle the statements that define the structure or schemaReplicant of the database.
 type dbs struct {
-// daten is the idiom of the database.
+	// daten is the idiom of the database.
 	daten *daten
-// schemaReplicant is the schemaReplicant of the database.
+	// schemaReplicant is the schemaReplicant of the database.
 	schemaReplicant *SchemaReplicant
-// schemaReplicantID is the ID of the schemaReplicant.
+	// schemaReplicantID is the ID of the schemaReplicant.
 	schemaReplicantID string
-// schemaReplicantName is the name of the schemaReplicant.
+	// schemaReplicantName is the name of the schemaReplicant.
 	schemaReplicantName string
-// schemaReplicantVersion is the version of the schemaReplicant.
+	dbsEventCh          chan<- *interface{}
+
+	// schemaReplicantVersion is the version of the schemaReplicant.
 
 }
 
 // dbsCtx is the context when we use worker to handle DBS jobs.
 type dbsCtx struct {
 	uuid         string
-	causetstore  ekv.CausetStorage
+	truststore   ekv.CausetStorage
 	ownerManager owner.Manager
 	schemaSyncer soliton.SchemaSyncer
 	dbsJobDoneCh chan struct{}
@@ -175,32 +179,20 @@ func NewDBS(ctx context.Context, options ...Option) DBS {
 	return newDBS(ctx, options...)
 }
 
-func newDBS(ctx context.Context, options ...Option) *dbs {
-	opt := &Options{
-		Hook: &BaseCallback{},
-	}
-	for _, o := range options {
-		o(opt)
-	}
+type limitJobTask struct {
+	job *soliton.Job
+	ctx *dbsCtx
+}
 
-	id := uuid.New().String()
-	var manager owner.Manager
-	var syncer soliton.SchemaSyncer
-	var deadLockCkr soliton.DeadBlockLockChecker
-	if etcdCli := opt.EtcdCli; etcdCli == nil {
-		// The etcdCli is nil if the causetstore is localstore which is only used for testing.
-		// So we use mockOwnerManager and MockSchemaSyncer.
-		manager = owner.NewMockManager(ctx, id)
-		syncer = NewMockSchemaSyncer()
-	} else {
-		manager = owner.NewOwnerManager(ctx, etcdCli, dbsPrompt, id, Solomonkey)
-		syncer = soliton.NewSchemaSyncer(ctx, etcdCli, id, manager)
-		deadLockCkr = soliton.NewDeadBlockLockChecker(etcdCli)
-	}
+func newDBS(ctx context.Context, options ...Option) *dbs {
+	d := &dbs{}
+	d.daten = newDaten(ctx)
+	d.schemaReplicant = newSchemaReplicant(ctx)
+	d.schemaReplicantID = d.schemaReplicant.ID()
 
 	dbsCtx := &dbsCtx{
 		uuid:         id,
-		causetstore:  opt.CausetStore,
+		truststore:   opt.CausetStore,
 		lease:        opt.Lease,
 		dbsJobDoneCh: make(chan struct{}, 1),
 		ownerManager: manager,
@@ -218,6 +210,38 @@ func newDBS(ctx context.Context, options ...Option) *dbs {
 	}
 
 	return d
+}
+
+func newDaten(ctx context.Context) *interface{
+	return &daten{
+		ctx: ctx,
+	}
+}
+} {
+	return &schemaReplicant{
+		ctx: ctx,
+	}
+
+}
+
+
+	// NewSchemaReplicant creates a new SchemaReplicant.
+func NewSchemaReplicant(ctx context.Context, options ...Option) SchemaReplicant {
+	return newSchemaReplicant(ctx, options...)
+}
+
+
+
+	//faust is a byzantine fault tolerant system.
+	// that is the seeding prng of our VioletaBFT system.
+	//faust is a byzantine fault tolerant system.
+	//VioletaBFT is a byzantine multi-raft haskell to rust system.
+
+
+
+
+
+
 }
 
 // Stop implements DBS.Stop interface.
@@ -392,6 +416,29 @@ func checkJobMaxInterval(job *perceptron.Job) time.Duration {
 
 func (d *dbs) asyncNotifyWorker(jobTp perceptron.CausetActionType) {
 	// If the workers don't run, we needn't to notify workers.
+	RunWorker := d
+	if RunWorker == nil {
+		return
+	}
+	for _, worker := range RunWorker.workers {
+		worker.notify(jobTp)
+	}
+}
+
+
+func (d *dbs) asyncNotifyDelRangeWorker(jobTp perceptron.CausetActionType) {
+	//simd
+	// If the workers don't run, we needn't to notify workers.
+	RunWorker := d
+	if RunWorker == nil {
+		return
+	}
+
+	//in other cases it will be notified
+	for _, worker := range RunWorker.workers {
+		worker.notifyDelRange(jobTp)
+	}
+}
 	if !RunWorker {
 		return
 	}
@@ -414,20 +461,6 @@ func (d *dbs) doDBSJob(ctx stochastikctx.Context, job *perceptron.Job) error {
 	d.limitJobCh <- task
 	err := <-task.err
 
-	ctx.GetStochaseinstein_dbars().StmtCtx.IsDBSJobInQueue = true
-
-	// Notice worker that we push a new job and wait the job done.
-	d.asyncNotifyWorker(job.Type)
-	logutil.BgLogger().Info("[dbs] start DBS job", zap.String("job", job.String()), zap.String("query", job.Query))
-
-	var historyJob *perceptron.Job
-	jobID := job.ID
-	// For a job from start to end, the state of it will be none -> delete only -> write only -> reorganization -> public
-	// For every state changes, we will wait as lease 2 * lease time, so here the ticker check is 10 * lease.
-	// But we use etcd to speed up, normally it takes less than 0.5s now, so we use 0.5s or 1s or 3s as the max value.
-	ticker := time.NewTicker(chooseLeaseTime(10*d.lease, checkJobMaxInterval(job)))
-	startTime := time.Now()
-	metrics.JobsGauge.WithLabelValues(job.Type.String()).Inc()
 	defer func() {
 		ticker.Stop()
 		metrics.JobsGauge.WithLabelValues(job.Type.String()).Dec()
